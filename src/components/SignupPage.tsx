@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import Script from "next/script";
 
 interface TrustItem {
@@ -42,35 +41,9 @@ export default function SignupPage({
   hubspotFormId,
   hubspotRegion,
 }: SignupPageProps) {
-  const formId = `hs-form-${hubspotFormId}`;
-
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-
-    const tryCreate = () => {
-      if ((window as any).hbspt?.forms) {
-        (window as any).hbspt.forms.create({
-          region: hubspotRegion,
-          portalId: hubspotPortalId,
-          formId: hubspotFormId,
-          target: `#${formId}`,
-        });
-        clearInterval(interval);
-      }
-    };
-
-    // Poll every 200 ms for up to 10 s — handles any script load timing
-    interval = setInterval(tryCreate, 200);
-    const timeout = setTimeout(() => clearInterval(interval), 10_000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
-  }, [formId, hubspotPortalId, hubspotFormId, hubspotRegion]);
-
   return (
     <>
+      {/* Portal-specific script — auto-discovers .hs-form-frame divs on the page */}
       <Script
         src={`https://js-${hubspotRegion}.hsforms.net/forms/embed/${hubspotPortalId}.js`}
         strategy="afterInteractive"
@@ -112,12 +85,15 @@ export default function SignupPage({
               </div>
             </div>
 
-            {/* Right form column */}
+            {/* Right form column — portal script auto-initialises this div */}
             <div>
               <div className="signup-formwrap">
-                <div id={formId} className="hubspot-placeholder">
-                  <span>Loading form…</span>
-                </div>
+                <div
+                  className="hs-form-frame"
+                  data-region={hubspotRegion}
+                  data-portal-id={hubspotPortalId}
+                  data-form-id={hubspotFormId}
+                />
               </div>
             </div>
           </div>
