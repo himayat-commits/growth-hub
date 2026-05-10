@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Growth Hub by Himayat — Next.js App
 
-## Getting Started
+Production-ready Next.js 15 App Router site for [Growth Hub by Himayat](https://growthhub.himayat.com.au), a Social Traders Verified social enterprise in Canberra, Australia.
 
-First, run the development server:
+## Running locally
 
 ```bash
+nvm use          # Node 20 (see .nvmrc)
+npm install
+cp .env.example .env.local   # add RESEND_API_KEY
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Required | Description |
+|---|---|---|
+| `RESEND_API_KEY` | Yes | API key from [resend.com](https://resend.com) |
+| `NEXT_PUBLIC_SITE_URL` | Yes | Deployed URL, e.g. `https://growthhub.himayat.com.au` |
 
-## Learn More
+## Deploying to Vercel
 
-To learn more about Next.js, take a look at the following resources:
+1. Push to GitHub and import into Vercel.
+2. Add `RESEND_API_KEY` and `NEXT_PUBLIC_SITE_URL` in Vercel → Environment Variables.
+3. `vercel.json` sets region to `syd1` (Sydney) for lowest Canberra latency.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+  app/
+    layout.tsx               Root layout (Navbar, Footer, fonts)
+    page.tsx                 Home page
+    sitemap.ts / robots.ts
+    api/contact/route.ts     POST → sends email via Resend
+    signup/foundations|growth|accelerate/page.tsx
+  components/
+    Navbar.tsx / Footer.tsx / SignupPage.tsx
+    sections/                Hero, SupportedBy, HowItWorks, PricingSection,
+                             FAQ, Community, BigQuote, Testimonials,
+                             About, FinalCTA, Contact
+public/
+  fonts/BiroScript.otf
+  images/  (himayat-logo.png, workshop.jpg, himayat-logomark.png)
+```
 
-## Deploy on Vercel
+## Contact form
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+POSTs JSON to `/api/contact` → Resend sends formatted HTML to `hello@himayat.com.au` with `Reply-To` set to the enquirer. Requires Resend account with `himayat.com.au` verified as a sending domain. For local dev, swap the `from` address in `route.ts` to `onboarding@resend.dev`.
