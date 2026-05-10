@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Source_Serif_4 } from "next/font/google";
 import localFont from "next/font/local";
+import { ClerkProvider, SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -53,9 +54,18 @@ export default function RootLayout({
   return (
     <html lang="en-AU" className={`${sourceSerif.variable} ${biroScript.variable}`}>
       <body>
-        <Navbar />
-        {children}
-        <Footer />
+        <ClerkProvider>
+          <Show when="signed-out">
+            <SignInButton />
+            <SignUpButton />
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
+          <Navbar />
+          {children}
+          <Footer />
+        </ClerkProvider>
       </body>
     </html>
   );
