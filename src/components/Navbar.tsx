@@ -31,7 +31,7 @@ export default function Navbar() {
           <Link href="/#contact">Contact</Link>
         </nav>
 
-        <Link className="btn btn-primary nav-cta" href="/#contact">
+        <Link className="btn btn-primary nav-cta" href="/sign-up">
           Sign Up Now
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
             <path d="M3 7h8M7 3l4 4-4 4" />
@@ -56,7 +56,7 @@ export default function Navbar() {
           <Link href="/#faq" onClick={() => setOpen(false)}>FAQ</Link>
           <Link href="/#contact" onClick={() => setOpen(false)}>Contact</Link>
           <div className="nav-drawer-cta">
-            <Link className="btn btn-primary" href="/#contact" onClick={() => setOpen(false)}>
+            <Link className="btn btn-primary" href="/sign-up" onClick={() => setOpen(false)}>
               Sign Up Now
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
                 <path d="M3 7h8M7 3l4 4-4 4" />

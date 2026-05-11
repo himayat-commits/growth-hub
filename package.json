@@ -2,26 +2,41 @@
   "name": "growth-hub",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "payload generate:importmap && next build",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "payload:importmap": "payload generate:importmap",
+    "payload:types": "payload generate:types",
+    "payload:migrate:create": "payload migrate:create",
+    "payload:migrate": "payload migrate",
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.3.3",
     "@hookform/resolvers": "^5.2.2",
     "@neondatabase/serverless": "^1.1.0",
+    "@payloadcms/db-postgres": "^3.84.1",
+    "@payloadcms/email-resend": "^3.84.1",
+    "@payloadcms/next": "^3.84.1",
+    "@payloadcms/richtext-lexical": "^3.84.1",
+    "@payloadcms/storage-vercel-blob": "^3.84.1",
+    "@payloadcms/ui": "^3.84.1",
     "@stripe/stripe-js": "^9.4.0",
     "drizzle-orm": "^0.45.2",
+    "graphql": "^16.14.0",
     "next": "16.2.6",
+    "payload": "^3.84.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.75.0",
     "resend": "^6.12.3",
+    "sharp": "^0.34.5",
     "stripe": "^22.1.1",
     "zod": "^4.4.3"
   },
@@ -34,6 +49,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
