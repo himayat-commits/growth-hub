@@ -10,4 +10,6 @@ export default {
   },
   verbose: true,
   strict: true,
+  // Prevent drizzle-kit from touching Payload's tables (which live in the 'payload' schema)
+  schemaFilter: ['public'],
 } satisfies Config;
