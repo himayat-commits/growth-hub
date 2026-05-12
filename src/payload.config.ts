@@ -13,10 +13,12 @@ const cwd = process.cwd();
 
 // On Vercel preview deployments NEXT_PUBLIC_SITE_URL points to the production
 // domain which may not exist yet, so the admin panel would POST logins to the
-// wrong host. Use VERCEL_BRANCH_URL (stable per branch) for preview instead.
+// wrong host. On any non-production Vercel deployment use VERCEL_URL (the
+// deployment-specific hostname Vercel always sets) so admin API calls stay on
+// the correct origin.
 const serverURL =
-  process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_BRANCH_URL
-    ? `https://${process.env.VERCEL_BRANCH_URL}`
+  process.env.VERCEL_ENV !== 'production' && process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
     : (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000');
 
 // Collections
@@ -102,10 +104,8 @@ export default buildConfig({
 
   cors: [
     process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
-    // Allow the Vercel branch URL on preview so admin login works before
+    // Allow the deployment URL on preview so admin login works before
     // the production domain is configured.
-    ...(process.env.VERCEL_BRANCH_URL
-      ? [`https://${process.env.VERCEL_BRANCH_URL}`]
-      : []),
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
   ],
 });
