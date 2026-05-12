@@ -1,12 +1,23 @@
 import React from 'react';
+import { RootLayout } from '@payloadcms/next/layouts';
+import '@payloadcms/next/css';
+import { importMap } from './admin/importMap';
 
-// Minimal segment layout for Payload CMS admin — intentionally excludes
-// the site's Navbar, Footer, ClerkProvider, and brand CSS.
-// The <html>/<body> wrapper is provided by the shared app/layout.tsx root layout.
-export default function PayloadLayout({
+// Import the Payload config.  buildConfig() is async so m.default is
+// Promise<SanitizedConfig>, which RootLayout accepts directly.
+const config = import('@payload-config').then((m) => m.default);
+
+// Payload's RootLayout renders <html>, <body>, ConfigProvider, RootProvider,
+// and the ProgressBar — everything the admin UI needs to function correctly.
+// It must wrap all (payload) routes so that useConfig() has a valid context.
+export default function PayloadAdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <RootLayout config={config} importMap={importMap}>
+      {children}
+    </RootLayout>
+  );
 }
