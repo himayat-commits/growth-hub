@@ -1,15 +1,12 @@
 import React from 'react';
 
-// Minimal root layout for Payload CMS admin — intentionally excludes
+// Minimal segment layout for Payload CMS admin — intentionally excludes
 // the site's Navbar, Footer, ClerkProvider, and brand CSS.
+// The <html>/<body> wrapper is provided by the shared app/layout.tsx root layout.
 export default function PayloadLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
+  return <>{children}</>;
 }
