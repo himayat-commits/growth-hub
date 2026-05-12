@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Source_Serif_4 } from "next/font/google";
 import localFont from "next/font/local";
 import { ClerkProvider } from "@clerk/nextjs";
-import "./globals.css";
+import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -15,7 +15,7 @@ const sourceSerif = Source_Serif_4({
 });
 
 const biroScript = localFont({
-  src: "../../public/fonts/BiroScript.otf",
+  src: "../../../public/fonts/BiroScript.otf",
   variable: "--font-script",
   weight: "400",
   display: "swap",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Growth Hub by Himayat",
     description:
-      "AI-powered digital marketing with real, local support in Canberra.",
+      "AI-powered digital marketing with real, local Canberra support.",
     url: "https://growthhub.himayat.com.au",
     siteName: "Growth Hub by Himayat",
     locale: "en_AU",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
