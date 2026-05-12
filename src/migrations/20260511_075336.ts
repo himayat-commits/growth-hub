@@ -1,6 +1,7 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql`CREATE SCHEMA IF NOT EXISTS payload`);
   await db.execute(sql`
    CREATE TYPE "payload"."enum_pages_blocks_hero_variant" AS ENUM('centered', 'left-aligned', 'split');
   CREATE TYPE "payload"."enum_pages_blocks_testimonials_layout" AS ENUM('grid', 'carousel');
