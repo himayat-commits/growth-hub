@@ -305,6 +305,20 @@ export default async function OnboardingPage({ searchParams }: Props) {
                 </span>
                 <div className="ob-step-body">
                   <span className="ob-step-label">
+                    <Link href="/portal" style={{ color: "inherit" }}>
+                      Open your subscriber portal →
+                    </Link>
+                  </span>
+                  <p className="ob-step-sub">Access all your tools, onboarding videos, and community resources in one place.</p>
+                </div>
+              </li>
+
+              <li className="ob-step next">
+                <span className="ob-step-icon" aria-label="Next step">
+                  <ArrowIcon />
+                </span>
+                <div className="ob-step-body">
+                  <span className="ob-step-label">
                     <Link href="/dashboard" style={{ color: "inherit" }}>
                       Manage your subscription →
                     </Link>
