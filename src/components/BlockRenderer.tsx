@@ -118,9 +118,15 @@ export default function BlockRenderer({ blocks, siteSettings }: BlockRendererPro
           case "testimonials": {
             // Payload populates relationship fields as full objects when depth >= 1
             const testimonialDocs = Array.isArray(block.testimonials)
-              ? block.testimonials.map((t: AnyBlock) =>
-                  typeof t === "object" && t !== null ? t : null
-                ).filter(Boolean)
+              ? (block.testimonials as AnyBlock[])
+                  .filter((t): t is AnyBlock => typeof t === "object" && t !== null)
+                  .map((t) => ({
+                    id: t.id as string | null | undefined,
+                    quote: t.quote as string | null | undefined,
+                    author: t.author as string | null | undefined,
+                    role: t.role as string | null | undefined,
+                    company: t.company as string | null | undefined,
+                  }))
               : null;
             return (
               <Testimonials
