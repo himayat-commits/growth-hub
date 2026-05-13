@@ -5,56 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { PLANS, calculateDisplayPrice, type BillingInterval, type PlanTier } from '@/lib/plans';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface ManagedTier {
-  name: string;
-  tag: string;
-  price: number;
-  terms: string;
-  desc: string;
-  features: string[];
-  addon?: string;
-  cta: string;
-  featured?: boolean;
-  badge?: string;
-}
-
-const MANAGED: ManagedTier[] = [
-  {
-    name: 'Managed Pro',
-    tag: 'We run it. You grow.',
-    price: 1499,
-    terms: 'Billed monthly · 6-month minimum',
-    desc: 'Expert hands on your digital marketing — without hiring a team.',
-    features: [
-      'Full Accelerate platform access',
-      '12 managed social posts/month',
-      'Review response management (24hr)',
-      'Monthly strategy call & dedicated manager',
-      'First month bonus: logo + 1-page website',
-    ],
-    cta: 'Enquire Now',
-  },
-  {
-    name: 'Managed Elite',
-    tag: 'Your entire online growth engine.',
-    price: 2499,
-    terms: 'Billed monthly · 6-month minimum',
-    desc: 'Hands-off digital marketing with full competitive intelligence.',
-    features: [
-      'Everything in Managed Pro',
-      '20 social posts/mo + custom design',
-      'Search AI + Competitor AI + Insights',
-      'Local SEO + Google Ads management',
-      'Fortnightly strategy + full brand & website build',
-    ],
-    cta: 'Enquire Now',
-    featured: true,
-    badge: 'All-in',
-  },
-];
-
 // ── Compare table ─────────────────────────────────────────────────────────────
 
 const TIERS_COMPARE = [
@@ -179,7 +129,6 @@ export interface PricingPageContentProps {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function PricingPageContent({ heading, subheading }: PricingPageContentProps = {}) {
-  const [mode, setMode] = useState<'self' | 'managed'>('self');
   const [interval, setInterval] = useState<BillingInterval>('month');
   const [loading, setLoading] = useState<PlanTier | null>(null);
   const [showCompare, setShowCompare] = useState(false);
@@ -224,112 +173,63 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
             </h1>
             {subheading && <p style={{ marginTop: 8, color: 'var(--text-muted, #5a6a65)' }}>{subheading}</p>}
 
-            {/* Self-Service / Done For You toggle */}
+            {/* Monthly / Annual toggle */}
             <div className="pkg-toggle-row">
-              <div className="pkg-toggle" role="tablist">
-                <button role="tab" aria-selected={mode === 'self'} className={mode === 'self' ? 'active' : ''} onClick={() => setMode('self')}>
-                  Self-Service
+              <div className="pkg-toggle" role="tablist" aria-label="Billing interval">
+                <button role="tab" aria-selected={interval === 'month'} className={interval === 'month' ? 'active' : ''} onClick={() => setInterval('month')}>
+                  Monthly
                 </button>
-                <button role="tab" aria-selected={mode === 'managed'} className={mode === 'managed' ? 'active' : ''} onClick={() => setMode('managed')}>
-                  Done For You
+                <button role="tab" aria-selected={interval === 'year'} className={interval === 'year' ? 'active' : ''} onClick={() => setInterval('year')}>
+                  Annual
+                  <span style={{ marginLeft: 6, background: 'var(--lime, #c5e84a)', color: 'var(--ink, #1a3530)', borderRadius: 99, padding: '1px 7px', fontSize: '0.7em', fontWeight: 600 }}>
+                    2 months free
+                  </span>
                 </button>
               </div>
-              <span className="pkg-info" tabIndex={0} role="button" aria-label="More information about pricing tiers">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
-                </svg>
-                <span className="pkg-info-tip" role="tooltip">
-                  Three self-service tiers to grow at your own pace, or two managed options where we handle everything.
-                </span>
-              </span>
             </div>
-
-            {/* Monthly / Annual toggle — only shown for Self-Service */}
-            {mode === 'self' && (
-              <div className="pkg-toggle-row" style={{ marginTop: 12 }}>
-                <div className="pkg-toggle" role="tablist" aria-label="Billing interval">
-                  <button role="tab" aria-selected={interval === 'month'} className={interval === 'month' ? 'active' : ''} onClick={() => setInterval('month')}>
-                    Monthly
-                  </button>
-                  <button role="tab" aria-selected={interval === 'year'} className={interval === 'year' ? 'active' : ''} onClick={() => setInterval('year')}>
-                    Annual
-                    <span style={{ marginLeft: 6, background: 'var(--lime, #c5e84a)', color: 'var(--ink, #1a3530)', borderRadius: 99, padding: '1px 7px', fontSize: '0.7em', fontWeight: 600 }}>
-                      2 months free
-                    </span>
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* ── Cards ── */}
-          {mode === 'self' ? (
-            <div className="pkg-grid">
-              {selfTiers.map((tierId) => {
-                const tier = PLANS[tierId];
-                const { amount, period } = calculateDisplayPrice(tier.monthlyPrice, interval);
-                const billedLabel = interval === 'month' ? 'Billed monthly · No lock-in' : 'Billed annually · No lock-in';
-                const isLoading = loading === tierId;
+          <div className="pkg-grid">
+            {selfTiers.map((tierId) => {
+              const tier = PLANS[tierId];
+              const { amount, period } = calculateDisplayPrice(tier.monthlyPrice, interval);
+              const billedLabel = interval === 'month' ? 'Billed monthly · No lock-in' : 'Billed annually · No lock-in';
+              const isLoading = loading === tierId;
 
-                return (
-                  <div className={`pkg-card ${tier.highlight ? 'featured' : ''}`} key={tierId}>
-                    {tier.highlight && <span className="pkg-badge-pop">★ Most popular</span>}
-                    <div className="pkg-name">{tier.name}</div>
-                    <div className="pkg-tagline">{tier.tagline}</div>
-                    <div className="pkg-price">
-                      ${amount.toLocaleString()}
-                      <span className="unit">{period}</span>
-                    </div>
-                    <div className="pkg-terms">{billedLabel}</div>
-                    <p className="pkg-desc">{tier.description}</p>
-                    <ul className="pkg-features">
-                      {tier.features.map((f) => <li key={f}>{f}</li>)}
-                    </ul>
-                    <div className="pkg-addon-slot">
-                      {tier.addOnNote && <div className="pkg-addon">{tier.addOnNote}</div>}
-                    </div>
-                    <div className="pkg-cta">
-                      <button
-                        type="button"
-                        className={`btn ${tier.highlight ? 'btn-lime' : 'btn-primary'}`}
-                        onClick={() => startCheckout(tierId)}
-                        disabled={isLoading || !isLoaded}
-                        style={{ width: '100%', opacity: isLoading || !isLoaded ? 0.6 : 1, cursor: isLoading || !isLoaded ? 'not-allowed' : 'pointer' }}
-                      >
-                        {isLoading ? 'Loading…' : `${tier.name === 'Foundations' ? 'Start with Foundations' : tier.name === 'Growth' ? 'Start with Growth' : 'Start with Accelerate'}`}
-                        {!isLoading && <ArrowIcon />}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="pkg-grid managed">
-              {MANAGED.map((t) => (
-                <div className={`pkg-card ${t.featured ? 'featured' : ''}`} key={t.name}>
-                  {t.badge && <span className="pkg-badge-pop">★ {t.badge}</span>}
-                  <div className="pkg-name">{t.name}</div>
-                  <div className="pkg-tagline">{t.tag}</div>
+              return (
+                <div className={`pkg-card ${tier.highlight ? 'featured' : ''}`} key={tierId}>
+                  {tier.highlight && <span className="pkg-badge-pop">★ Most popular</span>}
+                  <div className="pkg-name">{tier.name}</div>
+                  <div className="pkg-tagline">{tier.tagline}</div>
                   <div className="pkg-price">
-                    ${t.price.toLocaleString()}
-                    <span className="unit">/month</span>
+                    ${amount.toLocaleString()}
+                    <span className="unit">{period}</span>
                   </div>
-                  <div className="pkg-terms">{t.terms}</div>
-                  <p className="pkg-desc">{t.desc}</p>
+                  <div className="pkg-terms">{billedLabel}</div>
+                  <p className="pkg-desc">{tier.description}</p>
                   <ul className="pkg-features">
-                    {t.features.map((f) => <li key={f}>{f}</li>)}
+                    {tier.features.map((f) => <li key={f}>{f}</li>)}
                   </ul>
-                  <div className="pkg-addon-slot" />
+                  <div className="pkg-addon-slot">
+                    {tier.addOnNote && <div className="pkg-addon">{tier.addOnNote}</div>}
+                  </div>
                   <div className="pkg-cta">
-                    <a className={`btn ${t.featured ? 'btn-lime' : 'btn-primary'}`} href="/#contact">
-                      {t.cta} <ArrowIcon />
-                    </a>
+                    <button
+                      type="button"
+                      className={`btn ${tier.highlight ? 'btn-lime' : 'btn-primary'}`}
+                      onClick={() => startCheckout(tierId)}
+                      disabled={isLoading || !isLoaded}
+                      style={{ width: '100%', opacity: isLoading || !isLoaded ? 0.6 : 1, cursor: isLoading || !isLoaded ? 'not-allowed' : 'pointer' }}
+                    >
+                      {isLoading ? 'Loading…' : `Start with ${tier.name}`}
+                      {!isLoading && <ArrowIcon />}
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
 
         </div>
       </section>
