@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+// ── Icon components ──────────────────────────────────────────────────────────
+
 const CalIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 9h18M8 3v4M16 3v4" />
@@ -28,173 +30,166 @@ const LockIcon = () => (
   </svg>
 );
 
-const TABS = [
+// Icon mapping by slug
+const SLUG_ICONS: Record<string, React.ComponentType> = {
+  events: CalIcon,
+  webinar: WifiIcon,
+  community: PeopleIcon,
+  support: MailIcon,
+};
+
+// ── Default hardcoded tabs ───────────────────────────────────────────────────
+
+const DEFAULT_TABS = [
   {
-    key: "events",
+    slug: "events",
     label: "In-Person Events",
     badge: "Free & Subscriber",
     locked: false,
-    Icon: CalIcon,
-    panel: (
-      <div className="comm-panel-inner comm-panel-events">
-        <div className="comm-panel-left">
-          <div className="comm-tag">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 21 C 7 15 4 11 4 8 A 8 8 0 0 1 20 8 C 20 11 17 15 12 21 Z" /><circle cx="12" cy="9" r="2.5" />
-            </svg>
-            In Person · Canberra &amp; Online
-          </div>
-          <h3>Learn, network and grow together</h3>
-          <p>
-            We run regular workshops and in-person meetups across Canberra.{" "}
-            <strong>Some are free and open to everyone, others are reserved just for subscribers.</strong>{" "}
-            Every event is designed to help local business owners build skills, share wins, and connect with a community that's genuinely in their corner.
-          </p>
-        </div>
-        <div className="comm-panel-right">
-          <div className="comm-events-head">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 9h18M8 3v4M16 3v4" />
-            </svg>
-            <span>Upcoming Events</span>
-          </div>
-          <div className="comm-event">
-            <div className="comm-event-row">
-              <span className="comm-event-status">Coming Soon</span>
-              <span className="comm-event-pill comm-event-pill-free">Free · Open to all</span>
-            </div>
-            <span className="comm-event-title">Canberra Small Business Networking Night</span>
-            <span className="comm-event-loc">Canberra CBD</span>
-          </div>
-          <div className="comm-event">
-            <div className="comm-event-row">
-              <span className="comm-event-status">Coming Soon</span>
-              <span className="comm-event-pill comm-event-pill-sub">Subscribers only</span>
-            </div>
-            <span className="comm-event-title">Digital Marketing Deep-Dive Workshop</span>
-            <span className="comm-event-loc">Canberra · In person</span>
-          </div>
-        </div>
-      </div>
-    ),
+    tagLine: "In Person · Canberra & Online",
+    panelHeading: "Learn, network and grow together",
+    panelDescription:
+      "We run regular workshops and in-person meetups across Canberra. Some are free and open to everyone, others are reserved just for subscribers. Every event is designed to help local business owners build skills, share wins, and connect with a community that's genuinely in their corner.",
+    features: [],
   },
   {
-    key: "webinar",
+    slug: "webinar",
     label: "Weekly Live Webinar",
     badge: "Subscribers Only",
     locked: true,
-    Icon: WifiIcon,
-    panel: (
-      <div className="comm-panel-inner comm-panel-split">
-        <div className="comm-panel-left">
-          <div className="comm-tag">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 9h18M8 3v4M16 3v4" />
-            </svg>
-            Live · Every Week
-          </div>
-          <h3>Weekly live sessions with the Himayat team</h3>
-          <p>Part training, part Q&amp;A, part community hangout. Bring your questions, share your wins, and learn what's working for other local businesses in the network.</p>
-        </div>
-        <ul className="comm-bullets">
-          <li>Platform walkthroughs and feature deep-dives</li>
-          <li>Practical digital marketing education</li>
-          <li>Live Q&amp;A with the Himayat team</li>
-          <li>Recordings available if you can't make it live</li>
-        </ul>
-      </div>
-    ),
+    tagLine: "Live · Every Week",
+    panelHeading: "Weekly live sessions with the Himayat team",
+    panelDescription:
+      "Part training, part Q&A, part community hangout. Bring your questions, share your wins, and learn what's working for other local businesses in the network.",
+    features: [
+      { text: "Platform walkthroughs and feature deep-dives" },
+      { text: "Practical digital marketing education" },
+      { text: "Live Q&A with the Himayat team" },
+      { text: "Recordings available if you can't make it live" },
+    ],
   },
   {
-    key: "community",
+    slug: "community",
     label: "Community Access",
     badge: "Subscribers Only",
     locked: true,
-    Icon: PeopleIcon,
-    panel: (
-      <div className="comm-panel-inner comm-panel-split">
-        <div className="comm-panel-left">
-          <div className="comm-tag">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="9" cy="9" r="3" /><path d="M3 19c0-3 3-5 6-5s6 2 6 5" />
-            </svg>
-            Peer Support · Always On
-          </div>
-          <h3>A network of owners who back each other</h3>
-          <p>You're never on your own. The moment you sign up, you're part of a network of Canberra business owners who share advice, refer each other, and celebrate wins together.</p>
-        </div>
-        <ul className="comm-bullets">
-          <li>Private Slack workspace for day-to-day questions</li>
-          <li>Facebook group for wider conversation and wins</li>
-          <li>WhatsApp group for quick help and local chat</li>
-          <li>Member-to-member referrals and introductions</li>
-        </ul>
-      </div>
-    ),
+    tagLine: "Peer Support · Always On",
+    panelHeading: "A network of owners who back each other",
+    panelDescription:
+      "You're never on your own. The moment you sign up, you're part of a network of Canberra business owners who share advice, refer each other, and celebrate wins together.",
+    features: [
+      { text: "Private Slack workspace for day-to-day questions" },
+      { text: "Facebook group for wider conversation and wins" },
+      { text: "WhatsApp group for quick help and local chat" },
+      { text: "Member-to-member referrals and introductions" },
+    ],
   },
   {
-    key: "support",
+    slug: "support",
     label: "Email Support",
     badge: "Subscribers Only",
     locked: true,
-    Icon: MailIcon,
-    panel: (
-      <div className="comm-panel-inner comm-panel-split">
-        <div className="comm-panel-left">
-          <div className="comm-tag">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 7 9-7" />
-            </svg>
-            48-Hour Response
-          </div>
-          <h3>Real humans, real help</h3>
-          <p>Stuck on something? Email us and a real human from the Himayat team will get back to you. No ticket queues, no offshore call centres, no chatbots pretending to help.</p>
-        </div>
-        <ul className="comm-bullets">
-          <li>Platform access and login help</li>
-          <li>Troubleshooting setup issues</li>
-          <li>48-hour response time across all tiers</li>
-          <li>Escalation to the Himayat team for anything urgent</li>
-        </ul>
-      </div>
-    ),
+    tagLine: "48-Hour Response",
+    panelHeading: "Real humans, real help",
+    panelDescription:
+      "Stuck on something? Email us and a real human from the Himayat team will get back to you. No ticket queues, no offshore call centres, no chatbots pretending to help.",
+    features: [
+      { text: "Platform access and login help" },
+      { text: "Troubleshooting setup issues" },
+      { text: "48-hour response time across all tiers" },
+      { text: "Escalation to the Himayat team for anything urgent" },
+    ],
   },
 ];
 
-export default function Community() {
+// ── Props ────────────────────────────────────────────────────────────────────
+
+export interface CommunityProps {
+  heading?: string | null;
+  subheading?: string | null;
+  tabs?: Array<{
+    slug: string;
+    label: string;
+    badge?: string | null;
+    locked?: boolean | null;
+    tagLine?: string | null;
+    panelHeading?: string | null;
+    panelDescription?: string | null;
+    features?: Array<{ text: string; id?: string | null }> | null;
+    id?: string | null;
+  }> | null;
+}
+
+export default function Community({ heading, subheading, tabs }: CommunityProps) {
   const [active, setActive] = useState(0);
+
+  const resolvedTabs = tabs && tabs.length > 0 ? tabs : DEFAULT_TABS;
+  const activeTab = resolvedTabs[active];
+  const TabIcon = SLUG_ICONS[activeTab.slug] ?? CalIcon;
 
   return (
     <section id="community" className="community">
       <div className="wrap">
         <h2 className="comm-h2">
-          You're not just buying software.<br />
-          You're joining a community that has your back.
+          {heading ?? "You're not just buying software."}
+          {!heading && (
+            <>
+              <br />
+              {subheading ?? "You're joining a community that has your back."}
+            </>
+          )}
+          {heading && subheading && (
+            <>
+              <br />
+              {subheading}
+            </>
+          )}
         </h2>
 
         <div className="comm-tabs" role="tablist">
-          {TABS.map((t, i) => (
-            <button
-              key={t.key}
-              role="tab"
-              aria-selected={active === i}
-              className={`comm-tab ${active === i ? "active" : ""}`}
-              onClick={() => setActive(i)}
-            >
-              <span className="comm-tab-icon" aria-hidden="true">
-                <t.Icon />
-              </span>
-              <span className="comm-tab-label">{t.label}</span>
-              <span className={`comm-tab-badge ${t.locked ? "locked" : ""}`}>
-                {t.locked && <LockIcon />}
-                {t.badge}
-              </span>
-            </button>
-          ))}
+          {resolvedTabs.map((t, i) => {
+            const Icon = SLUG_ICONS[t.slug] ?? CalIcon;
+            return (
+              <button
+                key={t.slug}
+                role="tab"
+                aria-selected={active === i}
+                className={`comm-tab ${active === i ? "active" : ""}`}
+                onClick={() => setActive(i)}
+              >
+                <span className="comm-tab-icon" aria-hidden="true">
+                  <Icon />
+                </span>
+                <span className="comm-tab-label">{t.label}</span>
+                <span className={`comm-tab-badge ${t.locked ? "locked" : ""}`}>
+                  {t.locked && <LockIcon />}
+                  {t.badge ?? ""}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="comm-panel" role="tabpanel" key={TABS[active].key}>
-          {TABS[active].panel}
+        <div className="comm-panel" role="tabpanel" key={activeTab.slug}>
+          <div className="comm-panel-inner comm-panel-split">
+            <div className="comm-panel-left">
+              {activeTab.tagLine && (
+                <div className="comm-tag">
+                  <TabIcon />
+                  {activeTab.tagLine}
+                </div>
+              )}
+              {activeTab.panelHeading && <h3>{activeTab.panelHeading}</h3>}
+              {activeTab.panelDescription && <p>{activeTab.panelDescription}</p>}
+            </div>
+            {activeTab.features && activeTab.features.length > 0 && (
+              <ul className="comm-bullets">
+                {activeTab.features.map((f, fi) => (
+                  <li key={fi}>{f.text}</li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </section>

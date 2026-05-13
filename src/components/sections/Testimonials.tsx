@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const ITEMS = [
+const DEFAULT_ITEMS = [
   { q: "Growth Hub understood our business from day one. We went from invisible online to getting calls every week.", who: "Local restaurant owner", where: "Canberra" },
   { q: "The community webinars alone are worth it. I've learned more in two months than in a year trying to figure it out myself.", who: "Home services operator", where: "Queanbeyan" },
   { q: "Having a team that actually gets what it's like to run a small business in a new country. That's what made the difference.", who: "Retail business owner", where: "Belconnen" },
@@ -9,9 +9,31 @@ const ITEMS = [
   { q: "Google reviews went from 12 to over 80 in six months. The Reviews AI just does it all in the background.", who: "Trades business owner", where: "Kingston" },
 ];
 
-const loop = [...ITEMS, ...ITEMS];
+export interface TestimonialsProps {
+  testimonials?: Array<{
+    id?: string | null;
+    quote?: string | null;
+    author?: string | null;
+    role?: string | null;
+    company?: string | null;
+  }> | null;
+  ctaLabel?: string | null;
+  ctaHref?: string | null;
+}
 
-export default function Testimonials() {
+export default function Testimonials({ testimonials, ctaLabel, ctaHref }: TestimonialsProps) {
+  // Map CMS testimonials to the shape expected by the marquee, or fall back to hardcoded items
+  const items =
+    testimonials && testimonials.length > 0
+      ? testimonials.map((t) => ({
+          q: t.quote ?? "",
+          who: [t.author, t.role].filter(Boolean).join(", ") || "Growth Hub customer",
+          where: t.company ?? "",
+        }))
+      : DEFAULT_ITEMS;
+
+  const loop = [...items, ...items];
+
   return (
     <section className="ttg">
       <div className="ttg-marquee" aria-label="Customer stories">
@@ -20,7 +42,7 @@ export default function Testimonials() {
             <div
               className="ttg-card"
               key={i}
-              aria-hidden={i >= ITEMS.length ? "true" : undefined}
+              aria-hidden={i >= items.length ? "true" : undefined}
             >
               <div className="ttg-stars" aria-label="5 out of 5 stars">★★★★★</div>
               <p>&ldquo;{it.q}&rdquo;</p>
@@ -33,8 +55,8 @@ export default function Testimonials() {
         </div>
       </div>
       <div className="ttg-cta">
-        <Link className="btn btn-primary" href="#contact">
-          Sign Up Now
+        <Link className="btn btn-primary" href={ctaHref ?? "#contact"}>
+          {ctaLabel ?? "Sign Up Now"}
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
             <path d="M3 7h8M7 3l4 4-4 4" />
           </svg>

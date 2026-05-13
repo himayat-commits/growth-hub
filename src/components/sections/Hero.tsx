@@ -19,50 +19,99 @@ function Underline({ color = "#E3F29C" }: { color?: string }) {
   );
 }
 
-export default function Hero() {
+// Default content — mirrors the original hardcoded values; used as fallback when CMS fields are absent
+const DEFAULTS = {
+  eyebrow: "A Social Traders Verified Enterprise",
+  handnote: "Grow local. Grow together.",
+  subheading:
+    "We make that happen. AI-powered digital marketing with real, local support, so you grow confidently — knowing every subscription fuels employment pathways in our community.",
+  ctaLabel: "View Packages",
+  ctaHref: "#packages",
+  secondaryCtaLabel: "Learn More",
+  secondaryCtaHref: "#how",
+  chips: [
+    { text: "30+ local businesses supported" },
+    { text: "Community included" },
+    { text: "Canberra-based support" },
+  ],
+};
+
+export interface HeroProps {
+  eyebrow?: string | null;
+  heading?: string | null;
+  handnote?: string | null;
+  subheading?: string | null;
+  ctaLabel?: string | null;
+  ctaHref?: string | null;
+  secondaryCtaLabel?: string | null;
+  secondaryCtaHref?: string | null;
+  chips?: Array<{ text: string; id?: string | null }> | null;
+}
+
+export default function Hero({
+  eyebrow,
+  heading,
+  handnote,
+  subheading,
+  ctaLabel,
+  ctaHref,
+  secondaryCtaLabel,
+  secondaryCtaHref,
+  chips,
+}: HeroProps) {
+  const resolvedChips = chips && chips.length > 0 ? chips : DEFAULTS.chips;
+
+  // Detect if the heading ends with "grow." so we can apply the styled underline
+  const resolvedHeading = heading ?? "Your business deserves to grow.";
+  const growMatch = resolvedHeading.match(/^(.*?)(grow)\.\s*$/s);
+
   return (
     <section className="hero" id="top">
       <div className="wrap">
         <div className="hero-eyebrow">
           <span className="dot" />
-          A Social Traders Verified Enterprise
+          {eyebrow ?? DEFAULTS.eyebrow}
         </div>
 
         <h1 className="hero-h1">
-          Your business deserves to&nbsp;
-          <span className="grow">
-            grow
-            <Underline />
-          </span>
-          .
+          {growMatch ? (
+            <>
+              {growMatch[1]}
+              <span className="grow">
+                grow
+                <Underline />
+              </span>
+              .
+            </>
+          ) : (
+            resolvedHeading
+          )}
         </h1>
 
         <div className="hero-handnote">
-          <span className="txt handscript">Grow local. Grow together.</span>
+          <span className="txt handscript">{handnote ?? DEFAULTS.handnote}</span>
         </div>
 
-        <p className="hero-sub">
-          We make that happen. AI-powered digital marketing with real, local
-          support, so you grow confidently — knowing every subscription fuels
-          employment pathways in our community.
-        </p>
+        <p className="hero-sub">{subheading ?? DEFAULTS.subheading}</p>
 
         <div className="hero-ctas">
-          <Link className="btn btn-primary" href="#packages">
-            View Packages
+          <Link className="btn btn-primary" href={ctaHref ?? DEFAULTS.ctaHref}>
+            {ctaLabel ?? DEFAULTS.ctaLabel}
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
               <path d="M3 7h8M7 3l4 4-4 4" />
             </svg>
           </Link>
-          <Link className="btn btn-secondary" href="#how">
-            Learn More
+          <Link className="btn btn-secondary" href={secondaryCtaHref ?? DEFAULTS.secondaryCtaHref}>
+            {secondaryCtaLabel ?? DEFAULTS.secondaryCtaLabel}
           </Link>
         </div>
 
         <div className="hero-chips">
-          <span className="chip"><span className="chip-dot" /> 30+ local businesses supported</span>
-          <span className="chip"><span className="chip-dot" /> Community included</span>
-          <span className="chip"><span className="chip-dot" /> Canberra-based support</span>
+          {resolvedChips.map((chip, i) => (
+            <span className="chip" key={i}>
+              <span className="chip-dot" /> {chip.text}
+            </span>
+          ))}
         </div>
       </div>
 

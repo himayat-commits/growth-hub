@@ -17,5 +17,21 @@ export const HeroBlock: Block = {
       options: ['centered', 'left-aligned', 'split'],
       defaultValue: 'centered',
     },
+    {
+      name: 'eyebrow',
+      type: 'text',
+      admin: { description: 'Badge text above the heading, e.g. "A Social Traders Verified Enterprise"' },
+    },
+    {
+      name: 'handnote',
+      type: 'text',
+      admin: { description: 'Handscript tagline below heading, e.g. "Grow local. Grow together."' },
+    },
+    {
+      name: 'chips',
+      type: 'array',
+      admin: { description: 'Info chips displayed below the CTA buttons' },
+      fields: [{ name: 'text', type: 'text', required: true }],
+    },
   ],
 };

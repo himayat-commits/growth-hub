@@ -24,7 +24,13 @@ const INTERESTS = [
   "Not sure yet",
 ];
 
-export default function Contact() {
+export interface ContactProps {
+  supportEmail?: string | null;
+  phone?: string | null;
+  address?: string | null;
+}
+
+export default function Contact({ supportEmail, phone, address }: ContactProps = {}) {
   const [ref, setRef] = useState("");
   const [interests, setInterests] = useState<Set<string>>(new Set());
   const [focused, setFocused] = useState<string | null>(null);
@@ -94,7 +100,7 @@ export default function Contact() {
               <p>We'll reply to <strong>{watch("email")}</strong> within 48 hours — usually sooner.</p>
             </div>
           </div>
-          <ContactStrip />
+          <ContactStrip email={supportEmail} phone={phone} address={address} />
         </div>
       </section>
     );
@@ -254,26 +260,39 @@ export default function Contact() {
           </form>
         </div>
 
-        <ContactStrip />
+        <ContactStrip email={supportEmail} phone={phone} address={address} />
       </div>
     </section>
   );
 }
 
-function ContactStrip() {
+function ContactStrip({
+  email,
+  phone,
+  address,
+}: {
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+}) {
+  const resolvedEmail = email ?? "hello@himayat.com.au";
+  const resolvedPhone = phone ?? "02 5119 0005";
+  const resolvedPhoneHref = resolvedPhone.replace(/\s/g, "");
+  const resolvedAddress = address ?? "Level 4, 1 Moore St · Canberra ACT 2601";
+
   return (
     <div className="contact-strip">
       <div className="cs-item">
         <span className="cs-lbl">Call</span>
-        <a className="cs-val" href="tel:0251190005">02 5119 0005</a>
+        <a className="cs-val" href={`tel:${resolvedPhoneHref}`}>{resolvedPhone}</a>
       </div>
       <div className="cs-item">
         <span className="cs-lbl">Email direct</span>
-        <a className="cs-val" href="mailto:hello@himayat.com.au">hello@himayat.com.au</a>
+        <a className="cs-val" href={`mailto:${resolvedEmail}`}>{resolvedEmail}</a>
       </div>
       <div className="cs-item">
         <span className="cs-lbl">Visit</span>
-        <span className="cs-val">Level 4, 1 Moore St · Canberra ACT 2601</span>
+        <span className="cs-val">{resolvedAddress}</span>
       </div>
       <div className="cs-item">
         <span className="cs-lbl">Hours</span>

@@ -21,6 +21,16 @@ export const SiteSettings: GlobalConfig = {
       defaultValue: 'hello@himayat.com.au',
     },
     {
+      name: 'phone',
+      type: 'text',
+      admin: { description: 'Display phone number, e.g. "02 5119 0005"' },
+    },
+    {
+      name: 'address',
+      type: 'text',
+      admin: { description: 'Display address, e.g. "Level 4, 1 Moore St, Canberra ACT 2601"' },
+    },
+    {
       name: 'socialLinks',
       type: 'group',
       fields: [

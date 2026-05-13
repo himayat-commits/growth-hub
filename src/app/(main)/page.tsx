@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import { getPageBySlug, getSiteSettings } from "@/lib/cms";
+import BlockRenderer from "@/components/BlockRenderer";
+
+// Fallback section imports — used when the 'home' page hasn't been seeded yet
 import Hero from "@/components/sections/Hero";
 import SupportedBy from "@/components/sections/SupportedBy";
 import HowItWorks from "@/components/sections/HowItWorks";
@@ -16,7 +20,34 @@ export const metadata: Metadata = {
     "AI-powered digital marketing with real, local Canberra support. Packages from $299/mo. Social Traders Verified · NDIS Registered.",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [page, siteSettings] = await Promise.all([
+    getPageBySlug("home").catch(() => null),
+    getSiteSettings().catch(() => null),
+  ]);
+
+  // If the CMS page has blocks, render via BlockRenderer.
+  // The Contact section is always appended — it has no CMS block (form logic stays in code).
+  if (page?.layout && page.layout.length > 0) {
+    // Build a plain SiteSettings object for props forwarding
+    const settingsData = siteSettings
+      ? {
+          supportEmail: (siteSettings as { supportEmail?: string | null }).supportEmail ?? null,
+          phone: (siteSettings as { phone?: string | null }).phone ?? null,
+          address: (siteSettings as { address?: string | null }).address ?? null,
+        }
+      : null;
+
+    return (
+      <main>
+        <BlockRenderer blocks={page.layout as Parameters<typeof BlockRenderer>[0]["blocks"]} siteSettings={settingsData} />
+        <Contact supportEmail={settingsData?.supportEmail} />
+      </main>
+    );
+  }
+
+  // Fallback: render all hardcoded sections until the 'home' page is seeded in the CMS.
+  // This keeps the site working immediately after deployment even without seed data.
   return (
     <main>
       <Hero />

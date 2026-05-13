@@ -17,5 +17,7 @@ export const TestimonialsBlock: Block = {
       options: ['grid', 'carousel'],
       defaultValue: 'grid',
     },
+    { name: 'ctaLabel', type: 'text', defaultValue: 'Sign Up Now' },
+    { name: 'ctaHref', type: 'text', defaultValue: '#contact' },
   ],
 };

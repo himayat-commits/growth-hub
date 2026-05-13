@@ -16,5 +16,11 @@ export const LogoStrip: Block = {
       type: 'checkbox',
       defaultValue: false,
     },
+    {
+      name: 'textItems',
+      type: 'array',
+      admin: { description: 'Text-only items (no image) — e.g. partner or funder names' },
+      fields: [{ name: 'name', type: 'text', required: true }],
+    },
   ],
 };

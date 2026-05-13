@@ -222,7 +222,12 @@ function ChevronIcon() {
   );
 }
 
-export default function PricingSection() {
+export interface PricingSectionProps {
+  heading?: string | null;
+  subheading?: string | null;
+}
+
+export default function PricingSection({ heading, subheading }: PricingSectionProps = {}) {
   const [mode, setMode] = useState<"self" | "managed">("self");
   const [showCompare, setShowCompare] = useState(false);
   const tiers = mode === "self" ? SELF : MANAGED;
@@ -233,7 +238,8 @@ export default function PricingSection() {
         <div className="wrap">
           <div className="pkg-head-centered" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
             <span className="section-label">Pricing</span>
-            <h2 className="section-h2" style={{ marginTop: 8 }}>Choose your level of support.</h2>
+            <h2 className="section-h2" style={{ marginTop: 8 }}>{heading ?? "Choose your level of support."}</h2>
+            {subheading && <p style={{ marginTop: 8 }}>{subheading}</p>}
             <div className="pkg-toggle-row">
               <div className="pkg-toggle" role="tablist">
                 <button

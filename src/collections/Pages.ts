@@ -12,6 +12,10 @@ import { CTABanner } from '../blocks/CTABanner.ts';
 import { TeamSection } from '../blocks/TeamSection.ts';
 import { StatsBanner } from '../blocks/StatsBanner.ts';
 import { RichTextBlock } from '../blocks/RichTextBlock.ts';
+import { HowItWorksBlock } from '../blocks/HowItWorksBlock.ts';
+import { AboutBlock } from '../blocks/AboutBlock.ts';
+import { BigQuoteBlock } from '../blocks/BigQuoteBlock.ts';
+import { CommunityBlock } from '../blocks/CommunityBlock.ts';
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -55,6 +59,10 @@ export const Pages: CollectionConfig = {
         TeamSection,
         StatsBanner,
         RichTextBlock,
+        HowItWorksBlock,
+        AboutBlock,
+        BigQuoteBlock,
+        CommunityBlock,
       ],
     },
     {
