@@ -76,6 +76,7 @@ export interface Config {
     'team-members': TeamMember;
     media: Media;
     logos: Logo;
+    partners: Partner;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     logos: LogosSelect<false> | LogosSelect<true>;
+    partners: PartnersSelect<false> | PartnersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -106,12 +108,14 @@ export interface Config {
     navigation: Navigation;
     'announcement-bar': AnnouncementBar;
     'signup-page-content': SignupPageContent;
+    'partners-page': PartnersPage;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
     'announcement-bar': AnnouncementBarSelect<false> | AnnouncementBarSelect<true>;
     'signup-page-content': SignupPageContentSelect<false> | SignupPageContentSelect<true>;
+    'partners-page': PartnersPageSelect<false> | PartnersPageSelect<true>;
   };
   locale: null;
   widgets: {
@@ -698,6 +702,47 @@ export interface CaseStudy {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners".
+ */
+export interface Partner {
+  id: number;
+  name: string;
+  /**
+   * Used for directory filter chips
+   */
+  type: 'technology' | 'community' | 'enterprise' | 'funding' | 'media';
+  /**
+   * Short description shown in the directory card
+   */
+  description?: string | null;
+  /**
+   * Full URL including https://
+   */
+  website?: string | null;
+  /**
+   * Primary contact person (optional)
+   */
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  /**
+   * Optional logo image (square or landscape, min 200px wide)
+   */
+  logo?: (number | null) | Media;
+  /**
+   * Show in the Featured Partners wall at the top of the /partners page
+   */
+  featured?: boolean | null;
+  /**
+   * Lower numbers appear first
+   */
+  order?: number | null;
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -755,6 +800,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'logos';
         value: number | Logo;
+      } | null)
+    | ({
+        relationTo: 'partners';
+        value: number | Partner;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1220,6 +1269,25 @@ export interface LogosSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners_select".
+ */
+export interface PartnersSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  description?: T;
+  website?: T;
+  contactName?: T;
+  contactEmail?: T;
+  contactPhone?: T;
+  logo?: T;
+  featured?: T;
+  order?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1427,6 +1495,107 @@ export interface SignupPageContent {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners-page".
+ */
+export interface PartnersPage {
+  id: number;
+  heroEyebrow?: string | null;
+  heroHeading?: string | null;
+  /**
+   * Paragraph below the heading
+   */
+  heroSubheading?: string | null;
+  heroCtaLabel?: string | null;
+  heroCtaHref?: string | null;
+  heroSecondaryCtaLabel?: string | null;
+  heroSecondaryCtaHref?: string | null;
+  heroChips?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  featuredWallHeading?: string | null;
+  /**
+   * Short lead text shown beside the heading
+   */
+  featuredWallLead?: string | null;
+  directoryHeading?: string | null;
+  directoryLead?: string | null;
+  benefitsHeading?: string | null;
+  benefitsLead?: string | null;
+  /**
+   * Up to 3 benefit cards
+   */
+  benefits?:
+    | {
+        /**
+         * Small label e.g. "01 — Reach"
+         */
+        tag: string;
+        heading: string;
+        body: string;
+        /**
+         * Handscript pull-quote (optional)
+         */
+        handnote?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  proofHeading?: string | null;
+  proofLead?: string | null;
+  /**
+   * Up to 3 stat cards
+   */
+  proofStats?:
+    | {
+        /**
+         * Small label e.g. "Community"
+         */
+        tag?: string | null;
+        /**
+         * The large number e.g. "400+"
+         */
+        num: string;
+        /**
+         * Script unit e.g. "members"
+         */
+        unit?: string | null;
+        heading: string;
+        body?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Up to 2 pull quotes
+   */
+  proofQuotes?:
+    | {
+        text: string;
+        attribution: string;
+        id?: string | null;
+      }[]
+    | null;
+  becomeHeading?: string | null;
+  /**
+   * Short paragraph below the heading
+   */
+  becomeBody?: string | null;
+  becomeBullets?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  becomeCtaLabel?: string | null;
+  becomeCtaHref?: string | null;
+  becomeSecondaryCtaLabel?: string | null;
+  becomeSecondaryCtaHref?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -1542,6 +1711,74 @@ export interface SignupPageContentSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners-page_select".
+ */
+export interface PartnersPageSelect<T extends boolean = true> {
+  heroEyebrow?: T;
+  heroHeading?: T;
+  heroSubheading?: T;
+  heroCtaLabel?: T;
+  heroCtaHref?: T;
+  heroSecondaryCtaLabel?: T;
+  heroSecondaryCtaHref?: T;
+  heroChips?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  featuredWallHeading?: T;
+  featuredWallLead?: T;
+  directoryHeading?: T;
+  directoryLead?: T;
+  benefitsHeading?: T;
+  benefitsLead?: T;
+  benefits?:
+    | T
+    | {
+        tag?: T;
+        heading?: T;
+        body?: T;
+        handnote?: T;
+        id?: T;
+      };
+  proofHeading?: T;
+  proofLead?: T;
+  proofStats?:
+    | T
+    | {
+        tag?: T;
+        num?: T;
+        unit?: T;
+        heading?: T;
+        body?: T;
+        id?: T;
+      };
+  proofQuotes?:
+    | T
+    | {
+        text?: T;
+        attribution?: T;
+        id?: T;
+      };
+  becomeHeading?: T;
+  becomeBody?: T;
+  becomeBullets?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  becomeCtaLabel?: T;
+  becomeCtaHref?: T;
+  becomeSecondaryCtaLabel?: T;
+  becomeSecondaryCtaHref?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

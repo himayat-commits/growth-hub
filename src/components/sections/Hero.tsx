@@ -46,6 +46,10 @@ export interface HeroProps {
   secondaryCtaLabel?: string | null;
   secondaryCtaHref?: string | null;
   chips?: Array<{ text: string; id?: string | null }> | null;
+  /** "dark" renders the hero with a teal background and eggshell text */
+  variant?: "light" | "dark";
+  /** Extra CSS class(es) applied to the <section> */
+  className?: string;
 }
 
 export default function Hero({
@@ -58,6 +62,8 @@ export default function Hero({
   secondaryCtaLabel,
   secondaryCtaHref,
   chips,
+  variant,
+  className,
 }: HeroProps) {
   const resolvedChips = chips && chips.length > 0 ? chips : DEFAULTS.chips;
 
@@ -66,7 +72,10 @@ export default function Hero({
   const growMatch = resolvedHeading.match(/^([\s\S]*?)(grow)\.\s*$/);
 
   return (
-    <section className="hero" id="top">
+    <section
+      className={["hero", variant === "dark" ? "hero-dark" : "", className ?? ""].filter(Boolean).join(" ")}
+      id="top"
+    >
       <div className="wrap">
         <div className="hero-eyebrow">
           <span className="dot" />

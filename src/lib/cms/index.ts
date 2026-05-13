@@ -210,3 +210,29 @@ export const getSignupContent = unstable_cache(
   ['signup-page-content'],
   { tags: ['signup-page-content'], revalidate: 3600 }
 );
+
+// ── Partners ──────────────────────────────────────────────────────────────────
+
+export const getPartners = unstable_cache(
+  async () => {
+    const payload = await getPayloadClient();
+    return payload.find({
+      collection: 'partners',
+      where: { status: { equals: 'published' } },
+      sort: 'order',
+      depth: 1,
+      limit: 0,
+    });
+  },
+  ['partners'],
+  { tags: ['partners'], revalidate: 3600 }
+);
+
+export const getPartnersPage = unstable_cache(
+  async () => {
+    const payload = await getPayloadClient();
+    return payload.findGlobal({ slug: 'partners-page', depth: 0 });
+  },
+  ['partners-page'],
+  { tags: ['partners-page'], revalidate: 3600 }
+);

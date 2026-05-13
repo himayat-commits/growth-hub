@@ -529,6 +529,188 @@ async function seed() {
     console.log('⏭   Pricing page already exists — skipping.');
   }
 
+  // ── 10. Partners ─────────────────────────────────────────────────────────
+  const { totalDocs: existingPartners } = await payload.find({
+    collection: 'partners',
+    limit: 1,
+  });
+
+  if (existingPartners === 0) {
+    const partnerData = [
+      {
+        name: 'ACT Government',
+        type: 'funding' as const,
+        description: 'Supporting small and diverse businesses across the ACT through grants, programs, and direct investment in community-led initiatives.',
+        featured: true,
+        order: 1,
+        status: 'published' as const,
+      },
+      {
+        name: 'Canberra Business Chamber',
+        type: 'community' as const,
+        description: 'The peak body for business in the ACT, connecting local businesses with advocacy, networking, and professional development opportunities.',
+        website: 'https://canberrabusiness.com',
+        featured: true,
+        order: 2,
+        status: 'published' as const,
+      },
+      {
+        name: 'Social Traders',
+        type: 'community' as const,
+        description: "Australia's leading social enterprise certifier. Growth Hub holds Social Traders Verified status, meaning every subscription creates community impact.",
+        website: 'https://socialtraders.com.au',
+        featured: true,
+        order: 3,
+        status: 'published' as const,
+      },
+      {
+        name: 'Birdeye',
+        type: 'technology' as const,
+        description: "The AI-powered customer experience platform at the core of Growth Hub's digital tools — reviews, listings, messaging, and more.",
+        website: 'https://birdeye.com',
+        featured: true,
+        order: 4,
+        status: 'published' as const,
+      },
+      {
+        name: 'GRIFFIN Accelerator',
+        type: 'enterprise' as const,
+        description: "Canberra's startup and SME accelerator program supporting early-stage and growth-stage founders with mentorship, capital, and networks.",
+        featured: true,
+        order: 5,
+        status: 'published' as const,
+      },
+      {
+        name: 'CBR Innovation Network',
+        type: 'community' as const,
+        description: "Connecting Canberra's innovation ecosystem — businesses, researchers, and government — to collaborate and grow together.",
+        website: 'https://cbrin.com.au',
+        featured: false,
+        order: 6,
+        status: 'published' as const,
+      },
+      {
+        name: 'Lighthouse Business Innovation Centre',
+        type: 'enterprise' as const,
+        description: 'Business coaching, advisory, and mentoring services for growth-stage enterprises in the ACT and surrounding region.',
+        website: 'https://lighthousebusiness.com.au',
+        featured: false,
+        order: 7,
+        status: 'published' as const,
+      },
+      {
+        name: 'Muslim Community Co-op',
+        type: 'community' as const,
+        description: 'A Canberra-based cooperative supporting Muslim-owned businesses and community enterprises with peer networks and practical resources.',
+        featured: false,
+        order: 8,
+        status: 'published' as const,
+      },
+    ];
+
+    for (const partner of partnerData) {
+      await payload.create({ collection: 'partners', data: partner });
+    }
+    console.log('✅  Created 8 sample partners.');
+  } else {
+    console.log('⏭   Partners already exist — skipping.');
+  }
+
+  // ── 11. PartnersPage global ───────────────────────────────────────────────
+  await payload.updateGlobal({
+    slug: 'partners-page',
+    data: {
+      heroEyebrow: 'Strategic Partners',
+      heroHeading: 'Better together.',
+      heroSubheading:
+        'We partner with technology providers, community organisations, funding bodies, and business support services that share our commitment to local growth and real community impact.',
+      heroCtaLabel: 'Become a Partner',
+      heroCtaHref: '#become',
+      heroSecondaryCtaLabel: 'View Directory',
+      heroSecondaryCtaHref: '#directory',
+      heroChips: [
+        { text: 'Canberra-based ecosystem' },
+        { text: 'Social Traders Verified' },
+        { text: 'Community-first' },
+      ],
+      featuredWallHeading: 'The network behind the network.',
+      featuredWallLead: '',
+      directoryHeading: 'Meet our partners.',
+      directoryLead: '',
+      benefitsHeading: 'Why partner with Growth Hub?',
+      benefitsLead: '',
+      benefits: [
+        {
+          tag: '01 — Reach',
+          heading: 'Access a growing network of local businesses.',
+          body: 'Growth Hub puts your brand, services, and expertise in front of 30+ local business owners and a rapidly growing subscriber base — all actively seeking trusted partners.',
+          handnote: 'Grow your pipeline.',
+        },
+        {
+          tag: '02 — Purpose',
+          heading: 'Partner with a certified social enterprise.',
+          body: 'Every Growth Hub subscription funds employment pathways for people facing barriers. When you partner with us, your brand is visibly aligned with real community impact — not just a logo on a wall.',
+          handnote: 'Do business differently.',
+        },
+        {
+          tag: '03 — Co-creation',
+          heading: 'Build something together.',
+          body: "We're always looking for partners who want to co-create. Whether it's a joint workshop, a bundled offer, or a community event, we'll work with you to create genuine value for our shared audience.",
+          handnote: 'More than a listing.',
+        },
+      ],
+      proofHeading: 'Impact by the numbers.',
+      proofLead: '',
+      proofStats: [
+        {
+          tag: 'Community',
+          num: '400+',
+          unit: 'people',
+          heading: 'People supported across our programs.',
+          body: 'Employment pathways, digital training, and wraparound support for people facing real barriers.',
+        },
+        {
+          tag: 'Events',
+          num: '50+',
+          unit: 'events',
+          heading: 'Community events delivered.',
+          body: 'Workshops, networking meetups, and in-person training sessions across Canberra.',
+        },
+        {
+          tag: 'Economy',
+          num: '$400K',
+          unit: 'in wages',
+          heading: 'Direct wages to underemployed community members.',
+          body: 'Every Growth Hub subscription contributes to real employment outcomes in the local community.',
+        },
+      ],
+      proofQuotes: [
+        {
+          text: "Partnering with Himayat has been one of the most rewarding decisions we've made. They genuinely care about the people they work with.",
+          attribution: 'A Canberra Community Partner',
+        },
+        {
+          text: "Growth Hub brought us closer to the local business community. The network effect has been real — we've seen referrals we wouldn't have had otherwise.",
+          attribution: 'A Technology Partner',
+        },
+      ],
+      becomeHeading: 'Become a partner.',
+      becomeBody:
+        "We're always looking for aligned organisations to grow with. Whether you're a technology provider, a community organisation, a funding body, or a business support service, there's a place for you in the Growth Hub network.",
+      becomeBullets: [
+        { text: 'Co-marketing and co-branding opportunities' },
+        { text: 'Access to a growing network of local business owners' },
+        { text: 'Genuine community impact — visible and measurable' },
+        { text: 'Featured placement on our /partners page' },
+      ],
+      becomeCtaLabel: 'Get in touch',
+      becomeCtaHref: 'mailto:hello@himayat.com.au?subject=Partnership%20Enquiry',
+      becomeSecondaryCtaLabel: 'View packages',
+      becomeSecondaryCtaHref: '/#packages',
+    },
+  });
+  console.log('✅  Updated PartnersPage global.');
+
   console.log('\n🎉  Seed complete!');
   process.exit(0);
 }

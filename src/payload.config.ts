@@ -31,12 +31,14 @@ import { FAQs } from './collections/FAQs.ts';
 import { TeamMembers } from './collections/TeamMembers.ts';
 import { Media } from './collections/Media.ts';
 import { Logos } from './collections/Logos.ts';
+import { Partners } from './collections/Partners.ts';
 
 // Globals
 import { SiteSettings } from './globals/SiteSettings.ts';
 import { Navigation } from './globals/Navigation.ts';
 import { AnnouncementBar } from './globals/AnnouncementBar.ts';
 import { SignupPageContent } from './globals/SignupPageContent.ts';
+import { PartnersPage } from './globals/PartnersPage.ts';
 
 export default buildConfig({
   admin: {
@@ -56,6 +58,7 @@ export default buildConfig({
     TeamMembers,
     Media,
     Logos,
+    Partners,
   ],
 
   globals: [
@@ -63,6 +66,7 @@ export default buildConfig({
     Navigation,
     AnnouncementBar,
     SignupPageContent,
+    PartnersPage,
   ],
 
   editor: lexicalEditor({}),
