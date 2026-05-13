@@ -63,7 +63,7 @@ export default function Hero({
 
   // Detect if the heading ends with "grow." so we can apply the styled underline
   const resolvedHeading = heading ?? "Your business deserves to grow.";
-  const growMatch = resolvedHeading.match(/^(.*?)(grow)\.\s*$/s);
+  const growMatch = resolvedHeading.match(/^([\s\S]*?)(grow)\.\s*$/);
 
   return (
     <section className="hero" id="top">
