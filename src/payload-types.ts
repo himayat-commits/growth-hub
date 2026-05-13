@@ -187,6 +187,23 @@ export interface Page {
             secondaryCtaHref?: string | null;
             backgroundImage?: (number | null) | Media;
             variant?: ('centered' | 'left-aligned' | 'split') | null;
+            /**
+             * Badge text above the heading, e.g. "A Social Traders Verified Enterprise"
+             */
+            eyebrow?: string | null;
+            /**
+             * Handscript tagline below heading, e.g. "Grow local. Grow together."
+             */
+            handnote?: string | null;
+            /**
+             * Info chips displayed below the CTA buttons
+             */
+            chips?:
+              | {
+                  text: string;
+                  id?: string | null;
+                }[]
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'hero';
@@ -206,6 +223,8 @@ export interface Page {
             heading?: string | null;
             testimonials?: (number | Testimonial)[] | null;
             layout?: ('grid' | 'carousel') | null;
+            ctaLabel?: string | null;
+            ctaHref?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'testimonials';
@@ -225,6 +244,15 @@ export interface Page {
             heading?: string | null;
             logos?: (number | Logo)[] | null;
             autoScroll?: boolean | null;
+            /**
+             * Text-only items (no image) — e.g. partner or funder names
+             */
+            textItems?:
+              | {
+                  name: string;
+                  id?: string | null;
+                }[]
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'logo-strip';
@@ -342,6 +370,127 @@ export interface Page {
             id?: string | null;
             blockName?: string | null;
             blockType: 'rich-text';
+          }
+        | {
+            heading?: string | null;
+            steps: {
+              title: string;
+              description: string;
+              id?: string | null;
+            }[];
+            /**
+             * Photo shown on the right side of the section
+             */
+            sectionImage?: (number | null) | Media;
+            /**
+             * Badge text overlaid on the image, e.g. "Live events + webinars"
+             */
+            imageBadge?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'how-it-works';
+          }
+        | {
+            sectionLabel?: string | null;
+            heading: string;
+            /**
+             * Italic text appended to the heading (rendered in <em>)
+             */
+            subheading?: string | null;
+            /**
+             * Body paragraphs shown in the left column
+             */
+            paragraphs?:
+              | {
+                  text: string;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Blockquote highlighted below the body paragraphs
+             */
+            pullQuote?: string | null;
+            /**
+             * Stat cards shown in the right column
+             */
+            stats?:
+              | {
+                  /**
+                   * e.g. "400+" or "$400K"
+                   */
+                  value: string;
+                  description: string;
+                  tone?: ('teal' | 'lime' | 'plain') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'about';
+          }
+        | {
+            quote: string;
+            /**
+             * Who said this, e.g. "A Local Canberra Business Owner"
+             */
+            attribution?: string | null;
+            /**
+             * Trust badges displayed below the quote
+             */
+            badges?:
+              | {
+                  label: string;
+                  icon?: ('verified' | 'ndis' | 'location') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'big-quote';
+          }
+        | {
+            heading?: string | null;
+            subheading?: string | null;
+            /**
+             * Each tab is a community pillar (events, webinar, community, support, etc.)
+             */
+            tabs: {
+              /**
+               * Tab button label, e.g. "In-Person Events"
+               */
+              label: string;
+              /**
+               * Anchor/key for this tab, e.g. "events"
+               */
+              slug: string;
+              /**
+               * Access badge text, e.g. "Subscribers Only"
+               */
+              badge?: string | null;
+              /**
+               * Show a lock icon on the badge
+               */
+              locked?: boolean | null;
+              /**
+               * Small tag shown at top of panel, e.g. "Live · Every Week"
+               */
+              tagLine?: string | null;
+              panelHeading?: string | null;
+              panelDescription?: string | null;
+              /**
+               * Bullet points in the right column of the panel
+               */
+              features?:
+                | {
+                    text: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'community';
           }
       )[]
     | null;
@@ -691,6 +840,14 @@ export interface PagesSelect<T extends boolean = true> {
               secondaryCtaHref?: T;
               backgroundImage?: T;
               variant?: T;
+              eyebrow?: T;
+              handnote?: T;
+              chips?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
               id?: T;
               blockName?: T;
             };
@@ -709,6 +866,8 @@ export interface PagesSelect<T extends boolean = true> {
               heading?: T;
               testimonials?: T;
               layout?: T;
+              ctaLabel?: T;
+              ctaHref?: T;
               id?: T;
               blockName?: T;
             };
@@ -727,6 +886,12 @@ export interface PagesSelect<T extends boolean = true> {
               heading?: T;
               logos?: T;
               autoScroll?: T;
+              textItems?:
+                | T
+                | {
+                    name?: T;
+                    id?: T;
+                  };
               id?: T;
               blockName?: T;
             };
@@ -811,6 +976,87 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               content?: T;
               maxWidth?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'how-it-works'?:
+          | T
+          | {
+              heading?: T;
+              steps?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    id?: T;
+                  };
+              sectionImage?: T;
+              imageBadge?: T;
+              id?: T;
+              blockName?: T;
+            };
+        about?:
+          | T
+          | {
+              sectionLabel?: T;
+              heading?: T;
+              subheading?: T;
+              paragraphs?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              pullQuote?: T;
+              stats?:
+                | T
+                | {
+                    value?: T;
+                    description?: T;
+                    tone?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'big-quote'?:
+          | T
+          | {
+              quote?: T;
+              attribution?: T;
+              badges?:
+                | T
+                | {
+                    label?: T;
+                    icon?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        community?:
+          | T
+          | {
+              heading?: T;
+              subheading?: T;
+              tabs?:
+                | T
+                | {
+                    label?: T;
+                    slug?: T;
+                    badge?: T;
+                    locked?: T;
+                    tagLine?: T;
+                    panelHeading?: T;
+                    panelDescription?: T;
+                    features?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
               id?: T;
               blockName?: T;
             };
@@ -1019,6 +1265,14 @@ export interface SiteSetting {
   siteName: string;
   tagline?: string | null;
   supportEmail?: string | null;
+  /**
+   * Display phone number, e.g. "02 5119 0005"
+   */
+  phone?: string | null;
+  /**
+   * Display address, e.g. "Level 4, 1 Moore St, Canberra ACT 2601"
+   */
+  address?: string | null;
   socialLinks?: {
     facebook?: string | null;
     instagram?: string | null;
@@ -1072,6 +1326,8 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   siteName?: T;
   tagline?: T;
   supportEmail?: T;
+  phone?: T;
+  address?: T;
   socialLinks?:
     | T
     | {
