@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 // Note: /api/stripe/webhook is intentionally NOT protected — it's called by Stripe.
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
+  '/onboarding(.*)',
   '/api/checkout',
   '/api/billing-portal',
 ]);
