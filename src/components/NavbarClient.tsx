@@ -29,7 +29,7 @@ export default function NavbarClient({ navItems, ctaLabel, ctaHref }: NavbarClie
 
   const resolvedItems = navItems && navItems.length > 0 ? navItems : DEFAULT_NAV_ITEMS;
   const resolvedCtaLabel = ctaLabel ?? "Sign Up Now";
-  const resolvedCtaHref = ctaHref ?? "/sign-up";
+  const resolvedCtaHref = ctaHref ?? "/pricing";
 
   return (
     <header className="nav" style={{ position: "sticky", top: 0, zIndex: 50 }}>
