@@ -105,11 +105,13 @@ export interface Config {
     'site-settings': SiteSetting;
     navigation: Navigation;
     'announcement-bar': AnnouncementBar;
+    'signup-page-content': SignupPageContent;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
     'announcement-bar': AnnouncementBarSelect<false> | AnnouncementBarSelect<true>;
+    'signup-page-content': SignupPageContentSelect<false> | SignupPageContentSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1320,6 +1322,111 @@ export interface AnnouncementBar {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signup-page-content".
+ */
+export interface SignupPageContent {
+  id: number;
+  foundations?: {
+    /**
+     * Main heading for the Foundations signup page
+     */
+    title?: string | null;
+    /**
+     * Subheading below the title
+     */
+    tagline?: string | null;
+    /**
+     * Feature list shown on the signup page
+     */
+    features?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional add-on upsell line (e.g. "Add Search AI from $99/mo")
+     */
+    addon?: string | null;
+    /**
+     * Trust badges / guarantees shown below the feature list
+     */
+    trustItems?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  growth?: {
+    /**
+     * Main heading for the Growth signup page
+     */
+    title?: string | null;
+    /**
+     * Subheading below the title
+     */
+    tagline?: string | null;
+    /**
+     * Feature list shown on the signup page
+     */
+    features?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional add-on upsell line (e.g. "Add Search AI from $99/mo")
+     */
+    addon?: string | null;
+    /**
+     * Trust badges / guarantees shown below the feature list
+     */
+    trustItems?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  accelerate?: {
+    /**
+     * Main heading for the Accelerate signup page
+     */
+    title?: string | null;
+    /**
+     * Subheading below the title
+     */
+    tagline?: string | null;
+    /**
+     * Feature list shown on the signup page
+     */
+    features?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional add-on upsell line (e.g. "Add Search AI from $99/mo")
+     */
+    addon?: string | null;
+    /**
+     * Trust badges / guarantees shown below the feature list
+     */
+    trustItems?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -1369,6 +1476,72 @@ export interface AnnouncementBarSelect<T extends boolean = true> {
   linkText?: T;
   linkHref?: T;
   bgColor?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signup-page-content_select".
+ */
+export interface SignupPageContentSelect<T extends boolean = true> {
+  foundations?:
+    | T
+    | {
+        title?: T;
+        tagline?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        addon?: T;
+        trustItems?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+      };
+  growth?:
+    | T
+    | {
+        title?: T;
+        tagline?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        addon?: T;
+        trustItems?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+      };
+  accelerate?:
+    | T
+    | {
+        title?: T;
+        tagline?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        addon?: T;
+        trustItems?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

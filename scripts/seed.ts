@@ -110,44 +110,83 @@ async function seed() {
   if (existingFAQs === 0) {
     const faqs = [
       {
-        question: 'Can I cancel my subscription at any time?',
-        answer: lexicalParagraph('Yes — there are no lock-in contracts. Cancel any time from your dashboard and you keep access until the end of your billing period.'),
-        category: 'billing' as const,
+        question: 'Who is Growth Hub for?',
+        answer: lexicalParagraph('Growth Hub is built for local, location-based businesses: anyone selling a physical product or service in their area. We work with cafes, trades, clinics, retail shops, salons, and more. Our tools and community are especially valuable for diverse business owners who may be navigating digital marketing for the first time.'),
+        category: 'general' as const,
         order: 1,
       },
       {
-        question: 'Do I need a long-term contract?',
-        answer: lexicalParagraph('No contracts required. All plans are month-to-month (or discounted annual). You can upgrade, downgrade, or cancel whenever you like.'),
-        category: 'billing' as const,
+        question: 'How is Growth Hub different from a regular digital agency?',
+        answer: lexicalParagraph("We're a Social Traders Verified social enterprise. That means your subscription doesn't just grow your business; it directly funds employment pathways and digital inclusion programs for people in your community. Plus, our support model is built around community (weekly webinars, peer groups, events), not billable hours."),
+        category: 'general' as const,
         order: 2,
+      },
+      {
+        question: 'Can I upgrade my package later?',
+        answer: lexicalParagraph('Yes. Self-service tiers (Foundations, Growth, Accelerate) have no lock-in. You can upgrade anytime and your new modules activate immediately. Managed tiers have a 6-month minimum commitment.'),
+        category: 'billing' as const,
+        order: 3,
+      },
+      {
+        question: 'Can I cancel my subscription at any time?',
+        answer: lexicalParagraph('Yes — there are no lock-in contracts. Cancel any time from your dashboard and you keep access until the end of your billing period.'),
+        category: 'billing' as const,
+        order: 4,
+      },
+      {
+        question: 'What happens in the first month?',
+        answer: lexicalParagraph('You get access to onboarding videos for every module in your tier, an invitation to the community groups (Slack, Facebook, WhatsApp), and your first weekly webinar. Managed tier clients also receive a dedicated onboarding call, and Managed Pro/Elite clients get first-month brand and website setup included.'),
+        category: 'general' as const,
+        order: 5,
       },
       {
         question: 'What is Social AI?',
         answer: lexicalParagraph('Social AI automatically generates and schedules branded social media content using your business details and local events. Our team reviews every post before it goes live.'),
         category: 'features' as const,
-        order: 3,
+        order: 6,
+      },
+      {
+        question: 'What is Agentic AI?',
+        answer: lexicalParagraph("Most of the modules powering Growth Hub use Agentic AI, meaning the AI doesn't just suggest actions, it takes them. It writes and publishes social posts, responds to reviews, manages your listings, and captures leads via webchat, all on your behalf."),
+        category: 'features' as const,
+        order: 7,
       },
       {
         question: 'How does the Reviews AI work?',
         answer: lexicalParagraph('Reviews AI monitors your Google Business Profile and drafts personalised responses to new reviews within minutes. You approve before anything is posted.'),
         category: 'features' as const,
-        order: 4,
+        order: 8,
       },
       {
         question: 'Is my data stored in Australia?',
         answer: lexicalParagraph('Yes. All data is stored in the Sydney (ap-southeast-2) region. We comply with Australian privacy law and never sell your data.'),
         category: 'technical' as const,
-        order: 5,
+        order: 9,
+      },
+      {
+        question: 'How do I learn to use the platform?',
+        answer: lexicalParagraph("Every subscriber gets access to our on-demand onboarding video library: short, plain-English walkthroughs covering every feature. You can learn at your own pace, rewatch anytime from your subscriber portal, and new videos unlock as you activate more tools. Prefer learning live? Our weekly subscriber webinar covers the same ground with a real person on the other end of your questions."),
+        category: 'general' as const,
+        order: 10,
       },
     ];
 
     for (const faq of faqs) {
       await payload.create({ collection: 'faqs', data: faq });
     }
-    console.log('✅  Created 5 sample FAQs.');
+    console.log('✅  Created 10 FAQs.');
   } else {
     console.log('⏭   FAQs already exist — skipping.');
   }
+
+  // Fetch all FAQ IDs (needed for the FAQ block in pages)
+  const { docs: allFAQs } = await payload.find({
+    collection: 'faqs',
+    sort: 'order',
+    limit: 0,
+    depth: 0,
+  });
+  const faqIds = allFAQs.map((f) => f.id);
 
   // ── 4. Site Settings global ──────────────────────────────────────────────
   await payload.updateGlobal({
@@ -198,14 +237,71 @@ async function seed() {
   });
   console.log('✅  Updated AnnouncementBar global.');
 
-  // ── 7. Home page ─────────────────────────────────────────────────────────
-  const { totalDocs: existingPages } = await payload.find({
+  // ── 7. SignupPageContent global ──────────────────────────────────────────
+  await payload.updateGlobal({
+    slug: 'signup-page-content',
+    data: {
+      foundations: {
+        title: 'Get online. Get noticed.',
+        tagline: "You're a step away from a real team in your corner.",
+        features: [
+          { text: 'Invoicing' },
+          { text: 'Social AI: content creation & scheduling' },
+          { text: 'Listing AI: 50+ directory management' },
+          { text: 'Messaging: unified inbox for all channels' },
+          { text: 'Community + weekly webinars included' },
+        ],
+        addon: '',
+        trustItems: [
+          { text: 'Social Traders Verified social enterprise' },
+          { text: 'No lock-in — cancel any time' },
+          { text: 'Canberra-based support team' },
+        ],
+      },
+      growth: {
+        title: 'Build trust. Build reputation.',
+        tagline: "You're a step away from a real team in your corner.",
+        features: [
+          { text: 'Everything in Foundations' },
+          { text: 'Timesheets & Docketing' },
+          { text: 'Reviews AI: automated generation & responses' },
+          { text: 'Review Collateral Kit: QR cards, badges, templates' },
+        ],
+        addon: 'Add Search AI from $99/mo',
+        trustItems: [
+          { text: 'Social Traders Verified social enterprise' },
+          { text: 'No lock-in — cancel any time' },
+          { text: 'Canberra-based support team' },
+        ],
+      },
+      accelerate: {
+        title: 'Convert visitors into customers.',
+        tagline: "You're a step away from a real team in your corner.",
+        features: [
+          { text: 'Everything in Growth' },
+          { text: 'Scheduling + Rostering' },
+          { text: 'Webchat AI (Robin): 24/7 lead capture' },
+          { text: 'Campaign Templates: SMS & email automation' },
+        ],
+        addon: 'Add Referrals from $175/mo',
+        trustItems: [
+          { text: 'Social Traders Verified social enterprise' },
+          { text: 'No lock-in — cancel any time' },
+          { text: 'Canberra-based support team' },
+        ],
+      },
+    },
+  });
+  console.log('✅  Updated SignupPageContent global.');
+
+  // ── 8. Home page ─────────────────────────────────────────────────────────
+  const { totalDocs: existingHomePages } = await payload.find({
     collection: 'pages',
     where: { slug: { equals: 'home' } },
     limit: 1,
   });
 
-  if (existingPages === 0) {
+  if (existingHomePages === 0) {
     await payload.create({
       collection: 'pages',
       data: {
@@ -253,8 +349,8 @@ async function seed() {
             steps: [
               { title: 'Choose your tier', description: 'Self-service to fully managed. Pick the level that fits your business stage and budget.' },
               { title: 'We set you up', description: 'Onboarding videos, platform access, and community groups activated from day one.' },
-              { title: 'Grow with real support', description: 'Weekly webinars, peer community, and live in-person events. You\'re never doing this alone.' },
-              { title: 'Scale when you\'re ready', description: 'Upgrade tiers or add modules as your business grows. No lock-in on self-service.' },
+              { title: 'Grow with real support', description: "Weekly webinars, peer community, and live in-person events. You're never doing this alone." },
+              { title: "Scale when you're ready", description: 'Upgrade tiers or add modules as your business grows. No lock-in on self-service.' },
             ],
             imageBadge: 'Live events + webinars',
           },
@@ -278,7 +374,7 @@ async function seed() {
                 tagLine: 'In Person · Canberra & Online',
                 panelHeading: 'Learn, network and grow together',
                 panelDescription:
-                  'We run regular workshops and in-person meetups across Canberra. Some are free and open to everyone, others are reserved just for subscribers. Every event is designed to help local business owners build skills, share wins, and connect with a community that\'s genuinely in their corner.',
+                  "We run regular workshops and in-person meetups across Canberra. Some are free and open to everyone, others are reserved just for subscribers. Every event is designed to help local business owners build skills, share wins, and connect with a community that's genuinely in their corner.",
                 features: [],
               },
               {
@@ -289,12 +385,12 @@ async function seed() {
                 tagLine: 'Live · Every Week',
                 panelHeading: 'Weekly live sessions with the Himayat team',
                 panelDescription:
-                  'Part training, part Q&A, part community hangout. Bring your questions, share your wins, and learn what\'s working for other local businesses in the network.',
+                  "Part training, part Q&A, part community hangout. Bring your questions, share your wins, and learn what's working for other local businesses in the network.",
                 features: [
                   { text: 'Platform walkthroughs and feature deep-dives' },
                   { text: 'Practical digital marketing education' },
                   { text: 'Live Q&A with the Himayat team' },
-                  { text: 'Recordings available if you can\'t make it live' },
+                  { text: "Recordings available if you can't make it live" },
                 ],
               },
               {
@@ -369,7 +465,14 @@ async function seed() {
               { value: '3:1', description: 'Social return on investment target', tone: 'plain' },
             ],
           },
-          // 9. Final CTA (cta-banner)
+          // 9. FAQ — seeded with all FAQ docs
+          {
+            blockType: 'faq',
+            heading: 'Common questions.',
+            faqs: faqIds,
+            category: 'all',
+          },
+          // 10. Final CTA (cta-banner)
           {
             blockType: 'cta-banner',
             heading: 'Not sure which package is right for you?',
@@ -385,9 +488,45 @@ async function seed() {
         ],
       },
     });
-    console.log('✅  Created home page with 9 blocks.');
+    console.log('✅  Created home page with 10 blocks.');
   } else {
     console.log('⏭   Home page already exists — skipping.');
+  }
+
+  // ── 9. Pricing page ──────────────────────────────────────────────────────
+  const { totalDocs: existingPricingPages } = await payload.find({
+    collection: 'pages',
+    where: { slug: { equals: 'pricing' } },
+    limit: 1,
+  });
+
+  if (existingPricingPages === 0) {
+    await payload.create({
+      collection: 'pages',
+      data: {
+        title: 'Pricing',
+        slug: 'pricing',
+        status: 'published',
+        layout: [
+          // 1. Pricing block — heading + subheading for the page
+          {
+            blockType: 'pricing',
+            heading: 'Pricing',
+            subheading: 'No lock-in. Cancel any time. Switch tiers as your business grows.',
+          },
+          // 2. FAQ block — references all seeded FAQ docs
+          {
+            blockType: 'faq',
+            heading: 'Common questions.',
+            faqs: faqIds,
+            category: 'all',
+          },
+        ],
+      },
+    });
+    console.log('✅  Created pricing page with 2 blocks.');
+  } else {
+    console.log('⏭   Pricing page already exists — skipping.');
   }
 
   console.log('\n🎉  Seed complete!');

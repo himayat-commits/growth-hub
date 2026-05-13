@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 
-const ITEMS = [
+export interface FAQItem {
+  q: string;
+  a: string;
+}
+
+const DEFAULT_ITEMS: FAQItem[] = [
   {
     q: "Who is Growth Hub for?",
     a: "Growth Hub is built for local, location-based businesses: anyone selling a physical product or service in their area. We work with cafes, trades, clinics, retail shops, salons, and more. Our tools and community are especially valuable for diverse business owners who may be navigating digital marketing for the first time.",
@@ -33,7 +38,12 @@ const ITEMS = [
   },
 ];
 
-export default function FAQ() {
+interface FAQProps {
+  items?: FAQItem[] | null;
+}
+
+export default function FAQ({ items }: FAQProps = {}) {
+  const resolvedItems = items && items.length > 0 ? items : DEFAULT_ITEMS;
   const [open, setOpen] = useState<number>(0);
 
   return (
@@ -55,7 +65,7 @@ export default function FAQ() {
           </div>
 
           <div className="faq-list">
-            {ITEMS.map((it, i) => (
+            {resolvedItems.map((it, i) => (
               <div className={`faq-item ${open === i ? "open" : ""}`} key={i}>
                 <button
                   className="faq-q"

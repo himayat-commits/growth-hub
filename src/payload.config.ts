@@ -36,6 +36,7 @@ import { Logos } from './collections/Logos.ts';
 import { SiteSettings } from './globals/SiteSettings.ts';
 import { Navigation } from './globals/Navigation.ts';
 import { AnnouncementBar } from './globals/AnnouncementBar.ts';
+import { SignupPageContent } from './globals/SignupPageContent.ts';
 
 export default buildConfig({
   admin: {
@@ -61,6 +62,7 @@ export default buildConfig({
     SiteSettings,
     Navigation,
     AnnouncementBar,
+    SignupPageContent,
   ],
 
   editor: lexicalEditor({}),

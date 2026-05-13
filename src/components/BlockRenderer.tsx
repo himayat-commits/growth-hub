@@ -19,6 +19,32 @@ import Testimonials from "@/components/sections/Testimonials";
 import About from "@/components/sections/About";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Contact from "@/components/sections/Contact";
+import FAQ, { type FAQItem } from "@/components/sections/FAQ";
+
+// ── Lexical helpers ───────────────────────────────────────────────────────────
+
+// Recursively extract plain text from a Payload Lexical JSON tree.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function lexicalToText(node: any): string {
+  if (!node) return "";
+  if (node.type === "text") return String(node.text ?? "");
+  if (node.type === "linebreak") return " ";
+  if (Array.isArray(node.children)) {
+    const inner = node.children.map(lexicalToText).join("");
+    // Add a space after each paragraph-level block so sentences don't run together.
+    return node.type === "paragraph" ? inner + " " : inner;
+  }
+  return "";
+}
+
+// Convert a populated Payload FAQ document to {q, a} plain-text format.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function faqDocToItem(doc: any): FAQItem {
+  return {
+    q: String(doc.question ?? ""),
+    a: lexicalToText(doc.answer?.root ?? doc.answer).trim(),
+  };
+}
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -170,14 +196,24 @@ export default function BlockRenderer({ blocks, siteSettings }: BlockRendererPro
           // Contact section has no matching CMS block — it's always rendered
           // from the caller (page.tsx) so we don't need a case here.
 
-          // Blocks used on other pages (blog, team, FAQ) — not rendered on home
+          case "faq": {
+            // block.faqs is populated at depth ≥ 2 as full FAQ documents.
+            const faqItems: FAQItem[] = Array.isArray(block.faqs)
+              ? (block.faqs as AnyBlock[])
+                  .filter((t): t is AnyBlock => typeof t === "object" && t !== null)
+                  .map(faqDocToItem)
+                  .filter((item) => item.q && item.a)
+              : [];
+            return <FAQ key={i} items={faqItems.length > 0 ? faqItems : null} />;
+          }
+
+          // Blocks used on other pages (blog, team) — not rendered here
           case "rich-text":
           case "content-with-image":
           case "feature-grid":
           case "stats-banner":
           case "team-section":
           case "video-embed":
-          case "faq":
             return null;
 
           default:

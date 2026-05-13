@@ -201,3 +201,12 @@ export const getAnnouncementBar = unstable_cache(
   ['announcement-bar'],
   { tags: ['announcement-bar'], revalidate: 3600 }
 );
+
+export const getSignupContent = unstable_cache(
+  async () => {
+    const payload = await getPayloadClient();
+    return payload.findGlobal({ slug: 'signup-page-content', depth: 0 });
+  },
+  ['signup-page-content'],
+  { tags: ['signup-page-content'], revalidate: 3600 }
+);
