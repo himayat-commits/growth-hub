@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { currentUser } from "@clerk/nextjs/server";
+import { withAuth } from "@workos-inc/authkit-nextjs";
 import { requireSubscription } from "@/lib/subscription";
 import { PLANS, ADDONS, getAddOnPriceId, type PlanTier, type AddOnId } from "@/lib/plans";
 import PortalModuleGrid from "./PortalModuleGrid";
@@ -84,14 +84,14 @@ function ArrowIcon() {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function PortalPage() {
-  const [sub, user] = await Promise.all([
+  const [sub, auth] = await Promise.all([
     requireSubscription(),
-    currentUser(),
+    withAuth(),
   ]);
 
   const planTier = (sub.planTier as PlanTier | null) ?? "foundations";
   const plan = PLANS[planTier];
-  const firstName = user?.firstName ?? null;
+  const firstName = auth.user?.firstName ?? null;
   const activeAddOns = resolveActiveAddOns(sub.addOnPriceIds ?? []);
 
   return (

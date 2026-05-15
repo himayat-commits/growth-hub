@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { withAuth } from '@workos-inc/authkit-nextjs';
 import { eq } from 'drizzle-orm';
 import { getStripe } from '@/lib/stripe';
 import { getDb } from '@/lib/db';
@@ -22,15 +22,15 @@ interface CheckoutRequest {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
+  const { user } = await withAuth();
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const user = await currentUser();
-  const email = user?.primaryEmailAddress?.emailAddress;
+  const userId = user.id;
+  const email = user.email;
   if (!email) {
-    return NextResponse.json({ error: 'No primary email on Clerk user' }, { status: 400 });
+    return NextResponse.json({ error: 'No email on WorkOS user' }, { status: 400 });
   }
 
   let body: CheckoutRequest;
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
   if (!customerId) {
     const customer = await getStripe().customers.create({
       email,
-      metadata: { clerkUserId: userId },
+      metadata: { userId },
     });
     customerId = customer.id;
 
@@ -110,13 +110,13 @@ export async function POST(req: NextRequest) {
     billing_address_collection: 'auto',
     subscription_data: {
       metadata: {
-        clerkUserId: userId,
+        userId,
         planTier: tier,
         billingInterval: interval,
       },
     },
     metadata: {
-      clerkUserId: userId,
+      userId,
     },
   });
 
