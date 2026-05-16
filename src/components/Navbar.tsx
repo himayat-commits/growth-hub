@@ -19,8 +19,11 @@ export default async function Navbar() {
   ]);
 
   const isSignedIn = !!auth.user;
+  // Signed-in users see a portal entry point.
+  // Signed-out users go through WorkOS sign-up first, then land on /pricing
+  // (so they pick a plan as an authenticated visitor — no mid-checkout auth detour).
   const ctaLabel = isSignedIn ? "My Growth Hub" : nav?.ctaLabel ?? null;
-  const ctaHref = isSignedIn ? "/portal" : nav?.ctaHref ?? null;
+  const ctaHref = isSignedIn ? "/portal" : nav?.ctaHref ?? "/sign-up?redirect_url=%2Fpricing";
 
   return (
     <NavbarClient
