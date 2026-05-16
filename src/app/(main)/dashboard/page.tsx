@@ -1,11 +1,54 @@
-import { requireSubscription } from '@/lib/subscription';
+import Link from 'next/link';
+import { withAuth } from '@workos-inc/authkit-nextjs';
+import { getSubscription } from '@/lib/subscription';
 import { PLANS, type PlanTier } from '@/lib/plans';
 import { ManageBillingButton } from './manage-billing-button';
 
 export default async function DashboardPage() {
-  const sub = await requireSubscription();
-  const planConfig = sub.planTier ? PLANS[sub.planTier as PlanTier] : null;
+  // Require sign-in but not a subscription — show an empty state for
+  // free users so they can navigate to /pricing or /portal from here.
+  await withAuth({ ensureSignedIn: true });
+  const sub = await getSubscription();
 
+  if (!sub) {
+    return (
+      <div className="min-h-screen bg-[#f0ebe0] p-12">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-4xl font-serif text-[#1a3530] mb-2">Dashboard</h1>
+          <p className="text-[#1a3530]/70 mb-10">Manage your Himayat subscription</p>
+
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#1a3530]/10">
+            <div className="text-xs tracking-[0.2em] uppercase text-[#7a2929] font-medium mb-2">
+              No active subscription
+            </div>
+            <div className="text-3xl font-serif text-[#1a3530] mb-4">
+              Choose a plan to unlock the full Growth Hub.
+            </div>
+            <p className="text-[#1a3530]/70 mb-8">
+              You can keep exploring the free modules in your portal in the meantime.
+            </p>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-2 rounded-full bg-[#1a3530] text-white px-6 py-3 text-sm font-medium hover:bg-[#0f2421] transition-colors"
+              >
+                Choose a plan
+              </Link>
+              <Link
+                href="/portal"
+                className="inline-flex items-center gap-2 rounded-full border border-[#1a3530]/20 text-[#1a3530] px-6 py-3 text-sm font-medium hover:bg-[#1a3530]/5 transition-colors"
+              >
+                Explore what's included
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const planConfig = sub.planTier ? PLANS[sub.planTier as PlanTier] : null;
   const periodEnd = sub.currentPeriodEnd
     ? new Intl.DateTimeFormat('en-AU', { dateStyle: 'long' }).format(sub.currentPeriodEnd)
     : null;

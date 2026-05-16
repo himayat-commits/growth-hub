@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { withAuth } from "@workos-inc/authkit-nextjs";
-import { requireSubscription } from "@/lib/subscription";
+import { getSubscription, isActive } from "@/lib/subscription";
 import { PLANS, ADDONS, getAddOnPriceId, type PlanTier, type AddOnId } from "@/lib/plans";
 import PortalModuleGrid from "./PortalModuleGrid";
 
@@ -84,15 +84,20 @@ function ArrowIcon() {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function PortalPage() {
+  // Portal is free for any signed-in user. `getSubscription()` returns null
+  // when there's no row in the subscriptions table — we just fall back to
+  // the "foundations" baseline so PortalModuleGrid renders free modules
+  // unlocked and the rest locked behind upgrade badges.
   const [sub, auth] = await Promise.all([
-    requireSubscription(),
-    withAuth(),
+    getSubscription(),
+    withAuth({ ensureSignedIn: true }),
   ]);
 
-  const planTier = (sub.planTier as PlanTier | null) ?? "foundations";
+  const hasActiveSub = isActive(sub);
+  const planTier: PlanTier = (sub?.planTier as PlanTier | null) ?? "foundations";
   const plan = PLANS[planTier];
   const firstName = auth.user?.firstName ?? null;
-  const activeAddOns = resolveActiveAddOns(sub.addOnPriceIds ?? []);
+  const activeAddOns = resolveActiveAddOns(sub?.addOnPriceIds ?? []);
 
   return (
     <main className="portal-main">
@@ -113,16 +118,25 @@ export default async function PortalPage() {
             {firstName ? `Your Growth Hub, ${firstName}.` : "Your Growth Hub."}
           </h1>
           <p className="portal-sub">
-            {plan.name} plan · Active — access your tools, videos, and community resources below.
+            {hasActiveSub
+              ? `${plan.name} plan · Active — access your tools, videos, and community resources below.`
+              : `Free access — explore the modules below. Upgrade any time to unlock more.`}
           </p>
-          <a
-            href={PLATFORM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary portal-platform-btn"
-          >
-            Open Growth Hub platform <ArrowIcon />
-          </a>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+            <a
+              href={PLATFORM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary portal-platform-btn"
+            >
+              Open Growth Hub platform <ArrowIcon />
+            </a>
+            {!hasActiveSub && (
+              <Link href="/pricing" className="btn btn-lime portal-platform-btn">
+                Choose a plan <ArrowIcon />
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* ── Module wizard ── */}
