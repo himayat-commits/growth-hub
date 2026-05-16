@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import { getSubscription } from '@/lib/subscription';
 import { PLANS, type PlanTier } from '@/lib/plans';
@@ -7,7 +8,12 @@ import { ManageBillingButton } from './manage-billing-button';
 export default async function DashboardPage() {
   // Require sign-in but not a subscription — show an empty state for
   // free users so they can navigate to /pricing or /portal from here.
-  await withAuth({ ensureSignedIn: true });
+  // Use manual redirect (not `ensureSignedIn: true`) because that helper
+  // writes a PKCE cookie, which isn't allowed in Server Component render.
+  const { user } = await withAuth();
+  if (!user) {
+    redirect('/sign-in?redirect_url=' + encodeURIComponent('/dashboard'));
+  }
   const sub = await getSubscription();
 
   if (!sub) {

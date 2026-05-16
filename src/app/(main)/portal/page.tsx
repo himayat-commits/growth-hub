@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { getSubscription, isActive } from "@/lib/subscription";
 import { PLANS, ADDONS, getAddOnPriceId, type PlanTier, type AddOnId } from "@/lib/plans";
@@ -88,10 +89,19 @@ export default async function PortalPage() {
   // when there's no row in the subscriptions table — we just fall back to
   // the "foundations" baseline so PortalModuleGrid renders free modules
   // unlocked and the rest locked behind upgrade badges.
+  //
+  // We use plain `withAuth()` + manual redirect (instead of
+  // `ensureSignedIn: true`) because the latter calls setPKCECookie
+  // internally, and Server Components can't write cookies. The /sign-in
+  // route handler does the cookie write properly.
   const [sub, auth] = await Promise.all([
     getSubscription(),
-    withAuth({ ensureSignedIn: true }),
+    withAuth(),
   ]);
+
+  if (!auth.user) {
+    redirect("/sign-in?redirect_url=" + encodeURIComponent("/portal"));
+  }
 
   const hasActiveSub = isActive(sub);
   const planTier: PlanTier = (sub?.planTier as PlanTier | null) ?? "foundations";
