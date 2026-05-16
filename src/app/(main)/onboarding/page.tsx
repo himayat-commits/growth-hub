@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { currentUser } from "@clerk/nextjs/server";
+import { withAuth } from "@workos-inc/authkit-nextjs";
 import { requireSubscription } from "@/lib/subscription";
 import { PLANS, type PlanTier } from "@/lib/plans";
 
@@ -104,16 +104,17 @@ interface Props {
 }
 
 export default async function OnboardingPage({ searchParams }: Props) {
-  const [sub, user, params] = await Promise.all([
+  const [sub, auth, params] = await Promise.all([
     requireSubscription(),
-    currentUser(),
+    withAuth(),
     searchParams,
   ]);
 
+  const user = auth.user;
   const planTier = sub.planTier as PlanTier | null;
   const plan = planTier ? PLANS[planTier] : null;
   const firstName = user?.firstName ?? null;
-  const email = user?.primaryEmailAddress?.emailAddress ?? null;
+  const email = user?.email ?? null;
   const isCheckoutSuccess = params.checkout === "success";
 
   const price = plan

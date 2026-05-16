@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@workos-inc/authkit-nextjs/components';
 import { PLANS, calculateDisplayPrice, type BillingInterval, type PlanTier } from '@/lib/plans';
 
 // ── Compare table ─────────────────────────────────────────────────────────────
@@ -132,7 +132,9 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
   const [interval, setInterval] = useState<BillingInterval>('month');
   const [loading, setLoading] = useState<PlanTier | null>(null);
   const [showCompare, setShowCompare] = useState(false);
-  const { isLoaded, isSignedIn } = useUser();
+  const { user, loading: authLoading } = useAuth();
+  const isLoaded = !authLoading;
+  const isSignedIn = !!user;
   const router = useRouter();
 
   const selfTiers: PlanTier[] = ['foundations', 'growth', 'accelerate'];

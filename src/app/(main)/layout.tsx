@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Source_Serif_4 } from "next/font/google";
 import localFont from "next/font/local";
-import { ClerkProvider } from "@clerk/nextjs";
+import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 // Root layout for the main app (multiple root layouts pattern — no app/layout.tsx).
-// Provides <html>/<body>, fonts, metadata, ClerkProvider, Navbar, and Footer.
+// Provides <html>/<body>, fonts, metadata, AuthKitProvider, Navbar, and Footer.
 // The (payload) route group has its own root layout via Payload's RootLayout.
 
 const sourceSerif = Source_Serif_4({
@@ -58,11 +58,11 @@ export default function MainLayout({
   return (
     <html lang="en-AU" className={`${sourceSerif.variable} ${biroScript.variable}`}>
       <body>
-        <ClerkProvider>
+        <AuthKitProvider>
           <Navbar />
           {children}
           <Footer />
-        </ClerkProvider>
+        </AuthKitProvider>
       </body>
     </html>
   );

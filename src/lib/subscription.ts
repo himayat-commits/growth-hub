@@ -1,18 +1,18 @@
-import { auth } from '@clerk/nextjs/server';
+import { withAuth } from '@workos-inc/authkit-nextjs';
 import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { subscriptions, type Subscription } from '@/lib/db/schema';
 
 /**
- * Look up the subscription row for a user. Falls back to the current Clerk
+ * Look up the subscription row for a user. Falls back to the current WorkOS
  * user when no userId is passed.
  */
 export async function getSubscription(userId?: string): Promise<Subscription | null> {
   let id = userId;
   if (!id) {
-    const session = await auth();
-    id = session.userId ?? undefined;
+    const { user } = await withAuth();
+    id = user?.id ?? undefined;
   }
   if (!id) return null;
 

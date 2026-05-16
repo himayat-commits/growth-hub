@@ -7,7 +7,7 @@ import { pgTable, text, timestamp, varchar, boolean } from 'drizzle-orm/pg-core'
  * via syncSubscription() in app/api/stripe/webhook/route.ts.
  */
 export const subscriptions = pgTable('subscriptions', {
-  // Clerk user id (e.g. "user_2abc...") — primary key, no separate users table needed.
+  // WorkOS user id (e.g. "user_01H...") — primary key, no separate users table needed.
   userId: text('user_id').primaryKey(),
   email: text('email').notNull(),
 

@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { withAuth } from '@workos-inc/authkit-nextjs';
 import { getStripe } from '@/lib/stripe';
 import { getSubscription } from '@/lib/subscription';
 
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
+  const { user } = await withAuth();
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const sub = await getSubscription(userId);
+  const sub = await getSubscription(user.id);
   if (!sub?.stripeCustomerId) {
     return NextResponse.json(
       { error: 'No Stripe customer for this user — subscribe first' },
