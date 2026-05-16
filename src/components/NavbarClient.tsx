@@ -30,9 +30,10 @@ export default function NavbarClient({ navItems, ctaLabel, ctaHref }: NavbarClie
 
   const resolvedItems = navItems && navItems.length > 0 ? navItems : DEFAULT_NAV_ITEMS;
   const resolvedCtaLabel = ctaLabel ?? "Sign Up Now";
-  // Signed-out CTA bounces through WorkOS sign-up first, then lands on /pricing
-  // so the user picks a plan as an authenticated visitor (no auth detour mid-checkout).
-  const resolvedCtaHref = ctaHref ?? "/sign-up?redirect_url=%2Fpricing";
+  // Signed-out CTA bounces through WorkOS sign-up first, then lands on /portal —
+  // users explore the free modules and click "Choose a plan" inside the portal
+  // when they want to upgrade.
+  const resolvedCtaHref = ctaHref ?? "/sign-up?redirect_url=%2Fportal";
 
   return (
     <header className="nav" style={{ position: "sticky", top: 0, zIndex: 50 }}>
