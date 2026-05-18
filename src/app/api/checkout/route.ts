@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
     mode: 'subscription',
     customer: customerId,
     line_items: lineItems,
-    success_url: `${origin}/onboarding?checkout=success`,
+    success_url: `${origin}/onboarding/confirm?checkout=success`,
     cancel_url: `${origin}/pricing`,
     allow_promotion_codes: true,
     billing_address_collection: 'auto',

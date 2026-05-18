@@ -579,6 +579,67 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .portal-sub { color: var(--muted); font-size: 1rem; margin: 0 0 20px; max-width: 56ch; }
 .portal-platform-btn { margin-top: 4px; }
 
+/* Birdeye provisioning banner — appears between the header and the module grid
+   once the user has either (a) completed the provisioning wizard, in which case
+   we show the live business number + dashboard CTA, or (b) is subscribed but
+   hasn't run the wizard yet, in which case we nudge them to start it. */
+.portal-birdeye-banner {
+  display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between;
+  padding: 28px 32px;
+  border-radius: 18px;
+  margin: 0 0 44px;
+  border: 1px solid var(--eggshell-line, #E6E1D2);
+  background: #FCFAF3;
+}
+.portal-birdeye-banner--ready {
+  border-color: rgba(13, 63, 72, 0.18);
+  background: linear-gradient(135deg, #EFF7C7 0%, #FCFAF3 60%);
+}
+.portal-birdeye-banner--setup {
+  border-color: rgba(95, 48, 75, 0.14);
+  background: #FCFAF3;
+}
+.portal-birdeye-banner-head { flex: 1 1 auto; min-width: 260px; }
+.portal-birdeye-pill {
+  display: inline-block;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #0D3F48;
+  color: #FCFAF3;
+}
+.portal-birdeye-pill--amber {
+  background: #5F304B;
+}
+.portal-birdeye-title {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(1.4rem, 2.4vw, 1.85rem);
+  color: var(--teal);
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  margin: 12px 0 8px;
+}
+.portal-birdeye-sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.portal-birdeye-sub code {
+  background: rgba(13, 63, 72, 0.08);
+  color: var(--teal);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.85em;
+}
+.portal-birdeye-banner-cta { flex-shrink: 0; }
+@media (max-width: 640px) {
+  .portal-birdeye-banner { padding: 22px 20px; }
+  .portal-birdeye-banner-cta { width: 100%; }
+  .portal-birdeye-banner-cta .btn { width: 100%; justify-content: center; }
+}
+
 /* Section labels */
 .portal-section-label { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal); margin: 0 0 16px; display: block; }
 .portal-section-label--locked { color: var(--muted); margin-top: 40px; }

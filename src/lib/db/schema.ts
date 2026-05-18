@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, varchar, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, varchar, boolean, jsonb } from 'drizzle-orm/pg-core';
 
 /**
  * Mirrors the canonical state of a user's Stripe subscription.
@@ -36,3 +36,21 @@ export const subscriptions = pgTable('subscriptions', {
 
 export type Subscription = typeof subscriptions.$inferSelect;
 export type NewSubscription = typeof subscriptions.$inferInsert;
+
+/**
+ * Wizard state for the Birdeye provisioning onboarding flow.
+ *
+ * One row per WorkOS user. The wizard writes patches here on every step
+ * (server-authoritative) so users can resume on any device. The provisioning
+ * orchestrator at /api/provision reads the full state from this row when the
+ * user clicks "Launch" on the review step.
+ */
+export const onboardingStates = pgTable('onboarding_states', {
+  userId: text('user_id').primaryKey(),
+  state: jsonb('state').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type OnboardingState = typeof onboardingStates.$inferSelect;
+export type NewOnboardingState = typeof onboardingStates.$inferInsert;

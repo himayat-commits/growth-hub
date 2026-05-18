@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
 import { withAuth } from "@workos-inc/authkit-nextjs";
+import { getDb } from "@/lib/db";
+import { onboardingStates } from "@/lib/db/schema";
 import { getSubscription, isActive } from "@/lib/subscription";
 import { PLANS, ADDONS, getAddOnPriceId, type PlanTier, type AddOnId } from "@/lib/plans";
+import { stepsForPackage, type WizardState } from "@/lib/wizard/state";
+import { isStepComplete } from "@/lib/wizard/initial-state";
+import type { PackageId } from "@/lib/wizard/packages";
 import PortalModuleGrid from "./PortalModuleGrid";
 
 export const metadata: Metadata = {
@@ -109,6 +115,35 @@ export default async function PortalPage() {
   const firstName = auth.user?.firstName ?? null;
   const activeAddOns = resolveActiveAddOns(sub?.addOnPriceIds ?? []);
 
+  // Has the user finished the Birdeye provisioning wizard? If so, surface
+  // the business number and a deep link to their Birdeye dashboard at the
+  // top of the portal. Persisted by /api/onboarding/[id] when the SSE
+  // provisioning "done" event fires on /onboarding/review.
+  const obRows = await getDb()
+    .select()
+    .from(onboardingStates)
+    .where(eq(onboardingStates.userId, auth.user.id))
+    .limit(1);
+  const wizardState = obRows[0]?.state as WizardState | undefined;
+  const businessNumber = wizardState?.provisioning?.businessNumber ?? null;
+  const businessName = wizardState?.business?.name ?? null;
+  const invitedUsers = wizardState?.provisioning?.invitedUsers ?? [];
+  const provisioned = !!businessNumber;
+
+  // For partially-completed wizards, deep-link to the first incomplete step
+  // so users can resume exactly where they left off instead of bouncing
+  // through the index redirect.
+  let setupHref = "/onboarding";
+  let setupProgress: { done: number; total: number } | null = null;
+  if (!provisioned && hasActiveSub) {
+    const wizardPackageId = (wizardState?.packageId as PackageId | undefined) ?? planTier;
+    const steps = stepsForPackage(wizardPackageId);
+    const completed = wizardState ? steps.filter((s) => isStepComplete(wizardState, s.key)).length : 0;
+    setupProgress = { done: completed, total: steps.length };
+    const next = wizardState ? steps.find((s) => s.key !== "review" && !isStepComplete(wizardState, s.key)) : steps[0];
+    setupHref = `/onboarding/${next?.key ?? "confirm"}`;
+  }
+
   return (
     <main className="portal-main">
       <div className="wrap">
@@ -148,6 +183,52 @@ export default async function PortalPage() {
             )}
           </div>
         </div>
+
+        {/* ── Birdeye provisioning banner ── */}
+        {provisioned ? (
+          <div className="portal-birdeye-banner portal-birdeye-banner--ready">
+            <div className="portal-birdeye-banner-head">
+              <span className="portal-birdeye-pill">✓ Birdeye account ready</span>
+              <h2 className="portal-birdeye-title">
+                {businessName ? `${businessName} is live on Birdeye.` : "Your Birdeye account is ready."}
+              </h2>
+              <p className="portal-birdeye-sub">
+                Business number <code>{businessNumber}</code>
+                {invitedUsers.length > 0 && (
+                  <> · {invitedUsers.length} team {invitedUsers.length === 1 ? "invite" : "invites"} sent</>
+                )}
+              </p>
+            </div>
+            <div className="portal-birdeye-banner-cta">
+              <a href={PLATFORM_URL} target="_blank" rel="noopener noreferrer" className="btn btn-lime">
+                Open your Birdeye dashboard <ArrowIcon />
+              </a>
+            </div>
+          </div>
+        ) : hasActiveSub ? (
+          <div className="portal-birdeye-banner portal-birdeye-banner--setup">
+            <div className="portal-birdeye-banner-head">
+              <span className="portal-birdeye-pill portal-birdeye-pill--amber">
+                {setupProgress && setupProgress.done > 0 ? "Setup in progress" : "Setup pending"}
+              </span>
+              <h2 className="portal-birdeye-title">
+                {setupProgress && setupProgress.done > 0
+                  ? "Pick up where you left off."
+                  : "Set up your Birdeye account."}
+              </h2>
+              <p className="portal-birdeye-sub">
+                {setupProgress && setupProgress.done > 0
+                  ? `${setupProgress.done} of ${setupProgress.total} steps complete · we'll resume right where you left off.`
+                  : "15-minute wizard. Save and resume any time — we'll pick up right where you left off."}
+              </p>
+            </div>
+            <div className="portal-birdeye-banner-cta">
+              <Link href={setupHref} className="btn btn-primary">
+                {setupProgress && setupProgress.done > 0 ? "Resume setup" : "Start setup"} <ArrowIcon />
+              </Link>
+            </div>
+          </div>
+        ) : null}
 
         {/* ── Module wizard ── */}
         <PortalModuleGrid tier={planTier} activeAddOns={activeAddOns} />
