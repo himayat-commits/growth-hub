@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
 import { withAuth } from "@workos-inc/authkit-nextjs";
+import { getDb } from "@/lib/db";
+import { onboardingStates } from "@/lib/db/schema";
 import { getSubscription, isActive } from "@/lib/subscription";
 import { PLANS, ADDONS, getAddOnPriceId, type PlanTier, type AddOnId } from "@/lib/plans";
+import type { WizardState } from "@/lib/wizard/state";
 import PortalModuleGrid from "./PortalModuleGrid";
 
 export const metadata: Metadata = {
@@ -109,6 +113,21 @@ export default async function PortalPage() {
   const firstName = auth.user?.firstName ?? null;
   const activeAddOns = resolveActiveAddOns(sub?.addOnPriceIds ?? []);
 
+  // Has the user finished the Birdeye provisioning wizard? If so, surface
+  // the business number and a deep link to their Birdeye dashboard at the
+  // top of the portal. Persisted by /api/onboarding/[id] when the SSE
+  // provisioning "done" event fires on /onboarding/review.
+  const obRows = await getDb()
+    .select()
+    .from(onboardingStates)
+    .where(eq(onboardingStates.userId, auth.user.id))
+    .limit(1);
+  const wizardState = obRows[0]?.state as WizardState | undefined;
+  const businessNumber = wizardState?.provisioning?.businessNumber ?? null;
+  const businessName = wizardState?.business?.name ?? null;
+  const invitedUsers = wizardState?.provisioning?.invitedUsers ?? [];
+  const provisioned = !!businessNumber;
+
   return (
     <main className="portal-main">
       <div className="wrap">
@@ -148,6 +167,46 @@ export default async function PortalPage() {
             )}
           </div>
         </div>
+
+        {/* ── Birdeye provisioning banner ── */}
+        {provisioned ? (
+          <div className="portal-birdeye-banner portal-birdeye-banner--ready">
+            <div className="portal-birdeye-banner-head">
+              <span className="portal-birdeye-pill">✓ Birdeye account ready</span>
+              <h2 className="portal-birdeye-title">
+                {businessName ? `${businessName} is live on Birdeye.` : "Your Birdeye account is ready."}
+              </h2>
+              <p className="portal-birdeye-sub">
+                Business number <code>{businessNumber}</code>
+                {invitedUsers.length > 0 && (
+                  <> · {invitedUsers.length} team {invitedUsers.length === 1 ? "invite" : "invites"} sent</>
+                )}
+              </p>
+            </div>
+            <div className="portal-birdeye-banner-cta">
+              <a href={PLATFORM_URL} target="_blank" rel="noopener noreferrer" className="btn btn-lime">
+                Open your Birdeye dashboard <ArrowIcon />
+              </a>
+            </div>
+          </div>
+        ) : hasActiveSub ? (
+          <div className="portal-birdeye-banner portal-birdeye-banner--setup">
+            <div className="portal-birdeye-banner-head">
+              <span className="portal-birdeye-pill portal-birdeye-pill--amber">Setup pending</span>
+              <h2 className="portal-birdeye-title">
+                Set up your Birdeye account.
+              </h2>
+              <p className="portal-birdeye-sub">
+                15-minute wizard. Save and resume any time — we&apos;ll pick up right where you left off.
+              </p>
+            </div>
+            <div className="portal-birdeye-banner-cta">
+              <Link href="/onboarding" className="btn btn-primary">
+                Start setup <ArrowIcon />
+              </Link>
+            </div>
+          </div>
+        ) : null}
 
         {/* ── Module wizard ── */}
         <PortalModuleGrid tier={planTier} activeAddOns={activeAddOns} />
