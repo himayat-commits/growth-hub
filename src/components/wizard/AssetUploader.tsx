@@ -42,13 +42,21 @@ export function AssetUploader({
     }
     setBusy(true);
     try {
-      const res = await fetch("/api/upload/sign", {
+      // Single round trip — stream the file body to /api/upload/sign which
+      // pipes it straight to Vercel Blob and returns the permanent public URL.
+      const qs = new URLSearchParams({ onboardingId, kind, filename: f.name });
+      const res = await fetch(`/api/upload/sign?${qs.toString()}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ onboardingId, kind, filename: f.name }),
+        headers: { "Content-Type": f.type },
+        body: f,
       });
       const data = await res.json();
-      if (data.mode === "live") {
+      if (!res.ok) {
+        throw new Error(data.error ?? `Upload failed (${res.status})`);
+      }
+      // Legacy two-step path (kept for backwards compat with any future
+      // mode === "live" presigning flow).
+      if (data.mode === "live" && data.uploadUrl) {
         await fetch(data.uploadUrl, {
           method: "PUT",
           headers: { "Content-Type": f.type },
