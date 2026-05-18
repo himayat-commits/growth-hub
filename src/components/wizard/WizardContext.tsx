@@ -10,10 +10,18 @@ import type { WizardState, StepKey } from "@/lib/wizard/state";
 import { stepsForPackage } from "@/lib/wizard/state";
 import { isStepComplete } from "@/lib/wizard/initial-state";
 
+type PatchOptions = {
+  /** If true, bypass the 600ms debounce and PUT this state to the server
+   *  immediately. The returned Promise resolves when the PUT lands. Use
+   *  for "must be persisted before we navigate" moments — e.g. after the
+   *  SSE provisioning "done" event. */
+  immediate?: boolean;
+};
+
 type Ctx = {
   state: WizardState;
   setState: (next: WizardState) => void;
-  patch: (mutate: (s: WizardState) => WizardState) => void;
+  patch: (mutate: (s: WizardState) => WizardState, options?: PatchOptions) => Promise<void>;
   goNext: (currentKey: StepKey) => void;
   goPrev: (currentKey: StepKey) => void;
   saveAndExit: () => Promise<void>;
@@ -54,45 +62,60 @@ export function WizardProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const putImmediate = React.useCallback(async (next: WizardState) => {
+    setSaving(true);
+    try {
+      await fetch(`/api/onboarding/${next.onboardingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(next),
+      });
+    } finally {
+      setSaving(false);
+    }
+  }, []);
+
   const persist = React.useCallback(
-    (next: WizardState) => {
+    (next: WizardState, options?: PatchOptions): Promise<void> => {
       try {
         localStorage.setItem(lsKey, JSON.stringify(next));
       } catch {
         /* quota — ignore */
       }
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(async () => {
-        setSaving(true);
-        try {
-          await fetch(`/api/onboarding/${next.onboardingId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(next),
-          });
-        } finally {
-          setSaving(false);
-        }
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+        saveTimer.current = null;
+      }
+      if (options?.immediate) {
+        return putImmediate(next);
+      }
+      saveTimer.current = setTimeout(() => {
+        void putImmediate(next);
       }, 600);
+      return Promise.resolve();
     },
-    [lsKey]
+    [lsKey, putImmediate]
   );
 
   const setState = React.useCallback(
     (next: WizardState) => {
       _setState(next);
-      persist(next);
+      void persist(next);
     },
     [persist]
   );
 
   const patch = React.useCallback(
-    (mutate: (s: WizardState) => WizardState) => {
+    (mutate: (s: WizardState) => WizardState, options?: PatchOptions): Promise<void> => {
+      // Compute next state outside of _setState so we can return a Promise
+      // that resolves once persist() completes. We then commit via _setState.
+      let next: WizardState | null = null;
       _setState((curr) => {
-        const next = mutate(curr);
-        persist(next);
+        next = mutate(curr);
         return next;
       });
+      if (next) return persist(next, options);
+      return Promise.resolve();
     },
     [persist]
   );
@@ -116,18 +139,13 @@ export function WizardProvider({
   );
 
   const saveAndExit = React.useCallback(async () => {
-    setSaving(true);
-    try {
-      await fetch(`/api/onboarding/${state.onboardingId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(state),
-      });
-      router.push("/portal");
-    } finally {
-      setSaving(false);
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
     }
-  }, [router, state]);
+    await putImmediate(state);
+    router.push("/portal");
+  }, [putImmediate, router, state]);
 
   const value: Ctx = { state, setState, patch, goNext, goPrev, saveAndExit, saving };
   return <WizardCtx.Provider value={value}>{children}</WizardCtx.Provider>;

@@ -79,18 +79,22 @@ export default function ReviewPage() {
         try {
           const ev = JSON.parse(line.slice(5).trim()) as ProvisionEvent | DoneEvent;
           if ("type" in ev && ev.type === "done") {
-            // Persist provisioning result back to localStorage so /portal
-            // and /done can render the businessNumber and invitations.
-            patch((s) => ({
-              ...s,
-              status: "provisioned",
-              provisioning: {
-                businessNumber: ev.businessNumber,
-                invitedUsers: ev.invitedUsers,
-                mediaIds: ev.mediaIds,
-                completedAt: new Date().toISOString(),
-              },
-            }));
+            // Persist provisioning result with immediate=true so the PUT
+            // lands BEFORE we navigate. /done and /portal then read the
+            // businessNumber server-side from Neon on the next request.
+            await patch(
+              (s) => ({
+                ...s,
+                status: "provisioned",
+                provisioning: {
+                  businessNumber: ev.businessNumber,
+                  invitedUsers: ev.invitedUsers,
+                  mediaIds: ev.mediaIds,
+                  completedAt: new Date().toISOString(),
+                },
+              }),
+              { immediate: true }
+            );
             setProvisioning(false);
             router.push("/onboarding/done");
             return;

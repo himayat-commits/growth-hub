@@ -7,7 +7,9 @@ import { getDb } from "@/lib/db";
 import { onboardingStates } from "@/lib/db/schema";
 import { getSubscription, isActive } from "@/lib/subscription";
 import { PLANS, ADDONS, getAddOnPriceId, type PlanTier, type AddOnId } from "@/lib/plans";
-import type { WizardState } from "@/lib/wizard/state";
+import { stepsForPackage, type WizardState } from "@/lib/wizard/state";
+import { isStepComplete } from "@/lib/wizard/initial-state";
+import type { PackageId } from "@/lib/wizard/packages";
 import PortalModuleGrid from "./PortalModuleGrid";
 
 export const metadata: Metadata = {
@@ -128,6 +130,20 @@ export default async function PortalPage() {
   const invitedUsers = wizardState?.provisioning?.invitedUsers ?? [];
   const provisioned = !!businessNumber;
 
+  // For partially-completed wizards, deep-link to the first incomplete step
+  // so users can resume exactly where they left off instead of bouncing
+  // through the index redirect.
+  let setupHref = "/onboarding";
+  let setupProgress: { done: number; total: number } | null = null;
+  if (!provisioned && hasActiveSub) {
+    const wizardPackageId = (wizardState?.packageId as PackageId | undefined) ?? planTier;
+    const steps = stepsForPackage(wizardPackageId);
+    const completed = wizardState ? steps.filter((s) => isStepComplete(wizardState, s.key)).length : 0;
+    setupProgress = { done: completed, total: steps.length };
+    const next = wizardState ? steps.find((s) => s.key !== "review" && !isStepComplete(wizardState, s.key)) : steps[0];
+    setupHref = `/onboarding/${next?.key ?? "confirm"}`;
+  }
+
   return (
     <main className="portal-main">
       <div className="wrap">
@@ -192,17 +208,23 @@ export default async function PortalPage() {
         ) : hasActiveSub ? (
           <div className="portal-birdeye-banner portal-birdeye-banner--setup">
             <div className="portal-birdeye-banner-head">
-              <span className="portal-birdeye-pill portal-birdeye-pill--amber">Setup pending</span>
+              <span className="portal-birdeye-pill portal-birdeye-pill--amber">
+                {setupProgress && setupProgress.done > 0 ? "Setup in progress" : "Setup pending"}
+              </span>
               <h2 className="portal-birdeye-title">
-                Set up your Birdeye account.
+                {setupProgress && setupProgress.done > 0
+                  ? "Pick up where you left off."
+                  : "Set up your Birdeye account."}
               </h2>
               <p className="portal-birdeye-sub">
-                15-minute wizard. Save and resume any time — we&apos;ll pick up right where you left off.
+                {setupProgress && setupProgress.done > 0
+                  ? `${setupProgress.done} of ${setupProgress.total} steps complete · we'll resume right where you left off.`
+                  : "15-minute wizard. Save and resume any time — we'll pick up right where you left off."}
               </p>
             </div>
             <div className="portal-birdeye-banner-cta">
-              <Link href="/onboarding" className="btn btn-primary">
-                Start setup <ArrowIcon />
+              <Link href={setupHref} className="btn btn-primary">
+                {setupProgress && setupProgress.done > 0 ? "Resume setup" : "Start setup"} <ArrowIcon />
               </Link>
             </div>
           </div>
