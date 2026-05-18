@@ -696,6 +696,144 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .portal-section-label--locked { color: var(--muted); margin-top: 40px; }
 .portal-section-hint { font-weight: 400; letter-spacing: 0; text-transform: none; opacity: 0.65; }
 
+/* Navbar account dropdown — visible only when the visitor is signed in.
+   Sits to the right of the primary CTA ("My Growth Hub"). */
+.nav-account { position: relative; display: flex; align-items: center; gap: 10px; }
+.nav-account-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid rgba(13, 63, 72, 0.18);
+  background: white;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--teal);
+  transition: background-color 120ms ease;
+}
+.nav-account-toggle:hover { background: rgba(227, 242, 156, 0.45); }
+.nav-account-avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 999px;
+  background: var(--teal); color: var(--eggshell);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.nav-account-menu {
+  position: absolute; right: 0; top: calc(100% + 8px);
+  min-width: 240px;
+  background: white;
+  border: 1px solid var(--eggshell-line, #E6E1D2);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px -22px rgba(13, 63, 72, 0.25), 0 1px 0 rgba(13, 63, 72, 0.04);
+  padding: 8px;
+  display: flex; flex-direction: column; gap: 2px;
+  z-index: 60;
+}
+.nav-account-menu a,
+.nav-account-menu form button {
+  display: block;
+  width: 100%; text-align: left;
+  font-family: inherit; font-size: 14px; color: var(--teal);
+  background: none; border: 0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.nav-account-menu a:hover,
+.nav-account-menu form button:hover { background: rgba(227, 242, 156, 0.4); }
+.nav-account-email {
+  padding: 6px 12px 10px;
+  margin: 0;
+  font-size: 12px; color: var(--muted);
+  border-bottom: 1px solid var(--eggshell-line, #E6E1D2);
+  margin-bottom: 6px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nav-account-divider {
+  height: 1px;
+  background: var(--eggshell-line, #E6E1D2);
+  margin: 6px -8px;
+}
+.nav-account-signout { color: var(--plum) !important; font-weight: 500; }
+.nav-drawer-signout {
+  font-family: inherit;
+  background: none; border: 0;
+  padding: 12px 0;
+  text-align: left;
+  font-size: 16px; color: var(--plum);
+  cursor: pointer;
+}
+@media (max-width: 720px) {
+  .nav-account-toggle { display: none; }
+  .nav-account-menu { display: none; }
+}
+
+/* Account page — /account */
+.account-main {
+  min-height: 100vh;
+  padding: 48px 24px 80px;
+  background: #FCFAF3;
+}
+.account-head { margin: 28px 0 36px; }
+.account-h1 {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  color: var(--teal);
+  letter-spacing: -0.02em;
+  margin: 10px 0 8px;
+  line-height: 1.15;
+}
+.account-email { margin: 0; color: var(--muted); font-size: 1rem; }
+.account-card {
+  background: white;
+  border: 1px solid var(--eggshell-line, #E6E1D2);
+  border-radius: 18px;
+  padding: 28px 30px;
+  margin: 0 0 24px;
+}
+.account-card-title {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1.35rem;
+  color: var(--teal);
+  margin: 0 0 18px;
+}
+.account-dl {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px 28px;
+  margin: 0 0 22px;
+}
+.account-dl > div {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 16px;
+  align-items: baseline;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--eggshell-line, #E6E1D2);
+}
+.account-dl > div:last-child { border-bottom: 0; padding-bottom: 0; }
+.account-dl dt { font-size: 0.85rem; color: var(--muted); margin: 0; }
+.account-dl dd { font-size: 1rem; color: var(--teal); margin: 0; font-weight: 500; }
+.account-mono { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 0.85rem !important; word-break: break-all; }
+.account-status { text-transform: capitalize; }
+.account-note { font-size: 0.9rem; color: var(--muted); margin: 16px 0 0; }
+.account-empty { font-size: 1rem; color: var(--muted); margin: 0 0 20px; }
+.account-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.account-actions .btn-outline {
+  display: inline-flex; align-items: center;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(13, 63, 72, 0.2);
+  background: white;
+  color: var(--teal);
+  font-size: 0.95rem; font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.account-actions .btn-outline:hover { background: rgba(227, 242, 156, 0.4); }
+
 /* Module grid */
 .portal-modules { margin-bottom: 8px; }
 .portal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 8px; }

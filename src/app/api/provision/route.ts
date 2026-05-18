@@ -141,23 +141,48 @@ export async function POST(req: Request) {
         await run("save_contact", { kind: "save_contact", req: c });
       }
 
-      // Step 7: notify-ops for module entitlements & Webchat config
+      // Step 7: notify-ops for module entitlements & Webchat config.
+      //
+      // Treated as non-fatal — provisioning has already succeeded against
+      // Birdeye, so a failed ops notification shouldn't block the customer.
+      // We DO record the attempt to provisioning_logs so ops can grep for
+      // failures and resend manually (or via a future retry endpoint).
+      const opsPayload = {
+        state: {
+          ...state,
+          provisioning: { businessNumber, invitedUsers, mediaIds },
+        },
+      };
       try {
         const origin = req.headers.get("origin") ?? "";
-        if (origin) {
-          await fetch(`${origin}/api/notify-ops`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              state: {
-                ...state,
-                provisioning: { businessNumber, invitedUsers, mediaIds },
-              },
-            }),
-          });
+        if (!origin) {
+          throw new Error("Missing origin header — can't reach /api/notify-ops");
         }
-      } catch {
-        /* non-fatal */
+        const res = await fetch(`${origin}/api/notify-ops`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(opsPayload),
+        });
+        if (!res.ok) {
+          throw new Error(`notify-ops returned ${res.status}`);
+        }
+        await appendProvisioningLog(onboardingId, {
+          step: stepCounter++,
+          kind: "notify_ops",
+          payload: opsPayload,
+          response: { status: res.status },
+          ok: true,
+        });
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "unknown error";
+        await appendProvisioningLog(onboardingId, {
+          step: stepCounter++,
+          kind: "notify_ops",
+          payload: opsPayload,
+          response: null,
+          ok: false,
+          error: message,
+        });
       }
 
       send({ type: "done", businessNumber, invitedUsers, mediaIds });

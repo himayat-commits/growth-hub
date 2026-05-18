@@ -31,6 +31,8 @@ export default async function Navbar() {
       navItems={nav?.navItems as { label: string; href: string; isExternal?: boolean | null }[] | null}
       ctaLabel={ctaLabel}
       ctaHref={ctaHref}
+      isSignedIn={isSignedIn}
+      userEmail={auth.user?.email ?? null}
     />
   );
 }

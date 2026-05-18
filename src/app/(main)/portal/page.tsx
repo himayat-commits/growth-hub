@@ -11,6 +11,7 @@ import { stepsForPackage, type WizardState } from "@/lib/wizard/state";
 import { isStepComplete } from "@/lib/wizard/initial-state";
 import type { PackageId } from "@/lib/wizard/packages";
 import { buildWebchatEmbedSnippet } from "@/lib/birdeye/payloads";
+import { getBirdeyeDashboardUrl } from "@/lib/birdeye/dashboard-url";
 import WebchatEmbedSnippet from "@/components/portal/WebchatEmbedSnippet";
 import PortalModuleGrid from "./PortalModuleGrid";
 
@@ -21,7 +22,11 @@ export const metadata: Metadata = {
 
 const ONBOARDING_VIDEO_URL = "https://himayat.com.au/onboarding-videos";
 const WEBINAR_URL = "https://himayat.com.au/weekly-webinar";
-const PLATFORM_URL = "https://app.birdeye.com";
+// Generic Birdeye host — used when the user hasn't provisioned yet. After
+// provisioning we substitute getBirdeyeDashboardUrl(businessNumber) instead,
+// which interpolates the user's business number into the configured
+// BIRDEYE_DASHBOARD_URL_TEMPLATE.
+const BIRDEYE_HOME_URL = "https://app.birdeye.com";
 
 const COMMUNITY_LINKS = [
   { label: "Slack", href: "https://himayat.slack.com" },
@@ -171,7 +176,7 @@ export default async function PortalPage() {
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
             <a
-              href={PLATFORM_URL}
+              href={businessNumber ? getBirdeyeDashboardUrl(businessNumber) : BIRDEYE_HOME_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-primary portal-platform-btn"
@@ -202,7 +207,12 @@ export default async function PortalPage() {
               </p>
             </div>
             <div className="portal-birdeye-banner-cta">
-              <a href={PLATFORM_URL} target="_blank" rel="noopener noreferrer" className="btn btn-lime">
+              <a
+                href={getBirdeyeDashboardUrl(businessNumber)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-lime"
+              >
                 Open your Birdeye dashboard <ArrowIcon />
               </a>
             </div>

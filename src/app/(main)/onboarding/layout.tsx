@@ -53,8 +53,31 @@ export default async function OnboardingLayout({
     <div className="flex min-h-screen bg-eggshell">
       <WizardProvider initialState={initialState}>
         <LeftRail />
-        <main className="flex-1 min-w-0">{children}</main>
+        <main className="flex-1 min-w-0">
+          {initialState.status === "provisioned" ? <PostProvisionBanner /> : null}
+          {children}
+        </main>
       </WizardProvider>
+    </div>
+  );
+}
+
+// Shown above every wizard step when the user has already provisioned their
+// Birdeye account. Edits made here are persisted to Neon but do NOT auto-sync
+// back to Birdeye — that flow doesn't exist yet. Setting the right expectation
+// up front is honest and points users at the support email.
+function PostProvisionBanner() {
+  return (
+    <div className="mx-auto max-w-4xl px-6 md:px-10 pt-6">
+      <div className="rounded-2xl border border-plum/20 bg-plum/[0.04] p-4 md:p-5 text-sm text-plum leading-relaxed">
+        <strong className="font-semibold">You&apos;re already provisioned.</strong>{" "}
+        Your Birdeye account is live, so changes you make here won&apos;t
+        auto-sync. To update your business info in Birdeye, email{" "}
+        <a href="mailto:hello@himayat.com.au" className="underline decoration-plum/40 hover:decoration-plum">
+          hello@himayat.com.au
+        </a>{" "}
+        or update directly in your Birdeye dashboard.
+      </div>
     </div>
   );
 }
