@@ -73,6 +73,7 @@ export async function POST(req: Request) {
           payload: req.req,
           response: result.response,
           ok: result.ok,
+          error: result.error,
         });
         send({
           step,

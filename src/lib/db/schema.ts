@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, varchar, boolean, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, varchar, boolean, jsonb, serial, integer, index } from 'drizzle-orm/pg-core';
 
 /**
  * Mirrors the canonical state of a user's Stripe subscription.
@@ -54,3 +54,35 @@ export const onboardingStates = pgTable('onboarding_states', {
 
 export type OnboardingState = typeof onboardingStates.$inferSelect;
 export type NewOnboardingState = typeof onboardingStates.$inferInsert;
+
+/**
+ * Append-only audit trail for every Birdeye provisioning API call.
+ *
+ * Each row is one step in a provisioning run (create_subaccount,
+ * update_business, add_media, create_user, default_review_sources,
+ * save_contact). Lets ops inspect what was sent + what came back, and
+ * the retry UX read the last failure for a given user.
+ */
+export const provisioningLogs = pgTable(
+  'provisioning_logs',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    // Increments per call within a single run. Run boundaries are inferred
+    // from createdAt + userId (we don't have a separate runs table — the
+    // attempt count lives in onboarding_states.state.provisioningAttempts).
+    step: integer('step').notNull(),
+    kind: varchar('kind', { length: 40 }).notNull(),
+    ok: boolean('ok').notNull(),
+    payload: jsonb('payload').notNull(),
+    response: jsonb('response'),
+    error: text('error'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    userIdIdx: index('provisioning_logs_user_id_idx').on(t.userId, t.createdAt),
+  })
+);
+
+export type ProvisioningLog = typeof provisioningLogs.$inferSelect;
+export type NewProvisioningLog = typeof provisioningLogs.$inferInsert;

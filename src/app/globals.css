@@ -640,6 +640,57 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
   .portal-birdeye-banner-cta .btn { width: 100%; justify-content: center; }
 }
 
+/* Webchat embed snippet — Accelerate-tier post-provision view */
+.portal-webchat-embed {
+  border: 1px solid var(--eggshell-line, #E6E1D2);
+  background: #FCFAF3;
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin: 0 0 32px;
+}
+.portal-webchat-embed-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 12px;
+}
+.portal-webchat-copy {
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(13, 63, 72, 0.18);
+  background: white;
+  color: var(--teal, #0D3F48);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+.portal-webchat-copy:hover { background: rgba(227, 242, 156, 0.4); }
+.portal-webchat-snippet {
+  background: #0D3F48;
+  color: #E3F29C;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 12.5px; line-height: 1.5;
+  padding: 14px 16px;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap; word-break: break-all;
+  margin: 0;
+}
+.portal-webchat-snippet code { font: inherit; color: inherit; background: transparent; padding: 0; }
+.portal-webchat-hint {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 10px 0 0;
+  line-height: 1.5;
+}
+.portal-webchat-hint code {
+  background: rgba(13, 63, 72, 0.08);
+  color: var(--teal);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.9em;
+}
+
 /* Section labels */
 .portal-section-label { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal); margin: 0 0 16px; display: block; }
 .portal-section-label--locked { color: var(--muted); margin-top: 40px; }

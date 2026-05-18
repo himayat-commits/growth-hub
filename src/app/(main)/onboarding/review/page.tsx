@@ -39,11 +39,15 @@ type DoneEvent = {
   mediaIds: string[];
 };
 
+type RunState = "idle" | "running" | "success" | "error";
+
 export default function ReviewPage() {
   const { state, patch } = useWizard();
   const router = useRouter();
-  const [provisioning, setProvisioning] = React.useState(false);
+  const [runState, setRunState] = React.useState<RunState>("idle");
   const [events, setEvents] = React.useState<ProvisionEvent[]>([]);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const provisioning = runState === "running";
 
   const requests = React.useMemo(
     () => assembleAllPayloads(state, PREVIEW_RESELLER_ID, PUBLIC_HOST),
@@ -52,8 +56,9 @@ export default function ReviewPage() {
   const pkg = PACKAGES[state.packageId];
 
   const provision = async () => {
-    setProvisioning(true);
+    setRunState("running");
     setEvents([]);
+    setErrorMessage(null);
     // Stateless API on Vercel — send the full wizard state in the body.
     const res = await fetch("/api/provision", {
       method: "POST",
@@ -61,12 +66,14 @@ export default function ReviewPage() {
       body: JSON.stringify({ state }),
     });
     if (!res.body) {
-      setProvisioning(false);
+      setRunState("error");
+      setErrorMessage("Server did not return a response stream. Please retry.");
       return;
     }
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buf = "";
+    let sawDone = false;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -77,11 +84,15 @@ export default function ReviewPage() {
         const line = p.split("\n").find((l) => l.startsWith("data:"));
         if (!line) continue;
         try {
-          const ev = JSON.parse(line.slice(5).trim()) as ProvisionEvent | DoneEvent;
+          const ev = JSON.parse(line.slice(5).trim()) as
+            | ProvisionEvent
+            | DoneEvent
+            | { status: "error"; error?: string };
           if ("type" in ev && ev.type === "done") {
-            // Persist provisioning result with immediate=true so the PUT
-            // lands BEFORE we navigate. /done and /portal then read the
-            // businessNumber server-side from Neon on the next request.
+            sawDone = true;
+            // Persist result with immediate=true so the PUT lands BEFORE
+            // we navigate. /done and /portal then read businessNumber
+            // server-side from Neon on the next request.
             await patch(
               (s) => ({
                 ...s,
@@ -95,8 +106,16 @@ export default function ReviewPage() {
               }),
               { immediate: true }
             );
-            setProvisioning(false);
+            setRunState("success");
             router.push("/onboarding/done");
+            return;
+          }
+          // Terminal fatal error emitted by the orchestrator (e.g. first step failed).
+          if ("status" in ev && ev.status === "error" && !("step" in ev)) {
+            setRunState("error");
+            setErrorMessage(
+              ("error" in ev && ev.error) || "Provisioning halted. Please retry."
+            );
             return;
           }
           setEvents((curr) => [...curr, ev as ProvisionEvent]);
@@ -105,7 +124,16 @@ export default function ReviewPage() {
         }
       }
     }
-    setProvisioning(false);
+    // Stream ended without a "done" event — treat as failure.
+    if (!sawDone) {
+      setRunState("error");
+      // Surface the most recent step's error if we have one.
+      const lastError = events.findLast?.((e) => e.status === "error");
+      setErrorMessage(
+        lastError?.error ??
+          "Provisioning didn't complete. Your existing answers are saved — please retry."
+      );
+    }
   };
 
   return (
@@ -232,10 +260,28 @@ export default function ReviewPage() {
           <Button variant="ghost">← Back</Button>
         </Link>
         <Button size="lg" variant="lime" onClick={provision} disabled={provisioning}>
-          {provisioning ? "Provisioning…" : "Provision my Birdeye account"}
+          {provisioning
+            ? "Provisioning…"
+            : runState === "error"
+            ? "Retry provisioning"
+            : "Provision my Birdeye account"}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
+
+      {runState === "error" && errorMessage ? (
+        <Card className="mt-6 border-plum/30 bg-plum/[0.04]">
+          <CardContent className="pt-5 pb-5">
+            <p className="text-sm font-sans text-plum leading-relaxed">
+              <strong className="font-semibold">Provisioning paused.</strong>{" "}
+              {errorMessage} Your answers are saved — click{" "}
+              <em className="not-italic font-semibold">Retry provisioning</em>{" "}
+              above to try again. Steps that already succeeded won&apos;t be
+              repeated unsafely.
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {events.length ? (
         <Card className="mt-10">

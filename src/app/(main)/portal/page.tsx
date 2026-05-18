@@ -10,6 +10,8 @@ import { PLANS, ADDONS, getAddOnPriceId, type PlanTier, type AddOnId } from "@/l
 import { stepsForPackage, type WizardState } from "@/lib/wizard/state";
 import { isStepComplete } from "@/lib/wizard/initial-state";
 import type { PackageId } from "@/lib/wizard/packages";
+import { buildWebchatEmbedSnippet } from "@/lib/birdeye/payloads";
+import WebchatEmbedSnippet from "@/components/portal/WebchatEmbedSnippet";
 import PortalModuleGrid from "./PortalModuleGrid";
 
 export const metadata: Metadata = {
@@ -228,6 +230,11 @@ export default async function PortalPage() {
               </Link>
             </div>
           </div>
+        ) : null}
+
+        {/* ── Webchat embed (Accelerate tier, post-provision only) ── */}
+        {provisioned && planTier === "accelerate" && businessNumber ? (
+          <WebchatEmbedSnippet snippet={buildWebchatEmbedSnippet(businessNumber)} />
         ) : null}
 
         {/* ── Module wizard ── */}
