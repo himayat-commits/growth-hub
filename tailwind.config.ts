@@ -12,23 +12,44 @@ const config: Config = {
         teal: {
           DEFAULT: "#0D3F48",
           deep: "#082A30",
+          50: "#E6EFEF",
         },
         plum: {
           DEFAULT: "#5F304B",
           deep: "#3F1F32",
+          50: "#F1E6EC",
         },
         eggshell: {
           DEFAULT: "#F3F0E7",
           warm: "#ECE7D8",
           line: "#E6E1D2",
+          paper: "#FCFAF3",
         },
-        lime: "#E3F29C",
-        lavender: "#E8DDFF",
+        lime: {
+          DEFAULT: "#E3F29C",
+          soft: "#EFF7C7",
+        },
+        lavender: { DEFAULT: "#E8DDFF" },
+        gold: { DEFAULT: "#E2B842" },
         fg: {
           DEFAULT: "#0D3F48",
           muted: "#4A6A70",
           subtle: "#7A9098",
         },
+        // `ink` aliases `fg` so Birdeye-Portal-derived wizard components
+        // (which use text-ink, text-ink-muted) work without rewrites.
+        ink: {
+          DEFAULT: "#0D3F48",
+          muted: "#4A6A70",
+          subtle: "#7A9098",
+        },
+        line: "#E6E1D2",
+      },
+      borderRadius: { xl: "1rem", "2xl": "1.5rem", "3xl": "2rem" },
+      boxShadow: {
+        soft: "0 1px 0 rgba(13,63,72,0.04), 0 16px 40px -22px rgba(13,63,72,0.18)",
+        card: "0 20px 50px -20px rgba(13,63,72,0.20)",
+        feature: "0 24px 60px -30px rgba(13,63,72,0.35)",
       },
       fontFamily: {
         serif: ["var(--font-source-serif)", "Iowan Old Style", "Georgia", "serif"],

@@ -8,6 +8,13 @@
       "when": 1778425251702,
       "tag": "0000_ambitious_absorbing_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778929143527,
+      "tag": "0001_add_onboarding_states",
+      "breakpoints": true
     }
   ]
 }
