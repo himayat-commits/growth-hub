@@ -15,6 +15,13 @@
       "when": 1778929143527,
       "tag": "0001_add_onboarding_states",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779104499173,
+      "tag": "0002_add_provisioning_logs",
+      "breakpoints": true
     }
   ]
 }

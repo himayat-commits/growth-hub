@@ -15,7 +15,9 @@
     "payload:types": "payload generate:types",
     "payload:migrate:create": "payload migrate:create",
     "payload:migrate": "payload migrate",
-    "seed": "node --env-file=.env.local --import tsx/esm scripts/seed.ts"
+    "seed": "node --env-file=.env.local --import tsx/esm scripts/seed.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:prod": "BASE_URL=https://thegrowthhub.com.au playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -45,6 +47,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
