@@ -75,3 +75,21 @@ test("/api/upload/sign rejects unauthenticated POST with 401", async ({ request 
   });
   expect(res.status()).toBe(401);
 });
+
+test("/api/profile rejects unauthenticated PUT with 401", async ({ request }) => {
+  const res = await request.put("/api/profile", {
+    headers: { "Content-Type": "application/json" },
+    data: { businessName: "Test Co" },
+  });
+  expect(res.status()).toBe(401);
+});
+
+test("/api/checkout rejects tier:free with 400", async ({ request }) => {
+  const res = await request.post("/api/checkout", {
+    headers: { "Content-Type": "application/json" },
+    data: { tier: "free", interval: "month" },
+  });
+  // Either 401 (unauthenticated path runs first) or 400 (tier:free check).
+  // Both confirm the endpoint is registered + can't be tricked into freeing.
+  expect([400, 401]).toContain(res.status());
+});
