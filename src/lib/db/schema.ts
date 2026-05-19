@@ -86,3 +86,42 @@ export const provisioningLogs = pgTable(
 
 export type ProvisioningLog = typeof provisioningLogs.$inferSelect;
 export type NewProvisioningLog = typeof provisioningLogs.$inferInsert;
+
+/**
+ * Extra profile fields collected by the dashboard /profile page.
+ *
+ * Identity (name, email, phone) still lives in WorkOS — this table holds
+ * everything else: business info, preferences, referral code. One row per
+ * WorkOS user, auto-created on first sign-in by lib/auth/ensure-user-record.
+ *
+ * profileCompletePct is denormalised from helpAreas, businessName, etc. on
+ * every update so /dashboard can show "Profile X% complete" without
+ * recomputing.
+ */
+export const userProfiles = pgTable('user_profiles', {
+  userId: text('user_id').primaryKey(), // WorkOS user id
+  businessName: text('business_name'),
+  businessDescription: text('business_description'),
+  stage: varchar('stage', { length: 20 }),
+    // 'idea' | 'just-starting' | 'running' | 'established'
+  industry: varchar('industry', { length: 20 }),
+    // 'retail' | 'services' | 'food' | 'creative' | 'trades' | 'other'
+  helpAreas: text('help_areas').array().default([]).notNull(),
+    // 'website' | 'marketing' | 'branding' | 'pricing' | 'systems' | 'funding' | 'confidence'
+  city: text('city'),
+  phone: text('phone'),
+  preferredLanguage: varchar('preferred_language', { length: 4 }).default('en').notNull(),
+    // 'en' | 'ar' | 'ne' | 'ur'
+  referCode: text('refer_code').unique(),
+  profileCompletePct: integer('profile_complete_pct').default(0).notNull(),
+  notifBooking: boolean('notif_booking').default(true).notNull(),
+  notifLibrary: boolean('notif_library').default(true).notNull(),
+  notifEvents: boolean('notif_events').default(true).notNull(),
+  notifNewsletter: boolean('notif_newsletter').default(false).notNull(),
+  notifReferrals: boolean('notif_referrals').default(true).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type NewUserProfile = typeof userProfiles.$inferInsert;

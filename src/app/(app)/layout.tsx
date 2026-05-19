@@ -9,8 +9,8 @@
 
 import { redirect } from 'next/navigation'
 import { withAuth } from '@workos-inc/authkit-nextjs'
-import { getSubscription, isActive } from '@/lib/subscription'
-import { PLANS, type PlanTier } from '@/lib/plans'
+import { getSubscription, getEffectivePlan } from '@/lib/subscription'
+import { PLANS } from '@/lib/plans'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Topbar } from '@/components/dashboard/Topbar'
 import type { TopbarUser } from '@/components/dashboard/Topbar'
@@ -25,11 +25,6 @@ function makeInitials(name: string | null | undefined, email: string | null | un
   return (email?.[0] ?? '?').toUpperCase()
 }
 
-function buildPlanLabel(tier: PlanTier | null): string {
-  if (!tier) return 'Free member'
-  return `${PLANS[tier].name} plan`
-}
-
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { user } = await withAuth()
   if (!user) {
@@ -37,14 +32,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const sub = await getSubscription()
-  const hasActiveSub = isActive(sub)
-  const tier: PlanTier | null = hasActiveSub ? (sub!.planTier as PlanTier | null) : null
+  const tier = getEffectivePlan(sub) // 'free' | 'foundations' | 'growth' | 'accelerate'
 
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email || ''
   const topbarUser: TopbarUser = {
     name: fullName,
     initials: makeInitials(fullName, user.email),
-    planLabel: buildPlanLabel(tier),
+    planLabel: PLANS[tier].name,
   }
 
   return (

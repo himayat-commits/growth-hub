@@ -3,7 +3,9 @@
  * shows on the pricing page and how price IDs map back to plans.
  */
 
-export type PlanTier = 'foundations' | 'growth' | 'accelerate';
+export type PlanTier = 'free' | 'foundations' | 'growth' | 'accelerate';
+/** Tiers that have a real Stripe subscription. `free` is excluded. */
+export type PaidPlanTier = Exclude<PlanTier, 'free'>;
 export type BillingInterval = 'month' | 'year';
 export type AddOnId = 'search_ai' | 'referrals';
 
@@ -19,6 +21,22 @@ export interface PlanConfig {
 }
 
 export const PLANS: Record<PlanTier, PlanConfig> = {
+  free: {
+    id: 'free',
+    name: 'Free Member',
+    tagline: 'Get started — no card needed.',
+    description:
+      'Community access, the public resource library, and one complimentary 30-minute Growth Call.',
+    monthlyPrice: 0,
+    features: [
+      'Public resource library',
+      'Community forum access',
+      '1 free Growth Call (30 min)',
+      'Weekly group webinars',
+      'Member-only discounts',
+    ],
+    addOnNote: null,
+  },
   foundations: {
     id: 'foundations',
     name: 'Foundations',
@@ -93,8 +111,8 @@ export const ADDONS: Record<AddOnId, AddOnConfig> = {
  * Reads from env vars at call time so dev / preview / prod each see
  * their own values.
  */
-export function getPlanPriceId(tier: PlanTier, interval: BillingInterval): string {
-  const map: Record<PlanTier, Record<BillingInterval, string | undefined>> = {
+export function getPlanPriceId(tier: PaidPlanTier, interval: BillingInterval): string {
+  const map: Record<PaidPlanTier, Record<BillingInterval, string | undefined>> = {
     foundations: {
       month: process.env.STRIPE_PRICE_FOUNDATIONS_MONTHLY,
       year: process.env.STRIPE_PRICE_FOUNDATIONS_YEARLY,
@@ -134,8 +152,8 @@ export function getAddOnPriceId(addOn: AddOnId): string {
  */
 export function priceIdToPlan(
   priceId: string
-): { tier: PlanTier; interval: BillingInterval } | null {
-  const entries: Array<[string | undefined, PlanTier, BillingInterval]> = [
+): { tier: PaidPlanTier; interval: BillingInterval } | null {
+  const entries: Array<[string | undefined, PaidPlanTier, BillingInterval]> = [
     [process.env.STRIPE_PRICE_FOUNDATIONS_MONTHLY, 'foundations', 'month'],
     [process.env.STRIPE_PRICE_FOUNDATIONS_YEARLY, 'foundations', 'year'],
     [process.env.STRIPE_PRICE_GROWTH_MONTHLY, 'growth', 'month'],

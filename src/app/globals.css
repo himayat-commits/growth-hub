@@ -62,6 +62,11 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 .btn-secondary:hover { background: var(--teal); color: var(--eggshell); border-color: var(--teal); }
 .btn-lime { background: var(--lime); color: var(--teal); }
 .btn-lime:hover { transform: translateY(-1px); filter: brightness(0.97); }
+/* Tertiary CTA used for the secondary "Join free" link in the Hero —
+   reads as a quiet text link, not a competing primary button. */
+.btn-tertiary { background: transparent; color: var(--teal); padding: 14px 12px; border: 0; text-decoration: underline; text-decoration-color: rgba(13, 63, 72, 0.35); text-underline-offset: 4px; }
+.btn-tertiary:hover { text-decoration-color: var(--teal); }
+.hero-cta-hint { opacity: 0.65; font-weight: 400; }
 .nav-toggle { display: none; width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(13, 63, 72, 0.25); align-items: center; justify-content: center; }
 .nav-toggle span { width: 16px; height: 1.5px; background: var(--teal); position: relative; display: block; }
 .nav-toggle span::before, .nav-toggle span::after { content:''; position:absolute; left:0; width:16px; height:1.5px; background:var(--teal); }

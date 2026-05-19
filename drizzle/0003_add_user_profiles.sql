@@ -1,0 +1,21 @@
+CREATE TABLE "user_profiles" (
+	"user_id" text PRIMARY KEY NOT NULL,
+	"business_name" text,
+	"business_description" text,
+	"stage" varchar(20),
+	"industry" varchar(20),
+	"help_areas" text[] DEFAULT '{}' NOT NULL,
+	"city" text,
+	"phone" text,
+	"preferred_language" varchar(4) DEFAULT 'en' NOT NULL,
+	"refer_code" text,
+	"profile_complete_pct" integer DEFAULT 0 NOT NULL,
+	"notif_booking" boolean DEFAULT true NOT NULL,
+	"notif_library" boolean DEFAULT true NOT NULL,
+	"notif_events" boolean DEFAULT true NOT NULL,
+	"notif_newsletter" boolean DEFAULT false NOT NULL,
+	"notif_referrals" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "user_profiles_refer_code_unique" UNIQUE("refer_code")
+);

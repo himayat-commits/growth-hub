@@ -44,6 +44,13 @@ export async function POST(req: NextRequest) {
   if (!tier || !interval) {
     return NextResponse.json({ error: 'tier and interval are required' }, { status: 400 });
   }
+  if (tier === 'free') {
+    // Free tier has no Stripe subscription — the user just signs up via WorkOS.
+    return NextResponse.json(
+      { error: 'Free plan does not require checkout. Sign up directly via /sign-up.' },
+      { status: 400 },
+    );
+  }
 
   // Build line items: base plan + valid add-ons.
   // Add-ons are silently filtered to those compatible with the chosen tier.

@@ -16,6 +16,14 @@ test("home page renders", async ({ page }) => {
   await expect(page.locator("body")).toContainText(/growth hub/i);
 });
 
+test("home page has Join free CTA pointing at /sign-up", async ({ page }) => {
+  await page.goto("/");
+  const joinFree = page.getByRole("link", { name: /join free/i });
+  await expect(joinFree).toBeVisible();
+  const href = await joinFree.getAttribute("href");
+  expect(href).toMatch(/^\/sign-up\?redirect_url=/);
+});
+
 test("pricing page loads with plan cards", async ({ page }) => {
   await page.goto("/pricing");
   await expect(page.locator("body")).toContainText(/foundations/i);
