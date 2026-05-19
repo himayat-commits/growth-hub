@@ -338,8 +338,10 @@ const ALL_MODULES: PortalModule[] = [
 
 // ── Tier ordering ─────────────────────────────────────────────────────────────
 
-const TIER_ORDER: Record<PlanTier, number> = { foundations: 0, growth: 1, accelerate: 2 };
-const TIER_NAMES: Record<PlanTier, string> = { foundations: "Foundations", growth: "Growth", accelerate: "Accelerate" };
+// Free Members rank below every paid tier. Modules with a `requires.tier`
+// gate render as locked for them, matching the Foundations preview state.
+const TIER_ORDER: Record<PlanTier, number> = { free: -1, foundations: 0, growth: 1, accelerate: 2 };
+const TIER_NAMES: Record<PlanTier, string> = { free: "Free", foundations: "Foundations", growth: "Growth", accelerate: "Accelerate" };
 
 function isModuleActive(mod: PortalModule, tier: PlanTier, activeAddOns: AddOnId[]): boolean {
   if (!mod.requires) return true;

@@ -113,6 +113,13 @@ export default function Hero({
           <Link className="btn btn-secondary" href={secondaryCtaHref ?? DEFAULTS.secondaryCtaHref}>
             {secondaryCtaLabel ?? DEFAULTS.secondaryCtaLabel}
           </Link>
+          <Link
+            className="btn btn-tertiary"
+            href="/sign-up?redirect_url=%2Fdashboard"
+            aria-label="Join free — no card needed"
+          >
+            Join free <span className="hero-cta-hint">— no card needed</span>
+          </Link>
         </div>
 
         <div className="hero-chips">

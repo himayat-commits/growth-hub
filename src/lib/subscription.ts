@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { subscriptions, type Subscription } from '@/lib/db/schema';
+import type { PlanTier } from '@/lib/plans';
 
 /**
  * Look up the subscription row for a user. Falls back to the current WorkOS
@@ -47,4 +48,20 @@ export async function requireSubscription(): Promise<Subscription> {
     redirect('/pricing');
   }
   return sub!;
+}
+
+/**
+ * Resolve the effective plan tier for any signed-in user.
+ *
+ * Free Members have no `subscriptions` row — the absence of a row IS the
+ * Free state. Paid users with an active sub return their `planTier`. Users
+ * whose paid sub has lapsed (cancelled / past_due / expired period) fall
+ * back to Free until they re-subscribe. This is the helper to use everywhere
+ * the UI needs to know "what does this user see right now".
+ */
+export function getEffectivePlan(sub: Subscription | null | undefined): PlanTier {
+  if (isActive(sub) && sub?.planTier) {
+    return sub.planTier as PlanTier;
+  }
+  return 'free';
 }
