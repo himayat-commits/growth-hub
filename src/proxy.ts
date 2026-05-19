@@ -15,7 +15,24 @@ import { NextRequest, NextResponse, type NextFetchEvent } from 'next/server';
  */
 const MARKETING_HOSTNAME = 'thegrowthhub.com.au';
 const APP_HOSTNAME = 'app.thegrowthhub.com.au';
-const APP_PATHS = ['/portal', '/dashboard', '/onboarding'];
+// All routes that should live under app.thegrowthhub.com.au. /portal and
+// /account are legacy URLs that 301 to /dashboard and /profile via
+// next.config.ts redirects — they're listed here so the redirect happens
+// on the right subdomain (otherwise the apex would 308 first, then the
+// legacy 301 would fire on the subdomain).
+const APP_PATHS = [
+  '/portal',        // legacy → redirects to /dashboard
+  '/account',       // legacy → redirects to /profile
+  '/dashboard',
+  '/plan',
+  '/services',
+  '/profile',
+  '/events',
+  '/resources',
+  '/messages',
+  '/benefits',
+  '/onboarding',
+];
 
 function isAppPath(pathname: string): boolean {
   return APP_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));

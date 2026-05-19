@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  // Legacy → new URL redirects as we migrate the post-signup surface onto the
+  // mockup-derived dashboard shell. 301s so bookmarks + crawlers update.
+  async redirects() {
+    return [
+      { source: '/portal', destination: '/dashboard', permanent: true },
+      { source: '/portal/:path*', destination: '/dashboard', permanent: true },
+      { source: '/account', destination: '/profile', permanent: true },
+    ];
+  },
 };
 
 export default withPayload(nextConfig);

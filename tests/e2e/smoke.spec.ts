@@ -31,6 +31,22 @@ test("/portal redirects unauthenticated visitor to /sign-in", async ({ page, bas
   expect(page.url()).not.toBe(`${baseURL}/portal`);
 });
 
+test("/dashboard redirects unauthenticated visitor to sign-in", async ({ page }) => {
+  // New post-signup home (replaces /portal).
+  await page.goto("/dashboard");
+  await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
+});
+
+test("/plan redirects unauthenticated visitor to sign-in", async ({ page }) => {
+  await page.goto("/plan");
+  await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
+});
+
+test("/profile redirects unauthenticated visitor to sign-in", async ({ page }) => {
+  await page.goto("/profile");
+  await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
+});
+
 test("/onboarding redirects unauthenticated visitor to sign-in", async ({ page }) => {
   await page.goto("/onboarding");
   await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
