@@ -34,6 +34,7 @@ import { Logos } from './collections/Logos.ts';
 import { Partners } from './collections/Partners.ts';
 import { Events } from './collections/Events.ts';
 import { Resources } from './collections/Resources.ts';
+import { Services } from './collections/Services.ts';
 
 // Globals
 import { SiteSettings } from './globals/SiteSettings.ts';
@@ -63,6 +64,7 @@ export default buildConfig({
     Partners,
     Events,
     Resources,
+    Services,
   ],
 
   globals: [

@@ -55,6 +55,11 @@ test("/profile redirects unauthenticated visitor to sign-in", async ({ page }) =
   await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
 });
 
+test("/services redirects unauthenticated visitor to sign-in", async ({ page }) => {
+  await page.goto("/services");
+  await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
+});
+
 test("/events redirects unauthenticated visitor to sign-in", async ({ page }) => {
   await page.goto("/events");
   await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });

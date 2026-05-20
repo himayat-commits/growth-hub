@@ -331,3 +331,44 @@ export const getFeaturedResources = unstable_cache(
   ['resources-featured'],
   { tags: ['resources'], revalidate: 3600 },
 );
+
+// ── Services ──────────────────────────────────────────────────────────────────
+
+/** All active services, sorted by sortOrder then alphabetically. Used by
+ *  the Services tab on /(app)/services. */
+export const getServices = unstable_cache(
+  async () => {
+    const payload = await getPayloadClient();
+    const { docs } = await payload.find({
+      collection: 'services',
+      where: { active: { equals: true } },
+      sort: ['sortOrder', 'title'],
+      limit: 100,
+      depth: 0,
+    });
+    return docs;
+  },
+  ['services-list'],
+  { tags: ['services'], revalidate: 3600 },
+);
+
+/** Single service by slug — for the /services/[slug] detail page (Phase 7). */
+export const getServiceBySlug = unstable_cache(
+  async (slug: string) => {
+    const payload = await getPayloadClient();
+    const { docs } = await payload.find({
+      collection: 'services',
+      where: {
+        and: [
+          { slug: { equals: slug } },
+          { active: { equals: true } },
+        ],
+      },
+      limit: 1,
+      depth: 0,
+    });
+    return docs[0] ?? null;
+  },
+  ['service-by-slug'],
+  { tags: ['services'], revalidate: 3600 },
+);

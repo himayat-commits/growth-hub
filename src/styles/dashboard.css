@@ -625,5 +625,35 @@ p { margin: 0; }
 .gh-toggle.is-on::after { transform: translateX(16px); }
 .gh-form-foot { display: flex; gap: 8px; justify-content: flex-end; padding-top: 6px; border-top: 1px solid var(--rule); margin-top: 4px; }
 
+/* ── Tabs (used by /(app)/services to switch between Birdeye modules and
+   the consultancy services catalogue) ─────────────────────────────────── */
+.gh-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  margin: 0 0 22px;
+  background: var(--cream-soft);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-lg);
+}
+.gh-tab {
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink-70);
+  background: transparent;
+  border: 0;
+  padding: 8px 16px;
+  border-radius: calc(var(--r-lg) - 4px);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.gh-tab:hover { color: var(--ink); }
+.gh-tab.is-active {
+  background: var(--surface);
+  color: var(--teal);
+  box-shadow: 0 1px 2px rgba(13, 63, 72, 0.08), 0 0 0 1px var(--rule);
+}
+
 /* ── Utility ───────────────────────────────────────────────────────── */
 .gh-frame, .gh-frame * { backface-visibility: hidden; }
