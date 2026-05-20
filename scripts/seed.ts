@@ -536,74 +536,221 @@ async function seed() {
   });
 
   if (existingPartners === 0) {
+    // Mirrors the standalone Partners mockup (May 2026) — 6 categories,
+    // richer card content with region/since/contribution/howWeWork.
     const partnerData = [
+      // Technology
       {
-        name: 'ACT Government',
-        type: 'funding' as const,
-        description: 'Supporting small and diverse businesses across the ACT through grants, programs, and direct investment in community-led initiatives.',
+        name: 'Birdeye',
+        category: 'technology' as const,
+        shape: 'circle' as const,
+        region: 'ACT · Global',
+        since: '2024',
+        description:
+          'Reputation, reviews and AI-driven customer experience tools that power our Growth and Accelerate packages.',
+        contribution: 'Reviews automation · AI customer messaging · listing management',
+        howWeWork: 'Bundled into client subscriptions; we configure and support locally.',
+        website: 'https://birdeye.com',
         featured: true,
         order: 1,
         status: 'published' as const,
       },
       {
-        name: 'Canberra Business Chamber',
-        type: 'community' as const,
-        description: 'The peak body for business in the ACT, connecting local businesses with advocacy, networking, and professional development opportunities.',
-        website: 'https://canberrabusiness.com',
+        name: 'What Works',
+        category: 'technology' as const,
+        shape: 'cross' as const,
+        region: 'Sydney',
+        since: '2025',
+        description:
+          'AI workflow studio. We co-design lightweight automations for small-business operations.',
+        contribution: 'AI workflows · ops automation · staff training',
+        howWeWork: 'Joint discovery sessions; build-and-handover engagements.',
         featured: true,
         order: 2,
         status: 'published' as const,
       },
       {
-        name: 'Social Traders',
-        type: 'community' as const,
-        description: "Australia's leading social enterprise certifier. Growth Hub holds Social Traders Verified status, meaning every subscription creates community impact.",
-        website: 'https://socialtraders.com.au',
-        featured: true,
+        name: 'Stitch Analytics',
+        category: 'technology' as const,
+        shape: 'bars' as const,
+        region: 'Melbourne',
+        since: '2025',
+        description:
+          'Privacy-first analytics so members can read their own data without a degree in dashboards.',
+        contribution: 'GA4 alternative · plain-English reporting',
+        howWeWork: 'White-labelled inside our member portal.',
         order: 3,
         status: 'published' as const,
       },
+
+      // Creative & Media
       {
-        name: 'Birdeye',
-        type: 'technology' as const,
-        description: "The AI-powered customer experience platform at the core of Growth Hub's digital tools — reviews, listings, messaging, and more.",
-        website: 'https://birdeye.com',
-        featured: true,
+        name: 'Hue & Cue Studio',
+        category: 'creative-media' as const,
+        shape: 'diamond' as const,
+        region: 'Canberra',
+        since: '2024',
+        description:
+          'Boutique brand & photography studio. They lead our visual refresh sprints for members.',
+        contribution: 'Brand · photography · campaign art direction',
+        howWeWork: 'Project rates discounted for Growth Hub members.',
         order: 4,
         status: 'published' as const,
       },
       {
-        name: 'GRIFFIN Accelerator',
-        type: 'enterprise' as const,
-        description: "Canberra's startup and SME accelerator program supporting early-stage and growth-stage founders with mentorship, capital, and networks.",
-        featured: true,
+        name: 'Riverline Films',
+        category: 'creative-media' as const,
+        shape: 'triangle' as const,
+        region: 'ACT',
+        since: '2025',
+        description:
+          'Documentary-style video for small businesses. Quietly excellent. Allergic to cliché.',
+        contribution: 'Founder films · social cutdowns · community storytelling',
+        howWeWork: 'Co-funded shoots for community campaigns.',
         order: 5,
         status: 'published' as const,
       },
       {
-        name: 'CBR Innovation Network',
-        type: 'community' as const,
-        description: "Connecting Canberra's innovation ecosystem — businesses, researchers, and government — to collaborate and grow together.",
-        website: 'https://cbrin.com.au',
-        featured: false,
+        name: 'Foundry Sound',
+        category: 'creative-media' as const,
+        shape: 'hex' as const,
+        region: 'Canberra',
+        since: '2025',
+        description: 'Podcast production house. Co-host of our "Local & Loud" series.',
+        contribution: 'Podcast production · audio editing · distribution',
+        howWeWork: 'Member rate; joint episodes funded by Growth Hub.',
         order: 6,
         status: 'published' as const,
       },
+
+      // Community & Delivery
       {
-        name: 'Lighthouse Business Innovation Centre',
-        type: 'enterprise' as const,
-        description: 'Business coaching, advisory, and mentoring services for growth-stage enterprises in the ACT and surrounding region.',
-        website: 'https://lighthousebusiness.com.au',
-        featured: false,
+        name: 'Muslim Community Co-op',
+        category: 'community-delivery' as const,
+        shape: 'leaf' as const,
+        region: 'Canberra',
+        since: '2023',
+        description:
+          'Long-standing community partner. Trusted referral channel into the businesses we serve.',
+        contribution: 'Outreach · translation · cultural advisory',
+        howWeWork: 'Shared events, joint outreach, paid community workshops.',
+        featured: true,
         order: 7,
         status: 'published' as const,
       },
       {
-        name: 'Muslim Community Co-op',
-        type: 'community' as const,
-        description: 'A Canberra-based cooperative supporting Muslim-owned businesses and community enterprises with peer networks and practical resources.',
-        featured: false,
+        name: 'New Roots Network',
+        category: 'community-delivery' as const,
+        shape: 'arc' as const,
+        region: 'ACT',
+        since: '2024',
+        description: 'Refugee and newcomer business support. We host their digital clinics.',
+        contribution: 'Referrals · mentorship · cultural brokering',
+        howWeWork: 'Monthly clinics at our Moore St space.',
         order: 8,
+        status: 'published' as const,
+      },
+
+      // Industry & Government
+      {
+        name: 'CBR Innovation Network',
+        category: 'industry-government' as const,
+        shape: 'hex' as const,
+        region: 'ACT',
+        since: '2024',
+        description:
+          'Connector across the Canberra innovation ecosystem. Our front door to the wider sector.',
+        contribution: 'Introductions · co-marketing · venue support',
+        howWeWork: 'Joint programming and member pipeline.',
+        website: 'https://cbrin.com.au',
+        featured: true,
+        order: 9,
+        status: 'published' as const,
+      },
+      {
+        name: 'ACT Government',
+        category: 'industry-government' as const,
+        shape: 'diamond' as const,
+        region: 'ACT',
+        since: '2023',
+        description:
+          'Funding partner for our community employment pathways and accessibility programs.',
+        contribution: 'Grant funding · policy guidance · access to programs',
+        howWeWork: 'Annual grant agreements; outcomes reporting.',
+        featured: true,
+        order: 10,
+        status: 'published' as const,
+      },
+      {
+        name: 'Canberra Business Chamber',
+        category: 'industry-government' as const,
+        shape: 'bars' as const,
+        region: 'ACT',
+        since: '2024',
+        description:
+          'Local advocacy and business support. We host joint events for new operators.',
+        contribution: 'Member benefits · advocacy · referral',
+        howWeWork: 'Cross-membership pricing for small businesses.',
+        website: 'https://canberrabusiness.com',
+        featured: true,
+        order: 11,
+        status: 'published' as const,
+      },
+
+      // Accelerator & Capital
+      {
+        name: 'GRIFFIN Accelerator',
+        category: 'accelerator-capital' as const,
+        shape: 'triangle' as const,
+        region: 'Canberra',
+        since: '2024',
+        description:
+          'Startup accelerator. They take our high-growth members further when the timing is right.',
+        contribution: 'Coaching · investor access · alumni network',
+        howWeWork: 'Warm introductions, joint mentor pool.',
+        featured: true,
+        order: 12,
+        status: 'published' as const,
+      },
+      {
+        name: 'Lighthouse Business',
+        category: 'accelerator-capital' as const,
+        shape: 'arc' as const,
+        region: 'ACT',
+        since: '2024',
+        description:
+          'Advisory practice for owner-operated firms. Strategy that fits a 7-person team.',
+        contribution: 'Strategy · finance · governance',
+        howWeWork: 'Subsidised advisory hours for members.',
+        website: 'https://lighthousebusiness.com.au',
+        order: 13,
+        status: 'published' as const,
+      },
+
+      // Research & Education
+      {
+        name: 'ANU Centre for Social Impact',
+        category: 'research-education' as const,
+        shape: 'circle' as const,
+        region: 'Canberra',
+        since: '2024',
+        description: 'Independent measurement of our social return. They keep us honest.',
+        contribution: 'SROI · evaluation · published research',
+        howWeWork: 'Annual evaluation engagement, open reporting.',
+        order: 14,
+        status: 'published' as const,
+      },
+      {
+        name: 'CIT Solutions',
+        category: 'research-education' as const,
+        shape: 'leaf' as const,
+        region: 'ACT',
+        since: '2025',
+        description:
+          'Vocational training partner. Pathway from our community programs into accredited courses.',
+        contribution: 'Accredited training · recognition of prior learning',
+        howWeWork: 'Stipended placements for community members.',
+        order: 15,
         status: 'published' as const,
       },
     ];
@@ -611,7 +758,7 @@ async function seed() {
     for (const partner of partnerData) {
       await payload.create({ collection: 'partners', data: partner });
     }
-    console.log('✅  Created 8 sample partners.');
+    console.log(`✅  Created ${partnerData.length} sample partners.`);
   } else {
     console.log('⏭   Partners already exist — skipping.');
   }

@@ -1,4 +1,11 @@
-import type { PartnerType } from "./shared";
+import PartnerMark from "./PartnerMark";
+import {
+  CATEGORY_LABELS,
+  defaultShapeForCategory,
+  legacyCategoryFallback,
+  type PartnerCategory,
+  type PartnerShape,
+} from "./shared";
 
 export interface FeaturedWallProps {
   heading?: string | null;
@@ -6,72 +13,70 @@ export interface FeaturedWallProps {
   partners?: Array<{
     id?: string | null;
     name: string;
+    /** New `category` field. Legacy records may pass `type` instead — both work. */
+    category?: string | null;
     type?: string | null;
+    shape?: string | null;
   }> | null;
 }
 
-function PartnerTypeIcon({ type }: { type?: string | null }) {
-  switch (type) {
-    case "technology":
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" />
-          <rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" />
-        </svg>
-      );
-    case "community":
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="9" cy="8" r="3" /><path d="M3 20c0-3 3-5 6-5s6 2 6 5" />
-          <circle cx="17" cy="7" r="2.5" /><path d="M15 19c0-2 1.5-3.5 4-4" />
-        </svg>
-      );
-    case "funding":
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="9" /><path d="M12 7v1m0 8v1m-3-5h5a1.5 1.5 0 0 1 0 3H9m0 0h5" />
-        </svg>
-      );
-    case "media":
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M5 12a7 7 0 0 1 14 0" /><path d="M8.5 12a3.5 3.5 0 0 1 7 0" />
-          <circle cx="12" cy="12" r="1" fill="currentColor" /><path d="M2 12a10 10 0 0 1 20 0" />
-        </svg>
-      );
-    default: // enterprise + fallback
-      return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <rect x="3" y="7" width="18" height="14" rx="2" />
-          <path d="M8 7V5a2 2 0 0 1 4 0v2" /><path d="M16 7V5a2 2 0 0 0-4 0v2" />
-          <path d="M8 12h.01M12 12h.01M16 12h.01" />
-        </svg>
-      );
-  }
-}
-
-const TYPE_LABELS: Record<string, string> = {
-  technology: "Technology",
-  community: "Community",
-  enterprise: "Enterprise",
-  funding: "Funding",
-  media: "Media",
-};
-
-const DEFAULT_PARTNERS: Array<{ id?: string | null; name: string; type: PartnerType }> = [
-  { name: "ACT Government", type: "funding" },
-  { name: "Canberra Business Chamber", type: "community" },
-  { name: "Social Traders", type: "community" },
-  { name: "Birdeye", type: "technology" },
-  { name: "GRIFFIN Accelerator", type: "enterprise" },
-  { name: "CBR Innovation Network", type: "community" },
-  { name: "Lighthouse Business", type: "enterprise" },
-  { name: "Muslim Community Co-op", type: "community" },
+/** Default partners shown if no CMS data — mirrors the standalone mockup
+ *  so the page never renders empty. */
+const DEFAULT_PARTNERS: Array<{
+  name: string;
+  category: PartnerCategory;
+  shape: PartnerShape;
+}> = [
+  { name: "Birdeye", category: "technology", shape: "circle" },
+  { name: "CBR Innovation Network", category: "industry-government", shape: "hex" },
+  { name: "ACT Government", category: "industry-government", shape: "diamond" },
+  { name: "Canberra Business Chamber", category: "industry-government", shape: "bars" },
+  { name: "GRIFFIN Accelerator", category: "accelerator-capital", shape: "triangle" },
+  { name: "Lighthouse Business", category: "accelerator-capital", shape: "arc" },
+  { name: "Muslim Community Co-op", category: "community-delivery", shape: "leaf" },
+  { name: "What Works", category: "technology", shape: "cross" },
 ];
 
+function resolveCategory(p: {
+  category?: string | null;
+  type?: string | null;
+}): PartnerCategory | null {
+  return legacyCategoryFallback(p.category ?? p.type ?? null);
+}
+
+function resolveShape(
+  shape: string | null | undefined,
+  category: PartnerCategory | null,
+): PartnerShape {
+  if (
+    shape &&
+    (["leaf", "arc", "diamond", "circle", "triangle", "bars", "cross", "hex"] as const).includes(
+      shape as PartnerShape,
+    )
+  ) {
+    return shape as PartnerShape;
+  }
+  return defaultShapeForCategory(category);
+}
+
 export default function FeaturedWall({ heading, lead, partners }: FeaturedWallProps = {}) {
-  const resolvedPartners =
-    partners && partners.length > 0 ? partners : DEFAULT_PARTNERS;
+  const resolved =
+    partners && partners.length > 0
+      ? partners.map((p) => {
+          const cat = resolveCategory(p);
+          return {
+            id: p.id ?? null,
+            name: p.name,
+            category: cat,
+            shape: resolveShape(p.shape, cat),
+          };
+        })
+      : DEFAULT_PARTNERS.map((p) => ({
+          id: null as string | null,
+          name: p.name,
+          category: p.category,
+          shape: p.shape,
+        }));
 
   return (
     <section className="featured-wall" id="featured">
@@ -80,20 +85,20 @@ export default function FeaturedWall({ heading, lead, partners }: FeaturedWallPr
           <div>
             <span className="section-label">Featured Partners</span>
             <h2 className="section-h2" style={{ margin: 0 }}>
-              {heading ?? "The network behind the network."}
+              {heading ?? "A handful of trusted names that make this work."}
             </h2>
           </div>
           {lead && <p className="fw-lead">{lead}</p>}
         </div>
 
         <div className="fw-grid">
-          {resolvedPartners.map((p, i) => (
-            <div className="fw-cell" key={p.id ?? i}>
+          {resolved.map((p, i) => (
+            <div className="fw-cell" key={p.id ?? `${p.name}-${i}`}>
               <span className="fw-mark">
-                <PartnerTypeIcon type={p.type} />
+                <PartnerMark shape={p.shape} />
               </span>
               <span className="fw-name">{p.name}</span>
-              <span className="fw-type">{TYPE_LABELS[p.type ?? ""] ?? p.type}</span>
+              <span className="fw-type">{p.category ? CATEGORY_LABELS[p.category] : ""}</span>
             </div>
           ))}
         </div>
