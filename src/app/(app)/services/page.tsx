@@ -1,23 +1,171 @@
-import type { Metadata } from 'next'
-import { PageHeader } from '@/components/dashboard/PageHeader'
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { eq } from 'drizzle-orm';
+import { withAuth } from '@workos-inc/authkit-nextjs';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { IcoCal, IcoArrow } from '@/components/dashboard/Icons';
+import { getDb } from '@/lib/db';
+import { onboardingStates } from '@/lib/db/schema';
+import { getSubscription, getEffectivePlan } from '@/lib/subscription';
+import { ADDONS, getAddOnPriceId, type AddOnId, type PlanTier } from '@/lib/plans';
+import type { WizardState } from '@/lib/wizard/state';
+import { stepsForPackage } from '@/lib/wizard/state';
+import { isStepComplete } from '@/lib/wizard/initial-state';
+import { getBirdeyeDashboardUrl } from '@/lib/birdeye/dashboard-url';
+import PortalModuleGrid from '@/components/portal/PortalModuleGrid';
+import { getServices } from '@/lib/cms';
+import ServicesTabs from './ServicesTabs';
+import ServicesCatalog, { type ServiceItem } from './ServicesCatalog';
 
 export const metadata: Metadata = {
   title: 'Services — Growth Hub',
+};
+
+/** Resolve which add-ons the user has, comparing stored Stripe price IDs
+ *  against env-configured ones. Silently skips any add-on whose env var
+ *  isn't set. Lifted from the deleted /(main)/portal/page.tsx. */
+function resolveActiveAddOns(priceIds: string[]): AddOnId[] {
+  const active: AddOnId[] = [];
+  for (const id of Object.keys(ADDONS) as AddOnId[]) {
+    try {
+      const pid = getAddOnPriceId(id);
+      if (priceIds.includes(pid)) active.push(id);
+    } catch {
+      // env var not set — skip
+    }
+  }
+  return active;
 }
 
-// v0 stub. Combined "Birdeye modules" + "Services" tabs page lands in Phase 4.
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const { user } = await withAuth();
+  if (!user) redirect('/sign-in?redirect_url=/services');
+
+  const [sub, services] = await Promise.all([getSubscription(), getServices()]);
+  const tier: PlanTier = getEffectivePlan(sub);
+  const activeAddOns = resolveActiveAddOns(sub?.addOnPriceIds ?? []);
+
+  // Has the user completed the Birdeye provisioning wizard?
+  const obRows = await getDb()
+    .select()
+    .from(onboardingStates)
+    .where(eq(onboardingStates.userId, user.id))
+    .limit(1);
+  const wizardState = obRows[0]?.state as WizardState | undefined;
+  const businessNumber = wizardState?.provisioning?.businessNumber ?? null;
+  const businessName = wizardState?.business?.name ?? null;
+  const provisioned = !!businessNumber;
+  const hasActivePaidSub = tier !== 'free';
+
+  // For partially-completed wizards, deep-link to the first incomplete step.
+  let setupHref = '/onboarding';
+  let setupProgress: { done: number; total: number } | null = null;
+  if (!provisioned && hasActivePaidSub) {
+    const wizardPkg = (wizardState?.packageId as 'foundations' | 'growth' | 'accelerate' | undefined)
+      ?? (tier as 'foundations' | 'growth' | 'accelerate');
+    const steps = stepsForPackage(wizardPkg);
+    const completed = wizardState
+      ? steps.filter((s) => isStepComplete(wizardState, s.key)).length
+      : 0;
+    setupProgress = { done: completed, total: steps.length };
+    const next = wizardState
+      ? steps.find((s) => s.key !== 'review' && !isStepComplete(wizardState, s.key))
+      : steps[0];
+    setupHref = `/onboarding/${next?.key ?? 'confirm'}`;
+  }
+
+  // Project Payload services into the lightweight shape the client tab needs.
+  const serviceItems: ServiceItem[] = services.map((s) => ({
+    id: s.id,
+    slug: s.slug,
+    title: s.title,
+    description: s.description,
+    category: s.category ?? 'strategy',
+    tone: s.tone ?? 'teal',
+    icon: s.icon ?? 'briefcase',
+    price: (s.price ?? null) as string | null,
+    priceLabel: (s.priceLabel ?? null) as string | null,
+    ctaLabel: s.ctaLabel ?? 'Request',
+  }));
+
   return (
     <>
       <PageHeader
         kicker="What we offer"
         title="Services"
-        sub="Birdeye modules and consultancy services in one place."
+        sub="Birdeye platform modules and consultancy services in one place. Every engagement starts with a free 30-minute Growth Call — no card needed."
+        actions={
+          <>
+            <Link href="/plan">
+              <button className="gh-btn ghost" type="button">
+                Compare plans
+              </button>
+            </Link>
+            <a
+              href="mailto:hello@himayat.com.au?subject=Book%20Growth%20Call"
+              className="gh-btn"
+            >
+              <IcoCal />
+              Book Growth Call
+            </a>
+          </>
+        }
       />
-      <div className="gh-empty">
-        <div className="gh-empty-h">Services content coming soon</div>
-        <p className="gh-empty-p">Combined modules + services tabs land in Phase 4.</p>
-      </div>
+
+      {/* Provisioning banner — only relevant on the modules side, but
+          rendered above the tabs so paid users see it on first paint. */}
+      {provisioned ? (
+        <div className="portal-birdeye-banner portal-birdeye-banner--ready" style={{ marginBottom: 24 }}>
+          <div className="portal-birdeye-banner-head">
+            <span className="portal-birdeye-pill">✓ Birdeye account ready</span>
+            <h2 className="portal-birdeye-title">
+              {businessName ? `${businessName} is live on Birdeye.` : 'Your Birdeye account is ready.'}
+            </h2>
+            <p className="portal-birdeye-sub">
+              Business number <code>{businessNumber}</code>
+            </p>
+          </div>
+          <div className="portal-birdeye-banner-cta">
+            <a
+              href={getBirdeyeDashboardUrl(businessNumber)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-lime"
+            >
+              Open your Birdeye dashboard <IcoArrow />
+            </a>
+          </div>
+        </div>
+      ) : hasActivePaidSub ? (
+        <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
+          <div className="portal-birdeye-banner-head">
+            <span className="portal-birdeye-pill portal-birdeye-pill--amber">
+              {setupProgress && setupProgress.done > 0 ? 'Setup in progress' : 'Setup pending'}
+            </span>
+            <h2 className="portal-birdeye-title">
+              {setupProgress && setupProgress.done > 0
+                ? 'Pick up where you left off.'
+                : 'Set up your Birdeye account.'}
+            </h2>
+            <p className="portal-birdeye-sub">
+              {setupProgress && setupProgress.done > 0
+                ? `${setupProgress.done} of ${setupProgress.total} steps complete · we'll resume right where you left off.`
+                : "15-minute wizard. Save and resume any time — we'll pick up right where you left off."}
+            </p>
+          </div>
+          <div className="portal-birdeye-banner-cta">
+            <Link href={setupHref} className="btn btn-primary">
+              {setupProgress && setupProgress.done > 0 ? 'Resume setup' : 'Start setup'} <IcoArrow />
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
+      <ServicesTabs
+        modules={<PortalModuleGrid tier={tier} activeAddOns={activeAddOns} />}
+        services={<ServicesCatalog services={serviceItems} />}
+      />
     </>
-  )
+  );
 }

@@ -79,6 +79,7 @@ export interface Config {
     partners: Partner;
     events: Event;
     resources: Resource;
+    services: Service;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -98,6 +99,7 @@ export interface Config {
     partners: PartnersSelect<false> | PartnersSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
+    services: ServicesSelect<false> | ServicesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -822,6 +824,52 @@ export interface Resource {
   createdAt: string;
 }
 /**
+ * Consultancy + done-with-you services. Use sortOrder to control card order; lower numbers first.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  title: string;
+  /**
+   * Used for the /services/[slug] URL. Keep it kebab-case (e.g. "growth-call", "website-setup").
+   */
+  slug: string;
+  /**
+   * Two or three sentences. Renders below the title on the card.
+   */
+  description: string;
+  category?: ('strategy' | 'build' | 'marketing' | 'ops') | null;
+  /**
+   * Icon background colour on the card.
+   */
+  tone?: ('lime' | 'teal' | 'plum' | 'lav') | null;
+  icon?: ('cal' | 'globe' | 'megaphone' | 'type' | 'trend' | 'share' | 'briefcase') | null;
+  /**
+   * Display price, e.g. "A$390 / mo" or "From A$1,950" or "Complimentary". Leave blank if pricing is bespoke.
+   */
+  price?: string | null;
+  /**
+   * Tiny label under the price, e.g. "first call free", "fixed project fee", "month-to-month".
+   */
+  priceLabel?: string | null;
+  /**
+   * Card button text. "Book a time" for the Growth Call, "Request" otherwise.
+   */
+  ctaLabel?: string | null;
+  /**
+   * Uncheck to hide from /services without deleting the row.
+   */
+  active?: boolean | null;
+  /**
+   * Lower numbers appear first. Growth Call is usually 0.
+   */
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -892,6 +940,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'resources';
         value: number | Resource;
+      } | null)
+    | ({
+        relationTo: 'services';
+        value: number | Service;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1406,6 +1458,25 @@ export interface ResourcesSelect<T extends boolean = true> {
   free?: T;
   publishedAt?: T;
   featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  description?: T;
+  category?: T;
+  tone?: T;
+  icon?: T;
+  price?: T;
+  priceLabel?: T;
+  ctaLabel?: T;
+  active?: T;
+  sortOrder?: T;
   updatedAt?: T;
   createdAt?: T;
 }

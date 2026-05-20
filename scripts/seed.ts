@@ -854,6 +854,103 @@ async function seed() {
     console.log(`✅  Created ${sampleResources.length} sample resources.`);
   }
 
+  // ── Services ────────────────────────────────────────────────────────────────
+  const existingServices = await payload.find({ collection: 'services', limit: 1 });
+  if (existingServices.totalDocs > 0) {
+    console.log('⏭   Services already exist — skipping.');
+  } else {
+    const sampleServices = [
+      {
+        title: 'Free Growth Call',
+        slug: 'growth-call',
+        description:
+          'A 30-minute 1:1 with a Growth Strategist. We listen, ask sharp questions and leave you with three concrete next moves.',
+        category: 'strategy' as const,
+        tone: 'lime' as const,
+        icon: 'cal' as const,
+        price: 'Complimentary',
+        priceLabel: 'first call free',
+        ctaLabel: 'Book a time',
+        active: true,
+        sortOrder: 0,
+      },
+      {
+        title: 'Website Setup & Coaching',
+        slug: 'website-setup',
+        description:
+          'Get a clear, fast website live in 2-3 weeks. We design, write and ship it — and teach you to edit it without us.',
+        category: 'build' as const,
+        tone: 'teal' as const,
+        icon: 'globe' as const,
+        price: 'From A$1,950',
+        priceLabel: 'fixed project fee',
+        ctaLabel: 'Request',
+        active: true,
+        sortOrder: 10,
+      },
+      {
+        title: 'Marketing Coaching',
+        slug: 'marketing-coaching',
+        description:
+          "Weekly 1:1 strategy with a coach who's run small businesses. We build your 90-day plan and keep you accountable to it.",
+        category: 'marketing' as const,
+        tone: 'plum' as const,
+        icon: 'megaphone' as const,
+        price: 'A$390 / mo',
+        priceLabel: 'month-to-month',
+        ctaLabel: 'Request',
+        active: true,
+        sortOrder: 20,
+      },
+      {
+        title: 'Branding Workshop',
+        slug: 'branding-workshop',
+        description:
+          'One full day to nail your story, audience and voice. You leave with a brand book, tagline options and a 12-month plan.',
+        category: 'strategy' as const,
+        tone: 'lav' as const,
+        icon: 'type' as const,
+        price: 'A$1,200',
+        priceLabel: 'one-day intensive',
+        ctaLabel: 'Request',
+        active: true,
+        sortOrder: 30,
+      },
+      {
+        title: 'SEO Foundations',
+        slug: 'seo-foundations',
+        description:
+          'Get found on Google for what your customers actually search. Technical audit, keyword plan and the first 3 articles done.',
+        category: 'marketing' as const,
+        tone: 'teal' as const,
+        icon: 'trend' as const,
+        price: 'From A$1,400',
+        priceLabel: '6-week sprint',
+        ctaLabel: 'Request',
+        active: true,
+        sortOrder: 40,
+      },
+      {
+        title: 'Social Media Plan',
+        slug: 'social-media-plan',
+        description:
+          'A 90-day content plan in one sitting — channels, themes, posts. Optional add-on for our team to publish for you.',
+        category: 'marketing' as const,
+        tone: 'plum' as const,
+        icon: 'share' as const,
+        price: 'A$650',
+        priceLabel: 'planning sprint',
+        ctaLabel: 'Request',
+        active: true,
+        sortOrder: 50,
+      },
+    ];
+    for (const s of sampleServices) {
+      await payload.create({ collection: 'services', data: s });
+    }
+    console.log(`✅  Created ${sampleServices.length} sample services.`);
+  }
+
   console.log('\n🎉  Seed complete!');
   process.exit(0);
 }
