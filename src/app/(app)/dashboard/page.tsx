@@ -9,6 +9,7 @@ import { getFeaturedResources, getUpcomingEvents } from '@/lib/cms';
 import { getUserRsvpSet } from '@/lib/db/rsvps';
 import { getNotifications } from '@/lib/db/notifications';
 import { getUnreadMessageCount, getThread } from '@/lib/db/messages';
+import { getActiveBookings, statusLabel } from '@/lib/db/bookings';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { onboardingStates } from '@/lib/db/schema';
@@ -106,6 +107,7 @@ export default async function DashboardPage() {
     thread,
     unreadMsgCount,
     obRows,
+    activeBookings,
   ] = await Promise.all([
     getSubscription(),
     getFeaturedResources(3),
@@ -119,6 +121,7 @@ export default async function DashboardPage() {
       .from(onboardingStates)
       .where(eq(onboardingStates.userId, user.id))
       .limit(1),
+    getActiveBookings(user.id),
   ]);
   const wizardState = obRows[0]?.state as WizardState | undefined;
   const tier = getEffectivePlan(sub);
@@ -326,28 +329,54 @@ export default async function DashboardPage() {
               View all →
             </Link>
           </div>
-          <div className="gh-empty">
-            <div className="gh-empty-ic">
-              <IcoBriefcase />
+          {activeBookings.length === 0 ? (
+            <div className="gh-empty">
+              <div className="gh-empty-ic">
+                <IcoBriefcase />
+              </div>
+              <div className="gh-empty-h">No active services yet</div>
+              <p className="gh-empty-p">
+                Browse our digital growth services — website builds, marketing coaching, ops
+                support and more.
+              </p>
+              <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                <Link href="/services#services">
+                  <button className="gh-empty-cta" type="button">
+                    Browse services
+                  </button>
+                </Link>
+                <Link href="/plan">
+                  <button className="gh-empty-cta ghost" type="button">
+                    See pricing
+                  </button>
+                </Link>
+              </div>
             </div>
-            <div className="gh-empty-h">No active services yet</div>
-            <p className="gh-empty-p">
-              Browse our digital growth services — website builds, marketing coaching, ops support
-              and more.
-            </p>
-            <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-              <Link href="/services">
-                <button className="gh-empty-cta" type="button">
-                  Browse services
-                </button>
-              </Link>
-              <Link href="/plan">
-                <button className="gh-empty-cta ghost" type="button">
-                  See pricing
-                </button>
-              </Link>
-            </div>
-          </div>
+          ) : (
+            <ul className="gh-list">
+              {activeBookings.slice(0, 3).map((b) => (
+                <li key={b.id}>
+                  <div className="gh-list-ic">
+                    <IcoBriefcase />
+                  </div>
+                  <div className="gh-list-body">
+                    <div className="gh-list-h">{b.serviceTitle}</div>
+                    <p className="gh-list-p">
+                      {statusLabel(b.status)}
+                      {b.datePreference ? ` · ${b.datePreference}` : ''}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/services/${b.serviceSlug}`}
+                    className="gh-list-time"
+                    style={{ color: 'var(--teal)', textDecoration: 'none' }}
+                  >
+                    View
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="gh-card">
