@@ -9,7 +9,14 @@ import { getFeaturedResources, getUpcomingEvents } from '@/lib/cms';
 import { getUserRsvpSet } from '@/lib/db/rsvps';
 import { getNotifications } from '@/lib/db/notifications';
 import { getUnreadMessageCount, getThread } from '@/lib/db/messages';
+import { eq } from 'drizzle-orm';
+import { getDb } from '@/lib/db';
+import { onboardingStates } from '@/lib/db/schema';
 import type { Notification } from '@/lib/db/schema';
+import type { WizardState } from '@/lib/wizard/state';
+import { stepsForPackage } from '@/lib/wizard/state';
+import { isStepComplete } from '@/lib/wizard/initial-state';
+import type { PackageId } from '@/lib/wizard/packages';
 import {
   IcoBriefcase,
   IcoCal,
@@ -90,16 +97,30 @@ export default async function DashboardPage() {
     email: user.email,
   });
 
-  const [sub, featuredResources, upcomingEvents, rsvpSet, notifications, thread, unreadMsgCount] =
-    await Promise.all([
-      getSubscription(),
-      getFeaturedResources(3),
-      getUpcomingEvents(50),
-      getUserRsvpSet(user.id),
-      getNotifications(user.id, 3),
-      getThread(user.id),
-      getUnreadMessageCount(user.id),
-    ]);
+  const [
+    sub,
+    featuredResources,
+    upcomingEvents,
+    rsvpSet,
+    notifications,
+    thread,
+    unreadMsgCount,
+    obRows,
+  ] = await Promise.all([
+    getSubscription(),
+    getFeaturedResources(3),
+    getUpcomingEvents(50),
+    getUserRsvpSet(user.id),
+    getNotifications(user.id, 3),
+    getThread(user.id),
+    getUnreadMessageCount(user.id),
+    getDb()
+      .select()
+      .from(onboardingStates)
+      .where(eq(onboardingStates.userId, user.id))
+      .limit(1),
+  ]);
+  const wizardState = obRows[0]?.state as WizardState | undefined;
   const tier = getEffectivePlan(sub);
   const plan = PLANS[tier];
 
@@ -166,9 +187,55 @@ export default async function DashboardPage() {
     },
   ];
 
+  // Paid users get an extra checklist item for the Birdeye provisioning
+  // wizard. State + meta reflect real wizard progress in Neon.
+  if (tier !== 'free') {
+    const provisioned = !!wizardState?.provisioning?.businessNumber;
+    const wizardPkg = (wizardState?.packageId as PackageId | undefined) ?? (tier as PackageId);
+    const steps = stepsForPackage(wizardPkg);
+    const completedSteps = wizardState
+      ? steps.filter((s) => isStepComplete(wizardState, s.key)).length
+      : 0;
+    const nextStep = wizardState
+      ? steps.find((s) => s.key !== 'review' && !isStepComplete(wizardState, s.key))
+      : steps[0];
+    const wizardHref = `/onboarding/${nextStep?.key ?? 'confirm'}`;
+
+    let state: 'done' | 'current' | 'todo';
+    let meta: string;
+    let action: string | undefined;
+    if (provisioned) {
+      state = 'done';
+      meta = `Birdeye business #${wizardState?.provisioning?.businessNumber ?? ''}`;
+    } else if (completedSteps > 0) {
+      state = 'current';
+      meta = `${completedSteps} of ${steps.length} wizard steps complete`;
+      action = 'Resume';
+    } else {
+      state = 'todo';
+      meta = `${steps.length}-step wizard · ~15 minutes`;
+      action = 'Start setup';
+    }
+    checklist.splice(3, 0, {
+      id: 'birdeye',
+      name: 'Set up your Birdeye account',
+      meta,
+      state,
+      href: wizardHref,
+      action,
+    });
+  }
+
   const done = checklist.filter((s) => s.state === 'done').length;
   const total = checklist.length;
   const pct = Math.round((done / total) * 100);
+  const NUMBER_WORDS: Record<number, string> = {
+    5: 'Five',
+    6: 'Six',
+    7: 'Seven',
+  };
+  const totalWord = NUMBER_WORDS[total] ?? String(total);
+  const heading = `${totalWord} quick steps to unlock the Growth Hub.`;
 
   return (
     <>
@@ -194,7 +261,7 @@ export default async function DashboardPage() {
       <div className="gh-onboard">
         <div className="gh-onboard-l">
           <span className="gh-onboard-kicker">Getting started</span>
-          <h2 className="gh-onboard-h">Five quick steps to unlock the Growth Hub.</h2>
+          <h2 className="gh-onboard-h">{heading}</h2>
           <p className="gh-onboard-p">
             Finish these and we&apos;ll surface coaching, courses and events matched to your goals
             — not a generic feed.

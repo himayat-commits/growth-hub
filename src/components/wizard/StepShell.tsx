@@ -40,9 +40,14 @@ export function StepShell({
     }
   };
 
+  // Rendered inside (app)/onboarding/layout.tsx → (app)/layout.tsx, so the
+  // outer Sidebar+Topbar already exist. We don't fight for full-viewport
+  // height anymore — the .gh-content scroll container handles overflow.
+  // Footer is `position: sticky; bottom: 0` so it pins to the bottom of
+  // that scroll viewport regardless of step length.
   return (
-    <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
-      <div className="flex-1 max-w-3xl mx-auto w-full px-6 md:px-10 py-12 md:py-16">
+    <div className="flex flex-col">
+      <div className="max-w-3xl mx-auto w-full px-6 md:px-10 pt-6 pb-12">
         {eyebrow ? <SectionLabel>{eyebrow}</SectionLabel> : null}
         <h1 className="font-serif text-4xl md:text-5xl font-normal text-teal mt-4 tracking-tight leading-[1.05]">
           {title}
@@ -53,8 +58,8 @@ export function StepShell({
         <div className="mt-10">{children}</div>
       </div>
 
-      <footer className="sticky bottom-0 bg-eggshell/95 backdrop-blur-md border-t border-line z-10">
-        <div className="max-w-3xl mx-auto w-full px-6 md:px-10 py-4 flex items-center justify-between gap-3">
+      <footer className="sticky bottom-0 -mx-8 px-8 bg-eggshell/95 backdrop-blur-md border-t border-line z-10">
+        <div className="max-w-3xl mx-auto w-full py-4 flex items-center justify-between gap-3">
           <Button variant="ghost" onClick={() => goPrev(stepKey)}>
             ← Back
           </Button>

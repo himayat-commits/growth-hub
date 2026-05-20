@@ -8,12 +8,12 @@ import {
 } from './Icons'
 
 const NAV = [
-  { id: 'dashboard', href: '/',          label: 'Dashboard',        Icon: IcoHome },
+  { id: 'dashboard', href: '/dashboard', label: 'Dashboard',        Icon: IcoHome },
   { id: 'plan',      href: '/plan',      label: 'My Plan',          Icon: IcoPlanNav },
   { id: 'services',  href: '/services',  label: 'Services',         Icon: IcoServicesNav },
   { id: 'resources', href: '/resources', label: 'Resources',        Icon: IcoResourcesNav },
   { id: 'events',    href: '/events',    label: 'Events & Webinars', Icon: IcoEventsNav },
-  { id: 'messages',  href: '/messages',  label: 'Messages', badge: 1, Icon: IcoMsgNav },
+  { id: 'messages',  href: '/messages',  label: 'Messages',         Icon: IcoMsgNav },
   { id: 'benefits',  href: '/benefits',  label: 'Member Benefits',  Icon: IcoBenefitsNav },
   { id: 'profile',   href: '/profile',   label: 'Profile & Settings', Icon: IcoProfileNav },
 ]
@@ -23,13 +23,16 @@ export function Sidebar() {
   const router = useRouter()
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/'
-    return pathname.startsWith(href)
+    // The Birdeye provisioning wizard at /onboarding/* is conceptually a
+    // Services flow — highlight Services in the sidebar while the user is
+    // inside the wizard so they always see where they are in the app.
+    if (href === '/services' && pathname.startsWith('/onboarding')) return true
+    return pathname === href || pathname.startsWith(`${href}/`)
   }
 
   return (
     <aside className="gh-side">
-      <button className="gh-side-brand" onClick={() => router.push('/')}>
+      <button className="gh-side-brand" onClick={() => router.push('/dashboard')}>
         <div className="gh-side-brand-mark">
           <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
             <circle cx="38" cy="35" r="22" fill="rgb(243,240,231)" opacity="0.9"/>
@@ -46,7 +49,7 @@ export function Sidebar() {
       </button>
 
       <nav className="gh-nav">
-        {NAV.map(({ id, href, label, badge, Icon }) => (
+        {NAV.map(({ id, href, label, Icon }) => (
           <Link
             key={id}
             href={href}
@@ -54,7 +57,6 @@ export function Sidebar() {
           >
             <Icon />
             <span>{label}</span>
-            {badge && <span className="gh-nav-badge">{badge}</span>}
           </Link>
         ))}
       </nav>
