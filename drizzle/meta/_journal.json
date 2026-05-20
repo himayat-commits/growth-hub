@@ -50,6 +50,13 @@
       "when": 1779279624346,
       "tag": "0006_add_service_bookings",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779282354842,
+      "tag": "0007_add_referrals",
+      "breakpoints": true
     }
   ]
 }

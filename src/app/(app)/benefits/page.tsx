@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ensureUserRecord } from '@/lib/auth/ensure-user-record';
+import { getReferralStats } from '@/lib/db/referrals';
 import {
   IcoCal,
   IcoBook,
@@ -28,14 +29,19 @@ export default async function BenefitsPage() {
   const { user } = await withAuth();
   if (!user) redirect('/sign-in?redirect_url=/benefits');
 
-  const profile = await ensureUserRecord({
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-  });
+  const [profile, referralStats] = await Promise.all([
+    ensureUserRecord({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    }),
+    getReferralStats(user.id),
+  ]);
 
   const referCode = profile.referCode ?? `GROW-${user.id.slice(-6).toUpperCase()}-${new Date().getFullYear()}`;
+  const totalCreditDollars = (referralStats.totalCreditCents / 100).toFixed(0);
+  const hasReferrals = referralStats.total > 0;
   const inviteLink = `${getSiteUrl()}/sign-up?ref=${encodeURIComponent(referCode)}`;
   const emailSubject = encodeURIComponent('Thought you might like The Growth Hub');
   const emailBody = encodeURIComponent(
@@ -117,9 +123,42 @@ export default async function BenefitsPage() {
             Refer a friend
             <span className="gh-pill lav">2× credit</span>
           </div>
-          <h3 className="gh-refer-h" style={{ marginTop: 8 }}>
-            You both get A$50 in service credit.
-          </h3>
+          {hasReferrals ? (
+            <h3 className="gh-refer-h" style={{ marginTop: 8 }}>
+              {referralStats.total} friend{referralStats.total === 1 ? '' : 's'} referred · A${totalCreditDollars} earned.
+            </h3>
+          ) : (
+            <h3 className="gh-refer-h" style={{ marginTop: 8 }}>
+              You both get A$50 in service credit.
+            </h3>
+          )}
+          {hasReferrals && (referralStats.pending > 0 || referralStats.qualified > 0) && (
+            <div
+              style={{
+                display: 'flex',
+                gap: 14,
+                margin: '8px 0 12px',
+                fontSize: 13,
+                color: 'var(--ink-70)',
+              }}
+            >
+              {referralStats.pending > 0 && (
+                <span>
+                  <strong>{referralStats.pending}</strong> awaiting Growth Call
+                </span>
+              )}
+              {referralStats.qualified > 0 && (
+                <span>
+                  <strong>{referralStats.qualified}</strong> qualified — credit issues on next paid plan
+                </span>
+              )}
+              {referralStats.credited > 0 && (
+                <span>
+                  <strong>{referralStats.credited}</strong> credited
+                </span>
+              )}
+            </div>
+          )}
           <p className="gh-refer-p" style={{ marginTop: 6 }}>
             Share your code with a friend who runs a small business. When they sign up and book
             their Growth Call, the credit lands in both accounts. No cap.
