@@ -714,13 +714,39 @@ export interface Partner {
   id: number;
   name: string;
   /**
-   * Used for directory filter chips
+   * Used for directory filter chips and grouping
    */
-  type: 'technology' | 'community' | 'enterprise' | 'funding' | 'media';
+  category:
+    | 'technology'
+    | 'creative-media'
+    | 'community-delivery'
+    | 'industry-government'
+    | 'accelerator-capital'
+    | 'research-education';
+  /**
+   * Abstract mono glyph used as a placeholder partner mark. Leave blank to use a sensible default by category.
+   */
+  shape?: ('circle' | 'diamond' | 'triangle' | 'leaf' | 'hex' | 'arc' | 'bars' | 'cross') | null;
   /**
    * Short description shown in the directory card
    */
   description?: string | null;
+  /**
+   * e.g. "Canberra", "ACT", "Sydney", "ACT · Global"
+   */
+  region?: string | null;
+  /**
+   * Year the partnership began, e.g. "2023" or "2024"
+   */
+  since?: string | null;
+  /**
+   * What this partner brings — e.g. "Reviews automation · AI customer messaging · listing management". Rendered under "What they bring" on the directory card.
+   */
+  contribution?: string | null;
+  /**
+   * How we collaborate — e.g. "Bundled into client subscriptions; we configure and support locally." Rendered under "How we work together".
+   */
+  howWeWork?: string | null;
   /**
    * Full URL including https://
    */
@@ -1413,8 +1439,13 @@ export interface LogosSelect<T extends boolean = true> {
  */
 export interface PartnersSelect<T extends boolean = true> {
   name?: T;
-  type?: T;
+  category?: T;
+  shape?: T;
   description?: T;
+  region?: T;
+  since?: T;
+  contribution?: T;
+  howWeWork?: T;
   website?: T;
   contactName?: T;
   contactEmail?: T;
