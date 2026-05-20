@@ -43,6 +43,28 @@ const authkit = authkitMiddleware({
   signUpPaths: ['/sign-up'],
 });
 
+/** Referral-cookie shape — set when a visitor lands with ?ref=GROW-… and
+ *  consumed once by /auth/callback on the user's first sign-in. */
+const REF_COOKIE_NAME = 'gh_ref';
+const REF_COOKIE_MAX_AGE = 90 * 24 * 60 * 60; // 90 days
+const REF_CODE_PATTERN = /^[A-Z0-9-]{4,32}$/i;
+
+/** Append a Set-Cookie header to any response we return when the URL has
+ *  a valid ?ref= query parameter. Safe to call on redirects — the cookie
+ *  travels with the response and is set on the client before the
+ *  redirect target is requested.
+ *
+ *  Uses Headers.append rather than NextResponse.cookies.set because the
+ *  authkit middleware can return either a NextResponse or a plain Response
+ *  depending on whether it short-circuits, and Headers.append works on both. */
+function attachReferralCookie(response: Response, request: NextRequest): Response {
+  const ref = request.nextUrl.searchParams.get('ref');
+  if (!ref || !REF_CODE_PATTERN.test(ref)) return response;
+  const cookie = `${REF_COOKIE_NAME}=${encodeURIComponent(ref)}; Path=/; Max-Age=${REF_COOKIE_MAX_AGE}; SameSite=Lax; HttpOnly`;
+  response.headers.append('set-cookie', cookie);
+  return response;
+}
+
 export default async function middleware(request: NextRequest, event: NextFetchEvent) {
   const host = request.headers.get('host') ?? '';
   const { pathname } = request.nextUrl;
@@ -51,7 +73,7 @@ export default async function middleware(request: NextRequest, event: NextFetchE
   if (host === MARKETING_HOSTNAME && isAppPath(pathname)) {
     const target = new URL(request.url);
     target.host = APP_HOSTNAME;
-    return NextResponse.redirect(target, 308);
+    return attachReferralCookie(NextResponse.redirect(target, 308), request);
   }
 
   // Subdomain: bounce non-app, non-auth, non-api paths to the apex.
@@ -63,12 +85,15 @@ export default async function middleware(request: NextRequest, event: NextFetchE
     if (!stays) {
       const target = new URL(request.url);
       target.host = MARKETING_HOSTNAME;
-      return NextResponse.redirect(target, 308);
+      return attachReferralCookie(NextResponse.redirect(target, 308), request);
     }
   }
 
   // Everything else: let AuthKit refresh the session cookie as usual.
-  return authkit(request, event);
+  // authkit can return undefined for non-protected paths — fall back to
+  // NextResponse.next() in that case so we can still attach our cookie.
+  const response: Response = (await authkit(request, event)) ?? NextResponse.next();
+  return attachReferralCookie(response, request);
 }
 
 export const config = {

@@ -12,6 +12,7 @@ import { Resend } from 'resend';
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import { createBooking, getUserBookings, hasOpenBookingFor } from '@/lib/db/bookings';
 import { createNotification } from '@/lib/db/notifications';
+import { qualifyReferral } from '@/lib/db/referrals';
 import { getServiceBySlug } from '@/lib/cms';
 
 export const runtime = 'nodejs';
@@ -88,6 +89,34 @@ export async function POST(req: NextRequest) {
     });
   } catch (e) {
     console.error('[service-bookings] customer notification failed', e);
+  }
+
+  // Growth Call → qualify any pending referral attributed to this user.
+  // Notify both sides that the A$50 credit is pending issuance.
+  if (slug === 'growth-call') {
+    try {
+      const referral = await qualifyReferral(user.id);
+      if (referral) {
+        await Promise.all([
+          createNotification({
+            userId: referral.referrerUserId,
+            kind: 'referral_signed_up',
+            title: 'Your referral booked a Growth Call',
+            body: 'A$50 service credit is on its way to both of you — we apply it on your next paid plan.',
+            href: '/benefits',
+          }),
+          createNotification({
+            userId: user.id,
+            kind: 'referral_signed_up',
+            title: 'A$50 credit unlocked',
+            body: "Thanks for joining via a friend — your A$50 service credit applies to your next paid plan.",
+            href: '/plan',
+          }),
+        ]);
+      }
+    } catch (e) {
+      console.error('[service-bookings] referral qualification failed', e);
+    }
   }
 
   // Best-effort email to ops.

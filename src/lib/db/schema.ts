@@ -233,6 +233,46 @@ export type ServiceBooking = typeof serviceBookings.$inferSelect;
 export type NewServiceBooking = typeof serviceBookings.$inferInsert;
 
 /**
+ * Referral attribution + credit tracking.
+ *
+ * A row is created when a new user signs up with a `?ref=GROW-…` code on
+ * their landing URL. status flow:
+ *   pending    — new user just signed up via referral, hasn't qualified
+ *   qualified  — referred user has booked their first Growth Call
+ *   credited   — A$50 Stripe customer-balance credit has been issued to
+ *                both sides (only possible once each side has a Stripe
+ *                customer ID via a paid plan)
+ *   declined   — fraud / self-referral / manual reject
+ *
+ * referredUserId is UNIQUE — a user can only be attributed to one
+ * referrer. Self-referrals (referrer === referred) are blocked at insert.
+ */
+export const referrals = pgTable(
+  'referrals',
+  {
+    id: serial('id').primaryKey(),
+    referrerUserId: text('referrer_user_id').notNull(),
+    referredUserId: text('referred_user_id').notNull().unique(),
+    referCode: text('refer_code').notNull(),
+      // Snapshot of the code that was used — referrer.referCode may be
+      // regenerated later, so we keep what the URL actually carried.
+    status: varchar('status', { length: 20 }).default('pending').notNull(),
+      // 'pending' | 'qualified' | 'credited' | 'declined'
+    creditedAmountCents: integer('credited_amount_cents').default(0).notNull(),
+      // Total credit in cents issued to BOTH sides. 0 until status=credited.
+    qualifiedAt: timestamp('qualified_at', { withTimezone: true }),
+    creditedAt: timestamp('credited_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    referrerIdx: index('referrals_referrer_idx').on(t.referrerUserId, t.status),
+  }),
+);
+
+export type Referral = typeof referrals.$inferSelect;
+export type NewReferral = typeof referrals.$inferInsert;
+
+/**
  * Member RSVPs against Payload events. The Payload `Events` collection
  * stores event content (title, date, etc.) in the `payload` schema;
  * RSVPs live here so we can join against `subscriptions` and `user_profiles`

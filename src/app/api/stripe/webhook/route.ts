@@ -7,6 +7,7 @@ import { getDb } from '@/lib/db';
 import { subscriptions } from '@/lib/db/schema';
 import { priceIdToPlan, PLANS } from '@/lib/plans';
 import { createNotification } from '@/lib/db/notifications';
+import { tryIssueReferralCredit } from '@/lib/stripe/referral-credit';
 
 // Webhook needs the Node.js runtime so we can read the raw request body
 // for signature verification. Edge runtime parses bodies eagerly.
@@ -185,6 +186,18 @@ async function syncSubscription(subscriptionId: string) {
       });
     } catch (e) {
       console.error('[stripe.webhook] subscription_active notification failed', e);
+    }
+
+    // Try to issue any pending referral credit. This walks both directions:
+    //   - if this user was REFERRED by someone, that referral is credited
+    //     (their credit lands on this customer's Stripe customer balance)
+    //   - if this user IS a referrer and any of their qualified referrals
+    //     have just had their referred user upgrade, those credits process
+    // tryIssueReferralCredit handles both. Failures are logged + swallowed.
+    try {
+      await tryIssueReferralCredit(userId);
+    } catch (e) {
+      console.error('[stripe.webhook] referral credit issuance failed', e);
     }
   }
 }
