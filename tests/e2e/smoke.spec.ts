@@ -60,6 +60,35 @@ test("/services redirects unauthenticated visitor to sign-in", async ({ page }) 
   await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
 });
 
+test("/messages redirects unauthenticated visitor to sign-in", async ({ page }) => {
+  await page.goto("/messages");
+  await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
+});
+
+test("/benefits redirects unauthenticated visitor to sign-in", async ({ page }) => {
+  await page.goto("/benefits");
+  await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
+});
+
+test("/api/notifications rejects unauthenticated GET with 401", async ({ request }) => {
+  const res = await request.get("/api/notifications");
+  expect(res.status()).toBe(401);
+});
+
+test("/api/notifications/unread-count returns 0 for unauthenticated", async ({ request }) => {
+  // This endpoint deliberately doesn't 401 — it's polled silently from the
+  // topbar bell so we don't want to spam the console with auth errors.
+  const res = await request.get("/api/notifications/unread-count");
+  expect(res.status()).toBe(200);
+  const data = await res.json();
+  expect(data.count).toBe(0);
+});
+
+test("/api/messages rejects unauthenticated GET with 401", async ({ request }) => {
+  const res = await request.get("/api/messages");
+  expect(res.status()).toBe(401);
+});
+
 test("/events redirects unauthenticated visitor to sign-in", async ({ page }) => {
   await page.goto("/events");
   await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });

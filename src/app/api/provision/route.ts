@@ -9,6 +9,7 @@
 import { z } from "zod";
 import { wizardStateSchema } from "@/lib/wizard/state";
 import { appendProvisioningLog } from "@/lib/wizard/state-store";
+import { createNotification } from "@/lib/db/notifications";
 import {
   buildCreateSubaccountPayload,
   buildUpdateBusinessPayload,
@@ -183,6 +184,22 @@ export async function POST(req: Request) {
           ok: false,
           error: message,
         });
+      }
+
+      // Emit the in-app notification. The onboardingId IS the user id (we
+      // set it to user.id in the wizard layout). Non-fatal on failure.
+      try {
+        await createNotification({
+          userId: onboardingId,
+          kind: "birdeye_provisioned",
+          title: "Birdeye account ready",
+          body: `Your business is live on Birdeye${
+            businessNumber ? ` (#${businessNumber})` : ""
+          }. Open your dashboard from /services or the portal banner.`,
+          href: "/services",
+        });
+      } catch (e) {
+        console.error("[provision] birdeye_provisioned notification failed", e);
       }
 
       send({ type: "done", businessNumber, invitedUsers, mediaIds });

@@ -5,7 +5,8 @@ import { eq } from 'drizzle-orm';
 import { getStripe } from '@/lib/stripe';
 import { getDb } from '@/lib/db';
 import { subscriptions } from '@/lib/db/schema';
-import { priceIdToPlan } from '@/lib/plans';
+import { priceIdToPlan, PLANS } from '@/lib/plans';
+import { createNotification } from '@/lib/db/notifications';
 
 // Webhook needs the Node.js runtime so we can read the raw request body
 // for signature verification. Edge runtime parses bodies eagerly.
@@ -139,6 +140,17 @@ async function syncSubscription(subscriptionId: string) {
     ? new Date(sub.current_period_end * 1000)
     : null;
 
+  // Read the prior row so we can detect a "just activated" transition and
+  // notify the user. Notifications only fire when we cross from non-active
+  // into active/trialing — repeated activations from the same state are no-ops.
+  const existing = await getDb()
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.stripeCustomerId, customerId))
+    .limit(1);
+  const priorStatus = existing[0]?.subscriptionStatus ?? null;
+  const userId = existing[0]?.userId ?? null;
+
   await getDb()
     .update(subscriptions)
     .set({
@@ -153,6 +165,28 @@ async function syncSubscription(subscriptionId: string) {
       updatedAt: new Date(),
     })
     .where(eq(subscriptions.stripeCustomerId, customerId));
+
+  // Emit subscription_active notification on the active/trialing
+  // transition. Wrapped in a try so a notification failure never breaks
+  // webhook idempotency.
+  const newlyActive =
+    (sub.status === 'active' || sub.status === 'trialing') &&
+    priorStatus !== 'active' &&
+    priorStatus !== 'trialing';
+  if (newlyActive && userId && planInfo) {
+    try {
+      const planName = PLANS[planInfo.tier].name;
+      await createNotification({
+        userId,
+        kind: 'subscription_active',
+        title: `${planName} plan activated`,
+        body: `Welcome aboard — your ${planName} subscription is live. Manage billing any time on the Plan page.`,
+        href: '/plan',
+      });
+    } catch (e) {
+      console.error('[stripe.webhook] subscription_active notification failed', e);
+    }
+  }
 }
 
 /**

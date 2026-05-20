@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation'
 import { withAuth } from '@workos-inc/authkit-nextjs'
 import { getSubscription, getEffectivePlan } from '@/lib/subscription'
 import { PLANS } from '@/lib/plans'
+import { getUnreadNotificationCount } from '@/lib/db/notifications'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Topbar } from '@/components/dashboard/Topbar'
 import type { TopbarUser } from '@/components/dashboard/Topbar'
@@ -31,7 +32,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect('/sign-in?redirect_url=/dashboard')
   }
 
-  const sub = await getSubscription()
+  const [sub, unreadCount] = await Promise.all([
+    getSubscription(),
+    getUnreadNotificationCount(user.id).catch(() => 0),
+  ])
   const tier = getEffectivePlan(sub) // 'free' | 'foundations' | 'growth' | 'accelerate'
 
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email || ''
@@ -45,7 +49,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="gh-frame" style={{ width: '100vw', height: '100vh', minHeight: 720 }}>
       <Sidebar />
       <div className="gh-main">
-        <Topbar user={topbarUser} />
+        <Topbar user={topbarUser} initialUnreadCount={unreadCount} />
         <div className="gh-content">{children}</div>
       </div>
     </div>

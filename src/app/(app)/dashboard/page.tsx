@@ -7,6 +7,9 @@ import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import { PLANS } from '@/lib/plans';
 import { getFeaturedResources, getUpcomingEvents } from '@/lib/cms';
 import { getUserRsvpSet } from '@/lib/db/rsvps';
+import { getNotifications } from '@/lib/db/notifications';
+import { getUnreadMessageCount, getThread } from '@/lib/db/messages';
+import type { Notification } from '@/lib/db/schema';
 import {
   IcoBriefcase,
   IcoCal,
@@ -20,32 +23,45 @@ export const metadata: Metadata = {
   title: 'Dashboard — Growth Hub',
 };
 
-// Static post-signup notifications. Phase 5 replaces these with rows from
-// the notifications table; for now they cover the welcome moment that
-// every new user sees.
-const STATIC_NOTIFICATIONS = [
-  {
-    id: 'n1',
-    tone: 'plum',
-    title: 'Welcome to The Growth Hub',
-    body: 'Your account is live. Complete your profile to unlock tailored recommendations.',
-    time: 'Just now',
-  },
-  {
-    id: 'n2',
-    tone: 'lav',
-    title: 'Your free Growth Call is waiting',
-    body: 'Every new member gets a complimentary 30-minute strategy call. Pick a time that suits you.',
-    time: 'Just now',
-  },
-  {
-    id: 'n3',
-    tone: 'teal',
-    title: 'Member benefits unlocked',
-    body: 'You now have access to the resource library, weekly webinars and community events.',
-    time: 'Just now',
-  },
-];
+// Notification "kind" → tone + icon used in the dashboard card. The
+// inbox view (Phase 5+) renders the same notifications with richer chrome.
+function notificationTone(kind: string): 'plum' | 'lav' | 'teal' {
+  switch (kind) {
+    case 'welcome':
+    case 'message_received':
+      return 'plum';
+    case 'subscription_active':
+    case 'event_reminder':
+      return 'lav';
+    case 'birdeye_provisioned':
+    case 'new_resource':
+    case 'referral_signed_up':
+    default:
+      return 'teal';
+  }
+}
+
+function notificationIcon(tone: 'plum' | 'lav' | 'teal') {
+  return tone === 'plum'
+    ? <IcoSpark />
+    : tone === 'lav'
+      ? <IcoCal />
+      : <IcoGift />;
+}
+
+/** Friendly relative time ("Just now", "5m ago", "2h ago", "3d ago"). */
+function relativeTime(date: Date): string {
+  const diffMs = Date.now() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 60) return 'Just now';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return new Intl.DateTimeFormat('en-AU', { day: 'numeric', month: 'short' }).format(date);
+}
 
 // Tone → CSS class on the dashboard "tag-on-img" pill. Keeps the visual
 // language consistent with the resource grid on /resources.
@@ -74,12 +90,16 @@ export default async function DashboardPage() {
     email: user.email,
   });
 
-  const [sub, featuredResources, upcomingEvents, rsvpSet] = await Promise.all([
-    getSubscription(),
-    getFeaturedResources(3),
-    getUpcomingEvents(50),
-    getUserRsvpSet(user.id),
-  ]);
+  const [sub, featuredResources, upcomingEvents, rsvpSet, notifications, thread, unreadMsgCount] =
+    await Promise.all([
+      getSubscription(),
+      getFeaturedResources(3),
+      getUpcomingEvents(50),
+      getUserRsvpSet(user.id),
+      getNotifications(user.id, 3),
+      getThread(user.id),
+      getUnreadMessageCount(user.id),
+    ]);
   const tier = getEffectivePlan(sub);
   const plan = PLANS[tier];
 
@@ -87,6 +107,12 @@ export default async function DashboardPage() {
   const myUpcoming = upcomingEvents
     .filter((e) => rsvpSet.has(Number(e.id)))
     .slice(0, 2);
+
+  // Latest team message — shown in the dashboard Messages preview card.
+  const latestTeamMessage = [...thread]
+    .reverse()
+    .find((m) => m.fromTeam);
+  const unreadNotifCount = notifications.filter((n: Notification) => !n.readAt).length;
 
   const greet = user.firstName || user.email?.split('@')[0] || 'there';
   const memberSince = new Intl.DateTimeFormat('en-AU', { dateStyle: 'long' }).format(
@@ -314,23 +340,47 @@ export default async function DashboardPage() {
           <div className="gh-card-hd">
             <div className="gh-card-h">
               Notifications
-              <span className="gh-pill plum">3 new</span>
+              {unreadNotifCount > 0 && (
+                <span className="gh-pill plum">{unreadNotifCount} new</span>
+              )}
             </div>
           </div>
-          <ul className="gh-list">
-            {STATIC_NOTIFICATIONS.map((n) => (
-              <li key={n.id}>
-                <div className={`gh-list-ic ${n.tone === 'plum' ? 'plum' : n.tone === 'lav' ? 'lav' : ''}`}>
-                  {n.tone === 'plum' ? <IcoSpark /> : n.tone === 'lav' ? <IcoCal /> : <IcoGift />}
-                </div>
-                <div className="gh-list-body">
-                  <div className="gh-list-h">{n.title}</div>
-                  <p className="gh-list-p">{n.body}</p>
-                </div>
-                <div className="gh-list-time">{n.time}</div>
-              </li>
-            ))}
-          </ul>
+          {notifications.length === 0 ? (
+            <div className="gh-empty" style={{ minHeight: 0, padding: '20px 18px' }}>
+              <div className="gh-empty-h">No notifications yet</div>
+              <p className="gh-empty-p">
+                We&apos;ll ping you here when something needs your attention — new resources,
+                upcoming events, billing changes.
+              </p>
+            </div>
+          ) : (
+            <ul className="gh-list">
+              {notifications.map((n) => {
+                const tone = notificationTone(n.kind);
+                const Item = (
+                  <>
+                    <div className={`gh-list-ic ${tone}`}>{notificationIcon(tone)}</div>
+                    <div className="gh-list-body">
+                      <div className="gh-list-h">{n.title}</div>
+                      <p className="gh-list-p">{n.body}</p>
+                    </div>
+                    <div className="gh-list-time">{relativeTime(n.createdAt)}</div>
+                  </>
+                );
+                return (
+                  <li key={n.id}>
+                    {n.href ? (
+                      <Link href={n.href} style={{ display: 'contents', color: 'inherit', textDecoration: 'none' }}>
+                        {Item}
+                      </Link>
+                    ) : (
+                      Item
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
 
         <div className="gh-card">
@@ -340,21 +390,38 @@ export default async function DashboardPage() {
               Open inbox
             </Link>
           </div>
-          <div className="gh-empty" style={{ minHeight: 0, padding: '20px 18px' }}>
-            <div className="gh-empty-ic">
-              <IcoMsg />
+          {latestTeamMessage ? (
+            <div className="gh-empty" style={{ minHeight: 0, padding: '20px 18px' }}>
+              <div className="gh-empty-ic">
+                <IcoMsg />
+              </div>
+              <div className="gh-empty-h">
+                {unreadMsgCount > 0
+                  ? `${unreadMsgCount} unread message${unreadMsgCount === 1 ? '' : 's'}`
+                  : 'Caught up'}
+              </div>
+              <p className="gh-empty-p">
+                {latestTeamMessage.body.slice(0, 140)}
+                {latestTeamMessage.body.length > 140 ? '…' : ''}
+              </p>
+              <Link href="/messages">
+                <button className="gh-empty-cta ghost" type="button">
+                  Open message
+                </button>
+              </Link>
             </div>
-            <div className="gh-empty-h">1 unread message</div>
-            <p className="gh-empty-p">
-              A welcome note from the Growth Hub team is waiting. Your Strategist will reach out
-              after your first call.
-            </p>
-            <Link href="/messages">
-              <button className="gh-empty-cta ghost" type="button">
-                Open message
-              </button>
-            </Link>
-          </div>
+          ) : (
+            <div className="gh-empty" style={{ minHeight: 0, padding: '20px 18px' }}>
+              <div className="gh-empty-ic">
+                <IcoMsg />
+              </div>
+              <div className="gh-empty-h">Your inbox is clear</div>
+              <p className="gh-empty-p">
+                The Growth Hub team will reach out after you finish onboarding or book your first
+                Growth Call.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="gh-card gh-refer">
