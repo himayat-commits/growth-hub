@@ -41,9 +41,18 @@ function makeReferCode(user: WorkOSUserLike): string {
 }
 
 export async function ensureUserRecord(user: WorkOSUserLike): Promise<UserProfile> {
+  return (await ensureUserRecordWithStatus(user)).profile;
+}
+
+/** Variant of ensureUserRecord that also reports whether the profile row
+ *  was created on this call. Used by /auth/callback to seed the welcome
+ *  notification + message exactly once per user (on their first sign-in). */
+export async function ensureUserRecordWithStatus(
+  user: WorkOSUserLike,
+): Promise<{ profile: UserProfile; created: boolean }> {
   const db = getDb();
   const rows = await db.select().from(userProfiles).where(eq(userProfiles.userId, user.id)).limit(1);
-  if (rows[0]) return rows[0];
+  if (rows[0]) return { profile: rows[0], created: false };
 
   // First sign-in. Insert a starter profile.
   const inserted = await db
@@ -55,10 +64,11 @@ export async function ensureUserRecord(user: WorkOSUserLike): Promise<UserProfil
     .onConflictDoNothing({ target: userProfiles.userId })
     .returning();
 
-  if (inserted[0]) return inserted[0];
+  if (inserted[0]) return { profile: inserted[0], created: true };
 
   // ON CONFLICT path — someone else (a concurrent sign-in) created the row.
-  // Fetch what's now there.
+  // Fetch what's now there. We didn't create it (the concurrent path did),
+  // so report created: false to avoid double-sending welcome messages.
   const refetched = await db
     .select()
     .from(userProfiles)
@@ -67,7 +77,7 @@ export async function ensureUserRecord(user: WorkOSUserLike): Promise<UserProfil
   if (!refetched[0]) {
     throw new Error(`ensureUserRecord: race-recovery select returned no row for ${user.id}`);
   }
-  return refetched[0];
+  return { profile: refetched[0], created: false };
 }
 
 /**

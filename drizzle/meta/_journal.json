@@ -36,6 +36,13 @@
       "when": 1779197153275,
       "tag": "0004_add_event_rsvps",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779254853908,
+      "tag": "0005_add_notifications_messages",
+      "breakpoints": true
     }
   ]
 }

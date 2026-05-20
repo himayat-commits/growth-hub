@@ -127,6 +127,66 @@ export type UserProfile = typeof userProfiles.$inferSelect;
 export type NewUserProfile = typeof userProfiles.$inferInsert;
 
 /**
+ * Per-user notification feed surfaced on /dashboard and the topbar bell.
+ *
+ * `kind` is a discriminator we use to render the right icon + tone in the
+ * UI. Append-only — we never delete rows, just mark them read.
+ *
+ * `href` is optional but useful for "click the notification, go somewhere".
+ */
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    kind: varchar('kind', { length: 30 }).notNull(),
+      // 'welcome' | 'subscription_active' | 'birdeye_provisioned'
+      // | 'new_resource' | 'event_reminder' | 'referral_signed_up'
+      // | 'message_received'
+    title: text('title').notNull(),
+    body: text('body').notNull(),
+    href: text('href'),
+    readAt: timestamp('read_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    userCreatedIdx: index('notifications_user_created_idx').on(t.userId, t.createdAt),
+  }),
+);
+
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
+
+/**
+ * Single thread of messages per user — the "Growth Hub Team" catch-all
+ * inbox. `fromTeam = true` means someone on the Himayat team sent it;
+ * `false` means the customer sent it.
+ *
+ * v1 stays as one thread per user (no per-Strategist assignment). When we
+ * add Strategist assignment in a later phase, we'll add a `threadId` column
+ * and migrate existing rows into a single legacy thread.
+ */
+export const messages = pgTable(
+  'messages',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    fromTeam: boolean('from_team').notNull(),
+    authorName: text('author_name'),
+      // 'Growth Hub Team' for the catch-all, or the operator's name when known
+    body: text('body').notNull(),
+    readAt: timestamp('read_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    userCreatedIdx: index('messages_user_created_idx').on(t.userId, t.createdAt),
+  }),
+);
+
+export type Message = typeof messages.$inferSelect;
+export type NewMessage = typeof messages.$inferInsert;
+
+/**
  * Member RSVPs against Payload events. The Payload `Events` collection
  * stores event content (title, date, etc.) in the `payload` schema;
  * RSVPs live here so we can join against `subscriptions` and `user_profiles`

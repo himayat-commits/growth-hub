@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { IcoSearch, IcoBell, IcoHelp } from './Icons'
 
@@ -11,10 +12,40 @@ export interface TopbarUser {
 
 interface TopbarProps {
   user: TopbarUser
-  unreadCount?: number
+  initialUnreadCount?: number
 }
 
-export function Topbar({ user, unreadCount = 0 }: TopbarProps) {
+// Poll /api/notifications/unread-count every 60s so the bell dot stays in
+// sync with new notifications without a websocket. Cheap — just a count.
+function useUnreadCount(initial: number) {
+  const [count, setCount] = useState(initial)
+  useEffect(() => {
+    let cancelled = false
+    const tick = async () => {
+      try {
+        const res = await fetch('/api/notifications/unread-count', { cache: 'no-store' })
+        if (!res.ok) return
+        const data: { count?: number } = await res.json()
+        if (!cancelled && typeof data.count === 'number') setCount(data.count)
+      } catch {
+        /* silent — try again next tick */
+      }
+    }
+    const id = window.setInterval(tick, 60_000)
+    // Also re-check on focus so coming back from another tab feels fresh.
+    const onFocus = () => { void tick() }
+    window.addEventListener('focus', onFocus)
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+      window.removeEventListener('focus', onFocus)
+    }
+  }, [])
+  return count
+}
+
+export function Topbar({ user, initialUnreadCount = 0 }: TopbarProps) {
+  const unreadCount = useUnreadCount(initialUnreadCount)
   return (
     <div className="gh-top">
       <div className="gh-search">
@@ -26,7 +57,8 @@ export function Topbar({ user, unreadCount = 0 }: TopbarProps) {
         <button className="gh-icon-btn" aria-label="Help">
           <IcoHelp />
         </button>
-        <button
+        <Link
+          href="/dashboard"
           className="gh-icon-btn"
           aria-label={
             unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'
@@ -34,7 +66,7 @@ export function Topbar({ user, unreadCount = 0 }: TopbarProps) {
         >
           <IcoBell />
           {unreadCount > 0 && <span className="gh-dot" />}
-        </button>
+        </Link>
       </div>
       <Link
         href="/profile"
