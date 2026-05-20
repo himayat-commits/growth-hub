@@ -32,6 +32,8 @@ import { TeamMembers } from './collections/TeamMembers.ts';
 import { Media } from './collections/Media.ts';
 import { Logos } from './collections/Logos.ts';
 import { Partners } from './collections/Partners.ts';
+import { Events } from './collections/Events.ts';
+import { Resources } from './collections/Resources.ts';
 
 // Globals
 import { SiteSettings } from './globals/SiteSettings.ts';
@@ -59,6 +61,8 @@ export default buildConfig({
     Media,
     Logos,
     Partners,
+    Events,
+    Resources,
   ],
 
   globals: [

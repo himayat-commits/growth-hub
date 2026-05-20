@@ -55,6 +55,21 @@ test("/profile redirects unauthenticated visitor to sign-in", async ({ page }) =
   await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
 });
 
+test("/events redirects unauthenticated visitor to sign-in", async ({ page }) => {
+  await page.goto("/events");
+  await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
+});
+
+test("/resources redirects unauthenticated visitor to sign-in", async ({ page }) => {
+  await page.goto("/resources");
+  await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
+});
+
+test("/api/events/:id/rsvp rejects unauthenticated POST with 401", async ({ request }) => {
+  const res = await request.post("/api/events/1/rsvp");
+  expect(res.status()).toBe(401);
+});
+
 test("/onboarding redirects unauthenticated visitor to sign-in", async ({ page }) => {
   await page.goto("/onboarding");
   await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });

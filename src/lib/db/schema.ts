@@ -125,3 +125,29 @@ export const userProfiles = pgTable('user_profiles', {
 
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type NewUserProfile = typeof userProfiles.$inferInsert;
+
+/**
+ * Member RSVPs against Payload events. The Payload `Events` collection
+ * stores event content (title, date, etc.) in the `payload` schema;
+ * RSVPs live here so we can join against `subscriptions` and `user_profiles`
+ * with Drizzle without bouncing through Payload's local API.
+ *
+ * `eventId` is the Payload event row id — Payload uses integers/serial
+ * IDs by default with the postgres adapter, so we mirror as integer.
+ *
+ * Compound primary key (userId + eventId) prevents double-RSVPs.
+ */
+export const eventRsvps = pgTable(
+  'event_rsvps',
+  {
+    userId: text('user_id').notNull(),
+    eventId: integer('event_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    userEventIdx: index('event_rsvps_user_event_idx').on(t.userId, t.eventId),
+  }),
+);
+
+export type EventRsvp = typeof eventRsvps.$inferSelect;
+export type NewEventRsvp = typeof eventRsvps.$inferInsert;

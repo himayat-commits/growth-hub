@@ -5,6 +5,8 @@ import { withAuth } from '@workos-inc/authkit-nextjs';
 import { ensureUserRecord } from '@/lib/auth/ensure-user-record';
 import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import { PLANS } from '@/lib/plans';
+import { getFeaturedResources, getUpcomingEvents } from '@/lib/cms';
+import { getUserRsvpSet } from '@/lib/db/rsvps';
 import {
   IcoBriefcase,
   IcoCal,
@@ -45,27 +47,12 @@ const STATIC_NOTIFICATIONS = [
   },
 ];
 
-// Suggested first reads — Phase 3 replaces with real Payload Resources.
-const STATIC_SUGGESTED = [
-  {
-    tag: 'Guide',
-    title: 'First steps: define your offer in one sentence',
-    meta: '5-min read',
-    tagClass: '',
-  },
-  {
-    tag: 'Template',
-    title: 'One-page business canvas — Growth Hub edition',
-    meta: 'PDF · Editable',
-    tagClass: 'lime',
-  },
-  {
-    tag: 'Webinar',
-    title: 'Marketing without burnout — for small operators',
-    meta: 'Thu 21 May · 12:30pm',
-    tagClass: 'teal',
-  },
-];
+// Tone → CSS class on the dashboard "tag-on-img" pill. Keeps the visual
+// language consistent with the resource grid on /resources.
+function toneClass(tone: string | null | undefined): string {
+  if (tone === 'lime' || tone === 'teal' || tone === 'plum' || tone === 'lav') return tone;
+  return '';
+}
 
 interface ChecklistItem {
   id: string;
@@ -87,9 +74,19 @@ export default async function DashboardPage() {
     email: user.email,
   });
 
-  const sub = await getSubscription();
+  const [sub, featuredResources, upcomingEvents, rsvpSet] = await Promise.all([
+    getSubscription(),
+    getFeaturedResources(3),
+    getUpcomingEvents(50),
+    getUserRsvpSet(user.id),
+  ]);
   const tier = getEffectivePlan(sub);
   const plan = PLANS[tier];
+
+  // The user's next 1-2 upcoming sessions (events they've RSVP'd to).
+  const myUpcoming = upcomingEvents
+    .filter((e) => rsvpSet.has(Number(e.id)))
+    .slice(0, 2);
 
   const greet = user.firstName || user.email?.split('@')[0] || 'there';
   const memberSince = new Intl.DateTimeFormat('en-AU', { dateStyle: 'long' }).format(
@@ -267,21 +264,47 @@ export default async function DashboardPage() {
               My calendar →
             </Link>
           </div>
-          <div className="gh-empty">
-            <div className="gh-empty-ic">
-              <IcoCal />
+          {myUpcoming.length === 0 ? (
+            <div className="gh-empty">
+              <div className="gh-empty-ic">
+                <IcoCal />
+              </div>
+              <div className="gh-empty-h">Your calendar is clear</div>
+              <p className="gh-empty-p">
+                Browse events and register for the next webinar, workshop or meet-up.
+              </p>
+              <Link href="/events">
+                <button className="gh-empty-cta" type="button">
+                  See what&apos;s on
+                </button>
+              </Link>
             </div>
-            <div className="gh-empty-h">Your calendar is clear</div>
-            <p className="gh-empty-p">
-              Start with a free 30-minute Growth Call. We&apos;ll map your first three moves
-              together.
-            </p>
-            <Link href="/services">
-              <button className="gh-empty-cta" type="button">
-                Book Growth Call
-              </button>
-            </Link>
-          </div>
+          ) : (
+            <ul className="gh-list">
+              {myUpcoming.map((e) => {
+                const dt = new Date(e.date as string);
+                const dateLabel = new Intl.DateTimeFormat('en-AU', {
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'short',
+                }).format(dt);
+                return (
+                  <li key={e.id}>
+                    <div className="gh-list-ic">
+                      <IcoCal />
+                    </div>
+                    <div className="gh-list-body">
+                      <div className="gh-list-h">{e.title}</div>
+                      <p className="gh-list-p">
+                        {dateLabel}
+                        {e.time ? ` · ${e.time}` : ''}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       </div>
 
@@ -358,35 +381,50 @@ export default async function DashboardPage() {
       </div>
 
       {/* Suggested resources */}
-      <div className="gh-suggest">
-        <div className="gh-card-hd">
-          <div className="gh-card-h">Suggested first reads</div>
-          <Link href="/resources" className="gh-card-link">
-            All resources →
-          </Link>
-        </div>
-        <div className="gh-suggest-grid">
-          {STATIC_SUGGESTED.map((s, i) => (
-            <Link
-              key={i}
-              href="/resources"
-              className="gh-suggest-item"
-              style={{ textDecoration: 'none', color: 'inherit' }}
-            >
-              <div className="gh-img-thumb">
-                <div className="gh-img-placeholder" />
-                <span className={`tag-on-img ${s.tagClass}`}>{s.tag}</span>
-              </div>
-              <h4 className="gh-suggest-h">{s.title}</h4>
-              <div className="gh-suggest-meta">
-                <span>{s.meta}</span>
-                <span className="dot" />
-                <span>Free</span>
-              </div>
+      {featuredResources.length > 0 && (
+        <div className="gh-suggest">
+          <div className="gh-card-hd">
+            <div className="gh-card-h">Suggested first reads</div>
+            <Link href="/resources" className="gh-card-link">
+              All resources →
             </Link>
-          ))}
+          </div>
+          <div className="gh-suggest-grid">
+            {featuredResources.map((r) => {
+              const thumb = r.thumbnail as { url?: string } | string | null | undefined;
+              const thumbUrl = typeof thumb === 'object' && thumb?.url ? thumb.url : null;
+              return (
+                <Link
+                  key={r.id}
+                  href={(r.url as string | undefined) ?? '/resources'}
+                  target={r.url ? '_blank' : undefined}
+                  rel={r.url ? 'noopener noreferrer' : undefined}
+                  className="gh-suggest-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <div className="gh-img-thumb">
+                    {thumbUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div className="gh-img-placeholder" />
+                    )}
+                    <span className={`tag-on-img ${toneClass(r.tone as string | null)}`}>
+                      {r.tag}
+                    </span>
+                  </div>
+                  <h4 className="gh-suggest-h">{r.title}</h4>
+                  <div className="gh-suggest-meta">
+                    <span>{r.meta ?? r.tag}</span>
+                    <span className="dot" />
+                    <span>{r.free ? 'Free' : 'Member'}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

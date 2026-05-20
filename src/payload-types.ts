@@ -77,6 +77,8 @@ export interface Config {
     media: Media;
     logos: Logo;
     partners: Partner;
+    events: Event;
+    resources: Resource;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +96,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     logos: LogosSelect<false> | LogosSelect<true>;
     partners: PartnersSelect<false> | PartnersSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
+    resources: ResourcesSelect<false> | ResourcesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -743,6 +747,82 @@ export interface Partner {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  description?: string | null;
+  /**
+   * Date the event runs on. Past dates remain visible as recordings.
+   */
+  date: string;
+  /**
+   * Display time, e.g. "12:30 – 1:30 pm" or "10:00 – 11:30 am".
+   */
+  time?: string | null;
+  type?: ('webinar' | 'workshop' | 'community') | null;
+  /**
+   * For in-person events. Leave blank for online.
+   */
+  location?: string | null;
+  /**
+   * Free-text seat availability shown to members, e.g. "8 of 12 spots left" or "Open registration".
+   */
+  seats?: string | null;
+  /**
+   * External registration URL (e.g. Eventbrite, Zoom).
+   */
+  registerUrl?: string | null;
+  /**
+   * For past events — surfaces in the recordings grid once uploaded.
+   */
+  recording?: (number | null) | Media;
+  /**
+   * Pin to the hero slot at the top of /events. Only the next featured upcoming event is shown.
+   */
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "resources".
+ */
+export interface Resource {
+  id: number;
+  title: string;
+  tag: 'Guide' | 'Template' | 'Course' | 'Video' | 'Webinar';
+  /**
+   * Card thumbnail colour. Try to spread tones across the grid for visual rhythm.
+   */
+  tone?: ('cream' | 'lime' | 'teal' | 'plum' | 'lav') | null;
+  /**
+   * Short meta line, e.g. "5-min read" or "PDF · Editable" or "Self-paced · 2 hrs".
+   */
+  meta?: string | null;
+  /**
+   * Optional cover image. Falls back to a solid-colour thumbnail using `tone`.
+   */
+  thumbnail?: (number | null) | Media;
+  /**
+   * Where the card links to — a hosted PDF, external course, YouTube, etc.
+   */
+  url?: string | null;
+  /**
+   * Uncheck to gate behind a paid plan.
+   */
+  free?: boolean | null;
+  publishedAt?: string | null;
+  /**
+   * Show in the dashboard "Suggested first reads" card. Aim for 3 featured at any time.
+   */
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -804,6 +884,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'partners';
         value: number | Partner;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'resources';
+        value: number | Resource;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1283,6 +1371,41 @@ export interface PartnersSelect<T extends boolean = true> {
   featured?: T;
   order?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  date?: T;
+  time?: T;
+  type?: T;
+  location?: T;
+  seats?: T;
+  registerUrl?: T;
+  recording?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "resources_select".
+ */
+export interface ResourcesSelect<T extends boolean = true> {
+  title?: T;
+  tag?: T;
+  tone?: T;
+  meta?: T;
+  thumbnail?: T;
+  url?: T;
+  free?: T;
+  publishedAt?: T;
+  featured?: T;
   updatedAt?: T;
   createdAt?: T;
 }

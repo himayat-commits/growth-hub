@@ -711,6 +711,149 @@ async function seed() {
   });
   console.log('✅  Updated PartnersPage global.');
 
+  // ── Events ──────────────────────────────────────────────────────────────────
+  const existingEvents = await payload.find({ collection: 'events', limit: 1 });
+  if (existingEvents.totalDocs > 0) {
+    console.log('⏭   Events already exist — skipping.');
+  } else {
+    const now = new Date();
+    const inDays = (n: number) => new Date(now.getTime() + n * 24 * 60 * 60 * 1000);
+    const sampleEvents = [
+      {
+        title: 'Marketing without burnout — for small operators',
+        description:
+          'How to run sustainable marketing as a team of one or two — with a content cadence you can actually keep.',
+        date: inDays(2).toISOString(),
+        time: '12:30 – 1:30pm',
+        type: 'webinar' as const,
+        seats: '42 spots open',
+        featured: true,
+      },
+      {
+        title: 'Building your first website — hands-on session',
+        description:
+          "Bring a laptop. We'll set up a landing page together using a free no-code tool. Lunch included.",
+        date: inDays(9).toISOString(),
+        time: '10:00 – 11:30am',
+        type: 'workshop' as const,
+        location: 'Auburn',
+        seats: '8 of 12 spots left',
+        featured: false,
+      },
+      {
+        title: 'Pricing services without underselling yourself',
+        description:
+          "A framework for setting prices that respect your time. Walk away with a number you'll actually quote.",
+        date: inDays(16).toISOString(),
+        time: '12:30 – 1:30pm',
+        type: 'webinar' as const,
+        seats: 'Open registration',
+        featured: false,
+      },
+      {
+        title: 'Growth Hub monthly meet-up',
+        description:
+          "Three members share what's working. Tea, food, conversation. Free, but please RSVP for catering.",
+        date: inDays(23).toISOString(),
+        time: '6:00 – 8:00pm',
+        type: 'community' as const,
+        location: 'Lakemba',
+        seats: 'Open registration',
+        featured: false,
+      },
+    ];
+    for (const e of sampleEvents) {
+      await payload.create({ collection: 'events', data: e });
+    }
+    console.log(`✅  Created ${sampleEvents.length} sample events.`);
+  }
+
+  // ── Resources ──────────────────────────────────────────────────────────────
+  const existingResources = await payload.find({ collection: 'resources', limit: 1 });
+  if (existingResources.totalDocs > 0) {
+    console.log('⏭   Resources already exist — skipping.');
+  } else {
+    const today = new Date().toISOString();
+    const sampleResources = [
+      {
+        title: 'First steps: define your offer in one sentence',
+        tag: 'Guide' as const,
+        tone: 'cream' as const,
+        meta: '5-min read',
+        free: true,
+        featured: true,
+        publishedAt: today,
+      },
+      {
+        title: 'One-page business canvas — Growth Hub edition',
+        tag: 'Template' as const,
+        tone: 'lime' as const,
+        meta: 'PDF · Editable',
+        free: true,
+        featured: true,
+        publishedAt: today,
+      },
+      {
+        title: 'From idea to first paying customer — 4 modules',
+        tag: 'Course' as const,
+        tone: 'teal' as const,
+        meta: 'Self-paced · 2 hrs',
+        free: true,
+        featured: false,
+        publishedAt: today,
+      },
+      {
+        title: 'Pricing calculator for service businesses',
+        tag: 'Template' as const,
+        tone: 'cream' as const,
+        meta: 'Spreadsheet · A$0',
+        free: true,
+        featured: false,
+        publishedAt: today,
+      },
+      {
+        title: 'How to write an About page people actually read',
+        tag: 'Guide' as const,
+        tone: 'lav' as const,
+        meta: '8-min read',
+        free: true,
+        featured: false,
+        publishedAt: today,
+      },
+      {
+        title: 'Three questions to ask every new customer',
+        tag: 'Video' as const,
+        tone: 'plum' as const,
+        meta: 'Watch · 12 min',
+        free: true,
+        featured: false,
+        publishedAt: today,
+      },
+      {
+        title: 'SEO Foundations — Module 1 free preview',
+        tag: 'Course' as const,
+        tone: 'teal' as const,
+        meta: 'Self-paced · 35 min',
+        free: true,
+        featured: true,
+        publishedAt: today,
+      },
+      {
+        title: 'Discovery call script + question bank',
+        tag: 'Template' as const,
+        tone: 'lime' as const,
+        meta: 'Doc · Editable',
+        free: true,
+        featured: false,
+        publishedAt: today,
+      },
+    ];
+    for (const r of sampleResources) {
+      await payload.create({ collection: 'resources', data: r });
+    }
+    console.log(`✅  Created ${sampleResources.length} sample resources.`);
+  }
+
   console.log('\n🎉  Seed complete!');
   process.exit(0);
 }

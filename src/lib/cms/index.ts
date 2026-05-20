@@ -236,3 +236,98 @@ export const getPartnersPage = unstable_cache(
   ['partners-page'],
   { tags: ['partners-page'], revalidate: 3600 }
 );
+
+// ── Events ────────────────────────────────────────────────────────────────────
+
+/** All events with date >= today (or no date), sorted by date ascending.
+ *  Useful for the /events page's "Upcoming" section. */
+export const getUpcomingEvents = unstable_cache(
+  async (limit = 50) => {
+    const payload = await getPayloadClient();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const { docs } = await payload.find({
+      collection: 'events',
+      where: {
+        date: { greater_than_equal: today.toISOString() },
+      },
+      sort: 'date',
+      limit,
+      depth: 1,
+    });
+    return docs;
+  },
+  ['events-upcoming'],
+  { tags: ['events'], revalidate: 3600 },
+);
+
+/** Past events that have a recording uploaded. Used by /events "Past
+ *  recordings" grid. */
+export const getPastRecordings = unstable_cache(
+  async (limit = 12) => {
+    const payload = await getPayloadClient();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const { docs } = await payload.find({
+      collection: 'events',
+      where: {
+        and: [
+          { date: { less_than: today.toISOString() } },
+          { recording: { exists: true } },
+        ],
+      },
+      sort: '-date',
+      limit,
+      depth: 1,
+    });
+    return docs;
+  },
+  ['events-past-recordings'],
+  { tags: ['events'], revalidate: 3600 },
+);
+
+/** A single event by ID — used by the RSVP API to confirm the event exists. */
+export async function getEventById(id: string | number) {
+  const payload = await getPayloadClient();
+  try {
+    return await payload.findByID({ collection: 'events', id, depth: 0 });
+  } catch {
+    return null;
+  }
+}
+
+// ── Resources ─────────────────────────────────────────────────────────────────
+
+/** All published resources, newest first. Wrapped in cache so /resources
+ *  can call this on every page load without round-tripping Payload. */
+export const getResources = unstable_cache(
+  async (limit = 100) => {
+    const payload = await getPayloadClient();
+    const { docs } = await payload.find({
+      collection: 'resources',
+      sort: '-publishedAt',
+      limit,
+      depth: 1,
+    });
+    return docs;
+  },
+  ['resources-list'],
+  { tags: ['resources'], revalidate: 3600 },
+);
+
+/** The 3-card "Suggested first reads" surface on /dashboard reads this. */
+export const getFeaturedResources = unstable_cache(
+  async (limit = 3) => {
+    const payload = await getPayloadClient();
+    const { docs } = await payload.find({
+      collection: 'resources',
+      where: { featured: { equals: true } },
+      sort: '-publishedAt',
+      limit,
+      depth: 1,
+    });
+    return docs;
+  },
+  ['resources-featured'],
+  { tags: ['resources'], revalidate: 3600 },
+);

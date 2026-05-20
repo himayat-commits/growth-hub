@@ -29,6 +29,13 @@
       "when": 1779193954328,
       "tag": "0003_add_user_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779197153275,
+      "tag": "0004_add_event_rsvps",
+      "breakpoints": true
     }
   ]
 }
