@@ -26,16 +26,29 @@ export default async function PartnersPage() {
 
   const partners = partnersResult?.docs ?? [];
 
-  // Split partners: featured wall vs. full directory
+  // Split partners: featured wall vs. full directory.
+  // `category` is the canonical field (post-Phase-9 schema). The
+  // shared.ts → legacyCategoryFallback() also handles older `type` values
+  // in case any unmigrated records linger.
   const featuredPartners = partners
     .filter((p) => p.featured)
-    .map((p) => ({ id: String(p.id), name: p.name, type: p.type }));
+    .map((p) => ({
+      id: String(p.id),
+      name: p.name,
+      category: (p as { category?: string | null }).category ?? null,
+      shape: (p as { shape?: string | null }).shape ?? null,
+    }));
 
   const directoryPartners = partners.map((p) => ({
     id: String(p.id),
     name: p.name,
-    type: p.type,
+    category: (p as { category?: string | null }).category ?? null,
+    shape: (p as { shape?: string | null }).shape ?? null,
     description: p.description ?? null,
+    region: (p as { region?: string | null }).region ?? null,
+    since: (p as { since?: string | null }).since ?? null,
+    contribution: (p as { contribution?: string | null }).contribution ?? null,
+    howWeWork: (p as { howWeWork?: string | null }).howWeWork ?? null,
     website: p.website ?? null,
     contactName: p.contactName ?? null,
     contactEmail: p.contactEmail ?? null,
