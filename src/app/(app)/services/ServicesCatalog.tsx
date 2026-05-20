@@ -111,10 +111,7 @@ export default function ServicesCatalog({ services }: { services: ServiceItem[] 
                   {s.price && <b>{s.price}</b>}
                   {s.priceLabel && <span>{s.priceLabel}</span>}
                 </div>
-                <a
-                  href={`mailto:hello@himayat.com.au?subject=${encodeURIComponent(`Service enquiry: ${s.title}`)}`}
-                  className="gh-btn"
-                >
+                <a href={`/services/${s.slug}`} className="gh-btn">
                   {s.ctaLabel}
                 </a>
               </div>

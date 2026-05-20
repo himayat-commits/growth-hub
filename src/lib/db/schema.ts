@@ -187,6 +187,52 @@ export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
 
 /**
+ * Customer-requested engagements with one of the Payload Services
+ * (Growth Call, Website Setup, Marketing Coaching, etc.).
+ *
+ * Status flow:
+ *   requested    — customer just submitted the form (initial state)
+ *   scheduled    — ops has booked a time / call
+ *   in_progress  — active engagement
+ *   completed    — done
+ *
+ * v1 customers can only create rows (status=requested). Ops handles the
+ * later transitions in Neon directly until we ship the ops console.
+ *
+ * `serviceSlug` is the Payload Service.slug (text) — we keep it loose
+ * because services live in the Payload schema, not the public schema.
+ * If a service is renamed/removed in Payload, existing bookings keep
+ * their slug as a label.
+ */
+export const serviceBookings = pgTable(
+  'service_bookings',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    serviceSlug: text('service_slug').notNull(),
+    serviceTitle: text('service_title').notNull(),
+      // Denormalised at insert time so the dashboard "Active services" card
+      // can render the correct label even if the Payload row is later edited.
+    status: varchar('status', { length: 20 }).default('requested').notNull(),
+      // 'requested' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
+    notes: text('notes'),
+    datePreference: text('date_preference'),
+      // Free-text describing when the customer is available — e.g.
+      // "Weekday mornings", "Next week", "ASAP".
+    requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow().notNull(),
+    scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    userStatusIdx: index('service_bookings_user_status_idx').on(t.userId, t.status),
+  }),
+);
+
+export type ServiceBooking = typeof serviceBookings.$inferSelect;
+export type NewServiceBooking = typeof serviceBookings.$inferInsert;
+
+/**
  * Member RSVPs against Payload events. The Payload `Events` collection
  * stores event content (title, date, etc.) in the `payload` schema;
  * RSVPs live here so we can join against `subscriptions` and `user_profiles`

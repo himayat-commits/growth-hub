@@ -89,6 +89,24 @@ test("/api/messages rejects unauthenticated GET with 401", async ({ request }) =
   expect(res.status()).toBe(401);
 });
 
+test("/api/service-bookings rejects unauthenticated GET with 401", async ({ request }) => {
+  const res = await request.get("/api/service-bookings");
+  expect(res.status()).toBe(401);
+});
+
+test("/api/service-bookings rejects unauthenticated POST with 401", async ({ request }) => {
+  const res = await request.post("/api/service-bookings", {
+    headers: { "Content-Type": "application/json" },
+    data: { serviceSlug: "growth-call" },
+  });
+  expect(res.status()).toBe(401);
+});
+
+test("/services/[slug] redirects unauthenticated visitor to sign-in", async ({ page }) => {
+  await page.goto("/services/growth-call");
+  await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
+});
+
 test("/events redirects unauthenticated visitor to sign-in", async ({ page }) => {
   await page.goto("/events");
   await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });

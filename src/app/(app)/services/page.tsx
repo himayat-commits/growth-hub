@@ -15,6 +15,7 @@ import { isStepComplete } from '@/lib/wizard/initial-state';
 import { getBirdeyeDashboardUrl } from '@/lib/birdeye/dashboard-url';
 import PortalModuleGrid from '@/components/portal/PortalModuleGrid';
 import { getServices } from '@/lib/cms';
+import { getActiveBookings, statusLabel } from '@/lib/db/bookings';
 import ServicesTabs from './ServicesTabs';
 import ServicesCatalog, { type ServiceItem } from './ServicesCatalog';
 
@@ -42,7 +43,11 @@ export default async function ServicesPage() {
   const { user } = await withAuth();
   if (!user) redirect('/sign-in?redirect_url=/services');
 
-  const [sub, services] = await Promise.all([getSubscription(), getServices()]);
+  const [sub, services, activeBookings] = await Promise.all([
+    getSubscription(),
+    getServices(),
+    getActiveBookings(user.id),
+  ]);
   const tier: PlanTier = getEffectivePlan(sub);
   const activeAddOns = resolveActiveAddOns(sub?.addOnPriceIds ?? []);
 
@@ -161,6 +166,34 @@ export default async function ServicesPage() {
           </div>
         </div>
       ) : null}
+
+      {activeBookings.length > 0 && (
+        <div className="gh-card" style={{ marginBottom: 24 }}>
+          <div className="gh-card-hd">
+            <div className="gh-card-h">Active engagements</div>
+            <span className="gh-pill plum">{activeBookings.length} open</span>
+          </div>
+          <ul className="gh-list">
+            {activeBookings.map((b) => (
+              <li key={b.id}>
+                <div className="gh-list-body">
+                  <div className="gh-list-h">{b.serviceTitle}</div>
+                  <p className="gh-list-p">
+                    {statusLabel(b.status)} · requested{' '}
+                    {new Intl.DateTimeFormat('en-AU', { dateStyle: 'medium' }).format(
+                      b.requestedAt,
+                    )}
+                    {b.datePreference ? ` · ${b.datePreference}` : ''}
+                  </p>
+                </div>
+                <Link href={`/services/${b.serviceSlug}`} className="gh-card-link">
+                  View →
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <ServicesTabs
         modules={<PortalModuleGrid tier={tier} activeAddOns={activeAddOns} />}
