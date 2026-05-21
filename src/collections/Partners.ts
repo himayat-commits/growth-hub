@@ -1,11 +1,22 @@
 import type { CollectionConfig } from 'payload';
 import { revalidate } from '../lib/cms/revalidate.ts';
 
+// Reused from the Events collection — keep in sync if either grows.
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
 export const Partners: CollectionConfig = {
   slug: 'partners',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'category', 'featured', 'status', 'order'],
+    defaultColumns: ['name', 'slug', 'category', 'featured', 'status', 'order'],
     group: 'Content',
   },
   fields: [
@@ -13,6 +24,25 @@ export const Partners: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      unique: true,
+      index: true,
+      admin: {
+        description:
+          'URL slug for /partners/{slug} deep page. Auto-generated from name on save if left blank.',
+      },
+      hooks: {
+        beforeChange: [
+          ({ value, data }) => {
+            if (value && String(value).trim()) return slugify(String(value));
+            if (data?.name) return slugify(String(data.name));
+            return value;
+          },
+        ],
+      },
     },
     {
       // Renamed from 'type' to 'category' to match the partners-page directory

@@ -41,6 +41,7 @@ export default async function PartnersPage() {
 
   const directoryPartners = partners.map((p) => ({
     id: String(p.id),
+    slug: (p as { slug?: string | null }).slug ?? null,
     name: p.name,
     category: (p as { category?: string | null }).category ?? null,
     shape: (p as { shape?: string | null }).shape ?? null,

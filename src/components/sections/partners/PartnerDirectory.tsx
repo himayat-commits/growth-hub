@@ -13,6 +13,8 @@ import {
 
 export interface DirectoryPartner {
   id?: string | null;
+  /** URL slug — when set, the card links to /partners/[slug]. */
+  slug?: string | null;
   name: string;
   /** New CMS field. Legacy `type` is bridged via legacyCategoryFallback. */
   category?: string | null;
@@ -337,7 +339,18 @@ export default function PartnerDirectory({
                 </dl>
               )}
 
-              {p.website ? (
+              {/* Card link priority: own deep page > external website > #contact.
+                  Deep page wins because /partners/[slug] is fully under our
+                  control and gives the visitor more context than a website
+                  drop-off. */}
+              {p.slug ? (
+                <a className="p-card-link" href={`/partners/${p.slug}`}>
+                  Read partnership profile
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+                    <path d="M3 7h8M7 3l4 4-4 4" />
+                  </svg>
+                </a>
+              ) : p.website ? (
                 <a
                   className="p-card-link"
                   href={p.website}
