@@ -11,6 +11,7 @@
 
 import 'server-only';
 import { eq, inArray } from 'drizzle-orm';
+import * as Sentry from '@sentry/nextjs';
 import { getStripe } from '@/lib/stripe';
 import { getDb } from '@/lib/db';
 import { subscriptions, referrals } from '@/lib/db/schema';
@@ -97,6 +98,10 @@ export async function tryIssueReferralCredit(userId: string): Promise<void> {
       ]);
     } catch (e) {
       console.error(`[referral-credit] Stripe credit failed for referral ${referral.id}`, e);
+      Sentry.captureException(e, {
+        tags: { area: 'referral_credit', phase: 'stripe_balance' },
+        extra: { referralId: referral.id, referCode: referral.referCode },
+      });
       continue;
     }
 
@@ -122,6 +127,7 @@ export async function tryIssueReferralCredit(userId: string): Promise<void> {
       ]);
     } catch (e) {
       console.error('[referral-credit] notification fan-out failed', e);
+      Sentry.captureException(e, { tags: { area: 'referral_credit', phase: 'notification' } });
     }
   }
 }

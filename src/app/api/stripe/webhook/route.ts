@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import type Stripe from 'stripe';
 import { Resend } from 'resend';
 import { eq } from 'drizzle-orm';
+import * as Sentry from '@sentry/nextjs';
 import { getStripe } from '@/lib/stripe';
 import { getDb } from '@/lib/db';
 import { subscriptions } from '@/lib/db/schema';
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     console.error('Webhook signature verification failed:', msg);
+    Sentry.captureException(err, { tags: { area: 'stripe.webhook', phase: 'verify' } });
     return new NextResponse(`Webhook Error: ${msg}`, { status: 400 });
   }
 
@@ -95,6 +97,9 @@ export async function POST(req: NextRequest) {
     }
   } catch (err) {
     console.error(`Webhook handler error (${event.type}):`, err);
+    Sentry.captureException(err, {
+      tags: { area: 'stripe.webhook', phase: 'handle', event_type: event.type },
+    });
     // Return 500 so Stripe retries. Webhook handlers must be idempotent —
     // syncSubscription is, since it overwrites with canonical state.
     return new NextResponse('Webhook handler failed', { status: 500 });
@@ -186,6 +191,7 @@ async function syncSubscription(subscriptionId: string) {
       });
     } catch (e) {
       console.error('[stripe.webhook] subscription_active notification failed', e);
+      Sentry.captureException(e, { tags: { area: 'stripe.webhook', phase: 'notification' } });
     }
 
     // Try to issue any pending referral credit. This walks both directions:
@@ -198,6 +204,7 @@ async function syncSubscription(subscriptionId: string) {
       await tryIssueReferralCredit(userId);
     } catch (e) {
       console.error('[stripe.webhook] referral credit issuance failed', e);
+      Sentry.captureException(e, { tags: { area: 'stripe.webhook', phase: 'referral_credit' } });
     }
   }
 }

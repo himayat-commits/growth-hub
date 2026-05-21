@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { handleAuth } from '@workos-inc/authkit-nextjs';
+import * as Sentry from '@sentry/nextjs';
 import { ensureUserRecordWithStatus } from '@/lib/auth/ensure-user-record';
 import { createNotification } from '@/lib/db/notifications';
 import { sendTeamMessage } from '@/lib/db/messages';
@@ -66,6 +67,7 @@ export const GET = handleAuth({
           }
         } catch (err) {
           console.error('[auth.callback] referral attribution failed', err);
+          Sentry.captureException(err, { tags: { area: 'auth.callback', phase: 'referral' } });
         }
       }
     } catch (err) {
@@ -73,6 +75,7 @@ export const GET = handleAuth({
       // /dashboard without the welcome content and the next request will
       // retry profile materialisation via the same ensureUserRecord path.
       console.error('[auth.callback] welcome-seed failed', err);
+      Sentry.captureException(err, { tags: { area: 'auth.callback', phase: 'welcome_seed' } });
     }
   },
 });

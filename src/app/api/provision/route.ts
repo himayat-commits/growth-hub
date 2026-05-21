@@ -7,6 +7,7 @@
 // or to data/provisioning-log/{id}.json in local dev.
 
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { wizardStateSchema } from "@/lib/wizard/state";
 import { appendProvisioningLog } from "@/lib/wizard/state-store";
 import { createNotification } from "@/lib/db/notifications";
@@ -92,6 +93,11 @@ export async function POST(req: Request) {
       const createReq = buildCreateSubaccountPayload(state, RESELLER_ID, API_HOST);
       const r1 = await run("create_subaccount", { kind: "create_subaccount", req: createReq });
       if (!r1.ok) {
+        Sentry.captureMessage('birdeye create_subaccount failed', {
+          level: 'error',
+          tags: { area: 'provision', step: 'create_subaccount', mode },
+          extra: { onboardingId, error: r1.error },
+        });
         send({ status: "error", error: r1.error });
         controller.close();
         return;
@@ -176,6 +182,10 @@ export async function POST(req: Request) {
         });
       } catch (e) {
         const message = e instanceof Error ? e.message : "unknown error";
+        Sentry.captureException(e, {
+          tags: { area: 'provision', step: 'notify_ops' },
+          extra: { onboardingId },
+        });
         await appendProvisioningLog(onboardingId, {
           step: stepCounter++,
           kind: "notify_ops",
@@ -200,6 +210,7 @@ export async function POST(req: Request) {
         });
       } catch (e) {
         console.error("[provision] birdeye_provisioned notification failed", e);
+        Sentry.captureException(e, { tags: { area: 'provision', step: 'notification' } });
       }
 
       send({ type: "done", businessNumber, invitedUsers, mediaIds });
