@@ -1851,6 +1851,22 @@ export interface PartnersPage {
   becomeCtaHref?: string | null;
   becomeSecondaryCtaLabel?: string | null;
   becomeSecondaryCtaHref?: string | null;
+  /**
+   * Named partnership lead shown on the right meta panel, e.g. "Amal — Director of Growth". Leave blank to hide.
+   */
+  partnershipLead?: string | null;
+  /**
+   * Partnership-specific inbox (defaults to partners@himayat.com.au). Used for both the meta panel row and the mailto: when the primary CTA is left as default.
+   */
+  partnerEmail?: string | null;
+  /**
+   * Public link to the partnership deck PDF. When set, the secondary CTA becomes "Download partnership deck (PDF)" and points here.
+   */
+  deckUrl?: string | null;
+  /**
+   * Optional link to a partner-requirements / criteria page. Shown as a "View partner requirements →" row on the meta panel when set.
+   */
+  requirementsUrl?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2039,6 +2055,10 @@ export interface PartnersPageSelect<T extends boolean = true> {
   becomeCtaHref?: T;
   becomeSecondaryCtaLabel?: T;
   becomeSecondaryCtaHref?: T;
+  partnershipLead?: T;
+  partnerEmail?: T;
+  deckUrl?: T;
+  requirementsUrl?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

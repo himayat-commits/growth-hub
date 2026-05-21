@@ -195,6 +195,40 @@ export const PartnersPage: GlobalConfig = {
           type: 'text',
           defaultValue: '/#packages',
         },
+        // ── Right-side meta block ─────────────────────────────────────────
+        // Renders alongside the heading + bullets. Each optional.
+        {
+          name: 'partnershipLead',
+          type: 'text',
+          admin: {
+            description:
+              'Named partnership lead shown on the right meta panel, e.g. "Amal — Director of Growth". Leave blank to hide.',
+          },
+        },
+        {
+          name: 'partnerEmail',
+          type: 'email',
+          admin: {
+            description:
+              'Partnership-specific inbox (defaults to partners@himayat.com.au). Used for both the meta panel row and the mailto: when the primary CTA is left as default.',
+          },
+        },
+        {
+          name: 'deckUrl',
+          type: 'text',
+          admin: {
+            description:
+              'Public link to the partnership deck PDF. When set, the secondary CTA becomes "Download partnership deck (PDF)" and points here.',
+          },
+        },
+        {
+          name: 'requirementsUrl',
+          type: 'text',
+          admin: {
+            description:
+              'Optional link to a partner-requirements / criteria page. Shown as a "View partner requirements →" row on the meta panel when set.',
+          },
+        },
       ],
     },
   ],
