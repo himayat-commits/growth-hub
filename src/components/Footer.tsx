@@ -34,8 +34,10 @@ export default function Footer() {
             <h5>Explore</h5>
             <ul>
               <li><Link href="/#packages">Packages</Link></li>
+              <li><Link href="/events">Events</Link></li>
+              <li><Link href="/partners">Partners</Link></li>
               <li><Link href="/#community">Community</Link></li>
-              <li><Link href="/#faq">FAQ</Link></li>
+              <li><Link href="/pricing#faq">FAQ</Link></li>
               <li><Link href="/#why">About us</Link></li>
               <li><Link href="/#contact">Contact</Link></li>
             </ul>

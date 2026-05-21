@@ -216,11 +216,11 @@ async function seed() {
         { label: 'Events', href: '/events', isExternal: false },
         { label: 'Partners', href: '/partners', isExternal: false },
         { label: 'About', href: '/#why', isExternal: false },
-        { label: 'FAQ', href: '/#faq', isExternal: false },
+        { label: 'FAQ', href: '/pricing#faq', isExternal: false },
         { label: 'Contact', href: '/#contact', isExternal: false },
       ],
       ctaLabel: 'Sign Up Now',
-      ctaHref: '/sign-up',
+      ctaHref: '/sign-up?redirect_url=%2Fportal',
     },
   });
   console.log('✅  Updated Navigation global.');
