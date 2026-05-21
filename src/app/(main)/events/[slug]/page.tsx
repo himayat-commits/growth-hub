@@ -1,22 +1,30 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { getPublicEventBySlug, getGenericEventSlugs, PUBLIC_EVENTS } from '@/lib/events-data';
+import {
+  getEventBySlug,
+  getGenericEventSlugs,
+  getPublicEvents,
+  getSiteSettings,
+} from '@/lib/cms';
+import { toPublicEvent, toPublicEvents } from '@/lib/events-data';
+import type { Event as PayloadEvent } from '@/payload-types';
 import Contact from '@/components/sections/Contact';
-import { getSiteSettings } from '@/lib/cms';
 
 export const revalidate = 3600;
 
-export function generateStaticParams() {
-  return getGenericEventSlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  const slugs = await getGenericEventSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const ev = getPublicEventBySlug(slug);
-  if (!ev) return { title: 'Event — Growth Hub by Himayat' };
+  const doc = await getEventBySlug(slug);
+  if (!doc) return { title: 'Event — Growth Hub by Himayat' };
+  const ev = toPublicEvent(doc as PayloadEvent);
   return {
     title: `${ev.title} — Growth Hub by Himayat`,
     description: ev.desc,
@@ -25,15 +33,22 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function GenericEventPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const ev = getPublicEventBySlug(slug);
-  if (!ev) notFound();
+  const doc = await getEventBySlug(slug);
+  if (!doc) notFound();
 
-  // Bespoke events have their own static route. If someone hits the dynamic
-  // route for a bespoke slug, send them to the dedicated page.
+  const ev = toPublicEvent(doc as PayloadEvent);
+
+  // Bespoke events have their own static route — bounce so the dynamic
+  // route never out-competes the hand-built layout.
   if (ev.bespoke) redirect(`/events/${ev.slug}`);
 
-  const siteSettings = await getSiteSettings();
-  const related = PUBLIC_EVENTS.filter((e) => e.slug !== ev.slug).slice(0, 3);
+  const [siteSettings, allDocs] = await Promise.all([
+    getSiteSettings(),
+    getPublicEvents(),
+  ]);
+  const related = toPublicEvents(allDocs as PayloadEvent[])
+    .filter((e) => e.slug !== ev.slug)
+    .slice(0, 3);
 
   return (
     <main>
@@ -42,7 +57,8 @@ export default async function GenericEventPage({ params }: { params: Params }) {
           <Link href="/events" className="ed-back">← All events</Link>
           <div className="hero-eyebrow">
             <span className="dot" />
-            {ev.tag} · {ev.audience}
+            {ev.tag}
+            {ev.audience ? ` · ${ev.audience}` : ''}
           </div>
           <h1 className="hero-h1">{ev.title}</h1>
           <p className="hero-sub">{ev.desc}</p>

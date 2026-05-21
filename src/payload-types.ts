@@ -780,6 +780,10 @@ export interface Partner {
 export interface Event {
   id: number;
   title: string;
+  /**
+   * URL slug. Auto-generated from title on save if left blank.
+   */
+  slug?: string | null;
   description?: string | null;
   /**
    * Date the event runs on. Past dates remain visible as recordings.
@@ -807,9 +811,33 @@ export interface Event {
    */
   recording?: (number | null) | Media;
   /**
-   * Pin to the hero slot at the top of /events. Only the next featured upcoming event is shown.
+   * Pin to the hero slot at the top of the public /events hub. Only the first featured upcoming event is shown.
    */
   featured?: boolean | null;
+  /**
+   * Public categorisation used by the /events hub filter chips. Independent of the internal `type` field (which still drives the dashboard labels).
+   */
+  category?: ('summit' | 'workshop' | 'mixer' | 'clinic' | 'community' | 'webinar') | null;
+  /**
+   * Display tag on the public hub (e.g. "Annual Summit", "Workshop", "Mixer"). Falls back to the category label when blank.
+   */
+  tag?: string | null;
+  /**
+   * Who the event is for, shown on the public detail page.
+   */
+  audience?: string | null;
+  /**
+   * Free-text cost line — e.g. "Free", "Free · RSVP", "Free for members · $40 guests".
+   */
+  cost?: string | null;
+  /**
+   * Override for non-standard date strings — e.g. "Date to be confirmed", "Fortnightly · alternating Tuesdays". When blank, `date` is auto-formatted.
+   */
+  dateDisplay?: string | null;
+  /**
+   * Set true if a hand-built landing page exists at /events/{slug}. The generic detail route will 307 to it.
+   */
+  bespoke?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1463,6 +1491,7 @@ export interface PartnersSelect<T extends boolean = true> {
  */
 export interface EventsSelect<T extends boolean = true> {
   title?: T;
+  slug?: T;
   description?: T;
   date?: T;
   time?: T;
@@ -1472,6 +1501,12 @@ export interface EventsSelect<T extends boolean = true> {
   registerUrl?: T;
   recording?: T;
   featured?: T;
+  category?: T;
+  tag?: T;
+  audience?: T;
+  cost?: T;
+  dateDisplay?: T;
+  bespoke?: T;
   updatedAt?: T;
   createdAt?: T;
 }
