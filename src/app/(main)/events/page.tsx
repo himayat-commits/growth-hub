@@ -1,9 +1,20 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { PUBLIC_EVENTS, PAST_PUBLIC_EVENTS } from '@/lib/events-data';
+import { toPublicEvents } from '@/lib/events-data';
 import UpcomingFilterList from './UpcomingFilterList';
 import Contact from '@/components/sections/Contact';
-import { getSiteSettings } from '@/lib/cms';
+import { getPublicEvents, getSiteSettings } from '@/lib/cms';
+import type { Event as PayloadEvent } from '@/payload-types';
+
+// Past-event "from the archive" snapshot. Kept inline rather than in
+// Payload because these are static historical references with bespoke
+// stats; promoting them to a schema would add a `pastEventStats` field
+// nobody asked for. Migrate when there's a real editor request.
+const PAST_PUBLIC_EVENTS = [
+  { title: 'Digital Marketing Day 2025', desc: 'A one-day intensive across SEO, paid social, content and CRM basics — co-hosted with RD Consulting.', tag: 'Workshop', tagClass: 'tag-workshop', date: 'November 2025', stats: [{ n: '84', l: 'Attendees' }, { n: '92%', l: 'Would recommend' }] },
+  { title: 'Birdeye Partnership Launch', desc: 'Marking our reputation-tooling partnership with Birdeye — onboarding 12 founding-cohort members on the night.', tag: 'Mixer', tagClass: 'tag-mixer', date: 'September 2025', stats: [{ n: '60+', l: 'Founders' }, { n: '12', l: 'Cohort onboarded' }] },
+  { title: 'Welcome to Country Kickoff', desc: 'Our 2025 program opener — Welcome to Country, year ahead, and the first community grant announcement.', tag: 'Community', tagClass: 'tag-community', date: 'February 2025', stats: [{ n: '120', l: 'In the room' }, { n: '$25K', l: 'Grants announced' }] },
+];
 
 export const metadata: Metadata = {
   title: 'Events — Growth Hub by Himayat',
@@ -76,7 +87,11 @@ const TESTIMONIALS = [
 ];
 
 export default async function EventsHubPage() {
-  const siteSettings = await getSiteSettings();
+  const [siteSettings, eventDocs] = await Promise.all([
+    getSiteSettings(),
+    getPublicEvents(),
+  ]);
+  const PUBLIC_EVENTS = toPublicEvents(eventDocs as PayloadEvent[]);
   const featured = PUBLIC_EVENTS.find((e) => e.featured) ?? PUBLIC_EVENTS[0];
 
   return (

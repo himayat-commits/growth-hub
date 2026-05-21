@@ -3,23 +3,62 @@ import { revalidate } from '../lib/cms/revalidate.ts';
 
 /**
  * Events the Himayat team runs — webinars, in-person workshops, monthly
- * meet-ups. Visible to all signed-in members on /(app)/events.
+ * meet-ups, summits and clinics.
  *
- * `featured: true` and `date >= today` puts the row in the hero slot on
- * the events page. Past events with a `recording` upload appear in the
- * "Past recordings" grid.
+ * Two surfaces consume this collection:
+ *   - /(app)/my-events     authenticated dashboard. Uses `type`, `seats`,
+ *                          `registerUrl`, `recording`. RSVPs flow through
+ *                          /api/events/[id]/rsvp.
+ *   - /(main)/events       public marketing hub + /(main)/events/[slug]
+ *                          detail. Uses `slug`, `category`, `tag`,
+ *                          `audience`, `cost`, `dateDisplay`, `bespoke`.
+ *
+ * `bespoke: true` means a hand-built static landing page exists at the
+ * slug (e.g. /events/small-business-journey). The dynamic [slug] route
+ * 307s to it so the bespoke layout always wins.
+ *
+ * Slug is auto-generated from title on create if left blank.
  */
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
 export const Events: CollectionConfig = {
   slug: 'events',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'date', 'type', 'location', 'featured'],
+    defaultColumns: ['title', 'slug', 'date', 'category', 'featured', 'bespoke'],
   },
   fields: [
     {
       name: 'title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      unique: true,
+      index: true,
+      admin: {
+        description: 'URL slug. Auto-generated from title on save if left blank.',
+      },
+      hooks: {
+        beforeChange: [
+          ({ value, data }) => {
+            if (value && String(value).trim()) return slugify(String(value));
+            if (data?.title) return slugify(String(data.title));
+            return value;
+          },
+        ],
+      },
     },
     {
       name: 'description',
@@ -81,7 +120,61 @@ export const Events: CollectionConfig = {
       defaultValue: false,
       admin: {
         description:
-          'Pin to the hero slot at the top of /events. Only the next featured upcoming event is shown.',
+          'Pin to the hero slot at the top of the public /events hub. Only the first featured upcoming event is shown.',
+      },
+    },
+    // ── Public hub fields ────────────────────────────────────────────────
+    {
+      name: 'category',
+      type: 'select',
+      defaultValue: 'workshop',
+      admin: {
+        description:
+          'Public categorisation used by the /events hub filter chips. Independent of the internal `type` field (which still drives the dashboard labels).',
+      },
+      options: [
+        { label: 'Summit', value: 'summit' },
+        { label: 'Workshop', value: 'workshop' },
+        { label: 'Mixer', value: 'mixer' },
+        { label: 'Clinic', value: 'clinic' },
+        { label: 'Community', value: 'community' },
+        { label: 'Webinar', value: 'webinar' },
+      ],
+    },
+    {
+      name: 'tag',
+      type: 'text',
+      admin: {
+        description:
+          'Display tag on the public hub (e.g. "Annual Summit", "Workshop", "Mixer"). Falls back to the category label when blank.',
+      },
+    },
+    {
+      name: 'audience',
+      type: 'text',
+      admin: { description: 'Who the event is for, shown on the public detail page.' },
+    },
+    {
+      name: 'cost',
+      type: 'text',
+      defaultValue: 'Free',
+      admin: { description: 'Free-text cost line — e.g. "Free", "Free · RSVP", "Free for members · $40 guests".' },
+    },
+    {
+      name: 'dateDisplay',
+      type: 'text',
+      admin: {
+        description:
+          'Override for non-standard date strings — e.g. "Date to be confirmed", "Fortnightly · alternating Tuesdays". When blank, `date` is auto-formatted.',
+      },
+    },
+    {
+      name: 'bespoke',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Set true if a hand-built landing page exists at /events/{slug}. The generic detail route will 307 to it.',
       },
     },
   ],

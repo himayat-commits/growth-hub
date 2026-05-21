@@ -296,6 +296,73 @@ export async function getEventById(id: string | number) {
   }
 }
 
+/** Every event, including past — for the public /events hub which shows
+ *  upcoming + recurring + bespoke summits regardless of date. Sorted
+ *  with featured first, then date ascending. Defensive try/catch matches
+ *  getGenericEventSlugs — see comment there. */
+export const getPublicEvents = unstable_cache(
+  async (limit = 100) => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'events',
+        sort: ['-featured', 'date'],
+        limit,
+        depth: 0,
+      });
+      return docs;
+    } catch (err) {
+      console.warn('[cms] getPublicEvents failed — returning [].', err);
+      return [];
+    }
+  },
+  ['events-public-all'],
+  { tags: ['events'], revalidate: 3600 },
+);
+
+/** Single event by slug — for the public /events/[slug] detail page. */
+export const getEventBySlug = unstable_cache(
+  async (slug: string) => {
+    const payload = await getPayloadClient();
+    const { docs } = await payload.find({
+      collection: 'events',
+      where: { slug: { equals: slug } },
+      limit: 1,
+      depth: 0,
+    });
+    return docs[0] ?? null;
+  },
+  ['event-by-slug'],
+  { tags: ['events'], revalidate: 3600 },
+);
+
+/** Every published event slug — used by generateStaticParams. Excludes
+ *  bespoke events, which have their own static routes.
+ *
+ *  Wrapped in try/catch so production builds succeed even before the
+ *  20260521_events_public_fields migration has run (e.g. preview deploys
+ *  on a branch that hasn't applied migrations yet). Returns empty on
+ *  failure — the dynamic route still renders at request time. */
+export const getGenericEventSlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'events',
+        where: { bespoke: { not_equals: true } },
+        limit: 0,
+        depth: 0,
+      });
+      return docs.map((d) => String(d.slug)).filter(Boolean);
+    } catch (err) {
+      console.warn('[cms] getGenericEventSlugs failed — returning [].', err);
+      return [];
+    }
+  },
+  ['events-generic-slugs'],
+  { tags: ['events'], revalidate: 3600 },
+);
+
 // ── Resources ─────────────────────────────────────────────────────────────────
 
 /** All published resources, newest first. Wrapped in cache so /resources
