@@ -27,7 +27,7 @@ const APP_PATHS = [
   '/plan',
   '/services',
   '/profile',
-  '/events',
+  '/my-events',
   '/resources',
   '/messages',
   '/benefits',

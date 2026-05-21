@@ -382,7 +382,7 @@ export default async function DashboardPage() {
         <div className="gh-card">
           <div className="gh-card-hd">
             <div className="gh-card-h">Upcoming sessions</div>
-            <Link href="/events" className="gh-card-link">
+            <Link href="/my-events" className="gh-card-link">
               My calendar →
             </Link>
           </div>
@@ -395,7 +395,7 @@ export default async function DashboardPage() {
               <p className="gh-empty-p">
                 Browse events and register for the next webinar, workshop or meet-up.
               </p>
-              <Link href="/events">
+              <Link href="/my-events">
                 <button className="gh-empty-cta" type="button">
                   See what&apos;s on
                 </button>

@@ -12,7 +12,7 @@ const NAV = [
   { id: 'plan',      href: '/plan',      label: 'My Plan',          Icon: IcoPlanNav },
   { id: 'services',  href: '/services',  label: 'Services',         Icon: IcoServicesNav },
   { id: 'resources', href: '/resources', label: 'Resources',        Icon: IcoResourcesNav },
-  { id: 'events',    href: '/events',    label: 'Events & Webinars', Icon: IcoEventsNav },
+  { id: 'events',    href: '/my-events', label: 'Events & Webinars', Icon: IcoEventsNav },
   { id: 'messages',  href: '/messages',  label: 'Messages',         Icon: IcoMsgNav },
   { id: 'benefits',  href: '/benefits',  label: 'Member Benefits',  Icon: IcoBenefitsNav },
   { id: 'profile',   href: '/profile',   label: 'Profile & Settings', Icon: IcoProfileNav },

@@ -23,7 +23,7 @@ export interface NavbarClientProps {
 
 const DEFAULT_NAV_ITEMS: NavItem[] = [
   { label: "Packages", href: "/#packages" },
-  { label: "Community", href: "/#community" },
+  { label: "Events", href: "/events" },
   { label: "Partners", href: "/partners" },
   { label: "About", href: "/#why" },
   { label: "FAQ", href: "/#faq" },
