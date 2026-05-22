@@ -10,6 +10,7 @@
 //   - honeypot field catches dumb bots without a CAPTCHA
 
 import { useState } from 'react';
+import { track } from '@/lib/analytics';
 
 export interface NewsletterFormProps {
   source: string;
@@ -48,6 +49,7 @@ export default function NewsletterForm({
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? 'Could not subscribe.');
+      track('newsletter_signup', { source });
       setStatus('sent');
       setMessage("You're in. We'll write when we have something worth reading.");
     } catch (err) {

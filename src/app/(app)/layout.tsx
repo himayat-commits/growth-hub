@@ -15,6 +15,8 @@ import { getUnreadNotificationCount } from '@/lib/db/notifications'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Topbar } from '@/components/dashboard/Topbar'
 import type { TopbarUser } from '@/components/dashboard/Topbar'
+import PostHogProvider from '@/components/PostHogProvider'
+import PostHogIdentify from '@/components/PostHogIdentify'
 import '@/styles/dashboard.css'
 
 function makeInitials(name: string | null | undefined, email: string | null | undefined) {
@@ -46,12 +48,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="gh-frame" style={{ width: '100vw', height: '100vh', minHeight: 720 }}>
-      <Sidebar />
-      <div className="gh-main">
-        <Topbar user={topbarUser} initialUnreadCount={unreadCount} />
-        <div className="gh-content">{children}</div>
+    <PostHogProvider>
+      <PostHogIdentify userId={user.id} email={user.email ?? null} planTier={tier} />
+      <div className="gh-frame" style={{ width: '100vw', height: '100vh', minHeight: 720 }}>
+        <Sidebar />
+        <div className="gh-main">
+          <Topbar user={topbarUser} initialUnreadCount={unreadCount} />
+          <div className="gh-content">{children}</div>
+        </div>
       </div>
-    </div>
+    </PostHogProvider>
   )
 }

@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { BillingInterval, PaidPlanTier } from '@/lib/plans';
+import { track } from '@/lib/analytics';
 
 interface PreviewResponse {
   isUpgrade: boolean;
@@ -63,6 +64,7 @@ export default function ChangePlanDialog({
     setDone(false);
     setOpen(true);
     dialogRef.current?.showModal();
+    track('plan_change_open', { from: currentPlanName, to: targetTier, interval });
     // Kick off the preview fetch immediately so the dialog isn't empty
     // while the user reads.
     setLoading(true);
@@ -98,6 +100,12 @@ export default function ChangePlanDialog({
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? 'Could not change plan');
+      track('plan_change_committed', {
+        from: currentPlanName,
+        to: targetTier,
+        interval,
+        amountCents: preview?.amountDue ?? null,
+      });
       setDone(true);
       // Webhook is asynchronous — give it 1.5s before refreshing so the
       // /plan page reads the new state.
