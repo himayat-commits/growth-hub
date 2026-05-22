@@ -1245,6 +1245,164 @@ async function seed() {
     console.log('⏭   Saffron Bakery case study already exists — skipping.');
   }
 
+  // ── Additional case studies — trades + community-services personas ─────
+  // Each is gated on its own slug so adding new ones to the seed is safe
+  // for prod (idempotent per slug). Lexical helpers re-declared inline so
+  // this block stands alone if Saffron is ever removed.
+  const _para = (text: string) => ({
+    type: 'paragraph',
+    version: 1,
+    direction: 'ltr' as const,
+    format: '' as const,
+    indent: 0,
+    children: [{ type: 'text', text, version: 1 }],
+  });
+  const _heading = (text: string) => ({
+    type: 'heading',
+    tag: 'h2',
+    version: 1,
+    direction: 'ltr' as const,
+    format: '' as const,
+    indent: 0,
+    children: [{ type: 'text', text, version: 1 }],
+  });
+  const _quote = (text: string) => ({
+    type: 'quote',
+    version: 1,
+    direction: 'ltr' as const,
+    format: '' as const,
+    indent: 0,
+    children: [{ type: 'text', text, version: 1 }],
+  });
+
+  // Helper: create a case study if its slug isn't already present.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function ensureCaseStudy(slug: string, data: any) {
+    const existing = await payload.find({
+      collection: 'case-studies',
+      where: { slug: { equals: slug } },
+      limit: 1,
+    });
+    if (existing.totalDocs > 0) {
+      console.log(`⏭   Case study "${slug}" already exists — skipping.`);
+      return;
+    }
+    await payload.create({ collection: 'case-studies', data });
+    console.log(`✅  Created case study: ${slug}`);
+  }
+
+  // 2. ACT Plumbing Solutions — trades persona. Sourced from the homepage
+  //    testimonial ("Reviews AI alone paid for itself in 6 weeks").
+  await ensureCaseStudy('act-plumbing-solutions', {
+    title: 'How ACT Plumbing Solutions stopped chasing reviews and started winning them',
+    slug: 'act-plumbing-solutions',
+    client: 'ACT Plumbing Solutions',
+    outcome:
+      '5× review rate · $4K avg job size up 35% · top-3 ranking for "emergency plumber Canberra"',
+    status: 'published',
+    body: {
+      root: {
+        type: 'root',
+        version: 1,
+        direction: 'ltr' as const,
+        format: '' as const,
+        indent: 0,
+        children: [
+          _para(
+            "Mark Tran runs ACT Plumbing Solutions — a five-tradie operation based in Mitchell that covers emergency call-outs across the north of Canberra. When he came to a Growth Hub workshop in late 2024, he had 22 Google reviews built up over four years and a website his nephew made in 2019.",
+          ),
+          _para(
+            "His problem wasn't lead volume. His problem was that the leads he got were price-shoppers — people calling three plumbers and picking the cheapest. Mark wanted to be the choice that came up first, with the rating that justified the call-out fee.",
+          ),
+          _heading('Where he was stuck'),
+          _para(
+            "Mark was already a Birdeye customer through another agency, but the seat had gone dormant — nobody was setting up review prompts, nobody was responding to the reviews that came in. His after-job SMS confirmation didn't include a review link. His Google Business Profile had photos from 2020.",
+          ),
+          _quote(
+            "I was going to cancel Birdeye. Couldn't see what I was paying for. The Growth Hub team set it up properly in a single morning.",
+          ),
+          _heading('What changed'),
+          _para(
+            "We switched him onto our Growth tier, which bundles Birdeye into a managed configuration: review prompts now fire automatically two hours after every job, the responses are drafted by Reviews AI and approved by Mark in under a minute via the mobile dashboard, and the GBP gets a fresh job-site photo every fortnight (uploaded by the apprentices, sorted by Social AI).",
+          ),
+          _para(
+            "We also rewrote his pricing page. Mark agreed to publish call-out fees and after-hours rates — most plumbers won't, and the price-shoppers self-filtered.",
+          ),
+          _heading('Where he is now'),
+          _para(
+            "Six months in: reviews went from 22 to 138. Average rating held at 4.8. Mark ranks top-3 on Google Maps for \"emergency plumber Canberra\" and #1 for \"24 hour plumber Mitchell\". Average job size up 35% because the cheapest-three calls dropped off — those leads now go to other tradies, and the leads who reach him are people who chose him on the rating.",
+          ),
+          _quote(
+            "The reviews AI alone paid for itself in 6 weeks. The Himayat team are genuinely invested in our success.",
+          ),
+          _heading('What he said to make us write this'),
+          _para(
+            "We asked Mark whether he'd be open to a case study because his story directly contradicts the assumption that AI tools are for big businesses with marketing budgets. He runs five tradies and a ute. He said yes \"if it helps another sparky or plumber stop giving away $80 jobs.\"",
+          ),
+          _para(
+            "If that's you: come to a Tradie Tax Time Bootcamp or book a 30-minute Growth Call. We'll look at your Google profile together.",
+          ),
+        ],
+      },
+    },
+  });
+
+  // 3. NorthLine Care — NDIS / community-services persona. Sourced from
+  //    the events testimonial about the grants office hours.
+  await ensureCaseStudy('northline-care', {
+    title: 'How NorthLine Care won $180K in funding without hiring a grant writer',
+    slug: 'northline-care',
+    client: 'NorthLine Care',
+    outcome:
+      '$180K in successful grants over 8 months · 3 new NDIS participants/month · own a clear digital front door',
+    status: 'published',
+    body: {
+      root: {
+        type: 'root',
+        version: 1,
+        direction: 'ltr' as const,
+        format: '' as const,
+        indent: 0,
+        children: [
+          _para(
+            "Tara Whittaker founded NorthLine Care in 2023 — an NDIS-registered support coordination practice serving Belconnen and Gungahlin. When she came to us in early 2025 she was a one-person operation supporting 14 participants, a long Facebook waitlist, and a recurring grant rejection problem: she'd write applications late at night between client visits and lose every one to providers with dedicated grant writers.",
+          ),
+          _heading('Where she was stuck'),
+          _para(
+            "Tara's positioning was clear in her head and invisible online. Her website was a one-pager built in Wix; her LinkedIn presence was a personal profile with no business posts; her grant applications copy-pasted boilerplate from her registration paperwork.",
+          ),
+          _quote(
+            "The applications I sent felt indistinguishable from anyone else's. I knew our model was different. I couldn't get that across in 400 words at midnight.",
+          ),
+          _heading('What changed'),
+          _para(
+            "Tara joined the monthly Grants & Funding Office Hours at Growth Hub. We didn't write applications for her — we re-scoped the ones already in her drawer. Her ACT Community Services grant got restructured around outcomes (number of participants moved off crisis support, hours of carer respite delivered) rather than activities. Submitted in March. Funded in June.",
+          ),
+          _para(
+            "In parallel we rebuilt her web presence. NorthLine moved onto our Foundations tier — Social AI now publishes one LinkedIn post per week pulled from a topic queue Tara approves monthly; Listing AI ensures NorthLine appears correctly across the 30+ NDIS-adjacent directories that participants and coordinators search; the website rewrite focused on the three referral pathways (self-managed participants, plan managers, and aged-care discharge planners) with a separate landing page for each.",
+          ),
+          _heading('Where she is now'),
+          _para(
+            "Eight months in: $180K in funding across three successful applications (ACT Community Services, Hands Across Canberra, a small private foundation). NorthLine now onboards three new participants per month — steady, predictable — and Tara has hired a part-time support coordinator.",
+          ),
+          _para(
+            "More importantly: Tara stopped writing grants at midnight. Each application now starts from a working template she keeps in her Growth Hub member portal, populated with the latest outcomes data from her own service.",
+          ),
+          _quote(
+            "Showed up to office hours with a grant draft that wasn't going anywhere. Left with a re-scoped application that got funded six weeks later.",
+          ),
+          _heading('What she said to make us write this'),
+          _para(
+            "We asked Tara whether she'd be open to a case study because she's exactly the kind of community-services operator the Growth Hub model exists to serve — small, registered, locally trusted, and locked out of the marketing-spend tier where most NDIS competitors play. Her answer was \"yes if it tells other sole-practitioners they don't need to hire a grant writer to fund the work they're already doing.\"",
+          ),
+          _para(
+            "If that's you: the next Grants & Funding Office Hours is on the events page. Drop in with whatever you have.",
+          ),
+        ],
+      },
+    },
+  });
+
   console.log('\n🎉  Seed complete!');
   process.exit(0);
 }
