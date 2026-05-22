@@ -144,6 +144,24 @@ section { padding: clamp(72px, 9vw, 140px) 0; position: relative; }
 .pkg-toggle button.active { background: var(--teal); color: var(--eggshell); }
 .pkg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
 .pkg-grid.managed { grid-template-columns: repeat(2, 1fr); max-width: 900px; margin-left: auto; margin-right: auto; }
+
+/* Free-tier entry banner — anchors the ladder at $0 above the three paid cards */
+.pkg-free-banner { display: grid; grid-template-columns: 1.6fr 1fr; gap: 32px; margin-top: 40px; padding: 28px 32px; background: var(--eggshell-warm); border: 1px solid var(--line); border-radius: 20px; align-items: center; }
+.pkg-free-tag { display: inline-block; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--plum); font-weight: 600; margin-bottom: 8px; }
+.pkg-free-h { font-family: var(--font-serif); font-weight: 400; font-size: 28px; letter-spacing: -0.015em; color: var(--teal); margin: 0 0 8px; }
+.pkg-free-p { color: var(--muted); font-size: 15px; line-height: 1.55; margin: 0 0 14px; max-width: 60ch; }
+.pkg-free-features { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.pkg-free-features li { font-size: 14px; color: var(--teal); padding-left: 18px; position: relative; }
+.pkg-free-features li::before { content: '✓'; position: absolute; left: 0; color: var(--plum); font-weight: 600; }
+.pkg-free-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.pkg-free-price { font-size: 40px; line-height: 1; color: var(--teal); letter-spacing: -0.02em; }
+.pkg-free-price .unit { font-size: 14px; color: var(--muted); margin-left: 4px; letter-spacing: 0; }
+.pkg-free-sub { font-size: 13px; color: var(--muted); }
+@media (max-width: 760px) {
+  .pkg-free-banner { grid-template-columns: 1fr; padding: 22px; }
+  .pkg-free-cta { align-items: stretch; }
+  .pkg-free-cta .btn { justify-content: center; }
+}
 .pkg-card { background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: 36px 32px; display: flex; flex-direction: column; position: relative; transition: transform .25s, box-shadow .25s; }
 .pkg-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px -20px rgba(13,63,72,0.2); }
 .pkg-card.featured { background: var(--teal); color: var(--eggshell); border-color: var(--teal); }
