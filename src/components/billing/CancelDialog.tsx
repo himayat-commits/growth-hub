@@ -9,6 +9,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { track } from '@/lib/analytics';
 
 const REASONS: Array<{ value: string; label: string }> = [
   { value: 'too-expensive', label: "It's too expensive right now" },
@@ -47,6 +48,7 @@ export default function CancelDialog({
     setDoneAt(null);
     setOpen(true);
     dialogRef.current?.showModal();
+    track('plan_cancel_open', { plan: currentPlanName });
   };
   const closeDialog = () => {
     dialogRef.current?.close();
@@ -68,6 +70,11 @@ export default function CancelDialog({
       });
       const data = (await res.json()) as { ok?: boolean; cancelAt?: number | null; error?: string };
       if (!res.ok) throw new Error(data.error ?? 'Could not cancel');
+      track('plan_cancel_committed', {
+        plan: currentPlanName,
+        reason,
+        hasComment: comment.length > 0,
+      });
       setDoneAt(data.cancelAt ?? null);
       // Refresh after a beat so the /plan page picks up the new state.
       setTimeout(() => {

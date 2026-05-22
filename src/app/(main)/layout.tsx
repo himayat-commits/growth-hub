@@ -6,6 +6,7 @@ import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RevealOnScroll from "@/components/RevealOnScroll";
+import PostHogProvider from "@/components/PostHogProvider";
 
 // Root layout for the main app (multiple root layouts pattern — no app/layout.tsx).
 // Provides <html>/<body>, fonts, metadata, AuthKitProvider, Navbar, and Footer.
@@ -60,10 +61,12 @@ export default function MainLayout({
     <html lang="en-AU" className={`${sourceSerif.variable} ${biroScript.variable}`}>
       <body>
         <AuthKitProvider>
-          <Navbar />
-          {children}
-          <Footer />
-          <RevealOnScroll />
+          <PostHogProvider>
+            <Navbar />
+            {children}
+            <Footer />
+            <RevealOnScroll />
+          </PostHogProvider>
         </AuthKitProvider>
       </body>
     </html>
