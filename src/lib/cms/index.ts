@@ -260,16 +260,26 @@ export const getSignupContent = unstable_cache(
 
 // ── Partners ──────────────────────────────────────────────────────────────────
 
+// Defensive: returns null when the query fails (e.g. preview DBs without
+// the latest migrations applied — Payload's SELECT includes every column
+// declared in the collection schema, so a single missing column blows up
+// the whole query). Callers already use `result?.docs ?? []` so null
+// falls through cleanly.
 export const getPartners = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    return payload.find({
-      collection: 'partners',
-      where: { status: { equals: 'published' } },
-      sort: 'order',
-      depth: 1,
-      limit: 0,
-    });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.find({
+        collection: 'partners',
+        where: { status: { equals: 'published' } },
+        sort: 'order',
+        depth: 1,
+        limit: 0,
+      });
+    } catch (err) {
+      console.warn('[cms] getPartners failed — returning null.', err);
+      return null;
+    }
   },
   ['partners'],
   { tags: ['partners'], revalidate: 3600 }
