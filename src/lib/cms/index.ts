@@ -323,10 +323,20 @@ export const getPartnerSlugs = unstable_cache(
   { tags: ['partners'], revalidate: 3600 },
 );
 
+// Same defensive pattern as getPartners: if the partners-page meta
+// migration (partnership_lead, partner_email, deck_url, requirements_url)
+// hasn't applied on a preview environment, findGlobal() selects columns
+// that don't exist. Catching here lets the page render with hardcoded
+// defaults instead of crashing the prerender.
 export const getPartnersPage = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    return payload.findGlobal({ slug: 'partners-page', depth: 0 });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.findGlobal({ slug: 'partners-page', depth: 0 });
+    } catch (err) {
+      console.warn('[cms] getPartnersPage failed — returning null.', err);
+      return null;
+    }
   },
   ['partners-page'],
   { tags: ['partners-page'], revalidate: 3600 }
