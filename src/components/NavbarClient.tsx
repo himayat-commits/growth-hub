@@ -26,7 +26,7 @@ const DEFAULT_NAV_ITEMS: NavItem[] = [
   { label: "Events", href: "/events" },
   { label: "Partners", href: "/partners" },
   { label: "About", href: "/#why" },
-  { label: "FAQ", href: "/#faq" },
+  { label: "FAQ", href: "/pricing#faq" },
   { label: "Contact", href: "/#contact" },
 ];
 

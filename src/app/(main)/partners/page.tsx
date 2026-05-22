@@ -7,6 +7,7 @@ import PartnerBenefits from "@/components/sections/partners/PartnerBenefits";
 import PartnerProof from "@/components/sections/partners/PartnerProof";
 import BecomePartnerCTA from "@/components/sections/partners/BecomePartnerCTA";
 import Contact from "@/components/sections/Contact";
+import NewsletterStrip from "@/components/NewsletterStrip";
 
 export const metadata: Metadata = {
   title: "Strategic Partners — Growth Hub by Himayat",
@@ -136,9 +137,19 @@ export default async function PartnersPage() {
         ctaHref={page?.becomeCtaHref ?? null}
         secondaryCtaLabel={page?.becomeSecondaryCtaLabel ?? null}
         secondaryCtaHref={page?.becomeSecondaryCtaHref ?? null}
+        partnershipLead={(page as { partnershipLead?: string | null })?.partnershipLead ?? null}
+        partnerEmail={(page as { partnerEmail?: string | null })?.partnerEmail ?? null}
+        deckUrl={(page as { deckUrl?: string | null })?.deckUrl ?? null}
+        requirementsUrl={(page as { requirementsUrl?: string | null })?.requirementsUrl ?? null}
         email={siteSettings?.supportEmail ?? null}
         phone={siteSettings?.phone ?? null}
         address={siteSettings?.address ?? null}
+      />
+
+      <NewsletterStrip
+        source="partners"
+        heading="Stay in the loop."
+        sub="Quarterly partnership updates — new co-host opportunities, joint events, partner-only roundtables."
       />
 
       {/* Contact form (hardcoded — same as homepage) */}

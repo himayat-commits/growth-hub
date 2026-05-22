@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { toPublicEvents } from '@/lib/events-data';
 import UpcomingFilterList from './UpcomingFilterList';
 import Contact from '@/components/sections/Contact';
+import NewsletterStrip from '@/components/NewsletterStrip';
 import { getPublicEvents, getSiteSettings } from '@/lib/cms';
 import type { Event as PayloadEvent } from '@/payload-types';
 
@@ -314,6 +315,12 @@ export default async function EventsHubPage() {
           </div>
         </div>
       </section>
+
+      <NewsletterStrip
+        source="events"
+        heading="Get the events newsletter."
+        sub="One email a month with the next workshops, mixers and clinics. No drip sequence."
+      />
 
       {/* Contact reuses the shared marketing form. */}
       <Contact

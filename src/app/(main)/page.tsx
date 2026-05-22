@@ -13,6 +13,7 @@ import Testimonials from "@/components/sections/Testimonials";
 import About from "@/components/sections/About";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Contact from "@/components/sections/Contact";
+import NewsletterStrip from "@/components/NewsletterStrip";
 
 export const metadata: Metadata = {
   title: "Growth Hub by Himayat — Your business deserves to grow.",
@@ -41,6 +42,7 @@ export default async function HomePage() {
     return (
       <main>
         <BlockRenderer blocks={page.layout as Parameters<typeof BlockRenderer>[0]["blocks"]} siteSettings={settingsData} />
+        <NewsletterStrip source="home" />
         <Contact supportEmail={settingsData?.supportEmail} />
       </main>
     );
@@ -59,6 +61,7 @@ export default async function HomePage() {
       <Testimonials />
       <About />
       <FinalCTA />
+      <NewsletterStrip source="home" />
       <Contact />
     </main>
   );
