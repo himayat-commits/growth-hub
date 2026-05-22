@@ -8,6 +8,8 @@ import { PLANS, type PlanTier, type PaidPlanTier } from '@/lib/plans';
 import { ManageBillingButton } from '@/components/billing/ManageBillingButton';
 import { IcoShield } from '@/components/dashboard/Icons';
 import PlanCheckoutButton from './PlanCheckoutButton';
+import ChangePlanDialog from '@/components/billing/ChangePlanDialog';
+import CancelDialog from '@/components/billing/CancelDialog';
 
 export const metadata: Metadata = {
   title: 'My plan — Growth Hub',
@@ -41,6 +43,26 @@ export default async function PlanPage() {
   const upgradeTarget: PaidPlanTier =
     currentTier === 'free' || currentTier === 'foundations' ? 'growth' : 'accelerate';
 
+  // Already-subscribed users get the in-app ChangePlanDialog (calls
+  // /api/change-plan with a prorated preview). Free-tier users still
+  // go through Stripe Checkout to create a new subscription.
+  const hasActiveSubscription = !!sub?.stripeSubscriptionId && sub.subscriptionStatus !== 'canceled';
+  function upgradeControl(tier: PaidPlanTier, label: string, className: string) {
+    if (hasActiveSubscription && tier !== currentTier) {
+      return (
+        <ChangePlanDialog
+          currentPlanName={currentPlan.name}
+          targetTier={tier}
+          targetPlanName={PLANS[tier].name}
+          interval={(sub?.billingInterval as 'month' | 'year' | null) ?? 'month'}
+          label={label}
+          className={className}
+        />
+      );
+    }
+    return <PlanCheckoutButton tier={tier} label={label} className={className} />;
+  }
+
   return (
     <>
       <PageHeader
@@ -58,13 +80,8 @@ export default async function PlanPage() {
                 See benefits
               </button>
             </Link>
-            {currentTier !== 'accelerate' && (
-              <PlanCheckoutButton
-                tier={upgradeTarget}
-                label={`Upgrade to ${PLANS[upgradeTarget].name}`}
-                className="gh-btn"
-              />
-            )}
+            {currentTier !== 'accelerate' &&
+              upgradeControl(upgradeTarget, `Upgrade to ${PLANS[upgradeTarget].name}`, 'gh-btn')}
           </>
         }
       />
@@ -122,14 +139,18 @@ export default async function PlanPage() {
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'stretch' }}>
-          {currentTier !== 'accelerate' && (
-            <PlanCheckoutButton
-              tier={upgradeTarget}
-              label={`Upgrade to ${PLANS[upgradeTarget].name}`}
-              className="gh-btn lime"
+          {currentTier !== 'accelerate' &&
+            upgradeControl(upgradeTarget, `Upgrade to ${PLANS[upgradeTarget].name}`, 'gh-btn lime')}
+          {currentTier !== 'free' && <ManageBillingButton />}
+          {/* In-app cancel-with-survey, only for paid subs that aren't
+              already scheduled for cancellation. The Manage billing
+              portal is still available above for everything else. */}
+          {hasActiveSubscription && !sub?.cancelAtPeriodEnd && (
+            <CancelDialog
+              currentPlanName={currentPlan.name}
+              periodEnd={periodEnd}
             />
           )}
-          {currentTier !== 'free' && <ManageBillingButton />}
         </div>
       </div>
 
@@ -191,11 +212,11 @@ export default async function PlanPage() {
                   </button>
                 </Link>
               ) : (
-                <PlanCheckoutButton
-                  tier={t as PaidPlanTier}
-                  label={`Upgrade — A$${plan.monthlyPrice}/mo`}
-                  className={isFeatured ? 'gh-btn lime' : 'gh-btn'}
-                />
+                upgradeControl(
+                  t as PaidPlanTier,
+                  `${PLANS[t as PaidPlanTier].monthlyPrice > currentPlan.monthlyPrice ? 'Upgrade' : 'Switch'} — A$${plan.monthlyPrice}/mo`,
+                  isFeatured ? 'gh-btn lime' : 'gh-btn',
+                )
               )}
             </div>
           );

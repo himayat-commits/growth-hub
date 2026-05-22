@@ -657,3 +657,50 @@ p { margin: 0; }
 
 /* ── Utility ───────────────────────────────────────────────────────── */
 .gh-frame, .gh-frame * { backface-visibility: hidden; }
+
+/* ── Billing dialogs (ChangePlanDialog + CancelDialog) ─────────────── */
+.gh-billing-dialog {
+  border: 0;
+  padding: 0;
+  border-radius: 18px;
+  background: var(--cream, #F3F0E7);
+  color: var(--ink, #0D3F48);
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  overflow: auto;
+  box-shadow: 0 32px 80px -20px rgba(13,63,72,0.35);
+}
+.gh-billing-dialog::backdrop {
+  background: rgba(13,63,72,0.55);
+  backdrop-filter: blur(6px);
+}
+.gh-billing-dialog-inner { padding: 32px 32px 28px; }
+.gh-billing-dialog-h {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 28px;
+  letter-spacing: -0.015em;
+  margin: 0 0 8px;
+  color: var(--teal, #0D3F48);
+}
+.gh-billing-dialog-sub { color: var(--ink-70, #4A6A70); font-size: 15px; line-height: 1.55; margin: 0 0 20px; }
+.gh-billing-dialog-fine { font-size: 13px; color: var(--ink-50, #7A9098); line-height: 1.5; margin-top: 16px; }
+.gh-billing-dialog-err { background: rgba(95,48,75,0.08); color: var(--plum, #5F304B); padding: 10px 14px; border-radius: 10px; font-size: 14px; margin: 0 0 16px; }
+.gh-billing-dialog-loading { color: var(--ink-50); font-size: 14px; padding: 24px 0; text-align: center; }
+.gh-billing-dialog-done { color: var(--teal); font-size: 15px; margin: 16px 0 8px; }
+.gh-billing-dialog-summary { background: var(--cream-warm, #ECE7D8); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.gh-billing-dialog-summary .row { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; }
+.gh-billing-dialog-summary .row strong { color: var(--teal); font-size: 17px; }
+.gh-billing-dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
+.gh-billing-dialog-actions .gh-btn { min-width: 120px; }
+
+/* CancelDialog — reason radio list */
+.gh-cancel-reasons { border: 0; padding: 0; margin: 0 0 16px; display: flex; flex-direction: column; gap: 6px; }
+.gh-cancel-reason { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; font-size: 14px; transition: background .15s, border-color .15s; }
+.gh-cancel-reason:hover { background: var(--cream-warm); }
+.gh-cancel-reason.is-on { background: var(--teal); color: var(--cream); border-color: var(--teal); }
+.gh-cancel-reason input { accent-color: var(--lime); }
+.gh-cancel-comment { display: flex; flex-direction: column; gap: 6px; margin: 0 0 8px; }
+.gh-cancel-comment span { font-size: 13px; color: var(--ink-70); }
+.gh-cancel-comment textarea { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--cream); font: inherit; font-size: 14px; line-height: 1.5; color: var(--ink); resize: vertical; }
+.gh-cancel-comment textarea:focus { outline: none; border-color: var(--teal); }
