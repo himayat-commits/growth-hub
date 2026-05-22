@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import NamingConcepts from './NamingConcepts';
 import Contact from '@/components/sections/Contact';
 import { getSiteSettings } from '@/lib/cms';
 
@@ -164,9 +163,6 @@ export default async function SmallBusinessJourneyPage() {
           </div>
         </div>
       </section>
-
-      {/* NAMING (client) */}
-      <NamingConcepts />
 
       {/* SCHEDULE */}
       <section className="schedule" id="program">
