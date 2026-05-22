@@ -32,6 +32,7 @@ const APP_PATHS = [
   '/messages',
   '/benefits',
   '/onboarding',
+  '/ops',  // internal staff console (gated by OPS_EMAILS allowlist)
 ];
 
 function isAppPath(pathname: string): boolean {
