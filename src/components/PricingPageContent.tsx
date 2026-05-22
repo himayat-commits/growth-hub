@@ -8,6 +8,7 @@ import { PLANS, calculateDisplayPrice, type BillingInterval, type PlanTier } fro
 // ── Compare table ─────────────────────────────────────────────────────────────
 
 const TIERS_COMPARE = [
+  { name: 'Free', price: '$0' },
   { name: 'Foundations', price: '$299/mo' },
   { name: 'Growth', price: '$499/mo' },
   { name: 'Accelerate', price: '$799/mo' },
@@ -16,41 +17,45 @@ const TIERS_COMPARE = [
 ];
 
 const C = '✓', D = '—', M = 'Managed';
+// Each row holds 6 cells: [Free, Foundations, Growth, Accelerate, Managed Pro, Managed Elite].
+// Free maps to the community-only entry point — webinar, community, in-person events,
+// and one complimentary Growth Call. No SaaS modules.
 const ROWS: [string, string[] | null][] = [
   ['Support', null],
-  ['Support Level', ['Basic email', 'Basic email', 'Basic email', 'Dedicated manager', 'Priority same-day']],
-  ['Onboarding Videos', [C, C, C, C, C]],
-  ['Weekly Live Webinar', [C, C, C, C, C]],
-  ['Community Access', [C, C, C, C, C]],
-  ['In-Person Events', [C, C, C, C, C]],
+  ['Support Level',           ['Community',  'Basic email',  'Basic email',  'Basic email',  'Dedicated manager', 'Priority same-day']],
+  ['Onboarding Videos',       [D, C, C, C, C, C]],
+  ['Weekly Live Webinar',     [C, C, C, C, C, C]],
+  ['Community Access',        [C, C, C, C, C, C]],
+  ['In-Person Events',        [C, C, C, C, C, C]],
+  ['Free Growth Call (30m)',  [C, C, C, C, C, C]],
   ['Work Management Modules', null],
-  ['Invoicing', [C, C, C, M, M]],
-  ['Timesheets & Docketing', [D, C, C, M, M]],
-  ['Scheduling & Rostering', [D, D, C, M, M]],
+  ['Invoicing',               [D, C, C, C, M, M]],
+  ['Timesheets & Docketing',  [D, D, C, C, M, M]],
+  ['Scheduling & Rostering',  [D, D, D, C, M, M]],
   ['Marketing Platform Modules', null],
-  ['Social AI', [C, C, C, M, M]],
-  ['Listing AI', [C, C, C, M, M]],
-  ['Messaging', [C, C, C, C, C]],
-  ['Reviews AI', [D, C, C, M, M]],
-  ['Review Collateral Kit', [D, C, C, C, C]],
-  ['Webchat AI (Robin)', [D, D, C, C, C]],
-  ['Referrals', [D, 'Add-on $175', 'Add-on $175', C, M]],
-  ['Search AI', [D, 'Add-on $99', 'Add-on $99', D, M]],
-  ['Insights', [D, D, D, D, M]],
-  ['Competitor AI', [D, D, D, D, M]],
-  ['Managed Services', null],
-  ['Social Media Posts', [D, D, D, '12/mo', '20/mo + design']],
-  ['Review Management', [D, D, D, '24hr response', '24hr response']],
-  ['Strategy Calls', [D, D, D, 'Monthly (45m)', 'Fortnightly']],
-  ['Account Manager', [D, D, D, C, 'Priority']],
-  ['Local SEO', [D, D, D, D, C]],
-  ['Google Ads', [D, D, D, D, C]],
-  ['Website Updates', [D, D, D, D, '4 hrs/mo']],
-  ['Blog Content', [D, D, D, D, '1/mo']],
-  ['SMS/Email Campaigns', [D, D, D, D, '2x/mo']],
+  ['Social AI',               [D, C, C, C, M, M]],
+  ['Listing AI',              [D, C, C, C, M, M]],
+  ['Messaging',               [D, C, C, C, C, C]],
+  ['Reviews AI',              [D, D, C, C, M, M]],
+  ['Review Collateral Kit',   [D, D, C, C, C, C]],
+  ['Webchat AI (Robin)',      [D, D, D, C, C, C]],
+  ['Referrals',               [D, D, 'Add-on $175', 'Add-on $175', C, M]],
+  ['Search AI',               [D, D, 'Add-on $99', 'Add-on $99', D, M]],
+  ['Insights',                [D, D, D, D, D, M]],
+  ['Competitor AI',           [D, D, D, D, D, M]],
+  ['Managed Services',        null],
+  ['Social Media Posts',      [D, D, D, D, '12/mo', '20/mo + design']],
+  ['Review Management',       [D, D, D, D, '24hr response', '24hr response']],
+  ['Strategy Calls',          [D, D, D, D, 'Monthly (45m)', 'Fortnightly']],
+  ['Account Manager',         [D, D, D, D, C, 'Priority']],
+  ['Local SEO',               [D, D, D, D, D, C]],
+  ['Google Ads',              [D, D, D, D, D, C]],
+  ['Website Updates',         [D, D, D, D, D, '4 hrs/mo']],
+  ['Blog Content',            [D, D, D, D, D, '1/mo']],
+  ['SMS/Email Campaigns',     [D, D, D, D, D, '2x/mo']],
   ['First Month Setup', null],
-  ['Logo Design', [D, D, D, 'Basic', 'Brand setup']],
-  ['Website Build', [D, D, D, '1-page', 'Full build']],
+  ['Logo Design',             [D, D, D, D, 'Basic', 'Brand setup']],
+  ['Website Build',           [D, D, D, D, '1-page', 'Full build']],
 ];
 
 function CellContent({ v }: { v: string }) {
@@ -84,7 +89,7 @@ function ComparisonTable({ open }: { open: boolean }) {
               <tbody>
                 {ROWS.map((r, i) =>
                   r[1] === null ? (
-                    <tr className="group-header" key={i}><td colSpan={6}>{r[0]}</td></tr>
+                    <tr className="group-header" key={i}><td colSpan={7}>{r[0]}</td></tr>
                   ) : (
                     <tr key={i}>
                       <td>{r[0]}</td>
@@ -138,6 +143,7 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
   const router = useRouter();
 
   const selfTiers: PlanTier[] = ['foundations', 'growth', 'accelerate'];
+  const freePlan = PLANS.free;
 
   async function startCheckout(tier: PlanTier) {
     if (!isLoaded) return;
@@ -188,6 +194,42 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
                   </span>
                 </button>
               </div>
+            </div>
+          </div>
+
+          {/* ── Free entry-point banner ── */}
+          {/*
+            Sits above the three paid cards. Anchors the price ladder at $0
+            so visitors comparison-shopping see the no-card option without
+            having to scroll the whole page. Renders the same features list
+            from PLANS.free so the source of truth stays in lib/plans.ts.
+          */}
+          <div className="pkg-free-banner" role="region" aria-label="Free Member tier">
+            <div className="pkg-free-copy">
+              <div className="pkg-free-tag">Start free · no card needed</div>
+              <h3 className="pkg-free-h">{freePlan.name}</h3>
+              <p className="pkg-free-p">{freePlan.description}</p>
+              <ul className="pkg-free-features">
+                {freePlan.features.slice(0, 4).map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="pkg-free-cta">
+              <div className="pkg-free-price">
+                $0<span className="unit">/forever</span>
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => router.push('/sign-up?redirect_url=%2Fdashboard')}
+                disabled={!isLoaded}
+                style={{ opacity: !isLoaded ? 0.6 : 1, cursor: !isLoaded ? 'not-allowed' : 'pointer' }}
+              >
+                Join free — no card needed
+                <ArrowIcon />
+              </button>
+              <span className="pkg-free-sub">Upgrade to a paid tier any time.</span>
             </div>
           </div>
 

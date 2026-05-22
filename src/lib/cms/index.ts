@@ -275,6 +275,54 @@ export const getPartners = unstable_cache(
   { tags: ['partners'], revalidate: 3600 }
 );
 
+/** Single partner by slug — for /partners/[slug] deep pages. Wrapped in
+ *  try/catch so builds succeed even before the slug migration applies. */
+export const getPartnerBySlug = unstable_cache(
+  async (slug: string) => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'partners',
+        where: {
+          and: [
+            { slug: { equals: slug } },
+            { status: { equals: 'published' } },
+          ],
+        },
+        limit: 1,
+        depth: 1,
+      });
+      return docs[0] ?? null;
+    } catch (err) {
+      console.warn('[cms] getPartnerBySlug failed', err);
+      return null;
+    }
+  },
+  ['partner-by-slug'],
+  { tags: ['partners'], revalidate: 3600 },
+);
+
+/** Every published partner slug — used by generateStaticParams. */
+export const getPartnerSlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'partners',
+        where: { status: { equals: 'published' } },
+        limit: 0,
+        depth: 0,
+      });
+      return docs.map((d) => String((d as { slug?: string }).slug ?? '')).filter(Boolean);
+    } catch (err) {
+      console.warn('[cms] getPartnerSlugs failed — returning [].', err);
+      return [];
+    }
+  },
+  ['partner-slugs'],
+  { tags: ['partners'], revalidate: 3600 },
+);
+
 export const getPartnersPage = unstable_cache(
   async () => {
     const payload = await getPayloadClient();
