@@ -272,6 +272,37 @@ export default function PricingSection({ heading, subheading }: PricingSectionPr
             </div>
           </div>
 
+          {/* Free-tier entry banner — only on the Self-Service ladder.
+              Anchors the price ladder at $0 so visitors comparison-shopping
+              see the no-card option without scrolling further. Reuses the
+              same .pkg-free-banner styles as /pricing for consistency. */}
+          {mode === "self" && (
+            <div className="pkg-free-banner" role="region" aria-label="Free Member tier">
+              <div className="pkg-free-copy">
+                <div className="pkg-free-tag">Start free · no card needed</div>
+                <h3 className="pkg-free-h">Free Member</h3>
+                <p className="pkg-free-p">
+                  Community access, the public resource library, and one complimentary 30-minute Growth Call. Upgrade to a paid tier whenever you&apos;re ready.
+                </p>
+                <ul className="pkg-free-features">
+                  <li>Public resource library</li>
+                  <li>Community forum access</li>
+                  <li>1 free Growth Call (30 min)</li>
+                  <li>Weekly group webinars</li>
+                </ul>
+              </div>
+              <div className="pkg-free-cta">
+                <div className="pkg-free-price">
+                  $0<span className="unit">/forever</span>
+                </div>
+                <Link className="btn btn-primary" href="/sign-up?redirect_url=%2Fdashboard">
+                  Join free — no card needed <ArrowIcon />
+                </Link>
+                <span className="pkg-free-sub">Upgrade to a paid tier any time.</span>
+              </div>
+            </div>
+          )}
+
           <div className={`pkg-grid ${mode === "managed" ? "managed" : ""}`}>
             {tiers.map((t) => (
               <div className={`pkg-card ${t.featured ? "featured" : ""}`} key={t.name}>
