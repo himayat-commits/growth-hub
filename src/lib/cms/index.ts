@@ -108,6 +108,53 @@ export const getCaseStudies = unstable_cache(
   { tags: ['case-studies'], revalidate: 3600 }
 );
 
+/** Single case study by slug — for /case-studies/[slug]. */
+export const getCaseStudyBySlug = unstable_cache(
+  async (slug: string) => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'case-studies',
+        where: {
+          and: [
+            { slug: { equals: slug } },
+            { status: { equals: 'published' } },
+          ],
+        },
+        limit: 1,
+        depth: 1,
+      });
+      return docs[0] ?? null;
+    } catch (err) {
+      console.warn('[cms] getCaseStudyBySlug failed', err);
+      return null;
+    }
+  },
+  ['case-study-by-slug'],
+  { tags: ['case-studies'], revalidate: 3600 },
+);
+
+/** Every published case-study slug — for generateStaticParams. */
+export const getCaseStudySlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'case-studies',
+        where: { status: { equals: 'published' } },
+        limit: 0,
+        depth: 0,
+      });
+      return docs.map((d) => String(d.slug)).filter(Boolean);
+    } catch (err) {
+      console.warn('[cms] getCaseStudySlugs failed — returning [].', err);
+      return [];
+    }
+  },
+  ['case-study-slugs'],
+  { tags: ['case-studies'], revalidate: 3600 },
+);
+
 // ── Testimonials ──────────────────────────────────────────────────────────────
 
 export const getTestimonials = unstable_cache(

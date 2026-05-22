@@ -1158,6 +1158,102 @@ async function seed() {
     console.log(`✅  Created ${sampleServices.length} sample services.`);
   }
 
+  // ── Case Studies ────────────────────────────────────────────────────────
+  // Seed one founding case study (Saffron Bakery — the testimonial source
+  // already on the homepage). Idempotent — skips if the slug exists.
+  const { totalDocs: existingCaseStudies } = await payload.find({
+    collection: 'case-studies',
+    where: { slug: { equals: 'saffron-bakery' } },
+    limit: 1,
+  });
+  if (existingCaseStudies === 0) {
+    const para = (text: string) => ({
+      type: 'paragraph',
+      version: 1,
+      direction: 'ltr' as const,
+      format: '' as const,
+      indent: 0,
+      children: [{ type: 'text', text, version: 1 }],
+    });
+    const heading = (text: string) => ({
+      type: 'heading',
+      tag: 'h2',
+      version: 1,
+      direction: 'ltr' as const,
+      format: '' as const,
+      indent: 0,
+      children: [{ type: 'text', text, version: 1 }],
+    });
+    const quote = (text: string) => ({
+      type: 'quote',
+      version: 1,
+      direction: 'ltr' as const,
+      format: '' as const,
+      indent: 0,
+      children: [{ type: 'text', text, version: 1 }],
+    });
+
+    await payload.create({
+      collection: 'case-studies',
+      data: {
+        title: "How Saffron Bakery doubled wholesale leads in six months",
+        slug: 'saffron-bakery',
+        client: 'Saffron Bakery',
+        outcome:
+          '2× wholesale enquiries · 80 Google reviews (from 12) · ranked top 3 for "Persian bakery Canberra"',
+        status: 'published',
+        body: {
+          root: {
+            type: 'root',
+            version: 1,
+            direction: 'ltr' as const,
+            format: '' as const,
+            indent: 0,
+            children: [
+              para(
+                "Priya Subramaniam runs Saffron Bakery — a small Persian–Australian bakery in inner south Canberra. When she joined Growth Hub in 2025 she had a single-page Squarespace site, a Facebook page with 800 followers, and a handful of regulars who'd been buying her saffron pastries for years.",
+              ),
+              para(
+                "What she didn't have was a way to convert the steady stream of people who tried her pastries at the Lyneham Sunday market into wholesale enquiries from cafes. \"People kept asking who we supplied,\" she said. \"And I kept giving them my Instagram handle.\"",
+              ),
+              heading('Where she was stuck'),
+              para(
+                "Saffron's Google profile was claimed but unmanaged. Twelve reviews, no responses. Listings on the directories that mattered — Beanhunter, Concrete Playground, Time Out Canberra — were either wrong or missing. Wholesale enquiries came through a contact form that emailed an address Priya checked twice a week.",
+              ),
+              quote(
+                "I was working 60 hours making the pastries. I didn't have a 61st hour for marketing.",
+              ),
+              heading('What changed'),
+              para(
+                "Over Priya's first three months on Growth (Birdeye-bundled): we set up review automation across Google + Facebook, surfaced 6 dormant directory listings and corrected them, and rebuilt her contact form to fire SMS notifications instead of email. Her reviews AI started prompting happy customers in-person via a QR card at the till.",
+              ),
+              para(
+                "Three months in, reviews went from 12 to 51. We added a second Reviews AI prompt at the end of the wholesale conversation — and a new Google Business product post every two weeks pulled from her existing Instagram (handled by the Social AI module).",
+              ),
+              heading('Where she is now'),
+              para(
+                "Six months in: 80 reviews, an average rating that held at 4.9, and ranking in the top 3 for 'Persian bakery Canberra' and 'saffron pastry ACT'. Wholesale enquiries roughly doubled — from 4 a month to 8–10 — and three of those converted to standing weekly orders at local cafes.",
+              ),
+              quote(
+                "Walked in with a half-built website and walked out with the next three things to fix. Every other workshop I've been to is selling something — this one wasn't.",
+              ),
+              heading('What she said to make us write this'),
+              para(
+                "We asked Priya whether she'd be open to a case study because she's the kind of operator we built Growth Hub for — making something genuinely good, in a market most agencies overlook, with no time to think about funnels. Her answer was \"yes if it helps another owner with a market stall and no website.\"",
+              ),
+              para(
+                "If that's you: come to a Growth Call or a free clinic. We'll start where you are.",
+              ),
+            ],
+          },
+        },
+      },
+    });
+    console.log('✅  Created 1 sample case study (Saffron Bakery).');
+  } else {
+    console.log('⏭   Saffron Bakery case study already exists — skipping.');
+  }
+
   console.log('\n🎉  Seed complete!');
   process.exit(0);
 }
