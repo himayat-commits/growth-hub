@@ -7,6 +7,7 @@ import * as migration_20260520_050915 from './20260520_050915';
 import * as migration_20260520_153805 from './20260520_153805';
 import * as migration_20260521_events_public_fields from './20260521_events_public_fields';
 import * as migration_20260521_navigation_events_partners from './20260521_navigation_events_partners';
+import * as migration_20260522_navigation_cta_and_faq_fix from './20260522_navigation_cta_and_faq_fix';
 
 export const migrations = [
   {
@@ -53,5 +54,10 @@ export const migrations = [
     up: migration_20260521_navigation_events_partners.up,
     down: migration_20260521_navigation_events_partners.down,
     name: '20260521_navigation_events_partners',
+  },
+  {
+    up: migration_20260522_navigation_cta_and_faq_fix.up,
+    down: migration_20260522_navigation_cta_and_faq_fix.down,
+    name: '20260522_navigation_cta_and_faq_fix',
   },
 ];

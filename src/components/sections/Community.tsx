@@ -63,20 +63,18 @@ const TABS = [
             <span>Upcoming Events</span>
           </div>
           <div className="comm-event">
-            <div className="comm-event-row">
-              <span className="comm-event-status">Coming Soon</span>
-              <span className="comm-event-pill comm-event-pill-free">Free · Open to all</span>
-            </div>
-            <span className="comm-event-title">Canberra Small Business Networking Night</span>
-            <span className="comm-event-loc">Canberra CBD</span>
-          </div>
-          <div className="comm-event">
-            <div className="comm-event-row">
-              <span className="comm-event-status">Coming Soon</span>
-              <span className="comm-event-pill comm-event-pill-sub">Subscribers only</span>
-            </div>
-            <span className="comm-event-title">Digital Marketing Deep-Dive Workshop</span>
-            <span className="comm-event-loc">Canberra · In person</span>
+            <span className="comm-event-title">A full calendar — workshops, mixers, clinics and an annual summit.</span>
+            <span className="comm-event-loc">Canberra · Mostly free · always inclusive</span>
+            <a
+              href="/events"
+              className="btn btn-secondary"
+              style={{ alignSelf: "flex-start", marginTop: 14 }}
+            >
+              See what&apos;s on
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+                <path d="M3 7h8M7 3l4 4-4 4" />
+              </svg>
+            </a>
           </div>
         </div>
       </div>
