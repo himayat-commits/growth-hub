@@ -7,6 +7,18 @@
  *
  * Import directly in Server Components — no API round-trip needed.
  * The Local API executes in-process via getPayload({ config }).
+ *
+ * Defensive pattern: every helper that touches Payload is wrapped in
+ * try/catch and returns null (single doc / global / paginated result) or
+ * [] (raw array). The reason is structural: Payload's SELECT includes
+ * EVERY column declared in the collection schema, so a single column
+ * added in code but not yet migrated to the DB blows up the entire
+ * query and breaks the prerender of every page that calls the helper.
+ *
+ * All call sites use optional chaining (`result?.docs ?? []`) or null
+ * guards, so a null return falls through to the page's hardcoded
+ * fallback instead of crashing the build. Once migrations apply on the
+ * target DB, the catch never fires.
  */
 import { getPayload } from 'payload';
 import config from '@payload-config';
@@ -17,23 +29,33 @@ async function getPayloadClient() {
   return getPayload({ config });
 }
 
+// Single shared logger so consumers can grep cleanly for cms-helper failures.
+function warn(label: string, err: unknown) {
+  console.warn(`[cms] ${label} failed.`, err);
+}
+
 // ── Pages ────────────────────────────────────────────────────────────────────
 
 export const getPageBySlug = unstable_cache(
   async (slug: string) => {
-    const payload = await getPayloadClient();
-    const { docs } = await payload.find({
-      collection: 'pages',
-      where: {
-        and: [
-          { slug: { equals: slug } },
-          { status: { equals: 'published' } },
-        ],
-      },
-      limit: 1,
-      depth: 2,
-    });
-    return docs[0] ?? null;
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'pages',
+        where: {
+          and: [
+            { slug: { equals: slug } },
+            { status: { equals: 'published' } },
+          ],
+        },
+        limit: 1,
+        depth: 2,
+      });
+      return docs[0] ?? null;
+    } catch (err) {
+      warn('getPageBySlug', err);
+      return null;
+    }
   },
   ['page-by-slug'],
   { tags: ['pages'], revalidate: 3600 }
@@ -41,14 +63,19 @@ export const getPageBySlug = unstable_cache(
 
 export const getAllPageSlugs = unstable_cache(
   async (): Promise<string[]> => {
-    const payload = await getPayloadClient();
-    const { docs } = await payload.find({
-      collection: 'pages',
-      where: { status: { equals: 'published' } },
-      limit: 0,
-      depth: 0,
-    });
-    return docs.map((p) => String(p.slug));
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'pages',
+        where: { status: { equals: 'published' } },
+        limit: 0,
+        depth: 0,
+      });
+      return docs.map((p) => String(p.slug));
+    } catch (err) {
+      warn('getAllPageSlugs', err);
+      return [];
+    }
   },
   ['all-page-slugs'],
   { tags: ['pages'], revalidate: 3600 }
@@ -58,15 +85,20 @@ export const getAllPageSlugs = unstable_cache(
 
 export const getPosts = unstable_cache(
   async (limit = 12, page = 1) => {
-    const payload = await getPayloadClient();
-    return payload.find({
-      collection: 'posts',
-      where: { status: { equals: 'published' } },
-      sort: '-publishedAt',
-      limit,
-      page,
-      depth: 1,
-    });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.find({
+        collection: 'posts',
+        where: { status: { equals: 'published' } },
+        sort: '-publishedAt',
+        limit,
+        page,
+        depth: 1,
+      });
+    } catch (err) {
+      warn('getPosts', err);
+      return null;
+    }
   },
   ['posts-list'],
   { tags: ['posts'], revalidate: 3600 }
@@ -74,19 +106,24 @@ export const getPosts = unstable_cache(
 
 export const getPostBySlug = unstable_cache(
   async (slug: string) => {
-    const payload = await getPayloadClient();
-    const { docs } = await payload.find({
-      collection: 'posts',
-      where: {
-        and: [
-          { slug: { equals: slug } },
-          { status: { equals: 'published' } },
-        ],
-      },
-      limit: 1,
-      depth: 2,
-    });
-    return docs[0] ?? null;
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'posts',
+        where: {
+          and: [
+            { slug: { equals: slug } },
+            { status: { equals: 'published' } },
+          ],
+        },
+        limit: 1,
+        depth: 2,
+      });
+      return docs[0] ?? null;
+    } catch (err) {
+      warn('getPostBySlug', err);
+      return null;
+    }
   },
   ['post-by-slug'],
   { tags: ['posts'], revalidate: 3600 }
@@ -96,13 +133,18 @@ export const getPostBySlug = unstable_cache(
 
 export const getCaseStudies = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    return payload.find({
-      collection: 'case-studies',
-      where: { status: { equals: 'published' } },
-      depth: 1,
-      limit: 0,
-    });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.find({
+        collection: 'case-studies',
+        where: { status: { equals: 'published' } },
+        depth: 1,
+        limit: 0,
+      });
+    } catch (err) {
+      warn('getCaseStudies', err);
+      return null;
+    }
   },
   ['case-studies'],
   { tags: ['case-studies'], revalidate: 3600 }
@@ -126,7 +168,7 @@ export const getCaseStudyBySlug = unstable_cache(
       });
       return docs[0] ?? null;
     } catch (err) {
-      console.warn('[cms] getCaseStudyBySlug failed', err);
+      warn('getCaseStudyBySlug', err);
       return null;
     }
   },
@@ -147,7 +189,7 @@ export const getCaseStudySlugs = unstable_cache(
       });
       return docs.map((d) => String(d.slug)).filter(Boolean);
     } catch (err) {
-      console.warn('[cms] getCaseStudySlugs failed — returning [].', err);
+      warn('getCaseStudySlugs', err);
       return [];
     }
   },
@@ -159,13 +201,18 @@ export const getCaseStudySlugs = unstable_cache(
 
 export const getTestimonials = unstable_cache(
   async (featuredOnly = false) => {
-    const payload = await getPayloadClient();
-    return payload.find({
-      collection: 'testimonials',
-      where: featuredOnly ? { featured: { equals: true } } : {},
-      depth: 1,
-      limit: 0,
-    });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.find({
+        collection: 'testimonials',
+        where: featuredOnly ? { featured: { equals: true } } : {},
+        depth: 1,
+        limit: 0,
+      });
+    } catch (err) {
+      warn('getTestimonials', err);
+      return null;
+    }
   },
   ['testimonials'],
   { tags: ['testimonials'], revalidate: 3600 }
@@ -175,14 +222,19 @@ export const getTestimonials = unstable_cache(
 
 export const getFAQs = unstable_cache(
   async (category?: string) => {
-    const payload = await getPayloadClient();
-    return payload.find({
-      collection: 'faqs',
-      where: category ? { category: { equals: category } } : {},
-      sort: 'order',
-      depth: 0,
-      limit: 0,
-    });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.find({
+        collection: 'faqs',
+        where: category ? { category: { equals: category } } : {},
+        sort: 'order',
+        depth: 0,
+        limit: 0,
+      });
+    } catch (err) {
+      warn('getFAQs', err);
+      return null;
+    }
   },
   ['faqs'],
   { tags: ['faqs'], revalidate: 3600 }
@@ -192,13 +244,18 @@ export const getFAQs = unstable_cache(
 
 export const getTeamMembers = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    return payload.find({
-      collection: 'team-members',
-      sort: 'order',
-      depth: 1,
-      limit: 0,
-    });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.find({
+        collection: 'team-members',
+        sort: 'order',
+        depth: 1,
+        limit: 0,
+      });
+    } catch (err) {
+      warn('getTeamMembers', err);
+      return null;
+    }
   },
   ['team-members'],
   { tags: ['team-members'], revalidate: 3600 }
@@ -208,13 +265,18 @@ export const getTeamMembers = unstable_cache(
 
 export const getLogos = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    return payload.find({
-      collection: 'logos',
-      sort: 'order',
-      depth: 1,
-      limit: 0,
-    });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.find({
+        collection: 'logos',
+        sort: 'order',
+        depth: 1,
+        limit: 0,
+      });
+    } catch (err) {
+      warn('getLogos', err);
+      return null;
+    }
   },
   ['logos'],
   { tags: ['logos'], revalidate: 3600 }
@@ -224,8 +286,13 @@ export const getLogos = unstable_cache(
 
 export const getSiteSettings = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    return payload.findGlobal({ slug: 'site-settings', depth: 0 });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.findGlobal({ slug: 'site-settings', depth: 0 });
+    } catch (err) {
+      warn('getSiteSettings', err);
+      return null;
+    }
   },
   ['site-settings'],
   { tags: ['site-settings'], revalidate: 3600 }
@@ -233,8 +300,13 @@ export const getSiteSettings = unstable_cache(
 
 export const getNavigation = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    return payload.findGlobal({ slug: 'navigation', depth: 0 });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.findGlobal({ slug: 'navigation', depth: 0 });
+    } catch (err) {
+      warn('getNavigation', err);
+      return null;
+    }
   },
   ['navigation'],
   { tags: ['navigation'], revalidate: 3600 }
@@ -242,8 +314,13 @@ export const getNavigation = unstable_cache(
 
 export const getAnnouncementBar = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    return payload.findGlobal({ slug: 'announcement-bar', depth: 0 });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.findGlobal({ slug: 'announcement-bar', depth: 0 });
+    } catch (err) {
+      warn('getAnnouncementBar', err);
+      return null;
+    }
   },
   ['announcement-bar'],
   { tags: ['announcement-bar'], revalidate: 3600 }
@@ -251,8 +328,13 @@ export const getAnnouncementBar = unstable_cache(
 
 export const getSignupContent = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    return payload.findGlobal({ slug: 'signup-page-content', depth: 0 });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.findGlobal({ slug: 'signup-page-content', depth: 0 });
+    } catch (err) {
+      warn('getSignupContent', err);
+      return null;
+    }
   },
   ['signup-page-content'],
   { tags: ['signup-page-content'], revalidate: 3600 }
@@ -260,11 +342,6 @@ export const getSignupContent = unstable_cache(
 
 // ── Partners ──────────────────────────────────────────────────────────────────
 
-// Defensive: returns null when the query fails (e.g. preview DBs without
-// the latest migrations applied — Payload's SELECT includes every column
-// declared in the collection schema, so a single missing column blows up
-// the whole query). Callers already use `result?.docs ?? []` so null
-// falls through cleanly.
 export const getPartners = unstable_cache(
   async () => {
     try {
@@ -277,7 +354,7 @@ export const getPartners = unstable_cache(
         limit: 0,
       });
     } catch (err) {
-      console.warn('[cms] getPartners failed — returning null.', err);
+      warn('getPartners', err);
       return null;
     }
   },
@@ -285,8 +362,7 @@ export const getPartners = unstable_cache(
   { tags: ['partners'], revalidate: 3600 }
 );
 
-/** Single partner by slug — for /partners/[slug] deep pages. Wrapped in
- *  try/catch so builds succeed even before the slug migration applies. */
+/** Single partner by slug — for /partners/[slug] deep pages. */
 export const getPartnerBySlug = unstable_cache(
   async (slug: string) => {
     try {
@@ -304,7 +380,7 @@ export const getPartnerBySlug = unstable_cache(
       });
       return docs[0] ?? null;
     } catch (err) {
-      console.warn('[cms] getPartnerBySlug failed', err);
+      warn('getPartnerBySlug', err);
       return null;
     }
   },
@@ -325,7 +401,7 @@ export const getPartnerSlugs = unstable_cache(
       });
       return docs.map((d) => String((d as { slug?: string }).slug ?? '')).filter(Boolean);
     } catch (err) {
-      console.warn('[cms] getPartnerSlugs failed — returning [].', err);
+      warn('getPartnerSlugs', err);
       return [];
     }
   },
@@ -335,8 +411,13 @@ export const getPartnerSlugs = unstable_cache(
 
 export const getPartnersPage = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    return payload.findGlobal({ slug: 'partners-page', depth: 0 });
+    try {
+      const payload = await getPayloadClient();
+      return await payload.findGlobal({ slug: 'partners-page', depth: 0 });
+    } catch (err) {
+      warn('getPartnersPage', err);
+      return null;
+    }
   },
   ['partners-page'],
   { tags: ['partners-page'], revalidate: 3600 }
@@ -344,48 +425,56 @@ export const getPartnersPage = unstable_cache(
 
 // ── Events ────────────────────────────────────────────────────────────────────
 
-/** All events with date >= today (or no date), sorted by date ascending.
- *  Useful for the /events page's "Upcoming" section. */
+/** All events with date >= today (or no date), sorted by date ascending. */
 export const getUpcomingEvents = unstable_cache(
   async (limit = 50) => {
-    const payload = await getPayloadClient();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const { docs } = await payload.find({
-      collection: 'events',
-      where: {
-        date: { greater_than_equal: today.toISOString() },
-      },
-      sort: 'date',
-      limit,
-      depth: 1,
-    });
-    return docs;
+    try {
+      const payload = await getPayloadClient();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const { docs } = await payload.find({
+        collection: 'events',
+        where: {
+          date: { greater_than_equal: today.toISOString() },
+        },
+        sort: 'date',
+        limit,
+        depth: 1,
+      });
+      return docs;
+    } catch (err) {
+      warn('getUpcomingEvents', err);
+      return [];
+    }
   },
   ['events-upcoming'],
   { tags: ['events'], revalidate: 3600 },
 );
 
-/** Past events that have a recording uploaded. Used by /events "Past
- *  recordings" grid. */
+/** Past events with a recording uploaded. */
 export const getPastRecordings = unstable_cache(
   async (limit = 12) => {
-    const payload = await getPayloadClient();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const { docs } = await payload.find({
-      collection: 'events',
-      where: {
-        and: [
-          { date: { less_than: today.toISOString() } },
-          { recording: { exists: true } },
-        ],
-      },
-      sort: '-date',
-      limit,
-      depth: 1,
-    });
-    return docs;
+    try {
+      const payload = await getPayloadClient();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const { docs } = await payload.find({
+        collection: 'events',
+        where: {
+          and: [
+            { date: { less_than: today.toISOString() } },
+            { recording: { exists: true } },
+          ],
+        },
+        sort: '-date',
+        limit,
+        depth: 1,
+      });
+      return docs;
+    } catch (err) {
+      warn('getPastRecordings', err);
+      return [];
+    }
   },
   ['events-past-recordings'],
   { tags: ['events'], revalidate: 3600 },
@@ -393,18 +482,15 @@ export const getPastRecordings = unstable_cache(
 
 /** A single event by ID — used by the RSVP API to confirm the event exists. */
 export async function getEventById(id: string | number) {
-  const payload = await getPayloadClient();
   try {
+    const payload = await getPayloadClient();
     return await payload.findByID({ collection: 'events', id, depth: 0 });
   } catch {
     return null;
   }
 }
 
-/** Every event, including past — for the public /events hub which shows
- *  upcoming + recurring + bespoke summits regardless of date. Sorted
- *  with featured first, then date ascending. Defensive try/catch matches
- *  getGenericEventSlugs — see comment there. */
+/** Every event, including past — for the public /events hub. */
 export const getPublicEvents = unstable_cache(
   async (limit = 100) => {
     try {
@@ -417,7 +503,7 @@ export const getPublicEvents = unstable_cache(
       });
       return docs;
     } catch (err) {
-      console.warn('[cms] getPublicEvents failed — returning [].', err);
+      warn('getPublicEvents', err);
       return [];
     }
   },
@@ -428,26 +514,25 @@ export const getPublicEvents = unstable_cache(
 /** Single event by slug — for the public /events/[slug] detail page. */
 export const getEventBySlug = unstable_cache(
   async (slug: string) => {
-    const payload = await getPayloadClient();
-    const { docs } = await payload.find({
-      collection: 'events',
-      where: { slug: { equals: slug } },
-      limit: 1,
-      depth: 0,
-    });
-    return docs[0] ?? null;
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'events',
+        where: { slug: { equals: slug } },
+        limit: 1,
+        depth: 0,
+      });
+      return docs[0] ?? null;
+    } catch (err) {
+      warn('getEventBySlug', err);
+      return null;
+    }
   },
   ['event-by-slug'],
   { tags: ['events'], revalidate: 3600 },
 );
 
-/** Every published event slug — used by generateStaticParams. Excludes
- *  bespoke events, which have their own static routes.
- *
- *  Wrapped in try/catch so production builds succeed even before the
- *  20260521_events_public_fields migration has run (e.g. preview deploys
- *  on a branch that hasn't applied migrations yet). Returns empty on
- *  failure — the dynamic route still renders at request time. */
+/** Every published event slug — for generateStaticParams. Excludes bespoke. */
 export const getGenericEventSlugs = unstable_cache(
   async (): Promise<string[]> => {
     try {
@@ -460,7 +545,7 @@ export const getGenericEventSlugs = unstable_cache(
       });
       return docs.map((d) => String(d.slug)).filter(Boolean);
     } catch (err) {
-      console.warn('[cms] getGenericEventSlugs failed — returning [].', err);
+      warn('getGenericEventSlugs', err);
       return [];
     }
   },
@@ -470,18 +555,22 @@ export const getGenericEventSlugs = unstable_cache(
 
 // ── Resources ─────────────────────────────────────────────────────────────────
 
-/** All published resources, newest first. Wrapped in cache so /resources
- *  can call this on every page load without round-tripping Payload. */
+/** All published resources, newest first. */
 export const getResources = unstable_cache(
   async (limit = 100) => {
-    const payload = await getPayloadClient();
-    const { docs } = await payload.find({
-      collection: 'resources',
-      sort: '-publishedAt',
-      limit,
-      depth: 1,
-    });
-    return docs;
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'resources',
+        sort: '-publishedAt',
+        limit,
+        depth: 1,
+      });
+      return docs;
+    } catch (err) {
+      warn('getResources', err);
+      return [];
+    }
   },
   ['resources-list'],
   { tags: ['resources'], revalidate: 3600 },
@@ -490,15 +579,20 @@ export const getResources = unstable_cache(
 /** The 3-card "Suggested first reads" surface on /dashboard reads this. */
 export const getFeaturedResources = unstable_cache(
   async (limit = 3) => {
-    const payload = await getPayloadClient();
-    const { docs } = await payload.find({
-      collection: 'resources',
-      where: { featured: { equals: true } },
-      sort: '-publishedAt',
-      limit,
-      depth: 1,
-    });
-    return docs;
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'resources',
+        where: { featured: { equals: true } },
+        sort: '-publishedAt',
+        limit,
+        depth: 1,
+      });
+      return docs;
+    } catch (err) {
+      warn('getFeaturedResources', err);
+      return [];
+    }
   },
   ['resources-featured'],
   { tags: ['resources'], revalidate: 3600 },
@@ -506,40 +600,49 @@ export const getFeaturedResources = unstable_cache(
 
 // ── Services ──────────────────────────────────────────────────────────────────
 
-/** All active services, sorted by sortOrder then alphabetically. Used by
- *  the Services tab on /(app)/services. */
+/** All active services. */
 export const getServices = unstable_cache(
   async () => {
-    const payload = await getPayloadClient();
-    const { docs } = await payload.find({
-      collection: 'services',
-      where: { active: { equals: true } },
-      sort: ['sortOrder', 'title'],
-      limit: 100,
-      depth: 0,
-    });
-    return docs;
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'services',
+        where: { active: { equals: true } },
+        sort: ['sortOrder', 'title'],
+        limit: 100,
+        depth: 0,
+      });
+      return docs;
+    } catch (err) {
+      warn('getServices', err);
+      return [];
+    }
   },
   ['services-list'],
   { tags: ['services'], revalidate: 3600 },
 );
 
-/** Single service by slug — for the /services/[slug] detail page (Phase 7). */
+/** Single service by slug — for the /services/[slug] detail page. */
 export const getServiceBySlug = unstable_cache(
   async (slug: string) => {
-    const payload = await getPayloadClient();
-    const { docs } = await payload.find({
-      collection: 'services',
-      where: {
-        and: [
-          { slug: { equals: slug } },
-          { active: { equals: true } },
-        ],
-      },
-      limit: 1,
-      depth: 0,
-    });
-    return docs[0] ?? null;
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'services',
+        where: {
+          and: [
+            { slug: { equals: slug } },
+            { active: { equals: true } },
+          ],
+        },
+        limit: 1,
+        depth: 0,
+      });
+      return docs[0] ?? null;
+    } catch (err) {
+      warn('getServiceBySlug', err);
+      return null;
+    }
   },
   ['service-by-slug'],
   { tags: ['services'], revalidate: 3600 },

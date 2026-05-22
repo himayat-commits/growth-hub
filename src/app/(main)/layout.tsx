@@ -5,6 +5,7 @@ import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import RevealOnScroll from "@/components/RevealOnScroll";
 
 // Root layout for the main app (multiple root layouts pattern — no app/layout.tsx).
 // Provides <html>/<body>, fonts, metadata, AuthKitProvider, Navbar, and Footer.
@@ -62,6 +63,7 @@ export default function MainLayout({
           <Navbar />
           {children}
           <Footer />
+          <RevealOnScroll />
         </AuthKitProvider>
       </body>
     </html>
