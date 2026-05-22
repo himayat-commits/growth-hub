@@ -714,6 +714,10 @@ export interface Partner {
   id: number;
   name: string;
   /**
+   * URL slug for /partners/{slug} deep page. Auto-generated from name on save if left blank.
+   */
+  slug?: string | null;
+  /**
    * Used for directory filter chips and grouping
    */
   category:
@@ -1467,6 +1471,7 @@ export interface LogosSelect<T extends boolean = true> {
  */
 export interface PartnersSelect<T extends boolean = true> {
   name?: T;
+  slug?: T;
   category?: T;
   shape?: T;
   description?: T;
