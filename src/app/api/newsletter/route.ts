@@ -12,6 +12,13 @@
 //   HUBSPOT_PORTAL_ID  numeric portal id (visible in any HubSpot URL)
 //   HUBSPOT_FORM_ID    GUID of the newsletter form (HubSpot → Marketing
 //                       → Forms → ⋮ → "Share" → embed code)
+//   HUBSPOT_REGION     region prefix matching the form's data-region.
+//                       'na1' (default) → api.hsforms.com
+//                       'eu1'           → api-eu1.hsforms.com
+//                       'ap1'           → api-ap1.hsforms.com
+//                       Check the embed snippet — js-ap1 / data-region="ap1"
+//                       means the form lives in APAC and submissions to the
+//                       default NA endpoint will silently 404.
 //
 // We deliberately use the unauthenticated Forms-submit endpoint rather
 // than the Contacts API: it reuses the form's lifecycle / list-add /
@@ -55,7 +62,13 @@ export async function POST(req: Request) {
     );
   }
 
-  const url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
+  // Region resolution. HubSpot's submission API uses different hosts per
+  // region; submitting to the wrong one silently 404s and the user thinks
+  // the form is broken. Default to NA for back-compat.
+  const region = (process.env.HUBSPOT_REGION ?? 'na1').toLowerCase();
+  const apiHost =
+    region === 'na1' ? 'api.hsforms.com' : `api-${region}.hsforms.com`;
+  const url = `https://${apiHost}/submissions/v3/integration/submit/${portalId}/${formId}`;
   const payload = {
     fields: [
       // objectTypeId 0-1 = Contact. HubSpot's submission API expects the
