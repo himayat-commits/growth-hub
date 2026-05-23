@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import PartnerMark from "./PartnerMark";
+import { track } from "@/lib/analytics";
 import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
@@ -344,7 +345,17 @@ export default function PartnerDirectory({
                   control and gives the visitor more context than a website
                   drop-off. */}
               {p.slug ? (
-                <a className="p-card-link" href={`/partners/${p.slug}`}>
+                <a
+                  className="p-card-link"
+                  href={`/partners/${p.slug}`}
+                  onClick={() =>
+                    track('partner_card_click', {
+                      partner: p.slug,
+                      category: p.category,
+                      destination: 'profile',
+                    })
+                  }
+                >
                   Read partnership profile
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
                     <path d="M3 7h8M7 3l4 4-4 4" />
@@ -356,6 +367,13 @@ export default function PartnerDirectory({
                   href={p.website}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    track('partner_card_click', {
+                      partner: p.name,
+                      category: p.category,
+                      destination: 'website',
+                    })
+                  }
                 >
                   Visit website
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">

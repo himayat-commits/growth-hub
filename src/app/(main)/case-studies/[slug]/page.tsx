@@ -10,6 +10,7 @@ import {
 } from '@/lib/cms';
 import LexicalRichText from '@/components/LexicalRichText';
 import Contact from '@/components/sections/Contact';
+import TrackOnMount from '@/components/TrackOnMount';
 
 export const revalidate = 3600;
 
@@ -50,6 +51,12 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
 
   return (
     <main>
+      {/* Fires `case_study_open` once on mount with slug + client + outcome
+          so PostHog can rank which case studies pull the most traffic. */}
+      <TrackOnMount
+        event="case_study_open"
+        properties={{ slug, client, outcome: outcome ? outcome.slice(0, 80) : undefined }}
+      />
       <section className="hero case-study-hero">
         <div className="wrap">
           <Link href="/case-studies" className="ed-back" style={{ color: 'var(--plum)' }}>
