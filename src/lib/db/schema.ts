@@ -125,7 +125,9 @@ export const userProfiles = pgTable('user_profiles', {
   notifReferrals: boolean('notif_referrals').default(true).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (t) => ({
+  assignedStrategistIdx: index('user_profiles_assigned_strategist_idx').on(t.assignedStrategistId),
+}));
 
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type NewUserProfile = typeof userProfiles.$inferInsert;
