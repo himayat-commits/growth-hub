@@ -5,6 +5,7 @@ import { ensureUserRecordWithStatus } from '@/lib/auth/ensure-user-record';
 import { createNotification } from '@/lib/db/notifications';
 import { sendTeamMessage } from '@/lib/db/messages';
 import { attributeReferral } from '@/lib/db/referrals';
+import { getStrategistBySlug } from '@/lib/cms';
 
 // Exchanges the WorkOS authorization code for a session cookie.
 // Configure this URL as a Redirect URI in dashboard.workos.com → Redirects.
@@ -30,6 +31,20 @@ export const GET = handleAuth({
         // First sign-in: seed the welcome content. Both calls swallow
         // their own errors so a flaky DB doesn't block sign-in.
         const greet = user.firstName ?? 'there';
+
+        // Resolve the assigned strategist (auto-set by ensureUserRecordWithStatus
+        // above). Falls back gracefully when the collection hasn't been seeded.
+        const { profile } = await ensureUserRecordWithStatus({
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        });
+        const strategist = profile.assignedStrategistId
+          ? await getStrategistBySlug(profile.assignedStrategistId).catch(() => null)
+          : null;
+        const strategistName = strategist?.name ?? 'The Growth Hub Team';
+
         await createNotification({
           userId: user.id,
           kind: 'welcome',
@@ -39,7 +54,8 @@ export const GET = handleAuth({
         });
         await sendTeamMessage(
           user.id,
-          `Salaam ${greet}, and welcome to The Growth Hub.\n\nWe're a small team and we read every message ourselves. To make the most of your first month:\n\n1. Finish your profile so we can match you to the right Strategist.\n2. Book your free 30-minute Growth Call when you're ready — no prep needed.\n3. Have a look around the resource library if you want a head start.\n\nReply here any time. We're cheering for you.\n\n— The Growth Hub Team`,
+          `Salaam ${greet}, and welcome to The Growth Hub.\n\nI'm ${strategistName}, your Growth Strategist. I'll be your main point of contact here — reply to this message any time and I read everything myself.\n\nTo make the most of your first month:\n\n1. Finish your profile so I can tailor your recommendations.\n2. Book your free 30-minute Growth Call when you're ready — no prep needed.\n3. Have a look around the resource library if you want a head start.\n\nLooking forward to working with you.\n\n— ${strategistName}`,
+          strategistName,
         );
 
         // Referral attribution. Reads the gh_ref cookie set by middleware

@@ -4,6 +4,9 @@ import { withAuth } from '@workos-inc/authkit-nextjs';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { IcoCog } from '@/components/dashboard/Icons';
 import { getThread, markThreadRead, TEAM_AUTHOR_NAME, getUnreadMessageCount } from '@/lib/db/messages';
+import { ensureUserRecord } from '@/lib/auth/ensure-user-record';
+import { getStrategistBySlug } from '@/lib/cms';
+import type { Media } from '@/payload-types';
 import MessageComposer from './MessageComposer';
 
 export const metadata: Metadata = {
@@ -32,15 +35,44 @@ export default async function MessagesPage() {
   const { user } = await withAuth();
   if (!user) redirect('/sign-in?redirect_url=/messages');
 
+  const profile = await ensureUserRecord({
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+  });
+
   // Mark every team message as read the moment the user opens the inbox.
   // Has to happen before getThread so the returned rows reflect the new state.
   const unreadBefore = await getUnreadMessageCount(user.id);
   if (unreadBefore > 0) {
     await markThreadRead(user.id);
   }
-  const thread = await getThread(user.id);
+
+  const [thread, strategist] = await Promise.all([
+    getThread(user.id),
+    profile.assignedStrategistId
+      ? getStrategistBySlug(profile.assignedStrategistId)
+      : Promise.resolve(null),
+  ]);
 
   const lastTeamMsg = [...thread].reverse().find((m) => m.fromTeam);
+
+  // Resolved display values — fall back to "Growth Hub Team" when no strategist assigned.
+  const displayName = strategist?.name ?? TEAM_AUTHOR_NAME;
+  const displayPhotoUrl =
+    strategist?.photo && typeof strategist.photo === 'object'
+      ? (strategist.photo as Media).url ?? null
+      : null;
+  const displayInitials = strategist
+    ? strategist.name
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((w) => w[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : 'GH';
 
   return (
     <>
@@ -63,9 +95,14 @@ export default async function MessagesPage() {
           </div>
           <div className="gh-msg-list">
             <button className="gh-msg-thread is-active" type="button">
-              <div className="gh-avatar" style={{ background: 'var(--teal)', width: 34, height: 34, fontSize: 12 }}>GH</div>
+              <div className="gh-avatar" style={{ background: 'var(--teal)', width: 34, height: 34, fontSize: 12, overflow: 'hidden', padding: displayPhotoUrl ? 0 : undefined }}>
+                {displayPhotoUrl
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={displayPhotoUrl} alt={displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : displayInitials}
+              </div>
               <div>
-                <div className="gh-msg-thread-name">{TEAM_AUTHOR_NAME}</div>
+                <div className="gh-msg-thread-name">{displayName}</div>
                 <div className="gh-msg-thread-preview">
                   {lastTeamMsg
                     ? lastTeamMsg.body.slice(0, 70) + (lastTeamMsg.body.length > 70 ? '…' : '')
@@ -88,13 +125,33 @@ export default async function MessagesPage() {
 
         <div className="gh-msg-pane">
           <div className="gh-msg-pane-hd">
-            <div className="gh-avatar" style={{ background: 'var(--teal)' }}>GH</div>
+            <div className="gh-avatar" style={{ background: 'var(--teal)', overflow: 'hidden', padding: displayPhotoUrl ? 0 : undefined }}>
+              {displayPhotoUrl
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={displayPhotoUrl} alt={displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : displayInitials}
+            </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{TEAM_AUTHOR_NAME}</div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{displayName}</div>
               <div style={{ fontSize: 12, color: 'var(--ink-50)' }}>
-                Usually replies within 1 business day · Online
+                {strategist?.email
+                  ? <a href={`mailto:${strategist.email}`} style={{ color: 'var(--ink-50)' }}>{strategist.email}</a>
+                  : 'Usually replies within 1 business day'}
+                {' · '}
+                {strategist?.role ?? 'Growth Hub Team'}
               </div>
             </div>
+            {strategist?.calendlyUrl && (
+              <a
+                href={strategist.calendlyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gh-btn ghost"
+                style={{ fontSize: 12, padding: '5px 12px', whiteSpace: 'nowrap' }}
+              >
+                Book a call →
+              </a>
+            )}
           </div>
 
           <div className="gh-msg-pane-body">

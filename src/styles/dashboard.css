@@ -803,3 +803,14 @@ p { margin: 0; }
 .gh-cancel-comment span { font-size: 13px; color: var(--ink-70); }
 .gh-cancel-comment textarea { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--cream); font: inherit; font-size: 14px; line-height: 1.5; color: var(--ink); resize: vertical; }
 .gh-cancel-comment textarea:focus { outline: none; border-color: var(--teal); }
+
+/* Strategist card on /profile */
+.gh-strategist-card { display: flex; align-items: center; gap: 18px; padding: 16px 0; }
+.gh-strategist-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--teal); color: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 600; flex-shrink: 0; overflow: hidden; }
+.gh-strategist-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.gh-strategist-info { display: flex; flex-direction: column; gap: 3px; }
+.gh-strategist-name { font-size: 15px; font-weight: 600; color: var(--ink); }
+.gh-strategist-role { font-size: 13px; color: var(--ink-50); }
+.gh-strategist-links { display: flex; align-items: center; gap: 12px; margin-top: 6px; flex-wrap: wrap; }
+.gh-strategist-link { font-size: 13px; color: var(--teal); text-decoration: none; }
+.gh-strategist-link:hover { text-decoration: underline; }

@@ -5,7 +5,7 @@ import { withAuth } from '@workos-inc/authkit-nextjs';
 import { ensureUserRecord } from '@/lib/auth/ensure-user-record';
 import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import { PLANS } from '@/lib/plans';
-import { getFeaturedResources, getUpcomingEvents } from '@/lib/cms';
+import { getFeaturedResources, getUpcomingEvents, getStrategistBySlug } from '@/lib/cms';
 import { getUserRsvpSet } from '@/lib/db/rsvps';
 import { getNotifications } from '@/lib/db/notifications';
 import { getUnreadMessageCount, getThread } from '@/lib/db/messages';
@@ -126,6 +126,10 @@ export default async function DashboardPage() {
   const wizardState = obRows[0]?.state as WizardState | undefined;
   const tier = getEffectivePlan(sub);
   const plan = PLANS[tier];
+
+  const strategist = profile.assignedStrategistId
+    ? await getStrategistBySlug(profile.assignedStrategistId)
+    : null;
 
   // The user's next 1-2 upcoming sessions (events they've RSVP'd to).
   const myUpcoming = upcomingEvents
@@ -250,9 +254,11 @@ export default async function DashboardPage() {
             {greet}.
           </h1>
           <div className="gh-welcome-sub">
-            {tier === 'free'
-              ? "Let's get your account set up so we can match you to the right supports."
-              : `You're on the ${plan.name} plan. Everything in your account is here.`}
+            {strategist
+              ? `${strategist.name} is your Growth Strategist — message them any time from your inbox.`
+              : tier === 'free'
+                ? "Let's get your account set up so we can match you to the right supports."
+                : `You're on the ${plan.name} plan. Everything in your account is here.`}
           </div>
         </div>
         <div className="gh-welcome-meta">
