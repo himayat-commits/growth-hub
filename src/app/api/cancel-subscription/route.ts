@@ -17,6 +17,7 @@ import { withAuth } from '@workos-inc/authkit-nextjs';
 import * as Sentry from '@sentry/nextjs';
 import { getStripe } from '@/lib/stripe';
 import { getSubscription } from '@/lib/subscription';
+import { upsertCancellation } from '@/lib/db/cancellations';
 
 export const runtime = 'nodejs';
 
@@ -81,6 +82,23 @@ export async function POST(req: NextRequest) {
     // narrow the response shape sent to the client.
     const cancelAt = (updated as unknown as { current_period_end?: number | null })
       .current_period_end;
+
+    // Log the cancellation row so /ops/cancellations can read it without
+    // round-tripping Stripe. Non-fatal — survey data being absent from
+    // the log shouldn't block a successful Stripe cancel.
+    try {
+      await upsertCancellation({
+        userId: user.id,
+        stripeSubscriptionId: sub.stripeSubscriptionId,
+        planTier: sub.planTier ?? null,
+        reason,
+        comment,
+        cancelAt: cancelAt ? new Date(cancelAt * 1000) : null,
+      });
+    } catch (logErr) {
+      console.error('[cancel-subscription] upsertCancellation failed', logErr);
+      Sentry.captureException(logErr, { tags: { area: 'cancel-subscription', phase: 'log' } });
+    }
 
     return NextResponse.json({
       ok: true,

@@ -9,6 +9,7 @@ import {
   referrals,
   subscriptions,
   userProfiles,
+  subscriptionCancellations,
 } from '@/lib/db/schema';
 
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,8 @@ export default async function OpsOverviewPage() {
     activeSubs,
     profilesTotal,
     profilesRecent,
+    cancellationsRecent,
+    cancellationsTopReason,
   ] = await Promise.all([
     db.select({ c: count() }).from(serviceBookings).where(eq(serviceBookings.status, 'requested')),
     db.select({ c: count() }).from(serviceBookings).where(eq(serviceBookings.status, 'scheduled')),
@@ -41,6 +44,25 @@ export default async function OpsOverviewPage() {
     db.select({ c: count() }).from(userProfiles).where(
       sql`${userProfiles.createdAt} > NOW() - INTERVAL '7 days'`,
     ),
+    // Cancellations in last 30 days, excluding restored.
+    db.select({ c: count() }).from(subscriptionCancellations).where(
+      sql`${subscriptionCancellations.createdAt} > NOW() - INTERVAL '30 days'
+          AND ${subscriptionCancellations.restoredAt} IS NULL`,
+    ),
+    // Top reason in last 30 days.
+    db.select({
+      reason: subscriptionCancellations.reason,
+      c: sql<number>`count(*)::int`,
+    })
+    .from(subscriptionCancellations)
+    .where(
+      sql`${subscriptionCancellations.createdAt} > NOW() - INTERVAL '30 days'
+          AND ${subscriptionCancellations.restoredAt} IS NULL
+          AND ${subscriptionCancellations.reason} <> ''`,
+    )
+    .groupBy(subscriptionCancellations.reason)
+    .orderBy(sql`count(*) DESC`)
+    .limit(1),
   ]);
 
   const tiles: Array<{
@@ -74,6 +96,16 @@ export default async function OpsOverviewPage() {
       href: '/ops/signups',
       cta: 'See',
       tone: 'good',
+    },
+    {
+      label: 'Cancellations (30 days)',
+      num: cancellationsRecent[0]?.c ?? 0,
+      sub: cancellationsTopReason[0]?.reason
+        ? `Top reason: ${cancellationsTopReason[0].reason.replace(/-/g, ' ')}`
+        : 'No reasons recorded yet',
+      href: '/ops/cancellations',
+      cta: 'Review',
+      tone: (cancellationsRecent[0]?.c ?? 0) > 0 ? 'attention' : undefined,
     },
   ];
 

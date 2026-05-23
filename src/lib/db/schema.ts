@@ -297,3 +297,42 @@ export const eventRsvps = pgTable(
 
 export type EventRsvp = typeof eventRsvps.$inferSelect;
 export type NewEventRsvp = typeof eventRsvps.$inferInsert;
+
+/**
+ * Cancellation log — denormalised so /ops/cancellations can query it
+ * directly instead of round-tripping Stripe Search per page load.
+ *
+ * Written by two paths, both idempotent via ON CONFLICT DO UPDATE on
+ * stripeSubscriptionId:
+ *   1. POST /api/cancel-subscription — when a member cancels via the
+ *      in-app CancelDialog. Reason + comment come from the survey.
+ *   2. Stripe webhook customer.subscription.updated — when a member
+ *      cancels via the Stripe Customer Portal (bypassing our endpoint).
+ *      Reason is read from sub.metadata if the user came through
+ *      CancelDialog first, otherwise empty.
+ *
+ * `cancelAt` is when access ends (current_period_end from Stripe).
+ * `restoredAt` is set if the cancellation is undone before period end.
+ */
+export const subscriptionCancellations = pgTable(
+  'subscription_cancellations',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    stripeSubscriptionId: text('stripe_subscription_id').notNull().unique(),
+    planTier: varchar('plan_tier', { length: 20 }),
+    reason: varchar('reason', { length: 40 }).notNull().default(''),
+    comment: text('comment').notNull().default(''),
+    cancelAt: timestamp('cancel_at', { withTimezone: true }),
+    restoredAt: timestamp('restored_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    createdIdx: index('subscription_cancellations_created_idx').on(t.createdAt),
+    reasonIdx: index('subscription_cancellations_reason_idx').on(t.reason),
+  }),
+);
+
+export type SubscriptionCancellation = typeof subscriptionCancellations.$inferSelect;
+export type NewSubscriptionCancellation = typeof subscriptionCancellations.$inferInsert;
