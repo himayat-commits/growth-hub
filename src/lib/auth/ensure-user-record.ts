@@ -19,6 +19,7 @@ import 'server-only';
 import { eq, sql } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { userProfiles, type UserProfile } from '@/lib/db/schema';
+import { getActiveStrategists } from '@/lib/cms';
 
 interface WorkOSUserLike {
   id: string;
@@ -44,6 +45,51 @@ export async function ensureUserRecord(user: WorkOSUserLike): Promise<UserProfil
   return (await ensureUserRecordWithStatus(user)).profile;
 }
 
+/**
+ * Pick the next strategist to assign a new signup to. Least-loaded
+ * round-robin: counts current assignments per active strategist and picks
+ * the one with the fewest (Payload `order` ascending breaks ties).
+ *
+ * Returns null when no active strategists exist (collection not yet
+ * seeded, or all marked inactive) — caller leaves the profile unassigned
+ * and the UI falls back to "Growth Hub Team".
+ */
+async function pickNextStrategistSlug(): Promise<string | null> {
+  const strategists = await getActiveStrategists();
+  if (!strategists.length) return null;
+
+  const db = getDb();
+  const counts = await db
+    .select({
+      slug: userProfiles.assignedStrategistId,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(userProfiles)
+    .where(sql`${userProfiles.assignedStrategistId} is not null`)
+    .groupBy(userProfiles.assignedStrategistId);
+
+  const loadBySlug = new Map<string, number>();
+  for (const row of counts) {
+    if (row.slug) loadBySlug.set(row.slug, row.count);
+  }
+
+  let best: { slug: string; load: number; order: number } | null = null;
+  for (const s of strategists) {
+    const slug = (s as { slug?: string | null }).slug;
+    if (!slug) continue;
+    const load = loadBySlug.get(slug) ?? 0;
+    const order = (s as { order?: number | null }).order ?? 0;
+    if (
+      !best ||
+      load < best.load ||
+      (load === best.load && order < best.order)
+    ) {
+      best = { slug, load, order };
+    }
+  }
+  return best?.slug ?? null;
+}
+
 /** Variant of ensureUserRecord that also reports whether the profile row
  *  was created on this call. Used by /auth/callback to seed the welcome
  *  notification + message exactly once per user (on their first sign-in). */
@@ -55,11 +101,13 @@ export async function ensureUserRecordWithStatus(
   if (rows[0]) return { profile: rows[0], created: false };
 
   // First sign-in. Insert a starter profile.
+  const assignedStrategistId = await pickNextStrategistSlug();
   const inserted = await db
     .insert(userProfiles)
     .values({
       userId: user.id,
       referCode: makeReferCode(user),
+      assignedStrategistId,
     })
     .onConflictDoNothing({ target: userProfiles.userId })
     .returning();

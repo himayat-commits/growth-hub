@@ -735,6 +735,12 @@ p { margin: 0; }
 .gh-ops-actionbtn:hover:not(:disabled) { background: var(--teal); color: var(--cream); border-color: var(--teal); }
 .gh-ops-actionbtn:disabled { opacity: 0.5; cursor: not-allowed; }
 .gh-ops-err { color: var(--plum); font-size: 11px; margin-left: 6px; }
+.gh-ops-assign { display: inline-flex; align-items: center; gap: 6px; }
+.gh-ops-select {
+  padding: 4px 8px; border-radius: 6px; border: 1px solid var(--rule);
+  background: #fff; color: var(--ink); font-size: 12px; max-width: 160px;
+}
+.gh-ops-select:disabled { opacity: 0.5; cursor: not-allowed; }
 .gh-ops-empty { background: #fff; border: 1px solid var(--rule); border-radius: 14px; padding: 32px; text-align: center; color: var(--ink-50); }
 
 /* Progress meter for signup row */

@@ -113,6 +113,10 @@ export const userProfiles = pgTable('user_profiles', {
   preferredLanguage: varchar('preferred_language', { length: 4 }).default('en').notNull(),
     // 'en' | 'ar' | 'ne' | 'ur'
   referCode: text('refer_code').unique(),
+  // Slug of an active payload.strategists row. Loose ref across schemas; the
+  // UI tolerates orphan slugs by falling back to a "Growth Hub Team" label.
+  // Auto-assigned by ensure-user-record on first sign-in (round-robin).
+  assignedStrategistId: text('assigned_strategist_id'),
   profileCompletePct: integer('profile_complete_pct').default(0).notNull(),
   notifBooking: boolean('notif_booking').default(true).notNull(),
   notifLibrary: boolean('notif_library').default(true).notNull(),
