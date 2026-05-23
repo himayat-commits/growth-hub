@@ -4,10 +4,11 @@ import { withAuth } from '@workos-inc/authkit-nextjs';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import { ensureUserRecord } from '@/lib/auth/ensure-user-record';
-import { getProfile } from '@/lib/db/profile';
 import { PLANS } from '@/lib/plans';
 import SignOutButton from '@/components/SignOutButton';
 import ProfileForm from './ProfileForm';
+import { getStrategistBySlug } from '@/lib/cms';
+import type { Media } from '@/payload-types';
 
 export const metadata: Metadata = {
   title: 'Profile & settings — Growth Hub',
@@ -35,9 +36,27 @@ export default async function ProfilePage() {
     email: user.email,
   });
 
-  const sub = await getSubscription();
+  const [sub, strategist] = await Promise.all([
+    getSubscription(),
+    profile.assignedStrategistId
+      ? getStrategistBySlug(profile.assignedStrategistId)
+      : Promise.resolve(null),
+  ]);
   const tier = getEffectivePlan(sub);
   const planLabel = `${PLANS[tier].name}${tier === 'free' ? '' : ' plan'}`;
+  const strategistPhotoUrl =
+    strategist?.photo && typeof strategist.photo === 'object'
+      ? (strategist.photo as Media).url ?? null
+      : null;
+  const strategistInitials = strategist?.name
+    ? strategist.name
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((w) => w[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : 'GH';
 
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email || '';
   const memberSince = new Intl.DateTimeFormat('en-AU', { dateStyle: 'long' }).format(
@@ -62,6 +81,48 @@ export default async function ProfilePage() {
         profileCompletePct={profile.profileCompletePct}
         initialProfile={profile}
       />
+
+      {/* Your strategist card */}
+      <div className="gh-form">
+        <div className="gh-form-h">Your Growth Strategist</div>
+        {strategist ? (
+          <div className="gh-strategist-card">
+            <div className="gh-strategist-avatar">
+              {strategistPhotoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={strategistPhotoUrl} alt={strategist.name} />
+              ) : (
+                <span>{strategistInitials}</span>
+              )}
+            </div>
+            <div className="gh-strategist-info">
+              <div className="gh-strategist-name">{strategist.name}</div>
+              <div className="gh-strategist-role">{strategist.role}</div>
+              <div className="gh-strategist-links">
+                <a href={`mailto:${strategist.email}`} className="gh-strategist-link">
+                  {strategist.email}
+                </a>
+                {strategist.calendlyUrl && (
+                  <a
+                    href={strategist.calendlyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="gh-btn ghost"
+                    style={{ fontSize: 13, padding: '6px 14px' }}
+                  >
+                    Book a call →
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="gh-toggle-row-p" style={{ margin: 0 }}>
+            You&apos;ll be matched with a Growth Strategist once you complete your profile and book
+            your first Growth Call.
+          </p>
+        )}
+      </div>
 
       <div className="gh-form">
         <div className="gh-form-h">Security &amp; sign-in</div>
