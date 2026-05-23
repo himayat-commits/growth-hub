@@ -9,6 +9,7 @@ import { subscriptions } from '@/lib/db/schema';
 import { priceIdToPlan, PLANS } from '@/lib/plans';
 import { createNotification } from '@/lib/db/notifications';
 import { tryIssueReferralCredit } from '@/lib/stripe/referral-credit';
+import { upsertCancellation, markCancellationRestored } from '@/lib/db/cancellations';
 
 // Webhook needs the Node.js runtime so we can read the raw request body
 // for signature verification. Edge runtime parses bodies eagerly.
@@ -155,6 +156,7 @@ async function syncSubscription(subscriptionId: string) {
     .where(eq(subscriptions.stripeCustomerId, customerId))
     .limit(1);
   const priorStatus = existing[0]?.subscriptionStatus ?? null;
+  const priorCancelAtPeriodEnd = existing[0]?.cancelAtPeriodEnd ?? false;
   const userId = existing[0]?.userId ?? null;
 
   await getDb()
@@ -171,6 +173,40 @@ async function syncSubscription(subscriptionId: string) {
       updatedAt: new Date(),
     })
     .where(eq(subscriptions.stripeCustomerId, customerId));
+
+  // Cancellation log. Two transitions of interest:
+  //   priorCancelAtPeriodEnd=false → sub.cancel_at_period_end=true
+  //     → upsert a row (reason/comment come from Stripe metadata if the
+  //       member used /api/cancel-subscription, otherwise empty)
+  //   priorCancelAtPeriodEnd=true  → sub.cancel_at_period_end=false
+  //     → mark the existing row restored (member changed their mind)
+  // Idempotent via the upsert helper; safe to re-fire.
+  if (userId) {
+    const nowCancelAtPeriodEnd = sub.cancel_at_period_end ?? false;
+    if (!priorCancelAtPeriodEnd && nowCancelAtPeriodEnd) {
+      try {
+        const meta = (sub.metadata ?? {}) as Record<string, string | undefined>;
+        await upsertCancellation({
+          userId,
+          stripeSubscriptionId: sub.id,
+          planTier: planInfo?.tier ?? null,
+          reason: meta.cancellationReason ?? '',
+          comment: meta.cancellationComment ?? '',
+          cancelAt: periodEnd,
+        });
+      } catch (e) {
+        console.error('[stripe.webhook] cancellation log upsert failed', e);
+        Sentry.captureException(e, { tags: { area: 'stripe.webhook', phase: 'cancellation_log' } });
+      }
+    } else if (priorCancelAtPeriodEnd && !nowCancelAtPeriodEnd) {
+      try {
+        await markCancellationRestored(sub.id);
+      } catch (e) {
+        console.error('[stripe.webhook] cancellation restore mark failed', e);
+        Sentry.captureException(e, { tags: { area: 'stripe.webhook', phase: 'cancellation_restore' } });
+      }
+    }
+  }
 
   // Emit subscription_active notification on the active/trialing
   // transition. Wrapped in a try so a notification failure never breaks
