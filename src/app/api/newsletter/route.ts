@@ -1,26 +1,36 @@
-// POST /api/newsletter — add an email to the Growth Hub Resend audience.
+// POST /api/newsletter — add an email to HubSpot via the Forms API.
 //
 // Body: { email: string, source?: string, hp?: string }
-//   - `email` is the only required field.
-//   - `source` is a free-text marker we send to Resend as a contact note
-//     (e.g. "home-footer", "events-hub") so we can attribute signups later.
-//   - `hp` is a honeypot: if non-empty the request came from a bot — we
-//     respond 200 OK without doing anything so the bot thinks it worked.
+//   - `email`  required
+//   - `source` free-text marker (e.g. "home-footer", "events-hub").
+//              Sent to HubSpot as the standard `hs_analytics_source_data_1`
+//              context field so it shows up in the contact record without
+//              needing a custom property.
+//   - `hp`     honeypot. Non-empty → silent 200 (bot signal).
 //
-// Env:
-//   RESEND_API_KEY        already used elsewhere in the project
-//   RESEND_AUDIENCE_ID    Resend audience to add contacts to. Without it
-//                         the endpoint returns 503 so dev/preview don't
-//                         silently swallow signups.
+// Env (set in Vercel):
+//   HUBSPOT_PORTAL_ID  numeric portal id (visible in any HubSpot URL)
+//   HUBSPOT_FORM_ID    GUID of the newsletter form (HubSpot → Marketing
+//                       → Forms → ⋮ → "Share" → embed code)
+//   HUBSPOT_REGION     region prefix matching the form's data-region.
+//                       'na1' (default) → api.hsforms.com
+//                       'eu1'           → api-eu1.hsforms.com
+//                       'ap1'           → api-ap1.hsforms.com
+//                       Check the embed snippet — js-ap1 / data-region="ap1"
+//                       means the form lives in APAC and submissions to the
+//                       default NA endpoint will silently 404.
+//
+// We deliberately use the unauthenticated Forms-submit endpoint rather
+// than the Contacts API: it reuses the form's lifecycle / list-add /
+// workflow automations exactly as if the user submitted the embedded
+// form themselves. No private app token required, no risk of bypassing
+// configured form rules.
 
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import * as Sentry from '@sentry/nextjs';
 
 export const runtime = 'nodejs';
 
-// Loose email pattern. We deliberately avoid a strict RFC 5322 regex —
-// Resend will reject genuinely malformed addresses on its side.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req: Request) {
@@ -31,7 +41,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  // Honeypot — bots fill hidden fields; humans don't. Pretend success.
+  // Honeypot — bots fill hidden fields. Return success silently.
   if (typeof body.hp === 'string' && body.hp.trim().length > 0) {
     return NextResponse.json({ ok: true });
   }
@@ -42,36 +52,66 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
-  const audienceId = process.env.RESEND_AUDIENCE_ID;
-  if (!apiKey || !audienceId) {
-    // Fail loudly in dev so the operator notices the missing config.
-    // Production deploys must have both set in Vercel project env.
-    console.error('[newsletter] RESEND_API_KEY or RESEND_AUDIENCE_ID is not set.');
+  const portalId = process.env.HUBSPOT_PORTAL_ID;
+  const formId = process.env.HUBSPOT_FORM_ID;
+  if (!portalId || !formId) {
+    console.error('[newsletter] HUBSPOT_PORTAL_ID or HUBSPOT_FORM_ID is not set.');
     return NextResponse.json(
       { error: 'Newsletter signup is temporarily unavailable.' },
       { status: 503 },
     );
   }
 
+  // Region resolution. HubSpot's submission API uses different hosts per
+  // region; submitting to the wrong one silently 404s and the user thinks
+  // the form is broken. Default to NA for back-compat.
+  const region = (process.env.HUBSPOT_REGION ?? 'na1').toLowerCase();
+  const apiHost =
+    region === 'na1' ? 'api.hsforms.com' : `api-${region}.hsforms.com`;
+  const url = `https://${apiHost}/submissions/v3/integration/submit/${portalId}/${formId}`;
+  const payload = {
+    fields: [
+      // objectTypeId 0-1 = Contact. HubSpot's submission API expects the
+      // contact's email as a standard property.
+      { objectTypeId: '0-1', name: 'email', value: email },
+    ],
+    context: {
+      // pageUri / pageName show up on the contact's form-submission
+      // history in HubSpot. Source goes into hs_analytics_source_data_1
+      // so we can segment in HubSpot lists by where the email came from.
+      pageUri: source ? `growth-hub:${source}` : 'growth-hub:unknown',
+      pageName: source ? `Newsletter signup (${source})` : 'Newsletter signup',
+      hutk: undefined, // We don't expose HubSpot tracking cookies here.
+    },
+  };
+
   try {
-    const resend = new Resend(apiKey);
-    // Resend treats duplicate-email creates as idempotent (returns the
-    // existing contact). No need to check first.
-    await resend.contacts.create({
-      audienceId,
-      email,
-      unsubscribed: false,
-      // Stash the source in firstName as a marker. Resend doesn't expose
-      // arbitrary metadata on contacts yet; this lets us segment later
-      // via the dashboard.
-      firstName: source ? `[${source}]` : undefined,
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
+    if (!res.ok) {
+      // HubSpot returns 400 for invalid email format / blocked domain /
+      // duplicate within a short window. We surface a generic message
+      // so the form doesn't leak HubSpot internals.
+      const detail = await res.text().catch(() => '');
+      console.warn('[newsletter] HubSpot rejected submission', res.status, detail.slice(0, 200));
+      // Treat HubSpot's "already exists" / "INVALID_EMAIL" responses as
+      // a 4xx the user should see, but anything else is a server problem.
+      if (res.status >= 400 && res.status < 500) {
+        return NextResponse.json(
+          { error: 'That email looks off — try again.' },
+          { status: 400 },
+        );
+      }
+      throw new Error(`HubSpot ${res.status}: ${detail.slice(0, 120)}`);
+    }
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error('[newsletter] resend contacts.create failed', err);
+    console.error('[newsletter] HubSpot submit failed', err);
     Sentry.captureException(err, {
-      tags: { area: 'newsletter' },
+      tags: { area: 'newsletter', provider: 'hubspot' },
       extra: { source },
     });
     return NextResponse.json(
