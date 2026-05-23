@@ -814,3 +814,41 @@ p { margin: 0; }
 .gh-strategist-links { display: flex; align-items: center; gap: 12px; margin-top: 6px; flex-wrap: wrap; }
 .gh-strategist-link { font-size: 13px; color: var(--teal); text-decoration: none; }
 .gh-strategist-link:hover { text-decoration: underline; }
+
+/* ── Ops inbox (message thread list + thread view) ──────────────────── */
+.gh-ops-inbox-wrap { display: flex; flex-direction: column; gap: 20px; max-width: 900px; }
+
+/* Filter chips */
+.gh-ops-inbox-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.gh-ops-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 500; border: 1px solid var(--rule); background: #fff; color: var(--ink-70); text-decoration: none; transition: background .14s, border-color .14s, color .14s; }
+.gh-ops-chip:hover { background: var(--cream-warm, #ECE7D8); border-color: var(--teal); color: var(--teal); }
+.gh-ops-chip.is-on { background: var(--teal); border-color: var(--teal); color: #fff; }
+.gh-ops-chip-count { font-size: 11px; opacity: 0.75; }
+.gh-ops-chip.is-on .gh-ops-chip-count { opacity: 0.9; }
+
+/* Inbox member list */
+.gh-ops-inbox-list { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+.gh-ops-inbox-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--rule); text-decoration: none; color: inherit; transition: background .12s; }
+.gh-ops-inbox-row:last-child { border-bottom: 0; }
+.gh-ops-inbox-row:hover { background: rgba(13,63,72,0.025); }
+.gh-ops-inbox-row.is-unanswered { border-left: 3px solid var(--plum, #5F304B); padding-left: 15px; }
+.gh-ops-inbox-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.gh-ops-inbox-row-hd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gh-ops-inbox-name { font-weight: 600; font-size: 13.5px; color: var(--ink); }
+.gh-ops-inbox-preview { font-size: 12.5px; color: var(--ink-50); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px; }
+.gh-ops-inbox-preview .who { font-weight: 600; color: var(--ink-70); }
+.gh-ops-inbox-row-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 11.5px; color: var(--ink-50); white-space: nowrap; flex-shrink: 0; }
+
+/* Unanswered badge */
+.gh-ops-badge { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em; }
+.gh-ops-badge.unanswered { background: rgba(95,48,75,0.1); color: var(--plum, #5F304B); }
+
+/* Thread view */
+.gh-ops-inbox-thread-hd { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.gh-ops-inbox-thread-body { display: flex; flex-direction: column; gap: 12px; padding: 20px 0; min-height: 200px; }
+
+/* Ops reply composer (textarea variant, overrides the input-based default) */
+.gh-ops-composer { flex-direction: column; align-items: stretch; gap: 10px; border-top: 1px solid var(--rule); padding: 14px 0 0; background: transparent; }
+.gh-msg-input { border: 1px solid var(--rule); background: var(--surface); border-radius: var(--r-md); padding: 10px 14px; font-size: 13.5px; font-family: inherit; color: var(--ink); outline: none; resize: vertical; line-height: 1.5; }
+.gh-msg-input:focus { border-color: var(--teal); }
+.gh-msg-composer-foot { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
