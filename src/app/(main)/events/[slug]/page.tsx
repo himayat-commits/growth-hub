@@ -10,6 +10,7 @@ import {
 import { toPublicEvent, toPublicEvents } from '@/lib/events-data';
 import type { Event as PayloadEvent } from '@/payload-types';
 import Contact from '@/components/sections/Contact';
+import RsvpMailtoLink from './RsvpMailtoLink';
 
 export const revalidate = 3600;
 
@@ -71,15 +72,8 @@ export default async function GenericEventPage({ params }: { params: Params }) {
           </div>
 
           <div className="ed-cta">
-            <a
-              className="btn btn-primary"
-              href={`mailto:hello@himayat.com.au?subject=${encodeURIComponent(`RSVP — ${ev.title}`)}`}
-            >
-              RSVP by email
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-                <path d="M3 7h8M7 3l4 4-4 4" />
-              </svg>
-            </a>
+            {/* Client wrapper attaches the event_rsvp_intent analytics event */}
+            <RsvpMailtoLink slug={ev.slug} title={ev.title} />
             <Link className="btn btn-secondary" href="/sign-up?redirect_url=%2Fmy-events">Members register inside</Link>
           </div>
         </div>

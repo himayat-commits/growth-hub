@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { track } from "@/lib/analytics";
 
 interface Tier {
   name: string;
@@ -246,7 +247,10 @@ export default function PricingSection({ heading, subheading }: PricingSectionPr
                   role="tab"
                   aria-selected={mode === "self"}
                   className={mode === "self" ? "active" : ""}
-                  onClick={() => setMode("self")}
+                  onClick={() => {
+                    setMode("self");
+                    track('pricing_interval_toggle', { location: 'home', mode: 'self' });
+                  }}
                 >
                   Self-Service
                 </button>
@@ -254,7 +258,10 @@ export default function PricingSection({ heading, subheading }: PricingSectionPr
                   role="tab"
                   aria-selected={mode === "managed"}
                   className={mode === "managed" ? "active" : ""}
-                  onClick={() => setMode("managed")}
+                  onClick={() => {
+                    setMode("managed");
+                    track('pricing_interval_toggle', { location: 'home', mode: 'managed' });
+                  }}
                 >
                   Done For You
                 </button>
@@ -295,7 +302,11 @@ export default function PricingSection({ heading, subheading }: PricingSectionPr
                 <div className="pkg-free-price">
                   $0<span className="unit">/forever</span>
                 </div>
-                <Link className="btn btn-primary" href="/sign-up?redirect_url=%2Fdashboard">
+                <Link
+                  className="btn btn-primary"
+                  href="/sign-up?redirect_url=%2Fdashboard"
+                  onClick={() => track('free_tier_join', { location: 'home' })}
+                >
                   Join free — no card needed <ArrowIcon />
                 </Link>
                 <span className="pkg-free-sub">Upgrade to a paid tier any time.</span>
@@ -323,11 +334,31 @@ export default function PricingSection({ heading, subheading }: PricingSectionPr
                 </div>
                 <div className="pkg-cta">
                   {t.slug ? (
-                    <Link className={`btn ${t.featured ? "btn-lime" : "btn-primary"}`} href={`/signup/${t.slug}`}>
+                    <Link
+                      className={`btn ${t.featured ? "btn-lime" : "btn-primary"}`}
+                      href={`/signup/${t.slug}`}
+                      onClick={() =>
+                        track('cta_click_upgrade', {
+                          location: 'home',
+                          tier: t.slug,
+                          mode,
+                        })
+                      }
+                    >
                       {t.cta} <ArrowIcon />
                     </Link>
                   ) : (
-                    <a className={`btn ${t.featured ? "btn-lime" : "btn-primary"}`} href="/#contact">
+                    <a
+                      className={`btn ${t.featured ? "btn-lime" : "btn-primary"}`}
+                      href="/#contact"
+                      onClick={() =>
+                        track('cta_click_upgrade', {
+                          location: 'home',
+                          tier: t.name,
+                          mode,
+                        })
+                      }
+                    >
                       {t.cta} <ArrowIcon />
                     </a>
                   )}
@@ -343,7 +374,11 @@ export default function PricingSection({ heading, subheading }: PricingSectionPr
           type="button"
           className={`compare-toggle ${showCompare ? "open" : ""}`}
           aria-expanded={showCompare}
-          onClick={() => setShowCompare((v) => !v)}
+          onClick={() => {
+            const next = !showCompare;
+            setShowCompare(next);
+            if (next) track('pricing_compare_open', { location: 'home' });
+          }}
         >
           {showCompare ? "Hide Comparison" : "Compare Options"}
           <ChevronIcon />

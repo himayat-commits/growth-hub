@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@workos-inc/authkit-nextjs/components';
 import { PLANS, calculateDisplayPrice, type BillingInterval, type PlanTier } from '@/lib/plans';
+import { track } from '@/lib/analytics';
 
 // ── Compare table ─────────────────────────────────────────────────────────────
 
@@ -152,6 +153,7 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
       return;
     }
     setLoading(tier);
+    track('cta_click_upgrade', { location: 'pricing', tier, interval });
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
@@ -184,10 +186,10 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
             {/* Monthly / Annual toggle */}
             <div className="pkg-toggle-row">
               <div className="pkg-toggle" role="tablist" aria-label="Billing interval">
-                <button role="tab" aria-selected={interval === 'month'} className={interval === 'month' ? 'active' : ''} onClick={() => setInterval('month')}>
+                <button role="tab" aria-selected={interval === 'month'} className={interval === 'month' ? 'active' : ''} onClick={() => { setInterval('month'); track('pricing_interval_toggle', { location: 'pricing', interval: 'month' }); }}>
                   Monthly
                 </button>
-                <button role="tab" aria-selected={interval === 'year'} className={interval === 'year' ? 'active' : ''} onClick={() => setInterval('year')}>
+                <button role="tab" aria-selected={interval === 'year'} className={interval === 'year' ? 'active' : ''} onClick={() => { setInterval('year'); track('pricing_interval_toggle', { location: 'pricing', interval: 'year' }); }}>
                   Annual
                   <span style={{ marginLeft: 6, background: 'var(--lime, #c5e84a)', color: 'var(--ink, #1a3530)', borderRadius: 99, padding: '1px 7px', fontSize: '0.7em', fontWeight: 600 }}>
                     2 months free
@@ -222,7 +224,10 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => router.push('/sign-up?redirect_url=%2Fdashboard')}
+                onClick={() => {
+                  track('free_tier_join', { location: 'pricing' });
+                  router.push('/sign-up?redirect_url=%2Fdashboard');
+                }}
                 disabled={!isLoaded}
                 style={{ opacity: !isLoaded ? 0.6 : 1, cursor: !isLoaded ? 'not-allowed' : 'pointer' }}
               >
@@ -284,7 +289,11 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
           type="button"
           className={`compare-toggle ${showCompare ? 'open' : ''}`}
           aria-expanded={showCompare}
-          onClick={() => setShowCompare((v) => !v)}
+          onClick={() => {
+            const next = !showCompare;
+            setShowCompare(next);
+            if (next) track('pricing_compare_open', { location: 'pricing' });
+          }}
         >
           {showCompare ? 'Hide Comparison' : 'Compare Options'}
           <ChevronIcon />

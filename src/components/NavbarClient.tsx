@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import SignOutButton from "./SignOutButton";
+import { track } from "@/lib/analytics";
 
 export interface NavItem {
   label: string;
@@ -100,7 +101,16 @@ export default function NavbarClient({
 
         {isSignedIn ? (
           <div className="nav-account" ref={menuRef}>
-            <Link className="btn btn-primary nav-cta" href={resolvedCtaHref}>
+            <Link
+              className="btn btn-primary nav-cta"
+              href={resolvedCtaHref}
+              onClick={() =>
+                track('cta_click_signup', {
+                  location: 'navbar',
+                  signedIn: isSignedIn,
+                })
+              }
+            >
               {resolvedCtaLabel}
               <ArrowIcon />
             </Link>
