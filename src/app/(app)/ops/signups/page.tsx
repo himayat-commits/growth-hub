@@ -1,32 +1,46 @@
 // Recent signups — user_profiles joined with subscriptions so ops sees
 // who's on free vs paid + when they joined + how complete their profile is.
+// Now also shows the assigned strategist + lets ops reassign inline.
 
 import { desc, eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { userProfiles, subscriptions } from '@/lib/db/schema';
+import { getActiveStrategists } from '@/lib/cms';
+import AssignStrategist, { type StrategistOption } from './AssignStrategist';
 
 export const dynamic = 'force-dynamic';
 
 export default async function OpsSignupsPage() {
   const db = getDb();
-  const rows = await db
-    .select({
-      userId: userProfiles.userId,
-      businessName: userProfiles.businessName,
-      stage: userProfiles.stage,
-      industry: userProfiles.industry,
-      city: userProfiles.city,
-      profileCompletePct: userProfiles.profileCompletePct,
-      referCode: userProfiles.referCode,
-      createdAt: userProfiles.createdAt,
-      email: subscriptions.email,
-      planTier: subscriptions.planTier,
-      subscriptionStatus: subscriptions.subscriptionStatus,
-    })
-    .from(userProfiles)
-    .leftJoin(subscriptions, eq(subscriptions.userId, userProfiles.userId))
-    .orderBy(desc(userProfiles.createdAt))
-    .limit(200);
+  const [rows, strategists] = await Promise.all([
+    db
+      .select({
+        userId: userProfiles.userId,
+        businessName: userProfiles.businessName,
+        stage: userProfiles.stage,
+        industry: userProfiles.industry,
+        city: userProfiles.city,
+        profileCompletePct: userProfiles.profileCompletePct,
+        referCode: userProfiles.referCode,
+        assignedStrategistId: userProfiles.assignedStrategistId,
+        createdAt: userProfiles.createdAt,
+        email: subscriptions.email,
+        planTier: subscriptions.planTier,
+        subscriptionStatus: subscriptions.subscriptionStatus,
+      })
+      .from(userProfiles)
+      .leftJoin(subscriptions, eq(subscriptions.userId, userProfiles.userId))
+      .orderBy(desc(userProfiles.createdAt))
+      .limit(200),
+    getActiveStrategists(),
+  ]);
+
+  const options: StrategistOption[] = strategists
+    .map((s) => ({
+      slug: (s as { slug?: string | null }).slug ?? '',
+      name: (s as { name?: string | null }).name ?? '',
+    }))
+    .filter((o) => o.slug && o.name);
 
   return (
     <>
@@ -54,6 +68,7 @@ export default async function OpsSignupsPage() {
                 <th>City</th>
                 <th>Profile</th>
                 <th>Plan</th>
+                <th>Strategist</th>
                 <th>Ref code</th>
               </tr>
             </thead>
@@ -89,6 +104,13 @@ export default async function OpsSignupsPage() {
                     ) : (
                       <span className="gh-ops-meta">free</span>
                     )}
+                  </td>
+                  <td>
+                    <AssignStrategist
+                      userId={r.userId}
+                      currentSlug={r.assignedStrategistId}
+                      options={options}
+                    />
                   </td>
                   <td className="gh-ops-meta">{r.referCode ?? '—'}</td>
                 </tr>

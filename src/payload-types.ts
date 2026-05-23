@@ -80,6 +80,7 @@ export interface Config {
     events: Event;
     resources: Resource;
     services: Service;
+    strategists: Strategist;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -100,6 +101,7 @@ export interface Config {
     events: EventsSelect<false> | EventsSelect<true>;
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
+    strategists: StrategistsSelect<false> | StrategistsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -929,6 +931,53 @@ export interface Service {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "strategists".
+ */
+export interface Strategist {
+  id: number;
+  name: string;
+  /**
+   * Stable assignment key stored on user_profiles.assigned_strategist_id. Auto-generated from name on save if left blank.
+   */
+  slug?: string | null;
+  /**
+   * e.g. "Growth Strategist", "Senior Strategist"
+   */
+  role: string;
+  photo?: (number | null) | Media;
+  email: string;
+  bio?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Full URL including https://
+   */
+  calendlyUrl?: string | null;
+  /**
+   * Only active strategists receive auto-assignment of new signups. Inactive strategists keep existing assignments.
+   */
+  active?: boolean | null;
+  /**
+   * Lower numbers appear first in admin lists
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1002,6 +1051,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'services';
         value: number | Service;
+      } | null)
+    | ({
+        relationTo: 'strategists';
+        value: number | Strategist;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1548,6 +1601,23 @@ export interface ServicesSelect<T extends boolean = true> {
   ctaLabel?: T;
   active?: T;
   sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "strategists_select".
+ */
+export interface StrategistsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  role?: T;
+  photo?: T;
+  email?: T;
+  bio?: T;
+  calendlyUrl?: T;
+  active?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }

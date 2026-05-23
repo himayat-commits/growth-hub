@@ -647,3 +647,46 @@ export const getServiceBySlug = unstable_cache(
   ['service-by-slug'],
   { tags: ['services'], revalidate: 3600 },
 );
+
+// ── Strategists ───────────────────────────────────────────────────────────────
+
+export const getActiveStrategists = unstable_cache(
+  async () => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'strategists',
+        where: { active: { equals: true } },
+        sort: 'order',
+        depth: 1,
+        limit: 0,
+      });
+      return docs;
+    } catch (err) {
+      warn('getActiveStrategists', err);
+      return [];
+    }
+  },
+  ['active-strategists'],
+  { tags: ['strategists'], revalidate: 3600 },
+);
+
+export const getStrategistBySlug = unstable_cache(
+  async (slug: string) => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'strategists',
+        where: { slug: { equals: slug } },
+        limit: 1,
+        depth: 1,
+      });
+      return docs[0] ?? null;
+    } catch (err) {
+      warn('getStrategistBySlug', err);
+      return null;
+    }
+  },
+  ['strategist-by-slug'],
+  { tags: ['strategists'], revalidate: 3600 },
+);
