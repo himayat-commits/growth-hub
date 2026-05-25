@@ -6,7 +6,11 @@ import {
   getPartnerSlugs,
   getPartners,
   getSiteSettings,
+  getEventsForPartner,
 } from '@/lib/cms';
+import { toPublicEvents } from '@/lib/events-data';
+import type { Event as PayloadEvent } from '@/payload-types';
+import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 import PartnerMark from '@/components/sections/partners/PartnerMark';
 import {
   CATEGORY_LABELS,
@@ -16,6 +20,7 @@ import {
   type PartnerShape,
 } from '@/components/sections/partners/shared';
 import Contact from '@/components/sections/Contact';
+import NewsletterStrip from '@/components/NewsletterStrip';
 
 export const revalidate = 3600;
 
@@ -43,10 +48,12 @@ export default async function PartnerProfilePage({ params }: { params: Params })
   const partner = await getPartnerBySlug(slug);
   if (!partner) notFound();
 
-  const [allPartnersResult, siteSettings] = await Promise.all([
+  const [allPartnersResult, siteSettings, partnerEventDocs] = await Promise.all([
     getPartners(),
     getSiteSettings(),
+    getEventsForPartner(partner.id, 6),
   ]);
+  const partnerEvents = toPublicEvents(partnerEventDocs as PayloadEvent[]);
 
   const name = String(partner.name ?? '');
   // category fallback chain matches PartnerDirectory: prefer category,
@@ -73,6 +80,12 @@ export default async function PartnerProfilePage({ params }: { params: Params })
 
   return (
     <main>
+      <BreadcrumbListJsonLd
+        crumbs={[
+          { name: 'Partners', path: '/partners' },
+          { name, path: `/partners/${slug}` },
+        ]}
+      />
       <section className="hero p-hero partner-profile-hero">
         <div className="wrap">
           <Link href="/partners" className="ed-back">← All partners</Link>
@@ -140,6 +153,32 @@ export default async function PartnerProfilePage({ params }: { params: Params })
         </section>
       )}
 
+      {partnerEvents.length > 0 && (
+        <section className="partner-profile-events events-list" style={{ paddingTop: 'clamp(72px, 9vw, 120px)' }}>
+          <div className="wrap">
+            <span className="section-label">Upcoming with {name}</span>
+            <h2 className="section-h2" style={{ marginTop: 8 }}>Events {name} is co-hosting.</h2>
+            <div className="evlist" style={{ marginTop: 32 }}>
+              {partnerEvents.map((r) => (
+                <Link className="ev-row" key={r.slug} href={`/events/${r.slug}?utm_source=partner-${slug}&utm_medium=referral`}>
+                  <div className="ev-date">
+                    <span className="month">{r.monthShort}</span>
+                    <span className="day">{r.day === '?' ? <em>?</em> : r.day}</span>
+                    <span className="year">{r.year}</span>
+                  </div>
+                  <div className="ev-main">
+                    <span className={'ev-tag ' + r.tagClass}>{r.tag}</span>
+                    <h3>{r.title}</h3>
+                    <p className="ev-desc">{r.desc}</p>
+                  </div>
+                  <span className="ev-cta">View event →</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {related.length > 0 && (
         <section className="partner-profile-related">
           <div className="wrap">
@@ -181,6 +220,12 @@ export default async function PartnerProfilePage({ params }: { params: Params })
           </div>
         </section>
       )}
+
+      <NewsletterStrip
+        source={`partner-${slug}`}
+        heading={`Follow what ${name} and Growth Hub are building.`}
+        sub="Joint workshops, partner-only events, and case-study updates. One email a month, no drip sequence."
+      />
 
       <Contact
         supportEmail={siteSettings?.supportEmail ?? null}

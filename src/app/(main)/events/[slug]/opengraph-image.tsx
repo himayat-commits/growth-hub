@@ -27,6 +27,12 @@ export default async function EventOgImage({ params }: { params: Params }) {
   const tag = ev?.tag ?? 'Event';
   const location = ev?.location ?? 'Canberra';
 
+  // When the event has a co-host partner, surface their name in the
+  // wordmark area. depth=1 on getEventBySlug populates `host` as an
+  // object; the name is the only field we render here.
+  const host = (doc as { host?: { name?: string } } | null)?.host;
+  const hostName = host && typeof host === 'object' ? host.name ?? null : null;
+
   return new ImageResponse(
     (
       <div
@@ -64,17 +70,30 @@ export default async function EventOgImage({ params }: { params: Params }) {
           </div>
         </div>
 
-        {/* Title */}
-        <div
-          style={{
-            display: 'flex',
-            fontSize: 84,
-            lineHeight: 1.05,
-            letterSpacing: '-0.025em',
-            maxWidth: '92%',
-          }}
-        >
-          {title}
+        {/* Title + optional "with [host]" co-host line */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: '92%' }}>
+          {hostName && (
+            <span
+              style={{
+                fontSize: 26,
+                color: '#E3F29C',
+                fontStyle: 'italic',
+                letterSpacing: '0.02em',
+              }}
+            >
+              with {hostName}
+            </span>
+          )}
+          <div
+            style={{
+              display: 'flex',
+              fontSize: 84,
+              lineHeight: 1.05,
+              letterSpacing: '-0.025em',
+            }}
+          >
+            {title}
+          </div>
         </div>
 
         {/* Bottom row — date + location */}

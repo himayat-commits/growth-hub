@@ -7,6 +7,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import PostHogProvider from "@/components/PostHogProvider";
+import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegrowthhub.com.au";
 
 // Root layout for the main app (multiple root layouts pattern — no app/layout.tsx).
 // Provides <html>/<body>, fonts, metadata, AuthKitProvider, Navbar, and Footer.
@@ -31,14 +35,13 @@ export const metadata: Metadata = {
   title: "Growth Hub by Himayat — Your business deserves to grow.",
   description:
     "AI-powered digital marketing with real, local support. Every subscription fuels employment pathways in the Canberra community.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://growthhub.himayat.com.au"
-  ),
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Growth Hub by Himayat",
     description:
       "AI-powered digital marketing with real, local Canberra support.",
-    url: "https://growthhub.himayat.com.au",
+    url: SITE_URL,
     siteName: "Growth Hub by Himayat",
     locale: "en_AU",
     type: "website",
@@ -62,6 +65,7 @@ export default function MainLayout({
       <body>
         <AuthKitProvider>
           <PostHogProvider>
+            <OrganizationJsonLd />
             <Navbar />
             {children}
             <Footer />

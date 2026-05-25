@@ -6,6 +6,7 @@
 // a clean server component.
 
 import { track } from '@/lib/analytics';
+import { readAttribution } from './useAttribution';
 
 export default function RsvpMailtoLink({
   slug,
@@ -19,7 +20,9 @@ export default function RsvpMailtoLink({
     <a
       className="btn btn-primary"
       href={mailto}
-      onClick={() => track('event_rsvp_intent', { slug, title, channel: 'mailto' })}
+      onClick={() =>
+        track('event_rsvp_intent', { slug, title, channel: 'mailto', ...readAttribution(slug) })
+      }
     >
       RSVP by email
       <svg

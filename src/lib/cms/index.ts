@@ -511,7 +511,9 @@ export const getPublicEvents = unstable_cache(
   { tags: ['events'], revalidate: 3600 },
 );
 
-/** Single event by slug — for the public /events/[slug] detail page. */
+/** Single event by slug — for the public /events/[slug] detail page.
+ *  Uses depth=1 so the `host` and `partners` relationships return as full
+ *  objects (name, slug, shape, category) for the partner lock-up render. */
 export const getEventBySlug = unstable_cache(
   async (slug: string) => {
     try {
@@ -520,7 +522,7 @@ export const getEventBySlug = unstable_cache(
         collection: 'events',
         where: { slug: { equals: slug } },
         limit: 1,
-        depth: 0,
+        depth: 1,
       });
       return docs[0] ?? null;
     } catch (err) {
@@ -530,6 +532,41 @@ export const getEventBySlug = unstable_cache(
   },
   ['event-by-slug'],
   { tags: ['events'], revalidate: 3600 },
+);
+
+/** Upcoming events where the given partner is the `host` or appears in
+ *  `partners[]`. Powers the "Upcoming with us" section on /partners/[slug]. */
+export const getEventsForPartner = unstable_cache(
+  async (partnerId: string | number, limit = 6) => {
+    try {
+      const payload = await getPayloadClient();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const { docs } = await payload.find({
+        collection: 'events',
+        where: {
+          and: [
+            { date: { greater_than_equal: today.toISOString() } },
+            {
+              or: [
+                { host: { equals: partnerId } },
+                { partners: { contains: partnerId } },
+              ],
+            },
+          ],
+        },
+        sort: 'date',
+        limit,
+        depth: 0,
+      });
+      return docs;
+    } catch (err) {
+      warn('getEventsForPartner', err);
+      return [];
+    }
+  },
+  ['events-for-partner'],
+  { tags: ['events', 'partners'], revalidate: 3600 },
 );
 
 /** Every published event slug — for generateStaticParams. Excludes bespoke. */

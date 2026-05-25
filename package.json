@@ -17,6 +17,7 @@
     "payload:migrate": "payload migrate",
     "seed": "node --env-file=.env.local --import tsx/esm scripts/seed.ts",
     "partners:add-missing": "node --env-file=.env.local --import tsx/esm scripts/add-missing-partners.ts",
+    "event:seed-cbrin": "node --env-file=.env.local --import tsx/esm scripts/seed-cbrin-event.ts",
     "test:e2e": "playwright test",
     "test:e2e:prod": "BASE_URL=https://thegrowthhub.com.au playwright test"
   },
