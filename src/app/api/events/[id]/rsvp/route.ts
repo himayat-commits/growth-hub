@@ -5,8 +5,9 @@
 // `created: true`. DELETE removes the RSVP.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { withAuth } from '@workos-inc/authkit-nextjs';
-import { rsvpToEvent, cancelRsvp } from '@/lib/db/rsvps';
+import { rsvpToEvent, cancelRsvp, type RsvpAttribution } from '@/lib/db/rsvps';
 import { getEventById } from '@/lib/cms';
 
 export const runtime = 'nodejs';
@@ -14,6 +15,31 @@ export const runtime = 'nodejs';
 function parseEventId(raw: string): number | null {
   const n = Number(raw);
   return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+/** Read the `gh_attr_{slug}` cookie set by /events/[slug] and return it
+ *  as a typed attribution object. Falls back to null on any parse error
+ *  so a broken cookie never blocks an RSVP. Caller passes the slug if
+ *  known; otherwise we scan any gh_attr_* cookie (last-write-wins). */
+async function readAttributionCookie(slug?: string): Promise<RsvpAttribution | undefined> {
+  try {
+    const store = await cookies();
+    const target = slug
+      ? store.get(`gh_attr_${slug}`)
+      : store.getAll().find((c) => c.name.startsWith('gh_attr_'));
+    if (!target?.value) return undefined;
+    const parsed = JSON.parse(decodeURIComponent(target.value)) as Record<string, unknown>;
+    const pick = (k: string) => (typeof parsed[k] === 'string' ? (parsed[k] as string).slice(0, 64) : null);
+    return {
+      source: pick('source'),
+      utmMedium: pick('utmMedium'),
+      utmCampaign: pick('utmCampaign'),
+      utmContent: pick('utmContent'),
+      ref: pick('ref'),
+    };
+  } catch {
+    return undefined;
+  }
 }
 
 export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
@@ -33,7 +59,10 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
     return NextResponse.json({ error: 'Event not found' }, { status: 404 });
   }
 
-  const created = await rsvpToEvent(user.id, eventId);
+  const attribution = await readAttributionCookie(
+    (event as { slug?: string }).slug ?? undefined,
+  );
+  const created = await rsvpToEvent(user.id, eventId, attribution);
   return NextResponse.json({ rsvped: true, created });
 }
 

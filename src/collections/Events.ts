@@ -177,6 +177,27 @@ export const Events: CollectionConfig = {
           'Set true if a hand-built landing page exists at /events/{slug}. The generic detail route will 307 to it.',
       },
     },
+    // ── Co-host & partner relationships ──────────────────────────────────
+    {
+      name: 'host',
+      type: 'relationship',
+      relationTo: 'partners',
+      hasMany: false,
+      admin: {
+        description:
+          'Primary venue/co-host for this event (e.g. Canberra Innovation Network). Renders the partner lock-up on the event detail page and surfaces this event on the partner page.',
+      },
+    },
+    {
+      name: 'partners',
+      type: 'relationship',
+      relationTo: 'partners',
+      hasMany: true,
+      admin: {
+        description:
+          'Other partners co-promoting this event. Surfaces this event on each partner page so they have a single URL to share with their audience.',
+      },
+    },
   ],
   hooks: {
     afterChange: [async () => { await revalidate('events'); }],

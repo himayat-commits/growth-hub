@@ -25,6 +25,7 @@ export type AnalyticsEvent =
   | 'newsletter_signup'          // /api/newsletter success
   | 'contact_form_submit'        // homepage Contact form submitted
   | 'event_rsvp_intent'          // clicked RSVP CTA on /events/[slug]
+  | 'event_add_to_calendar'      // clicked Add to Calendar (.ics download)
   | 'partner_card_click'         // clicked a partner-directory card
   | 'case_study_open'            // viewed a /case-studies/[slug] page
   // Add-ons / referrals

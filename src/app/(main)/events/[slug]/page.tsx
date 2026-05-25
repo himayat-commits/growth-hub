@@ -10,7 +10,13 @@ import {
 import { toPublicEvent, toPublicEvents } from '@/lib/events-data';
 import type { Event as PayloadEvent } from '@/payload-types';
 import Contact from '@/components/sections/Contact';
+import NewsletterStrip from '@/components/NewsletterStrip';
 import RsvpMailtoLink from './RsvpMailtoLink';
+import AddToCalendarLink from './AddToCalendarLink';
+import CaptureAttribution from './CaptureAttribution';
+import { EventJsonLd } from '@/components/seo/EventJsonLd';
+import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
+import { PartnerLockup } from '@/components/sections/events/PartnerLockup';
 
 export const revalidate = 3600;
 
@@ -26,9 +32,25 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const doc = await getEventBySlug(slug);
   if (!doc) return { title: 'Event — Growth Hub by Himayat' };
   const ev = toPublicEvent(doc as PayloadEvent);
+  const path = `/events/${ev.slug}`;
+  const title = `${ev.title} — Growth Hub by Himayat`;
   return {
-    title: `${ev.title} — Growth Hub by Himayat`,
+    title,
     description: ev.desc,
+    alternates: { canonical: path },
+    openGraph: {
+      title,
+      description: ev.desc,
+      url: path,
+      type: 'website',
+      siteName: 'Growth Hub by Himayat',
+      locale: 'en_AU',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: ev.desc,
+    },
   };
 }
 
@@ -53,6 +75,14 @@ export default async function GenericEventPage({ params }: { params: Params }) {
 
   return (
     <main>
+      <CaptureAttribution slug={ev.slug} />
+      <EventJsonLd ev={doc as PayloadEvent} />
+      <BreadcrumbListJsonLd
+        crumbs={[
+          { name: 'Events', path: '/events' },
+          { name: ev.title, path: `/events/${ev.slug}` },
+        ]}
+      />
       <section className="hero event-hero event-detail" id="top">
         <div className="wrap">
           <Link href="/events" className="ed-back">← All events</Link>
@@ -74,8 +104,14 @@ export default async function GenericEventPage({ params }: { params: Params }) {
           <div className="ed-cta">
             {/* Client wrapper attaches the event_rsvp_intent analytics event */}
             <RsvpMailtoLink slug={ev.slug} title={ev.title} />
+            <AddToCalendarLink slug={ev.slug} title={ev.title} />
             <Link className="btn btn-secondary" href="/sign-up?redirect_url=%2Fmy-events">Members register inside</Link>
           </div>
+
+          <PartnerLockup
+            host={(doc as { host?: unknown }).host as Parameters<typeof PartnerLockup>[0]['host']}
+            partners={(doc as { partners?: unknown }).partners as Parameters<typeof PartnerLockup>[0]['partners']}
+          />
         </div>
       </section>
 
@@ -104,6 +140,12 @@ export default async function GenericEventPage({ params }: { params: Params }) {
           </div>
         </section>
       )}
+
+      <NewsletterStrip
+        source={`event-${ev.slug}`}
+        heading={`Can't make ${ev.title}?`}
+        sub="Get the events digest — one email a month with the next workshops, mixers and clinics. No drip sequence."
+      />
 
       <Contact
         supportEmail={siteSettings?.supportEmail ?? null}

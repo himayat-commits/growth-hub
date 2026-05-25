@@ -6,8 +6,22 @@ import { and, eq, gte } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { eventRsvps, type EventRsvp } from '@/lib/db/schema';
 
-/** Insert an RSVP, idempotent. Returns true if a new row was created. */
-export async function rsvpToEvent(userId: string, eventId: number): Promise<boolean> {
+export interface RsvpAttribution {
+  source?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  utmContent?: string | null;
+  ref?: string | null;
+}
+
+/** Insert an RSVP, idempotent. Returns true if a new row was created.
+ *  Attribution is optional — when present it lets /ops/events answer
+ *  "where did these RSVPs come from?" */
+export async function rsvpToEvent(
+  userId: string,
+  eventId: number,
+  attribution?: RsvpAttribution,
+): Promise<boolean> {
   const db = getDb();
   // Check first so we can return the right boolean without relying on
   // returning() shape variance across drivers.
@@ -17,7 +31,15 @@ export async function rsvpToEvent(userId: string, eventId: number): Promise<bool
     .where(and(eq(eventRsvps.userId, userId), eq(eventRsvps.eventId, eventId)))
     .limit(1);
   if (existing[0]) return false;
-  await db.insert(eventRsvps).values({ userId, eventId });
+  await db.insert(eventRsvps).values({
+    userId,
+    eventId,
+    source: attribution?.source ?? null,
+    utmMedium: attribution?.utmMedium ?? null,
+    utmCampaign: attribution?.utmCampaign ?? null,
+    utmContent: attribution?.utmContent ?? null,
+    ref: attribution?.ref ?? null,
+  });
   return true;
 }
 

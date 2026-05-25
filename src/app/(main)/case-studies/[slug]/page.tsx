@@ -11,6 +11,7 @@ import {
 import LexicalRichText from '@/components/LexicalRichText';
 import Contact from '@/components/sections/Contact';
 import TrackOnMount from '@/components/TrackOnMount';
+import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 
 export const revalidate = 3600;
 
@@ -56,6 +57,12 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
       <TrackOnMount
         event="case_study_open"
         properties={{ slug, client, outcome: outcome ? outcome.slice(0, 80) : undefined }}
+      />
+      <BreadcrumbListJsonLd
+        crumbs={[
+          { name: 'Case studies', path: '/case-studies' },
+          { name: title, path: `/case-studies/${slug}` },
+        ]}
       />
       <section className="hero case-study-hero">
         <div className="wrap">

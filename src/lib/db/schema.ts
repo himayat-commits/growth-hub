@@ -295,6 +295,14 @@ export const eventRsvps = pgTable(
     userId: text('user_id').notNull(),
     eventId: integer('event_id').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    // Marketing attribution captured at the time of RSVP. Populated from
+    // a `gh_attr_{slug}` cookie set on /events/[slug] visit — survives the
+    // sign-in flow so we know which partner / campaign drove the RSVP.
+    source: varchar('source', { length: 64 }),
+    utmMedium: varchar('utm_medium', { length: 64 }),
+    utmCampaign: varchar('utm_campaign', { length: 80 }),
+    utmContent: varchar('utm_content', { length: 80 }),
+    ref: varchar('ref', { length: 64 }),
   },
   (t) => ({
     userEventIdx: index('event_rsvps_user_event_idx').on(t.userId, t.eventId),
