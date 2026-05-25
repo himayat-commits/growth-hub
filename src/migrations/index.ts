@@ -8,7 +8,10 @@ import * as migration_20260520_153805 from './20260520_153805';
 import * as migration_20260521_events_public_fields from './20260521_events_public_fields';
 import * as migration_20260521_navigation_events_partners from './20260521_navigation_events_partners';
 import * as migration_20260522_navigation_cta_and_faq_fix from './20260522_navigation_cta_and_faq_fix';
+import * as migration_20260522_partners_page_meta from './20260522_partners_page_meta';
+import * as migration_20260522_partners_slug from './20260522_partners_slug';
 import * as migration_20260523_add_strategists from './20260523_add_strategists';
+import * as migration_20260525_events_host_and_partners from './20260525_events_host_and_partners';
 
 export const migrations = [
   {
@@ -44,7 +47,7 @@ export const migrations = [
   {
     up: migration_20260520_153805.up,
     down: migration_20260520_153805.down,
-    name: '20260520_153805'
+    name: '20260520_153805',
   },
   {
     up: migration_20260521_events_public_fields.up,
@@ -62,8 +65,23 @@ export const migrations = [
     name: '20260522_navigation_cta_and_faq_fix',
   },
   {
+    up: migration_20260522_partners_page_meta.up,
+    down: migration_20260522_partners_page_meta.down,
+    name: '20260522_partners_page_meta',
+  },
+  {
+    up: migration_20260522_partners_slug.up,
+    down: migration_20260522_partners_slug.down,
+    name: '20260522_partners_slug',
+  },
+  {
     up: migration_20260523_add_strategists.up,
     down: migration_20260523_add_strategists.down,
     name: '20260523_add_strategists',
+  },
+  {
+    up: migration_20260525_events_host_and_partners.up,
+    down: migration_20260525_events_host_and_partners.down,
+    name: '20260525_events_host_and_partners',
   },
 ];

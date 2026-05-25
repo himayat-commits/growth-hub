@@ -78,6 +78,13 @@
       "when": 1779545242763,
       "tag": "0010_test_no_op",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1779716070649,
+      "tag": "0011_add_rsvp_attribution",
+      "breakpoints": true
     }
   ]
 }
