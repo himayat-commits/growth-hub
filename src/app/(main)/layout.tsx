@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import PostHogProvider from "@/components/PostHogProvider";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
+import Pixels from "@/components/analytics/Pixels";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegrowthhub.com.au";
@@ -65,6 +66,7 @@ export default function MainLayout({
       <body>
         <AuthKitProvider>
           <PostHogProvider>
+            <Pixels />
             <OrganizationJsonLd />
             <Navbar />
             {children}
