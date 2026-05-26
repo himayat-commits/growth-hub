@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { withAuth } from "@workos-inc/authkit-nextjs";
+import { withAuth } from "@/lib/auth/with-auth";
 import { getSubscription } from "@/lib/subscription";
 import type { PackageId } from "@/lib/wizard/packages";
 import { DoneView } from "@/components/portal/DoneView";

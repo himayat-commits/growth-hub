@@ -8,7 +8,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { withAuth } from "@workos-inc/authkit-nextjs";
+import { withAuth } from "@/lib/auth/with-auth";
 import { getDb } from "@/lib/db";
 import { onboardingStates } from "@/lib/db/schema";
 import { wizardStateSchema, type WizardState } from "@/lib/wizard/state";

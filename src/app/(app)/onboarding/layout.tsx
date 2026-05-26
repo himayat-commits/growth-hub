@@ -14,7 +14,7 @@
 
 import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
-import { withAuth } from '@workos-inc/authkit-nextjs';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getDb } from '@/lib/db';
 import { onboardingStates } from '@/lib/db/schema';
 import { getSubscription, isActive } from '@/lib/subscription';
