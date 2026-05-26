@@ -8,7 +8,7 @@
 // cookie, which Server Components can't do — same pattern as /portal today.
 
 import { redirect } from 'next/navigation'
-import { withAuth } from '@workos-inc/authkit-nextjs'
+import { withAuth } from '@/lib/auth/with-auth'
 import { getSubscription, getEffectivePlan } from '@/lib/subscription'
 import { PLANS } from '@/lib/plans'
 import { getUnreadNotificationCount } from '@/lib/db/notifications'

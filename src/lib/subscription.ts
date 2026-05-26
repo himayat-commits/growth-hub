@@ -1,4 +1,4 @@
-import { withAuth } from '@workos-inc/authkit-nextjs';
+import { withAuth } from '@/lib/auth/with-auth';
 import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
