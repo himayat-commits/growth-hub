@@ -10,6 +10,7 @@ import { priceIdToPlan, PLANS } from '@/lib/plans';
 import { createNotification } from '@/lib/db/notifications';
 import { tryIssueReferralCredit } from '@/lib/stripe/referral-credit';
 import { upsertCancellation, markCancellationRestored } from '@/lib/db/cancellations';
+import { sendServerConversion } from '@/lib/analytics/server-conversions';
 
 // Webhook needs the Node.js runtime so we can read the raw request body
 // for signature verification. Edge runtime parses bodies eagerly.
@@ -70,6 +71,29 @@ export async function POST(req: NextRequest) {
               : session.subscription.id;
           await syncSubscription(subId);
         }
+        // Tier 3.4: fire server-side conversions. No-op when META_CAPI_*
+        // / GOOGLE_ADS_* env vars aren't set, so safe to leave in.
+        // Doesn't await — if Meta is slow we don't want to slow the
+        // webhook ack and trigger Stripe to retry.
+        void sendServerConversion({
+          eventId: event.id,
+          eventName: session.mode === 'subscription' ? 'Purchase' : 'Lead',
+          email: session.customer_details?.email ?? null,
+          phone: session.customer_details?.phone ?? null,
+          externalId:
+            typeof session.customer === 'string'
+              ? session.customer
+              : (session.customer?.id ?? null),
+          value:
+            typeof session.amount_total === 'number'
+              ? session.amount_total / 100
+              : undefined,
+          currency: session.currency?.toUpperCase(),
+          sourceUrl: session.success_url ?? undefined,
+          // fbc / fbp / clientIp / userAgent would come from
+          // session.metadata if we threaded them through at checkout-
+          // creation time. Wire in /api/checkout when ready.
+        });
         break;
       }
 

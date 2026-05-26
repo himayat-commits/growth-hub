@@ -150,6 +150,36 @@ export const getCaseStudies = unstable_cache(
   { tags: ['case-studies'], revalidate: 3600 }
 );
 
+/** Case studies where `client` matches the given partner name — used by the
+ *  partner micro-site at /with/[partner-slug] to surface joint case studies.
+ *  Match is case-sensitive to mirror Payload's `equals` operator; pass the
+ *  exact partner.name as authored. */
+export const getCaseStudiesByClient = unstable_cache(
+  async (clientName: string) => {
+    try {
+      if (!clientName) return [];
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'case-studies',
+        where: {
+          and: [
+            { client: { equals: clientName } },
+            { status: { equals: 'published' } },
+          ],
+        },
+        limit: 12,
+        depth: 1,
+      });
+      return docs;
+    } catch (err) {
+      warn('getCaseStudiesByClient', err);
+      return [];
+    }
+  },
+  ['case-studies-by-client'],
+  { tags: ['case-studies'], revalidate: 3600 },
+);
+
 /** Single case study by slug — for /case-studies/[slug]. */
 export const getCaseStudyBySlug = unstable_cache(
   async (slug: string) => {
