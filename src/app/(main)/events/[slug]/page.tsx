@@ -17,6 +17,7 @@ import CaptureAttribution from './CaptureAttribution';
 import { EventJsonLd } from '@/components/seo/EventJsonLd';
 import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 import { PartnerLockup } from '@/components/sections/events/PartnerLockup';
+import ShareButtons from '@/components/sections/ShareButtons';
 
 export const revalidate = 3600;
 
@@ -112,6 +113,14 @@ export default async function GenericEventPage({ params }: { params: Params }) {
             host={(doc as { host?: unknown }).host as Parameters<typeof PartnerLockup>[0]['host']}
             partners={(doc as { partners?: unknown }).partners as Parameters<typeof PartnerLockup>[0]['partners']}
           />
+
+          <div style={{ marginTop: 28 }}>
+            <ShareButtons
+              title={ev.title}
+              path={`/events/${ev.slug}`}
+              surface="event"
+            />
+          </div>
         </div>
       </section>
 
