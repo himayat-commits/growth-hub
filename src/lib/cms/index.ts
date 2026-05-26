@@ -451,6 +451,32 @@ export const getUpcomingEvents = unstable_cache(
   { tags: ['events'], revalidate: 3600 },
 );
 
+/** All past events (date < today), most recent first. Used by the
+ *  public /events "From the archive" section so adding a past event
+ *  is an editor task in Payload rather than a code change. */
+export const getPastEvents = unstable_cache(
+  async (limit = 6) => {
+    try {
+      const payload = await getPayloadClient();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const { docs } = await payload.find({
+        collection: 'events',
+        where: { date: { less_than: today.toISOString() } },
+        sort: '-date',
+        limit,
+        depth: 0,
+      });
+      return docs;
+    } catch (err) {
+      warn('getPastEvents', err);
+      return [];
+    }
+  },
+  ['events-past-public'],
+  { tags: ['events'], revalidate: 3600 },
+);
+
 /** Past events with a recording uploaded. */
 export const getPastRecordings = unstable_cache(
   async (limit = 12) => {

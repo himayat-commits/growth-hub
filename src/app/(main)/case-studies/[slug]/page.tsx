@@ -12,6 +12,7 @@ import LexicalRichText from '@/components/LexicalRichText';
 import Contact from '@/components/sections/Contact';
 import TrackOnMount from '@/components/TrackOnMount';
 import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
+import ShareButtons from '@/components/sections/ShareButtons';
 
 export const revalidate = 3600;
 
@@ -79,6 +80,13 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
               {outcome}
             </p>
           )}
+          <div style={{ marginTop: 28 }}>
+            <ShareButtons
+              title={title}
+              path={`/case-studies/${slug}`}
+              surface="case-study"
+            />
+          </div>
         </div>
       </section>
 

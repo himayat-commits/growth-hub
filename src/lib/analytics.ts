@@ -14,6 +14,7 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
 import posthog from 'posthog-js';
 
 declare global {
@@ -44,7 +45,8 @@ export type AnalyticsEvent =
   | 'partner_card_click'         // clicked a partner-directory card
   | 'case_study_open'            // viewed a /case-studies/[slug] page
   // Add-ons / referrals
-  | 'referral_link_copy';        // copied referral link from /benefits
+  | 'referral_link_copy'         // copied referral link from /benefits
+  | 'referral_share_click';      // clicked a ShareButtons network link
 
 export function track(
   event: AnalyticsEvent,
@@ -116,7 +118,8 @@ const EVENT_MAP: Partial<Record<AnalyticsEvent, PlatformMap>> = {
   case_study_open:      { ga4: 'case_study_open', meta: 'ViewContent' },
 
   // Referrals
-  referral_link_copy: { ga4: 'share' },
+  referral_link_copy:   { ga4: 'share' },
+  referral_share_click: { ga4: 'share' },
   // Plan-management events (plan_change_*, plan_cancel_*) intentionally
   // omitted — they're dashboard-only and don't belong in acquisition pixels.
 };
@@ -158,4 +161,54 @@ export function reset() {
   if (typeof window === 'undefined') return;
   if (!posthog.__loaded) return;
   posthog.reset();
+}
+
+// ── A/B experiment harness ───────────────────────────────────────────────
+//
+// Thin hook over PostHog feature flags so the marketing surface can run
+// experiments without each component pulling posthog-js directly.
+//
+// Usage:
+//   const variant = useExperiment('pricing-hero-copy');
+//   if (variant === 'control') return <HeroA />;
+//   if (variant === 'b') return <HeroB />;
+//   return <HeroA />; // SSR + pre-flags fallback
+//
+// The variant value (string, boolean, or undefined) comes from PostHog's
+// feature flag evaluation. The first time a non-undefined variant is
+// observed for a given key in this session, an `$feature_flag_called`
+// event is captured by PostHog automatically — that's the exposure
+// signal PostHog's experiments dashboard uses to compute lift.
+//
+// Always render a sensible default on the first paint: PostHog flags
+// need a round-trip after init, and SSR can't know the variant. The
+// hook returns undefined initially, then the assigned variant once
+// PostHog reports back.
+
+export type ExperimentVariant = string | boolean | undefined;
+
+export function useExperiment(flagKey: string): ExperimentVariant {
+  // Lazy initialiser reads the SDK's cached flag value (from a prior
+  // session) without triggering an extra render — react-hooks/
+  // set-state-in-effect would flag a setState() inside the effect.
+  // SSR returns undefined; the effect below subscribes for updates.
+  const [variant, setVariant] = useState<ExperimentVariant>(() => {
+    if (typeof window === 'undefined') return undefined;
+    if (!posthog.__loaded) return undefined;
+    return posthog.getFeatureFlag(flagKey);
+  });
+
+  useEffect(() => {
+    if (!posthog.__loaded) return;
+    const off = posthog.onFeatureFlags((flags, variants) => {
+      const v = variants?.[flagKey] ?? (flags.includes(flagKey) ? true : undefined);
+      setVariant(v);
+    });
+    return () => {
+      // posthog.onFeatureFlags returns the unsubscribe fn.
+      if (typeof off === 'function') off();
+    };
+  }, [flagKey]);
+
+  return variant;
 }

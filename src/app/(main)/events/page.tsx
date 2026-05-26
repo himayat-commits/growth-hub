@@ -4,18 +4,8 @@ import { toPublicEvents } from '@/lib/events-data';
 import UpcomingFilterList from './UpcomingFilterList';
 import Contact from '@/components/sections/Contact';
 import NewsletterStrip from '@/components/NewsletterStrip';
-import { getPublicEvents, getSiteSettings } from '@/lib/cms';
+import { getPublicEvents, getPastEvents, getSiteSettings } from '@/lib/cms';
 import type { Event as PayloadEvent } from '@/payload-types';
-
-// Past-event "from the archive" snapshot. Kept inline rather than in
-// Payload because these are static historical references with bespoke
-// stats; promoting them to a schema would add a `pastEventStats` field
-// nobody asked for. Migrate when there's a real editor request.
-const PAST_PUBLIC_EVENTS = [
-  { title: 'Digital Marketing Day 2025', desc: 'A one-day intensive across SEO, paid social, content and CRM basics — co-hosted with RD Consulting.', tag: 'Workshop', tagClass: 'tag-workshop', date: 'November 2025', stats: [{ n: '84', l: 'Attendees' }, { n: '92%', l: 'Would recommend' }] },
-  { title: 'Birdeye Partnership Launch', desc: 'Marking our reputation-tooling partnership with Birdeye — onboarding 12 founding-cohort members on the night.', tag: 'Mixer', tagClass: 'tag-mixer', date: 'September 2025', stats: [{ n: '60+', l: 'Founders' }, { n: '12', l: 'Cohort onboarded' }] },
-  { title: 'Welcome to Country Kickoff', desc: 'Our 2025 program opener — Welcome to Country, year ahead, and the first community grant announcement.', tag: 'Community', tagClass: 'tag-community', date: 'February 2025', stats: [{ n: '120', l: 'In the room' }, { n: '$25K', l: 'Grants announced' }] },
-];
 
 export const metadata: Metadata = {
   title: 'Events — Growth Hub by Himayat',
@@ -88,11 +78,13 @@ const TESTIMONIALS = [
 ];
 
 export default async function EventsHubPage() {
-  const [siteSettings, eventDocs] = await Promise.all([
+  const [siteSettings, eventDocs, pastDocs] = await Promise.all([
     getSiteSettings(),
     getPublicEvents(),
+    getPastEvents(6),
   ]);
   const PUBLIC_EVENTS = toPublicEvents(eventDocs as PayloadEvent[]);
+  const PAST_PUBLIC_EVENTS = toPublicEvents(pastDocs as PayloadEvent[]);
   const featured = PUBLIC_EVENTS.find((e) => e.featured) ?? PUBLIC_EVENTS[0];
 
   return (
@@ -185,34 +177,28 @@ export default async function EventsHubPage() {
         </div>
       </section>
 
-      {/* PAST */}
-      <section className="past-events" id="past">
-        <div className="wrap">
-          <span className="section-label">From the archive</span>
-          <h2 className="section-h2">Past events.</h2>
-          <p className="ep-lead" style={{ marginTop: 12 }}>
-            A snapshot of what we&apos;ve already delivered. The full archive is available on request.
-          </p>
-          <div className="past-grid">
-            {PAST_PUBLIC_EVENTS.map((e, i) => (
-              <div className="past-card" key={i}>
-                <span className={'ev-tag ' + e.tagClass}>{e.tag}</span>
-                <h3>{e.title}</h3>
-                <span className="past-date">{e.date}</span>
-                <p>{e.desc}</p>
-                <div className="past-numbers">
-                  {e.stats.map((s, j) => (
-                    <div key={j}>
-                      <span className="n">{s.n}</span>
-                      <span className="l">{s.l}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+      {/* PAST — CMS-backed; section hides when there are no past events */}
+      {PAST_PUBLIC_EVENTS.length > 0 && (
+        <section className="past-events" id="past">
+          <div className="wrap">
+            <span className="section-label">From the archive</span>
+            <h2 className="section-h2">Past events.</h2>
+            <p className="ep-lead" style={{ marginTop: 12 }}>
+              A snapshot of what we&apos;ve already delivered. The full archive is available on request.
+            </p>
+            <div className="past-grid">
+              {PAST_PUBLIC_EVENTS.map((e) => (
+                <Link href={`/events/${e.slug}`} className="past-card" key={e.slug}>
+                  <span className={'ev-tag ' + e.tagClass}>{e.tag}</span>
+                  <h3>{e.title}</h3>
+                  <span className="past-date">{e.dateLong}</span>
+                  <p>{e.desc}</p>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* EVENT PARTNERS */}
       <section className="event-partners" id="partners">
