@@ -844,6 +844,18 @@ export interface Event {
    * Set true if a hand-built landing page exists at /events/{slug}. The generic detail route will 307 to it.
    */
   bespoke?: boolean | null;
+  /**
+   * Primary venue/co-host for this event (e.g. Canberra Innovation Network). Renders the partner lock-up on the event detail page and surfaces this event on the partner page.
+   */
+  host?: (number | null) | Partner;
+  /**
+   * Other partners co-promoting this event. Surfaces this event on each partner page so they have a single URL to share with their audience.
+   */
+  partners?: (number | Partner)[] | null;
+  /**
+   * Optional. When set, signed-in members can RSVP normally but the public mailto CTA is hidden and replaced with a "Members get early access" banner until this date passes. Drives paid-tier urgency for high-demand events. Leave blank for open-RSVP-from-launch.
+   */
+  memberPreviewUntil?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1565,6 +1577,9 @@ export interface EventsSelect<T extends boolean = true> {
   cost?: T;
   dateDisplay?: T;
   bespoke?: T;
+  host?: T;
+  partners?: T;
+  memberPreviewUntil?: T;
   updatedAt?: T;
   createdAt?: T;
 }

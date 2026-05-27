@@ -198,6 +198,15 @@ export const Events: CollectionConfig = {
           'Other partners co-promoting this event. Surfaces this event on each partner page so they have a single URL to share with their audience.',
       },
     },
+    {
+      name: 'memberPreviewUntil',
+      type: 'date',
+      admin: {
+        date: { pickerAppearance: 'dayAndTime' },
+        description:
+          'Optional. When set, signed-in members can RSVP normally but the public mailto CTA is hidden and replaced with a "Members get early access" banner until this date passes. Drives paid-tier urgency for high-demand events. Leave blank for open-RSVP-from-launch.',
+      },
+    },
   ],
   hooks: {
     afterChange: [async () => { await revalidate('events'); }],

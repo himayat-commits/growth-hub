@@ -9,6 +9,7 @@ import * as migration_20260521_events_public_fields from './20260521_events_publ
 import * as migration_20260521_navigation_events_partners from './20260521_navigation_events_partners';
 import * as migration_20260522_navigation_cta_and_faq_fix from './20260522_navigation_cta_and_faq_fix';
 import * as migration_20260523_add_strategists from './20260523_add_strategists';
+import * as migration_20260526_events_member_preview_until from './20260526_events_member_preview_until';
 
 export const migrations = [
   {
@@ -65,5 +66,10 @@ export const migrations = [
     up: migration_20260523_add_strategists.up,
     down: migration_20260523_add_strategists.down,
     name: '20260523_add_strategists',
+  },
+  {
+    up: migration_20260526_events_member_preview_until.up,
+    down: migration_20260526_events_member_preview_until.down,
+    name: '20260526_events_member_preview_until',
   },
 ];

@@ -18,6 +18,10 @@ import { EventJsonLd } from '@/components/seo/EventJsonLd';
 import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 import { PartnerLockup } from '@/components/sections/events/PartnerLockup';
 import ShareButtons from '@/components/sections/ShareButtons';
+import {
+  MemberPreviewBanner,
+  isInMemberPreviewWindow,
+} from '@/components/sections/events/MemberPreviewBanner';
 
 export const revalidate = 3600;
 
@@ -74,6 +78,13 @@ export default async function GenericEventPage({ params }: { params: Params }) {
     .filter((e) => e.slug !== ev.slug)
     .slice(0, 3);
 
+  // Tier 3.3: member-preview window. When `memberPreviewUntil` is set
+  // and in the future, the public mailto CTA is hidden — authenticated
+  // members can still RSVP via the "Members register inside" flow.
+  const memberPreviewUntil =
+    (doc as { memberPreviewUntil?: string | null }).memberPreviewUntil ?? null;
+  const inPreviewWindow = isInMemberPreviewWindow(memberPreviewUntil);
+
   return (
     <main>
       <CaptureAttribution slug={ev.slug} />
@@ -103,11 +114,18 @@ export default async function GenericEventPage({ params }: { params: Params }) {
           </div>
 
           <div className="ed-cta">
-            {/* Client wrapper attaches the event_rsvp_intent analytics event */}
-            <RsvpMailtoLink slug={ev.slug} title={ev.title} />
+            {/* Mailto CTA hides during the member-preview window — members can
+                still RSVP via "Members register inside" below. */}
+            {!inPreviewWindow && (
+              <RsvpMailtoLink slug={ev.slug} title={ev.title} />
+            )}
             <AddToCalendarLink slug={ev.slug} title={ev.title} />
             <Link className="btn btn-secondary" href="/sign-up?redirect_url=%2Fmy-events">Members register inside</Link>
           </div>
+
+          {inPreviewWindow && memberPreviewUntil && (
+            <MemberPreviewBanner until={memberPreviewUntil} />
+          )}
 
           <PartnerLockup
             host={(doc as { host?: unknown }).host as Parameters<typeof PartnerLockup>[0]['host']}
