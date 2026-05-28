@@ -684,6 +684,10 @@ export interface CaseStudy {
   slug: string;
   client: string;
   /**
+   * Optional. Link to the partner this case study is built with. Surfaces the case study on /with/{partner-slug} and /partners/{partner-slug}. When set, /with/{slug} prefers this over the legacy client-name string match.
+   */
+  partner?: (number | null) | Partner;
+  /**
    * One-line result summary, e.g. "3× organic traffic in 6 months".
    */
   outcome?: string | null;
@@ -856,6 +860,22 @@ export interface Event {
    * Optional. When set, signed-in members can RSVP normally but the public mailto CTA is hidden and replaced with a "Members get early access" banner until this date passes. Drives paid-tier urgency for high-demand events. Leave blank for open-RSVP-from-launch.
    */
   memberPreviewUntil?: string | null;
+  /**
+   * Post-event stats shown on /events under "From the archive". Two-three short value/label pairs work best (e.g. "84" / "Attendees", "92%" / "Would recommend").
+   */
+  keyMetrics?:
+    | {
+        /**
+         * Short — fits the big-number style (e.g. "84", "92%", "$25K").
+         */
+        value: string;
+        /**
+         * Short caption (e.g. "Attendees", "Would recommend").
+         */
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1418,6 +1438,7 @@ export interface CaseStudiesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   client?: T;
+  partner?: T;
   outcome?: T;
   body?: T;
   image?: T;
@@ -1580,6 +1601,13 @@ export interface EventsSelect<T extends boolean = true> {
   host?: T;
   partners?: T;
   memberPreviewUntil?: T;
+  keyMetrics?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

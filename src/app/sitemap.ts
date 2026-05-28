@@ -39,6 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/events', null, 'daily', 0.9),
     entry('/partners', null, 'weekly', 0.8),
     entry('/case-studies', null, 'weekly', 0.7),
+    entry('/insights', null, 'weekly', 0.7),
     entry('/pricing', null, 'monthly', 0.8),
     entry('/signup/foundations', null, 'monthly', 0.8),
     entry('/signup/growth', null, 'monthly', 0.8),
@@ -50,9 +51,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .map((e) => entry(`/events/${e.slug}`, e.updatedAt ?? e.date, 'weekly', 0.7));
 
   const partnerDocs = (partners?.docs ?? []) as Doc[];
-  const partnerEntries: MetadataRoute.Sitemap = partnerDocs
-    .filter((p): p is Doc & { slug: string } => Boolean(p.slug))
-    .map((p) => entry(`/partners/${p.slug}`, p.updatedAt, 'monthly', 0.6));
+  const partnerSlugDocs = partnerDocs.filter(
+    (p): p is Doc & { slug: string } => Boolean(p.slug),
+  );
+  // Each partner gets two indexed URLs: the directory profile
+  // (/partners/{slug}) and the co-branded campaign micro-site
+  // (/with/{slug}). Both pre-render at build time and are linked from
+  // each other, so it's worth exposing both to crawlers — the micro-
+  // site is what partners hand to their audience and ranks for the
+  // "Growth Hub × {Partner}" query.
+  const partnerEntries: MetadataRoute.Sitemap = partnerSlugDocs.flatMap((p) => [
+    entry(`/partners/${p.slug}`, p.updatedAt, 'monthly', 0.6),
+    entry(`/with/${p.slug}`, p.updatedAt, 'monthly', 0.6),
+  ]);
 
   const caseStudyDocs = (caseStudies?.docs ?? []) as Doc[];
   const caseStudyEntries: MetadataRoute.Sitemap = caseStudyDocs

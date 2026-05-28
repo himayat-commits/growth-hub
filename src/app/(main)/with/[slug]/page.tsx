@@ -22,7 +22,7 @@ import {
   getPartnerBySlug,
   getPartnerSlugs,
   getEventsForPartner,
-  getCaseStudiesByClient,
+  getCaseStudiesForPartner,
 } from '@/lib/cms';
 import { toPublicEvents } from '@/lib/events-data';
 import type { Event as PayloadEvent } from '@/payload-types';
@@ -80,7 +80,7 @@ export default async function PartnerMicrositePage({ params }: { params: Params 
 
   const [eventDocs, caseStudyDocs] = await Promise.all([
     getEventsForPartner(partner.id, 6),
-    getCaseStudiesByClient(partnerName),
+    getCaseStudiesForPartner(partner.id, partnerName),
   ]);
 
   const events = toPublicEvents(eventDocs as PayloadEvent[]);

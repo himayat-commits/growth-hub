@@ -30,6 +30,16 @@ export const CaseStudies: CollectionConfig = {
       required: true,
     },
     {
+      name: 'partner',
+      type: 'relationship',
+      relationTo: 'partners',
+      hasMany: false,
+      admin: {
+        description:
+          'Optional. Link to the partner this case study is built with. Surfaces the case study on /with/{partner-slug} and /partners/{partner-slug}. When set, /with/{slug} prefers this over the legacy client-name string match.',
+      },
+    },
+    {
       name: 'outcome',
       type: 'text',
       admin: {

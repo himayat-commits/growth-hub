@@ -20,7 +20,7 @@
  * fallback instead of crashing the build. Once migrations apply on the
  * target DB, the catch never fires.
  */
-import { getPayload } from 'payload';
+import { getPayload, type Where } from 'payload';
 import config from '@payload-config';
 import { unstable_cache } from 'next/cache';
 
@@ -150,10 +150,43 @@ export const getCaseStudies = unstable_cache(
   { tags: ['case-studies'], revalidate: 3600 }
 );
 
-/** Case studies where `client` matches the given partner name — used by the
- *  partner micro-site at /with/[partner-slug] to surface joint case studies.
- *  Match is case-sensitive to mirror Payload's `equals` operator; pass the
- *  exact partner.name as authored. */
+/** Case studies linked to a partner. Prefers the `partner` FK (added in
+ *  20260527 polish migration) and falls back to a `client` name string
+ *  match for case studies authored before the FK existed. Caller passes
+ *  both so the helper can do a single OR query — used by the partner
+ *  micro-site at /with/[partner-slug]. */
+export const getCaseStudiesForPartner = unstable_cache(
+  async (partnerId: string | number, partnerName: string) => {
+    try {
+      if (!partnerId && !partnerName) return [];
+      const payload = await getPayloadClient();
+      const conditions: Where[] = [];
+      if (partnerId) conditions.push({ partner: { equals: partnerId } });
+      if (partnerName) conditions.push({ client: { equals: partnerName } });
+      const { docs } = await payload.find({
+        collection: 'case-studies',
+        where: {
+          and: [
+            { or: conditions },
+            { status: { equals: 'published' } },
+          ],
+        },
+        limit: 12,
+        depth: 1,
+      });
+      return docs;
+    } catch (err) {
+      warn('getCaseStudiesForPartner', err);
+      return [];
+    }
+  },
+  ['case-studies-for-partner'],
+  { tags: ['case-studies'], revalidate: 3600 },
+);
+
+/** Legacy: case studies where `client` (text) matches a partner name.
+ *  Retained for any caller still on the pre-FK API; new callers should
+ *  use getCaseStudiesForPartner. */
 export const getCaseStudiesByClient = unstable_cache(
   async (clientName: string) => {
     try {
