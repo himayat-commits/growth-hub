@@ -94,7 +94,7 @@ export default async function PlanPage() {
           <div className="gh-plan-price" style={{ marginTop: 8 }}>
             {currentPlan.monthlyPrice === 0 ? (
               <>
-                A$0<small>/ forever</small>
+                A$0<small>/ 120 days</small>
               </>
             ) : (
               <>
@@ -121,7 +121,7 @@ export default async function PlanPage() {
               <>
                 <span>Activated on sign-up</span>
                 <span>·</span>
-                <span>Renews automatically</span>
+                <span>120-day free run</span>
                 <span>·</span>
                 <span>No card on file</span>
               </>
@@ -181,7 +181,7 @@ export default async function PlanPage() {
               <div className="gh-plan-price">
                 {plan.monthlyPrice === 0 ? (
                   <>
-                    A$0<small>/ forever</small>
+                    A$0<small>/ 120 days</small>
                   </>
                 ) : (
                   <>

@@ -17,6 +17,8 @@
     "payload:migrate": "payload migrate",
     "seed": "node --env-file=.env.local --import tsx/esm scripts/seed.ts",
     "partners:add-missing": "node --env-file=.env.local --import tsx/esm scripts/add-missing-partners.ts",
+    "partners:remove-birdeye": "node --env-file=.env.local --import tsx/esm scripts/remove-birdeye-partner.ts",
+    "partners:scrub-birdeye": "node --env-file=.env.local --import tsx/esm scripts/scrub-birdeye-globals.ts",
     "event:seed-cbrin": "node --env-file=.env.local --import tsx/esm scripts/seed-cbrin-event.ts",
     "event:draft-case-study": "node --env-file=.env.local --import tsx/esm scripts/draft-case-study-from-event.ts",
     "test:e2e": "playwright test",

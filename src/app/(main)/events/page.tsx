@@ -54,7 +54,7 @@ function PartnerGlyph({ shape }: { shape: string }) {
 }
 
 const EVENT_PARTNERS: Array<{ name: string; shape: string; role: string }> = [
-  { name: 'Birdeye', shape: 'circle', role: 'Technology' },
+  { name: 'Small Business Digital', shape: 'circle', role: 'Digital programs' },
   { name: 'CBR Innovation Network', shape: 'hex', role: 'Industry' },
   { name: 'ACT Government', shape: 'diamond', role: 'Funding' },
   { name: 'Canberra Business Chamber', shape: 'bars', role: 'Industry' },

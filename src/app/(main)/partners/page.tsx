@@ -40,21 +40,27 @@ export default async function PartnersPage() {
       shape: (p as { shape?: string | null }).shape ?? null,
     }));
 
-  const directoryPartners = partners.map((p) => ({
-    id: String(p.id),
-    slug: (p as { slug?: string | null }).slug ?? null,
-    name: p.name,
-    category: (p as { category?: string | null }).category ?? null,
-    shape: (p as { shape?: string | null }).shape ?? null,
-    description: p.description ?? null,
-    region: (p as { region?: string | null }).region ?? null,
-    since: (p as { since?: string | null }).since ?? null,
-    contribution: (p as { contribution?: string | null }).contribution ?? null,
-    howWeWork: (p as { howWeWork?: string | null }).howWeWork ?? null,
-    website: p.website ?? null,
-    contactName: p.contactName ?? null,
-    contactEmail: p.contactEmail ?? null,
-  }));
+  const directoryPartners = partners.map((p) => {
+    const logo = (p as { logo?: { url?: string | null; alt?: string | null } | number | null }).logo;
+    const logoObj = logo && typeof logo === 'object' ? logo : null;
+    return {
+      id: String(p.id),
+      slug: (p as { slug?: string | null }).slug ?? null,
+      name: p.name,
+      category: (p as { category?: string | null }).category ?? null,
+      shape: (p as { shape?: string | null }).shape ?? null,
+      description: p.description ?? null,
+      region: (p as { region?: string | null }).region ?? null,
+      since: (p as { since?: string | null }).since ?? null,
+      contribution: (p as { contribution?: string | null }).contribution ?? null,
+      howWeWork: (p as { howWeWork?: string | null }).howWeWork ?? null,
+      website: p.website ?? null,
+      contactName: p.contactName ?? null,
+      contactEmail: p.contactEmail ?? null,
+      logoUrl: logoObj?.url ?? null,
+      logoAlt: logoObj?.alt ?? null,
+    };
+  });
 
   return (
     <main>

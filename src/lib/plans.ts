@@ -24,9 +24,9 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
   free: {
     id: 'free',
     name: 'Free Member',
-    tagline: 'Get started — no card needed.',
+    tagline: 'Free for 120 days — no card needed.',
     description:
-      'Community access, the public resource library, and one complimentary 30-minute Growth Call.',
+      '120 days of community access, the public resource library, and one complimentary 30-minute Growth Call. Upgrade or apply for sponsorship before the window closes.',
     monthlyPrice: 0,
     features: [
       'Public resource library',
