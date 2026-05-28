@@ -300,7 +300,7 @@ export default function PricingSection({ heading, subheading }: PricingSectionPr
               </div>
               <div className="pkg-free-cta">
                 <div className="pkg-free-price">
-                  $0<span className="unit">/forever</span>
+                  $0<span className="unit">/ 120 days</span>
                 </div>
                 <Link
                   className="btn btn-primary"

@@ -1,5 +1,7 @@
+import Link from "next/link";
+
 const DEFAULT_PARTNERS = [
-  "Birdeye",
+  "Small Business Digital",
   "CBR Innovation Network",
   "What Works",
   "ACT Government",
@@ -33,7 +35,7 @@ export default function SupportedBy({ heading, textItems }: SupportedByProps) {
       <div className="wrap">
         <div className="supported-head">
           <h4>{heading ?? "Supported by"}</h4>
-          <span>Partners &amp; funders</span>
+          <Link href="/partners" className="supported-link">Partners &amp; funders</Link>
         </div>
       </div>
       <div className="marquee">

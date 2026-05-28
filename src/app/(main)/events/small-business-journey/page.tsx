@@ -29,7 +29,6 @@ const PROGRAM: ProgramSlot[] = [
     sessions: [
       { t: 'Know Your Business', p: 'The Chatbot Agency' },
       { t: 'Google Business Profile setup', p: 'The Chatbot Agency' },
-      { t: 'Google Analytics', p: 'The Chatbot Agency' },
       { t: 'Thinking of Starting a Small Business', p: 'Justin' },
       { t: 'Business Planning Support', p: 'Asuria' },
       { t: 'Help Desk — Getting Online', p: 'All', helpdesk: true },
@@ -75,7 +74,7 @@ const PROGRAM: ProgramSlot[] = [
     title: 'Build & automate',
     blurb: 'Putting the pieces together — your website, your brand, and AI to do the boring bits.',
     sessions: [
-      { t: 'Website Building & Branding', p: 'Caual Dot · The Chatbot Agency' },
+      { t: 'Website Building & Branding', p: 'Casual Dot · The Chatbot Agency' },
       { t: 'AI & Automation for Productivity', p: 'TBC' },
     ],
   },

@@ -27,7 +27,7 @@ const DEFAULT_PARTNERS: Array<{
   category: PartnerCategory;
   shape: PartnerShape;
 }> = [
-  { name: "Birdeye", category: "technology", shape: "circle" },
+  { name: "Small Business Digital", category: "technology", shape: "circle" },
   { name: "CBR Innovation Network", category: "industry-government", shape: "hex" },
   { name: "ACT Government", category: "industry-government", shape: "diamond" },
   { name: "Canberra Business Chamber", category: "industry-government", shape: "bars" },
@@ -101,6 +101,15 @@ export default function FeaturedWall({ heading, lead, partners }: FeaturedWallPr
               <span className="fw-type">{p.category ? CATEGORY_LABELS[p.category] : ""}</span>
             </div>
           ))}
+        </div>
+
+        <div className="fw-cta">
+          <a href="#directory" className="btn btn-secondary">
+            Browse Partner Directory
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+              <path d="M3 7h8M7 3l4 4-4 4" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>

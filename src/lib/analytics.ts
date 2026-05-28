@@ -30,6 +30,7 @@ export type AnalyticsEvent =
   | 'cta_click_signup'           // any "Sign Up Now" / "Join free" CTA
   | 'cta_click_upgrade'          // pricing tier "Start with X" buttons
   | 'free_tier_join'             // the dedicated Free banner CTA
+  | 'free_tier_countdown_view'   // dashboard 120-day countdown banner mounted
   | 'pricing_interval_toggle'    // monthly/annual toggle on /pricing
   | 'pricing_compare_open'       // expand the comparison table
   // Plan management (dashboard)

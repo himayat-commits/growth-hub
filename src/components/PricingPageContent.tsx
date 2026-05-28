@@ -219,7 +219,7 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
             </div>
             <div className="pkg-free-cta">
               <div className="pkg-free-price">
-                $0<span className="unit">/forever</span>
+                $0<span className="unit">/ 120 days</span>
               </div>
               <button
                 type="button"
@@ -234,7 +234,7 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
                 Join free — no card needed
                 <ArrowIcon />
               </button>
-              <span className="pkg-free-sub">Upgrade to a paid tier any time.</span>
+              <span className="pkg-free-sub">Free for 120 days · upgrade or apply for sponsorship before then.</span>
             </div>
           </div>
 

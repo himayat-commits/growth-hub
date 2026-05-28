@@ -38,15 +38,14 @@ interface PartnerSeed {
 const PARTNERS: PartnerSeed[] = [
   // Technology
   {
-    name: 'Birdeye',
+    name: 'Small Business Digital',
     category: 'technology',
     shape: 'circle',
-    region: 'ACT · Global',
-    since: '2024',
-    description: 'Reputation, reviews and AI-driven customer experience tools that power our Growth and Accelerate packages.',
-    contribution: 'Reviews automation · AI customer messaging · listing management',
-    howWeWork: 'Bundled into client subscriptions; we configure and support locally.',
-    website: 'https://birdeye.com',
+    region: 'Australia',
+    since: '2025',
+    description: 'Digital-readiness programs and tooling for small business — built for the people we serve.',
+    contribution: 'Digital programs · capability uplift · operator coaching',
+    howWeWork: 'Co-delivered cohorts and joint clinics for our members.',
     featured: true,
     order: 1,
   },

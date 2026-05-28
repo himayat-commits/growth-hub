@@ -65,3 +65,19 @@ export function getEffectivePlan(sub: Subscription | null | undefined): PlanTier
   }
   return 'free';
 }
+
+/** Length of the Free Member trial window, in days. Surfaced in dashboard
+ *  countdown copy and on the pricing page. Change here only — banner copy
+ *  reads from this constant. */
+export const FREE_TIER_DAYS = 120;
+
+/**
+ * How many days a Free Member has been on the platform, measured from
+ * `user_profiles.createdAt` (auto-created on first sign-in). Day 0 = today.
+ * Negative numbers are clamped to 0 so banner copy stays sane if a profile
+ * has a future-dated createdAt for any reason (test data, clock skew).
+ */
+export function getFreeMemberDayCount(profileCreatedAt: Date): number {
+  const ms = Date.now() - profileCreatedAt.getTime();
+  return Math.max(0, Math.floor(ms / 86_400_000));
+}

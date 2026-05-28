@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import { ensureUserRecord } from '@/lib/auth/ensure-user-record';
-import { getSubscription, getEffectivePlan } from '@/lib/subscription';
+import { getSubscription, getEffectivePlan, getFreeMemberDayCount } from '@/lib/subscription';
+import FreeTierCountdownBanner from '@/components/dashboard/FreeTierCountdownBanner';
 import { PLANS } from '@/lib/plans';
 import { getFeaturedResources, getUpcomingEvents, getStrategistBySlug } from '@/lib/cms';
 import { getUserRsvpSet } from '@/lib/db/rsvps';
@@ -265,6 +266,11 @@ export default async function DashboardPage() {
           Member since<b>{memberSince}</b>
         </div>
       </div>
+
+      {/* Free Member 120-day countdown */}
+      {tier === 'free' && (
+        <FreeTierCountdownBanner daysIn={getFreeMemberDayCount(profile.createdAt)} />
+      )}
 
       {/* Onboarding hero */}
       <div className="gh-onboard">

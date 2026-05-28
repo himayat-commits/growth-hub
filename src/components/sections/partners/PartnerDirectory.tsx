@@ -29,6 +29,9 @@ export interface DirectoryPartner {
   website?: string | null;
   contactName?: string | null;
   contactEmail?: string | null;
+  /** Optional uploaded partner logo. Falls back to PartnerMark glyph when missing. */
+  logoUrl?: string | null;
+  logoAlt?: string | null;
 }
 
 export interface PartnerDirectoryProps {
@@ -58,15 +61,15 @@ const SHAPE_NAMES = new Set<PartnerShape>([
 const DEFAULT_PARTNERS: ResolvedPartner[] = [
   // Technology
   {
-    name: "Birdeye",
+    name: "Small Business Digital",
     category: "technology",
     shape: "circle",
-    region: "ACT · Global",
-    since: "2024",
+    region: "Australia",
+    since: "2025",
     description:
-      "Reputation, reviews and AI-driven customer experience tools that power our Growth and Accelerate packages.",
-    contribution: "Reviews automation · AI customer messaging · listing management",
-    howWeWork: "Bundled into client subscriptions; we configure and support locally.",
+      "Digital-readiness programs and tooling for small business — built for the people we serve.",
+    contribution: "Digital programs · capability uplift · operator coaching",
+    howWeWork: "Co-delivered cohorts and joint clinics for our members.",
   },
   {
     name: "What Works",
@@ -306,7 +309,12 @@ export default function PartnerDirectory({
             <article className="p-card reveal" key={p.id ?? `${p.name}-${i}`}>
               <header className="p-card-top">
                 <span className="p-card-mark">
-                  <PartnerMark shape={p.shape} />
+                  {p.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.logoUrl} alt={p.logoAlt ?? `${p.name} logo`} className="p-card-logo" />
+                  ) : (
+                    <PartnerMark shape={p.shape} />
+                  )}
                 </span>
                 <div className="p-card-id">
                   <h3>{p.name}</h3>
