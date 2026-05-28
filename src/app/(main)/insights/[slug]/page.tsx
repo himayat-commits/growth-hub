@@ -12,6 +12,7 @@ import { notFound } from 'next/navigation';
 import { getPosts, getPostBySlug } from '@/lib/cms';
 import LexicalRichText from '@/components/LexicalRichText';
 import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
+import { ArticleJsonLd } from '@/components/seo/ArticleJsonLd';
 
 export const revalidate = 3600;
 
@@ -85,6 +86,14 @@ export default async function InsightDetailPage({ params }: { params: Params }) 
           { name: 'Insights', path: '/insights' },
           { name: title, path: `/insights/${slug}` },
         ]}
+      />
+      <ArticleJsonLd
+        headline={title}
+        slug={slug}
+        description={excerpt || undefined}
+        datePublished={publishedAt}
+        dateModified={(doc as { updatedAt?: string | null }).updatedAt ?? publishedAt}
+        imageUrl={cover?.url ?? null}
       />
 
       <section className="hero case-study-hero">

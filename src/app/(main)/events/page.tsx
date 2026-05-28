@@ -187,14 +187,32 @@ export default async function EventsHubPage() {
               A snapshot of what we&apos;ve already delivered. The full archive is available on request.
             </p>
             <div className="past-grid">
-              {PAST_PUBLIC_EVENTS.map((e) => (
-                <Link href={`/events/${e.slug}`} className="past-card" key={e.slug}>
-                  <span className={'ev-tag ' + e.tagClass}>{e.tag}</span>
-                  <h3>{e.title}</h3>
-                  <span className="past-date">{e.dateLong}</span>
-                  <p>{e.desc}</p>
-                </Link>
-              ))}
+              {PAST_PUBLIC_EVENTS.map((e, i) => {
+                // PAST_PUBLIC_EVENTS / pastDocs are zipped by index — same
+                // order from the same query — so we can pull keyMetrics
+                // off the raw Payload doc without an adapter change.
+                const metrics =
+                  ((pastDocs[i] as { keyMetrics?: Array<{ value?: string; label?: string }> | null })
+                    ?.keyMetrics ?? []).filter((m) => m?.value && m?.label);
+                return (
+                  <Link href={`/events/${e.slug}`} className="past-card" key={e.slug}>
+                    <span className={'ev-tag ' + e.tagClass}>{e.tag}</span>
+                    <h3>{e.title}</h3>
+                    <span className="past-date">{e.dateLong}</span>
+                    <p>{e.desc}</p>
+                    {metrics.length > 0 && (
+                      <div className="past-numbers">
+                        {metrics.map((m, j) => (
+                          <div key={j}>
+                            <span className="n">{m.value}</span>
+                            <span className="l">{m.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>

@@ -207,6 +207,29 @@ export const Events: CollectionConfig = {
           'Optional. When set, signed-in members can RSVP normally but the public mailto CTA is hidden and replaced with a "Members get early access" banner until this date passes. Drives paid-tier urgency for high-demand events. Leave blank for open-RSVP-from-launch.',
       },
     },
+    {
+      name: 'keyMetrics',
+      type: 'array',
+      labels: { singular: 'Key metric', plural: 'Key metrics' },
+      admin: {
+        description:
+          'Post-event stats shown on /events under "From the archive". Two-three short value/label pairs work best (e.g. "84" / "Attendees", "92%" / "Would recommend").',
+      },
+      fields: [
+        {
+          name: 'value',
+          type: 'text',
+          required: true,
+          admin: { description: 'Short — fits the big-number style (e.g. "84", "92%", "$25K").' },
+        },
+        {
+          name: 'label',
+          type: 'text',
+          required: true,
+          admin: { description: 'Short caption (e.g. "Attendees", "Would recommend").' },
+        },
+      ],
+    },
   ],
   hooks: {
     afterChange: [async () => { await revalidate('events'); }],
