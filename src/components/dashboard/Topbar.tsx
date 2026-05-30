@@ -48,10 +48,15 @@ export function Topbar({ user, initialUnreadCount = 0 }: TopbarProps) {
   const unreadCount = useUnreadCount(initialUnreadCount)
   return (
     <div className="gh-top">
-      <div className="gh-search">
+      <form className="gh-search" action="/search" method="get" role="search">
         <IcoSearch />
-        <input placeholder="Search services, resources, events…" />
-      </div>
+        <input
+          type="search"
+          name="q"
+          placeholder="Search services, resources, events…"
+          aria-label="Search"
+        />
+      </form>
       <div className="gh-top-spacer" />
       <div className="gh-top-actions">
         <button className="gh-icon-btn" aria-label="Help">

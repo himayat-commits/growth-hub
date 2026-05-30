@@ -1,11 +1,15 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   IcoHome, IcoPlanNav, IcoServicesNav, IcoResourcesNav,
   IcoEventsNav, IcoMsgNav, IcoBenefitsNav, IcoProfileNav,
 } from './Icons'
+
+const MARKETING_SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au'
 
 const NAV = [
   { id: 'dashboard', href: '/dashboard', label: 'Dashboard',        Icon: IcoHome },
@@ -32,21 +36,26 @@ export function Sidebar() {
 
   return (
     <aside className="gh-side">
-      <button className="gh-side-brand" onClick={() => router.push('/dashboard')}>
+      <a
+        className="gh-side-brand"
+        href={MARKETING_SITE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <div className="gh-side-brand-mark">
-          <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
-            <circle cx="38" cy="35" r="22" fill="rgb(243,240,231)" opacity="0.9"/>
-            <circle cx="62" cy="35" r="22" fill="rgb(243,240,231)" opacity="0.9"/>
-            <circle cx="40" cy="65" r="18" fill="rgb(243,240,231)" opacity="0.9"/>
-            <circle cx="60" cy="65" r="18" fill="rgb(243,240,231)" opacity="0.9"/>
-            <rect x="49" y="15" width="2" height="55" rx="1" fill="rgb(243,240,231)"/>
-          </svg>
+          <Image
+            src="/images/himayat-logo.png"
+            alt="Himayat logomark"
+            width={30}
+            height={30}
+            style={{ objectFit: 'contain' }}
+          />
         </div>
         <div>
           <div className="gh-side-brand-name">The Growth Hub</div>
           <div className="gh-side-brand-sub">By Himayat</div>
         </div>
-      </button>
+      </a>
 
       <nav className="gh-nav">
         {NAV.map(({ id, href, label, Icon }) => (

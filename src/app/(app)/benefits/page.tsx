@@ -5,6 +5,7 @@ import { withAuth } from '@workos-inc/authkit-nextjs';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ensureUserRecord } from '@/lib/auth/ensure-user-record';
 import { getReferralStats } from '@/lib/db/referrals';
+import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import {
   IcoCal,
   IcoBook,
@@ -14,6 +15,15 @@ import {
   IcoShield,
 } from '@/components/dashboard/Icons';
 import ReferralCopyButton from './ReferralCopyButton';
+
+// Small inline lock used on paid-only benefits. Standalone so we don't
+// bloat Icons.tsx for a single-use glyph.
+const LockGlyph = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="4" y="11" width="16" height="10" rx="2" />
+    <path d="M8 11V7a4 4 0 1 1 8 0v4" />
+  </svg>
+);
 
 export const metadata: Metadata = {
   title: 'Member benefits — Growth Hub',
@@ -29,7 +39,7 @@ export default async function BenefitsPage() {
   const { user } = await withAuth();
   if (!user) redirect('/sign-in?redirect_url=/benefits');
 
-  const [profile, referralStats] = await Promise.all([
+  const [profile, referralStats, sub] = await Promise.all([
     ensureUserRecord({
       id: user.id,
       firstName: user.firstName,
@@ -37,7 +47,10 @@ export default async function BenefitsPage() {
       email: user.email,
     }),
     getReferralStats(user.id),
+    getSubscription(),
   ]);
+  const tier = getEffectivePlan(sub);
+  const isPaid = tier !== 'free';
 
   const referCode = profile.referCode ?? `GROW-${user.id.slice(-6).toUpperCase()}-${new Date().getFullYear()}`;
   const totalCreditDollars = (referralStats.totalCreditCents / 100).toFixed(0);
@@ -54,6 +67,8 @@ export default async function BenefitsPage() {
     title: string;
     p: string;
     tag: string;
+    href?: string;
+    paidOnly?: boolean;
   }> = [
     {
       tone: 'lime',
@@ -61,20 +76,24 @@ export default async function BenefitsPage() {
       title: '1 free Growth Call',
       p: 'A complimentary 30-minute 1:1 with a Strategist. Use it whenever you\'re stuck.',
       tag: 'Available now',
+      href: '/services',
+      paidOnly: true,
     },
     {
       tone: '',
       Icon: IcoBook,
       title: 'Resource library',
       p: 'Guides, templates and short courses on running a small business. Updated weekly.',
-      tag: 'Browse →',
+      tag: 'Browse the library',
+      href: '/resources',
     },
     {
       tone: 'cream',
       Icon: IcoMegaphone,
       title: 'Weekly group webinars',
       p: 'A new session every Thursday at 12:30pm. Free for members, recordings included.',
-      tag: 'See events →',
+      tag: 'See what\'s on',
+      href: '/my-events',
     },
     {
       tone: 'plum',
@@ -89,6 +108,7 @@ export default async function BenefitsPage() {
       title: 'Refer & earn',
       p: 'Each friend who joins and books a Growth Call earns you both A$50 in service credit.',
       tag: `Your code: ${referCode}`,
+      href: '#refer',
     },
     {
       tone: '',
@@ -96,6 +116,8 @@ export default async function BenefitsPage() {
       title: 'Member-only pricing',
       p: '10-20% off every Growth Hub service, and partner offers from our trusted referrers.',
       tag: 'Applies at checkout',
+      href: '/plan',
+      paidOnly: true,
     },
   ];
 
@@ -115,6 +137,7 @@ export default async function BenefitsPage() {
       />
 
       <div
+        id="refer"
         className="gh-card gh-refer"
         style={{ flexDirection: 'row', alignItems: 'center', padding: 28 }}
       >
@@ -180,16 +203,43 @@ export default async function BenefitsPage() {
       </div>
 
       <div className="gh-grid-3">
-        {benefits.map((b) => (
-          <div key={b.title} className="gh-benefit">
-            <div className={`gh-benefit-ic ${b.tone}`}>
-              <b.Icon />
+        {benefits.map((b) => {
+          const locked = !!b.paidOnly && !isPaid;
+          const effectiveHref = locked ? '/plan' : b.href;
+          const tag = locked ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <LockGlyph />
+              Upgrade to unlock
+            </span>
+          ) : (
+            b.tag
+          );
+          const inner = (
+            <>
+              <div className={`gh-benefit-ic ${b.tone}`}>
+                <b.Icon />
+              </div>
+              <h3 className="gh-benefit-h">{b.title}</h3>
+              <p className="gh-benefit-p">{b.p}</p>
+              <div className="gh-benefit-tag">{tag}</div>
+            </>
+          );
+          const className = locked ? 'gh-benefit gh-benefit--locked' : 'gh-benefit';
+          return effectiveHref ? (
+            <Link
+              key={b.title}
+              href={effectiveHref}
+              className={className}
+              style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+            >
+              {inner}
+            </Link>
+          ) : (
+            <div key={b.title} className={className}>
+              {inner}
             </div>
-            <h3 className="gh-benefit-h">{b.title}</h3>
-            <p className="gh-benefit-p">{b.p}</p>
-            <div className="gh-benefit-tag">{b.tag}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </>
   );
