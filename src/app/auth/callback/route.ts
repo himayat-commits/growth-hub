@@ -59,6 +59,7 @@ export const GET = handleAuth({
           body: `Tell us about your business so ${strategistName} can match you to the right supports.`,
           href: '/profile',
         });
+
         const welcomeMessage = `Hi ${greet}, and welcome to The Growth Hub.\n\nI'm ${strategistName}, your Growth Strategist. You'll see me here whenever you need help — reply any time, I read everything myself.\n\nThree things worth doing this week:\n\n1. Finish your profile so I can tailor what I send you.\n2. Book your free 30-minute Growth Call when you're ready.\n3. Have a poke around the resource library.\n\nTalk soon,\n— ${strategistName}`;
 
         await sendTeamMessage(user.id, welcomeMessage, strategistName);

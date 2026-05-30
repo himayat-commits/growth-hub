@@ -117,6 +117,10 @@ export const userProfiles = pgTable('user_profiles', {
   // UI tolerates orphan slugs by falling back to a "Growth Hub Team" label.
   // Auto-assigned by ensure-user-record on first sign-in (round-robin).
   assignedStrategistId: text('assigned_strategist_id'),
+  // Profile photo. Populated by POST /api/profile/photo which uploads to
+  // Payload's Media collection and stores the resolved public URL here.
+  // Null until the user uploads a photo; UI falls back to initials.
+  photoUrl: text('photo_url'),
   profileCompletePct: integer('profile_complete_pct').default(0).notNull(),
   notifBooking: boolean('notif_booking').default(true).notNull(),
   notifLibrary: boolean('notif_library').default(true).notNull(),

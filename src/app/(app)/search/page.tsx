@@ -55,8 +55,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         }
       />
 
-      {!q && null}
-
       {q && totalHits === 0 && (
         <div className="gh-empty">
           <div className="gh-empty-h">No matches</div>

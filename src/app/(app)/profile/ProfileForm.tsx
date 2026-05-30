@@ -5,8 +5,11 @@
 // About your business, and Notifications & email. All edits PUT to
 // /api/profile in a single batch.
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { UserProfile } from '@/lib/db/schema';
+
+const PHOTO_MAX_BYTES = 4 * 1024 * 1024; // mirror /api/profile/photo
+const PHOTO_ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 interface Props {
   email: string | null;
@@ -116,6 +119,42 @@ export default function ProfileForm({
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [completePct, setCompletePct] = useState(profileCompletePct);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(initialProfile.photoUrl ?? null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const onPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // Reset the input so picking the same file again still fires onChange.
+    e.target.value = '';
+    if (!file) return;
+    if (!PHOTO_ALLOWED_MIME.has(file.type)) {
+      setSaveMsg('Use a JPEG, PNG or WebP image.');
+      return;
+    }
+    if (file.size > PHOTO_MAX_BYTES) {
+      setSaveMsg('Image too large (max 4 MB).');
+      return;
+    }
+    setUploading(true);
+    setSaveMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/profile/photo', { method: 'POST', body: fd });
+      const data = (await res.json()) as { photoUrl?: string; error?: string };
+      if (!res.ok || !data.photoUrl) {
+        throw new Error(data.error ?? 'Upload failed');
+      }
+      setPhotoUrl(data.photoUrl);
+      setSaveMsg('Photo updated ✓');
+      window.setTimeout(() => setSaveMsg(null), 2400);
+    } catch (err) {
+      setSaveMsg(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const toggleHelpArea = (value: string) => {
     setHelpAreas((prev) =>
@@ -182,7 +221,18 @@ export default function ProfileForm({
   return (
     <>
       <div className="gh-profile-hero">
-        <div className="gh-avatar-placeholder">{initials}</div>
+        <div className="gh-avatar-placeholder">
+          {photoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={photoUrl}
+              alt={fullName}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+            />
+          ) : (
+            initials
+          )}
+        </div>
         <div className="gh-profile-hero-body">
           <h2 className="gh-profile-hero-h">{fullName}</h2>
           <div className="gh-profile-hero-meta">
@@ -196,8 +246,21 @@ export default function ProfileForm({
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="gh-btn ghost" type="button" disabled>
-            Upload photo
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={onPhotoChange}
+            style={{ display: 'none' }}
+            aria-hidden="true"
+          />
+          <button
+            className="gh-btn ghost"
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? 'Uploading…' : photoUrl ? 'Change photo' : 'Upload photo'}
           </button>
           <button className="gh-btn" type="button" onClick={saveProfile} disabled={saving}>
             {saving ? 'Saving…' : 'Save changes'}
