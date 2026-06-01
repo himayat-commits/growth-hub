@@ -12,6 +12,7 @@ import { withAuth } from '@/lib/auth/with-auth'
 import { getSubscription, getEffectivePlan } from '@/lib/subscription'
 import { PLANS } from '@/lib/plans'
 import { getUnreadNotificationCount } from '@/lib/db/notifications'
+import { getProfile } from '@/lib/db/profile'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { Topbar } from '@/components/dashboard/Topbar'
 import type { TopbarUser } from '@/components/dashboard/Topbar'
@@ -34,9 +35,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect('/sign-in?redirect_url=/dashboard')
   }
 
-  const [sub, unreadCount] = await Promise.all([
+  const [sub, unreadCount, profile] = await Promise.all([
     getSubscription(),
     getUnreadNotificationCount(user.id).catch(() => 0),
+    getProfile(user.id).catch(() => null),
   ])
   const tier = getEffectivePlan(sub) // 'free' | 'foundations' | 'growth' | 'accelerate'
 
@@ -45,6 +47,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     name: fullName,
     initials: makeInitials(fullName, user.email),
     planLabel: PLANS[tier].name,
+    photoUrl: profile?.photoUrl ?? null,
   }
 
   return (

@@ -8,6 +8,7 @@ export interface TopbarUser {
   name: string
   initials: string
   planLabel: string
+  photoUrl?: string | null
 }
 
 interface TopbarProps {
@@ -78,7 +79,18 @@ export function Topbar({ user, initialUnreadCount = 0 }: TopbarProps) {
         className="gh-profile-chip"
         style={{ color: 'inherit', textDecoration: 'none' }}
       >
-        <div className="gh-avatar">{user.initials}</div>
+        <div className="gh-avatar">
+          {user.photoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.photoUrl}
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+            />
+          ) : (
+            user.initials
+          )}
+        </div>
         <div>
           <div className="gh-profile-name">{user.name}</div>
           <div className="gh-profile-role">{user.planLabel}</div>
