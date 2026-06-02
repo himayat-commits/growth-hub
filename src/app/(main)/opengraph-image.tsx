@@ -60,7 +60,7 @@ export default function SiteOgImage() {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: 22 }}>
           <span style={{ color: 'rgba(243,240,231,0.7)' }}>
-            AI-powered digital marketing · real, local Canberra support
+            Run + grow your local business · all in one platform
           </span>
           <span style={{ color: '#E3F29C', fontStyle: 'italic' }}>
             thegrowthhub.com.au

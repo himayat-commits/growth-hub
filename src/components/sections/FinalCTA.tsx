@@ -39,7 +39,7 @@ export default function FinalCTA({
             </h2>
             <p>
               {subheading ??
-                "Talk to someone who gets it. No sales pitch, no pressure. Just a real conversation about where your business is and what would actually help."}
+                "Talk to someone who gets it. No sales pitch, no pressure — just a straight conversation about where your business is and what would actually help."}
             </p>
             <div className="hero-ctas">
               <a

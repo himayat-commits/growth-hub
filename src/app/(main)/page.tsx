@@ -18,7 +18,7 @@ import NewsletterStrip from "@/components/NewsletterStrip";
 export const metadata: Metadata = {
   title: "Growth Hub by Himayat — Your business deserves to grow.",
   description:
-    "AI-powered digital marketing with real, local Canberra support. Packages from $299/mo. Social Traders Verified · NDIS Registered.",
+    "The all-in-one platform to run and grow your local business — work management, AI-powered marketing, and a community of local owners. From $299/mo. Social Traders Verified · NDIS Registered.",
 };
 
 export default async function HomePage() {

@@ -24,14 +24,14 @@ const DEFAULTS = {
   eyebrow: "A Social Traders Verified Enterprise",
   handnote: "Grow local. Grow together.",
   subheading:
-    "We make that happen. AI-powered digital marketing with real, local support, so you grow confidently — knowing every subscription fuels employment pathways in our community.",
+    "We make that happen — with one platform to run the day-to-day and grow what's next: work management, AI-powered marketing, and a community of local owners in your corner. And every subscription helps create local jobs.",
   ctaLabel: "View Packages",
   ctaHref: "#packages",
   secondaryCtaLabel: "Learn More",
   secondaryCtaHref: "#how",
   chips: [
-    { text: "30+ local businesses supported" },
-    { text: "Community included" },
+    { text: "Run + grow in one place" },
+    { text: "Backed by a local community" },
     { text: "Canberra-based support" },
   ],
 };
