@@ -43,6 +43,8 @@ export type AnalyticsEvent =
   | 'event_rsvp_intent'          // clicked RSVP CTA on /events/[slug]
   | 'event_add_to_calendar'      // clicked Add to Calendar (.ics download)
   | 'partner_card_click'         // clicked a partner-directory card
+  | 'partner_need_click'         // clicked a need-based discovery chip in /partners directory
+  | 'partner_recruit_click'      // clicked the inline "Could you be here?" recruitment card
   | 'case_study_open'            // viewed a /case-studies/[slug] page
   // Add-ons / referrals
   | 'referral_link_copy'         // copied referral link from /benefits
@@ -114,7 +116,9 @@ const EVENT_MAP: Partial<Record<AnalyticsEvent, PlatformMap>> = {
   contact_form_submit:  { ga4: 'generate_lead', meta: 'Contact', linkedinEnvKey: 'CONTACT' },
   event_rsvp_intent:    { ga4: 'generate_lead', meta: 'Lead', linkedinEnvKey: 'RSVP' },
   event_add_to_calendar:{ ga4: 'event_add_to_calendar', meta: 'Schedule' },
-  partner_card_click:   { ga4: 'partner_card_click' },
+  partner_card_click:    { ga4: 'partner_card_click' },
+  partner_need_click:    { ga4: 'partner_need_click' },
+  partner_recruit_click: { ga4: 'partner_recruit_click', meta: 'Lead' },
   case_study_open:      { ga4: 'case_study_open', meta: 'ViewContent' },
 
   // Referrals

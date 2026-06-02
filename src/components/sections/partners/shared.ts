@@ -1,4 +1,12 @@
 // Shared types + helpers for the /partners page sections.
+//
+// Region-label convention (Partner.region field):
+//   - Use "Canberra" for community, creative, technology, and accelerator partners
+//     where the place-name reads more naturally to a small-business audience.
+//   - Use "ACT" for government, research, and institutional partners where the
+//     jurisdictional label is the truer descriptor.
+//   - When a partner spans multiple cities, format as "ACT · <City>" (e.g. "ACT · Global").
+// Inconsistency here is purely a content decision — the directory accepts any string.
 
 /** Categories used in the directory filter chips. Six values matching the
  *  Partners Standalone mockup (May 2026). Legacy values from the previous

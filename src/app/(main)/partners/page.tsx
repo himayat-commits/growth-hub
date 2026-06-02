@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getPartners, getPartnersPage, getSiteSettings } from "@/lib/cms";
 import Hero from "@/components/sections/Hero";
 import FeaturedWall from "@/components/sections/partners/FeaturedWall";
+import NetworkStatsStrip from "@/components/sections/partners/NetworkStatsStrip";
 import PartnerDirectory from "@/components/sections/partners/PartnerDirectory";
 import PartnerBenefits from "@/components/sections/partners/PartnerBenefits";
 import PartnerProof from "@/components/sections/partners/PartnerProof";
@@ -45,6 +46,9 @@ export default async function PartnersPage() {
     slug: (p as { slug?: string | null }).slug ?? null,
     name: p.name,
     category: (p as { category?: string | null }).category ?? null,
+    secondaryCategories:
+      (p as { secondaryCategories?: Array<string | null> | null }).secondaryCategories ?? null,
+    isAnchor: Boolean((p as { isAnchor?: boolean | null }).isAnchor),
     shape: (p as { shape?: string | null }).shape ?? null,
     description: p.description ?? null,
     region: (p as { region?: string | null }).region ?? null,
@@ -72,6 +76,13 @@ export default async function PartnersPage() {
         ctaHref={page?.heroCtaHref ?? "#become"}
         secondaryCtaLabel={page?.heroSecondaryCtaLabel ?? "View Directory"}
         secondaryCtaHref={page?.heroSecondaryCtaHref ?? "#directory"}
+        tertiaryCtaLabel={(page as { heroTertiaryCtaLabel?: string | null })?.heroTertiaryCtaLabel ?? "Refer a partner"}
+        tertiaryCtaHref={
+          (page as { heroTertiaryCtaHref?: string | null })?.heroTertiaryCtaHref ??
+          `mailto:${siteSettings?.supportEmail ?? "hello@thegrowthhub.com.au"}?subject=Partner%20referral`
+        }
+        tertiaryCtaHint={(page as { heroTertiaryCtaHint?: string | null })?.heroTertiaryCtaHint ?? "— know someone we should meet?"}
+        tertiaryCtaAriaLabel="Refer a partner — opens an email"
         chips={
           page?.heroChips && page.heroChips.length > 0
             ? (page.heroChips as Array<{ text: string }>)
@@ -90,11 +101,26 @@ export default async function PartnersPage() {
         partners={featuredPartners.length > 0 ? featuredPartners : null}
       />
 
+      {/* By-the-numbers strip — credibility signal between wall and directory */}
+      <NetworkStatsStrip partners={directoryPartners} />
+
       {/* Partner Directory (client component — filterable) */}
       <PartnerDirectory
         heading={page?.directoryHeading ?? "Meet our partners."}
         lead={page?.directoryLead ?? null}
         partners={directoryPartners.length > 0 ? directoryPartners : null}
+        recruitmentCard={{
+          heading: (page as { recruitHeading?: string | null })?.recruitHeading ?? null,
+          body: (page as { recruitBody?: string | null })?.recruitBody ?? null,
+          needs: (page as { recruitNeeds?: Array<{ text: string }> | null })?.recruitNeeds?.map((n) => n.text) ?? null,
+          ctaLabel: (page as { recruitCtaLabel?: string | null })?.recruitCtaLabel ?? null,
+          ctaHref: (page as { recruitCtaHref?: string | null })?.recruitCtaHref ?? null,
+        }}
+        quotes={
+          page?.proofQuotes && page.proofQuotes.length > 0
+            ? (page.proofQuotes as Array<{ text: string; attribution: string }>)
+            : null
+        }
       />
 
       {/* Benefits (plum background) */}

@@ -53,19 +53,37 @@ function PartnerGlyph({ shape }: { shape: string }) {
   );
 }
 
+// Stallholders confirmed for the 9 July 2026 AI for Small Business expo at CBRIN.
 const EVENT_PARTNERS: Array<{ name: string; shape: string; role: string }> = [
-  { name: 'Birdeye', shape: 'circle', role: 'Technology' },
-  { name: 'CBR Innovation Network', shape: 'hex', role: 'Industry' },
-  { name: 'ACT Government', shape: 'diamond', role: 'Funding' },
-  { name: 'Canberra Business Chamber', shape: 'bars', role: 'Industry' },
-  { name: 'GRIFFIN Accelerator', shape: 'triangle', role: 'Programs' },
-  { name: 'Lighthouse Business', shape: 'arc', role: 'Advisory' },
-  { name: 'Muslim Community Co-op', shape: 'leaf', role: 'Community' },
+  { name: 'Himayat', shape: 'leaf', role: 'Co-host & community' },
+  { name: 'CBRIN', shape: 'hex', role: 'Venue & ecosystem' },
   { name: 'What Works', shape: 'cross', role: 'Tradie support' },
-  { name: 'RD Consulting', shape: 'bars', role: 'Marketing' },
-  { name: 'Normtech', shape: 'hex', role: 'IT & cyber' },
+  { name: 'Small Business Digital', shape: 'circle', role: 'Digital programs' },
+  { name: 'The Mill House Ventures', shape: 'arc', role: 'Social enterprise' },
   { name: 'Asuria', shape: 'circle', role: 'Business planning' },
+  { name: 'Canberra Business Chamber', shape: 'bars', role: 'Industry & advocacy' },
+  { name: 'Navitas Skilled Futures', shape: 'leaf', role: 'Skills & training' },
+  { name: 'Canberra Women in Business', shape: 'diamond', role: 'Women in business' },
   { name: 'Hands Across Canberra', shape: 'leaf', role: 'Community funding' },
+  { name: 'RKDN', shape: 'triangle', role: 'Advisory & consulting' },
+  { name: 'Canberra Business Advice & Support Service', shape: 'bars', role: 'Business advisory' },
+  { name: 'Bendigo Bank', shape: 'arc', role: 'Banking & finance' },
+  { name: 'Canberra Multicultural Community Forum', shape: 'leaf', role: 'Multicultural community' },
+  { name: 'Multicultural Hub Canberra', shape: 'arc', role: 'Multicultural community' },
+  { name: 'MARSS ACT', shape: 'leaf', role: 'Migrant & refugee settlement' },
+  { name: 'Australian Red Cross (ACT)', shape: 'cross', role: 'Community services' },
+  { name: 'MTC Australia', shape: 'circle', role: 'Employment & training' },
+  { name: 'Master Builders Association', shape: 'bars', role: 'Building industry' },
+  { name: 'ICN', shape: 'hex', role: 'Industry capability' },
+  { name: 'RD Consulting', shape: 'bars', role: 'Marketing & LinkedIn' },
+  { name: 'Allara Creative', shape: 'diamond', role: 'Creative & branding' },
+  { name: "Women's Centre for Health Matters", shape: 'circle', role: 'Health & wellbeing' },
+  { name: 'Catalysr', shape: 'triangle', role: 'Migrant entrepreneurs' },
+  { name: 'Many Rivers', shape: 'arc', role: 'Microenterprise' },
+  { name: 'Normtech', shape: 'hex', role: 'IT & cyber' },
+  { name: 'Her Zest', shape: 'arc', role: 'Women in business' },
+  { name: 'National Self Employment Association', shape: 'bars', role: 'Self-employment' },
+  { name: 'DEWR', shape: 'diamond', role: 'Government' },
 ];
 
 const TESTIMONIALS = [
@@ -123,7 +141,7 @@ export default async function EventsHubPage() {
             <Link className="featured-card" href={`/events/${featured.slug}`}>
               <div className="fe-copy">
                 <div>
-                  <span className="fe-badge"><span className="pulse" />Next up · annual summit</span>
+                  <span className="fe-badge"><span className="pulse" />Next up · free full-day expo</span>
                   <h2>{featured.title}</h2>
                   <span className="fe-script">Start. Build. Grow — together.</span>
                   <p className="fe-desc">{featured.desc}</p>
@@ -145,14 +163,14 @@ export default async function EventsHubPage() {
               <div className="fe-side">
                 <div className="fe-date-block">
                   <span className="month">{featured.monthShort}</span>
-                  <span className="day"><em>?</em></span>
+                  <span className="day">{featured.day === '?' ? <em>?</em> : featured.day}</span>
                   <span className="year">{featured.year}</span>
                 </div>
                 <div className="fe-side-foot">
-                  <span className="label">Currently working on</span>
-                  <div className="row"><span>Name &amp; branding</span><span className="v">In review</span></div>
-                  <div className="row"><span>Stakeholder lineup</span><span className="v">20 invited</span></div>
-                  <div className="row"><span>Sponsorship</span><span className="v">Open</span></div>
+                  <span className="label">On the day</span>
+                  <div className="row"><span>Format</span><span className="v">9am – 5pm</span></div>
+                  <div className="row"><span>Stallholders</span><span className="v">30+ confirmed</span></div>
+                  <div className="row"><span>Entry</span><span className="v">Free · all welcome</span></div>
                 </div>
               </div>
             </Link>
