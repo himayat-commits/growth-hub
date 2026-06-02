@@ -51,7 +51,7 @@ export default function BigQuote({ quote, attribution, badges }: BigQuoteProps) 
           <blockquote>
             <p>
               {quote ??
-                "Growth Hub didn't just set up our digital marketing. They introduced us to a community of other local business owners. We've never felt alone in this."}
+                "Growth Hub gave us more than marketing — the tools to run the day-to-day and a community of local owners who've had our back the whole way. We've never felt alone in this."}
             </p>
             <cite>— {attribution ?? "A Local Canberra Business Owner"}</cite>
           </blockquote>

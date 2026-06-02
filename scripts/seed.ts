@@ -317,14 +317,14 @@ async function seed() {
             heading: 'Your business deserves to grow.',
             handnote: 'Grow local. Grow together.',
             subheading:
-              'We make that happen. AI-powered digital marketing with real, local support, so you grow confidently — knowing every subscription fuels employment pathways in our community.',
+              "We make that happen — with one platform to run the day-to-day and grow what's next: work management, AI-powered marketing, and a community of local owners in your corner. And every subscription helps create local jobs.",
             ctaLabel: 'View Packages',
             ctaHref: '#packages',
             secondaryCtaLabel: 'Learn More',
             secondaryCtaHref: '#how',
             chips: [
-              { text: '30+ local businesses supported' },
-              { text: 'Community included' },
+              { text: 'Run + grow in one place' },
+              { text: 'Backed by a local community' },
               { text: 'Canberra-based support' },
             ],
           },
@@ -350,7 +350,7 @@ async function seed() {
             steps: [
               { title: 'Choose your tier', description: 'Self-service to fully managed. Pick the level that fits your business stage and budget.' },
               { title: 'We set you up', description: 'Onboarding videos, platform access, and community groups activated from day one.' },
-              { title: 'Grow with real support', description: "Weekly webinars, peer community, and live in-person events. You're never doing this alone." },
+              { title: 'Grow with momentum', description: 'Weekly webinars, peer groups, and in-person events keep you moving long after setup.' },
               { title: "Scale when you're ready", description: 'Upgrade tiers or add modules as your business grows. No lock-in on self-service.' },
             ],
             imageBadge: 'Live events + webinars',
@@ -389,7 +389,7 @@ async function seed() {
                   "Part training, part Q&A, part community hangout. Bring your questions, share your wins, and learn what's working for other local businesses in the network.",
                 features: [
                   { text: 'Platform walkthroughs and feature deep-dives' },
-                  { text: 'Practical digital marketing education' },
+                  { text: 'Practical marketing and business-tools training' },
                   { text: 'Live Q&A with the Himayat team' },
                   { text: "Recordings available if you can't make it live" },
                 ],
@@ -416,9 +416,9 @@ async function seed() {
                 badge: 'Subscribers Only',
                 locked: true,
                 tagLine: '48-Hour Response',
-                panelHeading: 'Real humans, real help',
+                panelHeading: 'A human on the other end',
                 panelDescription:
-                  'Stuck on something? Email us and a real human from the Himayat team will get back to you. No ticket queues, no offshore call centres, no chatbots pretending to help.',
+                  'Stuck on something? Email us and someone from the Himayat team gets back to you. No ticket queues, no offshore call centres, no chatbots pretending to help.',
                 features: [
                   { text: 'Platform access and login help' },
                   { text: 'Troubleshooting setup issues' },
@@ -432,7 +432,7 @@ async function seed() {
           {
             blockType: 'big-quote',
             quote:
-              "Growth Hub didn't just set up our digital marketing. They introduced us to a community of other local business owners. We've never felt alone in this.",
+              "Growth Hub gave us more than marketing — the tools to run the day-to-day and a community of local owners who've had our back the whole way. We've never felt alone in this.",
             attribution: 'A Local Canberra Business Owner',
             badges: [
               { label: 'Social Traders Verified', icon: 'verified' },
@@ -455,7 +455,7 @@ async function seed() {
             subheading: 'With people.',
             paragraphs: [
               { text: "We're a grassroots social enterprise. We started by helping people navigate complex systems that weren't built for them. Now, we bring that same unwavering support to local business owners." },
-              { text: "Big agencies overlook small, diverse businesses. We don't. We combine powerful AI tools with real, accessible community support, so you grow with a team that actually gets it." },
+              { text: "Big agencies overlook small, diverse businesses. We don't. We bring together everything you need to run and grow — work management, AI-powered marketing, and accessible community support — so you grow with a team that gets it." },
             ],
             pullQuote:
               "When you choose Growth Hub, you're not just growing your business. You're partnering with an ecosystem that turns barriers into bridges, creating real jobs in the neighbourhoods we share.",
@@ -478,7 +478,7 @@ async function seed() {
             blockType: 'cta-banner',
             heading: 'Not sure which package is right for you?',
             subheading:
-              'Talk to someone who gets it. No sales pitch, no pressure. Just a real conversation about where your business is and what would actually help.',
+              'Talk to someone who gets it. No sales pitch, no pressure — just a straight conversation about where your business is and what would actually help.',
             ctaLabel: 'Contact Us',
             ctaHref: 'mailto:hello@himayat.com.au?subject=Growth%20Hub%20Enquiry',
             secondaryCtaLabel: 'Sign Up Now',

@@ -100,7 +100,7 @@ const TABS = [
         </div>
         <ul className="comm-bullets">
           <li>Platform walkthroughs and feature deep-dives</li>
-          <li>Practical digital marketing education</li>
+          <li>Practical marketing and business-tools training</li>
           <li>Live Q&amp;A with the Himayat team</li>
           <li>Recordings available if you can&apos;t make it live</li>
         </ul>
@@ -149,8 +149,8 @@ const TABS = [
             </svg>
             48-Hour Response
           </div>
-          <h3>Real humans, real help</h3>
-          <p>Stuck on something? Email us and a real human from the Himayat team will get back to you. No ticket queues, no offshore call centres, no chatbots pretending to help.</p>
+          <h3>A human on the other end</h3>
+          <p>Stuck on something? Email us and someone from the Himayat team gets back to you. No ticket queues, no offshore call centres, no chatbots pretending to help.</p>
         </div>
         <ul className="comm-bullets">
           <li>Platform access and login help</li>
