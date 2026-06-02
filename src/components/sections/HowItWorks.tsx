@@ -3,7 +3,7 @@ import Image from "next/image";
 const DEFAULT_STEPS = [
   { title: "Choose your tier", description: "Self-service to fully managed. Pick the level that fits your business stage and budget." },
   { title: "We set you up", description: "Onboarding videos, platform access, and community groups activated from day one." },
-  { title: "Grow with real support", description: "Weekly webinars, peer community, and live in-person events. You're never doing this alone." },
+  { title: "Grow with momentum", description: "Weekly webinars, peer groups, and in-person events keep you moving long after setup." },
   { title: "Scale when you're ready", description: "Upgrade tiers or add modules as your business grows. No lock-in on self-service." },
 ];
 
@@ -60,7 +60,7 @@ export default function HowItWorks({ heading, steps, sectionImage, imageBadge }:
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                <span>Real community. Real people. Real events.</span>
+                <span>A community of local owners — in person and online.</span>
               </div>
             </div>
           </div>

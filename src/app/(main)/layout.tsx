@@ -35,13 +35,13 @@ const biroScript = localFont({
 export const metadata: Metadata = {
   title: "Growth Hub by Himayat — Your business deserves to grow.",
   description:
-    "AI-powered digital marketing with real, local support. Every subscription fuels employment pathways in the Canberra community.",
+    "Run and grow your local business from one platform — work management, AI-powered marketing, and community support. Every subscription helps fund local jobs in Canberra.",
   metadataBase: new URL(SITE_URL),
   alternates: { canonical: "/" },
   openGraph: {
     title: "Growth Hub by Himayat",
     description:
-      "AI-powered digital marketing with real, local Canberra support.",
+      "Run and grow your local business from one platform — work management, AI marketing, and a community that has your back.",
     url: SITE_URL,
     siteName: "Growth Hub by Himayat",
     locale: "en_AU",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Growth Hub by Himayat",
-    description: "AI-powered digital marketing with real, local Canberra support.",
+    description: "Run and grow your local business from one platform — work management, AI marketing, and a community that has your back.",
     images: ["/og-image.png"],
   },
 };
