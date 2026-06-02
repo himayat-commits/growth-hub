@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import PartnerMark from "./PartnerMark";
 import { track } from "@/lib/analytics";
 import {
@@ -20,6 +20,11 @@ export interface DirectoryPartner {
   /** New CMS field. Legacy `type` is bridged via legacyCategoryFallback. */
   category?: string | null;
   type?: string | null;
+  /** Optional additional categories. Partner appears in each section when
+   *  the directory is grouped, and matches each when filtered. */
+  secondaryCategories?: Array<string | null | undefined> | null;
+  /** Anchor partners render with elevated visual weight (2-col card). */
+  isAnchor?: boolean | null;
   shape?: string | null;
   description?: string | null;
   region?: string | null;
@@ -31,15 +36,46 @@ export interface DirectoryPartner {
   contactEmail?: string | null;
 }
 
+export interface RecruitmentCardConfig {
+  heading?: string | null;
+  body?: string | null;
+  needs?: string[] | null;
+  ctaLabel?: string | null;
+  ctaHref?: string | null;
+}
+
+export interface DirectoryQuote {
+  text: string;
+  attribution: string;
+}
+
 export interface PartnerDirectoryProps {
   heading?: string | null;
   lead?: string | null;
   partners?: DirectoryPartner[] | null;
+  /** Optional CMS-driven recruitment card; falls back to sensible defaults. */
+  recruitmentCard?: RecruitmentCardConfig | null;
+  /** Quotes interleaved between category sections to add social proof at the
+   *  moment of consideration. Capped at 2 to keep the directory scannable. */
+  quotes?: DirectoryQuote[] | null;
 }
 
-interface ResolvedPartner extends Omit<DirectoryPartner, 'category' | 'shape'> {
+/** Need-based discovery chips — maps plain-English needs to category filters.
+ *  Lets visitors browse the directory without speaking our internal taxonomy. */
+const NEEDS: Array<{ id: string; label: string; cat: PartnerCategory }> = [
+  { id: 'marketing', label: 'Marketing & brand', cat: 'creative-media' },
+  { id: 'funding', label: 'Funding & accelerator', cat: 'accelerator-capital' },
+  { id: 'tools', label: 'Tools & automation', cat: 'technology' },
+  { id: 'community', label: 'Community outreach', cat: 'community-delivery' },
+  { id: 'research', label: 'Research & evaluation', cat: 'research-education' },
+  { id: 'gov', label: 'Industry & government', cat: 'industry-government' },
+];
+
+interface ResolvedPartner extends Omit<DirectoryPartner, 'category' | 'shape' | 'secondaryCategories'> {
   category: PartnerCategory;
+  secondaryCategories: PartnerCategory[];
   shape: PartnerShape;
+  isAnchor: boolean;
 }
 
 const SHAPE_NAMES = new Set<PartnerShape>([
@@ -53,9 +89,12 @@ const SHAPE_NAMES = new Set<PartnerShape>([
   "hex",
 ]);
 
+type DefaultPartner = Omit<ResolvedPartner, 'secondaryCategories' | 'isAnchor'> &
+  Partial<Pick<ResolvedPartner, 'secondaryCategories' | 'isAnchor'>>;
+
 /** Default directory content — mirrors the standalone mockup. Used when no
  *  CMS rows exist so the /partners page renders meaningfully out of the box. */
-const DEFAULT_PARTNERS: ResolvedPartner[] = [
+const DEFAULT_PARTNERS_RAW: DefaultPartner[] = [
   // Technology
   {
     name: "Birdeye",
@@ -195,11 +234,14 @@ const DEFAULT_PARTNERS: ResolvedPartner[] = [
     contribution: "Coaching · investor access · alumni network",
     howWeWork: "Warm introductions, joint mentor pool.",
   },
+  // Note: this is the private advisory practice. Not to be confused with the
+  // "Lighthouse Business Innovation Centre" record (Industry & Government) that
+  // exists in the CMS — different organisation. Keep both names disambiguated.
   {
-    name: "Lighthouse Business",
+    name: "Lighthouse Business Advisory",
     category: "accelerator-capital",
     shape: "arc",
-    region: "ACT",
+    region: "Canberra",
     since: "2024",
     description: "Advisory practice for owner-operated firms. Strategy that fits a 7-person team.",
     contribution: "Strategy · finance · governance",
@@ -230,6 +272,20 @@ const DEFAULT_PARTNERS: ResolvedPartner[] = [
   },
 ];
 
+/** Anchor a few defaults so the "anchor tier" visual treatment renders in the
+ *  out-of-the-box demo state. Real anchors come through the CMS `isAnchor` flag. */
+const DEFAULT_ANCHOR_NAMES = new Set([
+  "ACT Government",
+  "ANU Centre for Social Impact",
+  "CBR Innovation Network",
+]);
+
+const DEFAULT_PARTNERS: ResolvedPartner[] = DEFAULT_PARTNERS_RAW.map((p) => ({
+  ...p,
+  secondaryCategories: p.secondaryCategories ?? [],
+  isAnchor: p.isAnchor ?? DEFAULT_ANCHOR_NAMES.has(p.name),
+}));
+
 function normalise(p: DirectoryPartner): ResolvedPartner | null {
   const category = legacyCategoryFallback(p.category ?? p.type ?? null);
   if (!category) return null;
@@ -237,17 +293,149 @@ function normalise(p: DirectoryPartner): ResolvedPartner | null {
     p.shape && SHAPE_NAMES.has(p.shape as PartnerShape)
       ? (p.shape as PartnerShape)
       : defaultShapeForCategory(category);
+  const secondaryCategories = (p.secondaryCategories ?? [])
+    .map((c) => legacyCategoryFallback(c ?? null))
+    .filter((c): c is PartnerCategory => c !== null && c !== category);
   return {
     ...p,
     category,
+    secondaryCategories,
     shape,
+    isAnchor: Boolean(p.isAnchor),
   };
+}
+
+function PartnerCard({ p }: { p: ResolvedPartner }) {
+  return (
+    <article className={`p-card reveal${p.isAnchor ? ' is-anchor' : ''}`}>
+      {p.isAnchor && <span className="p-card-anchor">Anchor partner</span>}
+      <span className="p-card-cat">{CATEGORY_LABELS[p.category]}</span>
+      <header className="p-card-top">
+        <span className="p-card-mark">
+          <PartnerMark shape={p.shape} />
+        </span>
+        <div className="p-card-id">
+          <h3>{p.name}</h3>
+          {(p.region || p.since) && (
+            <span className="p-card-meta">
+              {p.region}
+              {p.region && p.since && <span className="dot-sep"> · </span>}
+              {p.since && <>Since&nbsp;{p.since}</>}
+            </span>
+          )}
+        </div>
+      </header>
+
+      {p.description && <p className="p-card-desc">{p.description}</p>}
+
+      {p.contribution || p.howWeWork ? (
+        <dl className="p-card-dl">
+          {p.contribution && (
+            <>
+              <dt>What they bring</dt>
+              <dd>{p.contribution}</dd>
+            </>
+          )}
+          {p.howWeWork && (
+            <>
+              <dt>How we work together</dt>
+              <dd>{p.howWeWork}</dd>
+            </>
+          )}
+        </dl>
+      ) : (
+        <p className="p-card-status">Partnership profile in progress.</p>
+      )}
+
+      {p.slug ? (
+        <a
+          className="p-card-link"
+          href={`/partners/${p.slug}`}
+          onClick={() =>
+            track('partner_card_click', {
+              partner: p.slug,
+              category: p.category,
+              destination: 'profile',
+            })
+          }
+        >
+          Read partnership profile
+          <ArrowIcon />
+        </a>
+      ) : p.website ? (
+        <a
+          className="p-card-link"
+          href={p.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() =>
+            track('partner_card_click', {
+              partner: p.name,
+              category: p.category,
+              destination: 'website',
+            })
+          }
+        >
+          Visit website
+          <ArrowIcon />
+        </a>
+      ) : (
+        <a className="p-card-link" href="#contact">
+          Read partnership profile
+          <ArrowIcon />
+        </a>
+      )}
+    </article>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+      <path d="M3 7h8M7 3l4 4-4 4" />
+    </svg>
+  );
+}
+
+function RecruitmentCard({ config }: { config: RecruitmentCardConfig }) {
+  const heading = config.heading ?? 'Could you be here?';
+  const body =
+    config.body ??
+    'Open partnership slots, two-week onboarding, real referral flow. We co-design the relationship so it pays off for your team and ours.';
+  const needs = config.needs && config.needs.length > 0 ? config.needs : null;
+  const ctaLabel = config.ctaLabel ?? 'Become a partner';
+  const ctaHref = config.ctaHref ?? '#become';
+
+  return (
+    <aside className="dir-recruit reveal" aria-label="Become a partner">
+      <div className="dir-recruit-tag">Open partnership</div>
+      <h3 className="dir-recruit-h">{heading}</h3>
+      <p className="dir-recruit-body">{body}</p>
+      {needs && (
+        <ul className="dir-recruit-needs">
+          {needs.map((n) => (
+            <li key={n}>{n}</li>
+          ))}
+        </ul>
+      )}
+      <a
+        className="dir-recruit-link"
+        href={ctaHref}
+        onClick={() => track('partner_recruit_click', { source: 'directory_inline' })}
+      >
+        {ctaLabel}
+        <ArrowIcon />
+      </a>
+    </aside>
+  );
 }
 
 export default function PartnerDirectory({
   heading,
   lead,
   partners,
+  recruitmentCard,
+  quotes,
 }: PartnerDirectoryProps = {}) {
   const resolved: ResolvedPartner[] =
     partners && partners.length > 0
@@ -256,18 +444,38 @@ export default function PartnerDirectory({
 
   const [active, setActive] = useState<"all" | PartnerCategory>("all");
 
+  const matchesCategory = (p: ResolvedPartner, cat: PartnerCategory) =>
+    p.category === cat || p.secondaryCategories.includes(cat);
+
+  /** Anchors render first inside each category section. */
+  const anchorFirst = (a: ResolvedPartner, b: ResolvedPartner) =>
+    Number(b.isAnchor) - Number(a.isAnchor);
+
   const counts = useMemo(() => {
     const c: Partial<Record<PartnerCategory | "all", number>> = { all: resolved.length };
     resolved.forEach((p) => {
-      c[p.category] = (c[p.category] ?? 0) + 1;
+      for (const cat of [p.category, ...p.secondaryCategories]) {
+        c[cat] = (c[cat] ?? 0) + 1;
+      }
     });
     return c;
   }, [resolved]);
 
-  const visible = active === "all" ? resolved : resolved.filter((p) => p.category === active);
-
-  // Only show category chips that have at least one partner.
   const populatedCategories = CATEGORY_ORDER.filter((c) => (counts[c] ?? 0) > 0);
+  const visible = active === "all" ? resolved : resolved.filter((p) => matchesCategory(p, active));
+
+  // Only show need chips whose target category actually has partners.
+  const populatedNeeds = NEEDS.filter((n) => (counts[n.cat] ?? 0) > 0);
+
+  const handleNeedClick = (need: { id: string; cat: PartnerCategory }) => {
+    setActive(need.cat);
+    track('partner_need_click', { need: need.id, category: need.cat });
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        document.getElementById('directory')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  };
 
   return (
     <section className="directory" id="directory">
@@ -276,8 +484,33 @@ export default function PartnerDirectory({
         <h2 className="section-h2">{heading ?? "Browse the partner network."}</h2>
         <p className="section-lead">
           {lead ??
-            "Grouped by what they actually do for our members. Filter to the category you need or scan the whole list — every partner is named, accountable, and reachable."}
+            "Grouped by what they actually do for our members. Pick a need below, filter by category, or scan the whole list — every partner is named, accountable, and reachable."}
         </p>
+
+        {populatedNeeds.length > 0 && (
+          <div className="dir-needs" role="group" aria-label="Browse partners by need">
+            <span className="dir-needs-label">I&rsquo;m looking for&hellip;</span>
+            <div className="dir-needs-chips">
+              {populatedNeeds.map((n) => (
+                <button
+                  type="button"
+                  key={n.id}
+                  className={`dir-need${active === n.cat ? ' is-on' : ''}`}
+                  onClick={() => handleNeedClick(n)}
+                >
+                  {n.label}
+                </button>
+              ))}
+              <a
+                className="dir-need dir-need-help"
+                href="#contact"
+                onClick={() => track('partner_need_click', { need: 'unsure', category: null })}
+              >
+                Not sure — talk to us
+              </a>
+            </div>
+          </div>
+        )}
 
         <div className="dir-filters" role="group" aria-label="Filter by partner category">
           <button
@@ -301,96 +534,47 @@ export default function PartnerDirectory({
           ))}
         </div>
 
-        <div className="dir-grid">
-          {visible.map((p, i) => (
-            <article className="p-card reveal" key={p.id ?? `${p.name}-${i}`}>
-              <header className="p-card-top">
-                <span className="p-card-mark">
-                  <PartnerMark shape={p.shape} />
-                </span>
-                <div className="p-card-id">
-                  <h3>{p.name}</h3>
-                  {(p.region || p.since) && (
-                    <span className="p-card-meta">
-                      {p.region}
-                      {p.region && p.since && <span className="dot-sep"> · </span>}
-                      {p.since && <>Since&nbsp;{p.since}</>}
-                    </span>
+        {active === 'all' ? (
+          <div className="dir-sections">
+            {populatedCategories.map((cat, sectionIdx) => {
+              const inCat = resolved.filter((p) => matchesCategory(p, cat)).slice().sort(anchorFirst);
+              // Interleave a single quote after every other section. Caps at 2 total.
+              const quoteIdx = Math.floor(sectionIdx / 2);
+              const showQuote = quotes && quotes.length > 0 && sectionIdx > 0 && sectionIdx % 2 === 1 && quoteIdx <= quotes.length;
+              const quote = showQuote ? quotes![quoteIdx - 1] ?? quotes![0] : null;
+              return (
+                <Fragment key={cat}>
+                  <section className="dir-section" aria-label={CATEGORY_LABELS[cat]}>
+                    <header className="dir-section-head">
+                      <h3 className="dir-section-h">{CATEGORY_LABELS[cat]}</h3>
+                      <span className="dir-section-count">{inCat.length} partner{inCat.length === 1 ? '' : 's'}</span>
+                    </header>
+                    <div className="dir-grid">
+                      {inCat.map((p, i) => (
+                        <PartnerCard key={p.id ?? `${p.name}-${i}`} p={p} />
+                      ))}
+                    </div>
+                  </section>
+                  {quote && (
+                    <blockquote className="dir-quote reveal">
+                      <span className="dir-quote-mark">&ldquo;</span>
+                      <p>{quote.text}</p>
+                      <cite>{quote.attribution}</cite>
+                    </blockquote>
                   )}
-                </div>
-                <span className="p-card-cat">{CATEGORY_LABELS[p.category]}</span>
-              </header>
+                </Fragment>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="dir-grid">
+            {visible.slice().sort(anchorFirst).map((p, i) => (
+              <PartnerCard key={p.id ?? `${p.name}-${i}`} p={p} />
+            ))}
+          </div>
+        )}
 
-              {p.description && <p className="p-card-desc">{p.description}</p>}
-
-              {(p.contribution || p.howWeWork) && (
-                <dl className="p-card-dl">
-                  {p.contribution && (
-                    <>
-                      <dt>What they bring</dt>
-                      <dd>{p.contribution}</dd>
-                    </>
-                  )}
-                  {p.howWeWork && (
-                    <>
-                      <dt>How we work together</dt>
-                      <dd>{p.howWeWork}</dd>
-                    </>
-                  )}
-                </dl>
-              )}
-
-              {/* Card link priority: own deep page > external website > #contact.
-                  Deep page wins because /partners/[slug] is fully under our
-                  control and gives the visitor more context than a website
-                  drop-off. */}
-              {p.slug ? (
-                <a
-                  className="p-card-link"
-                  href={`/partners/${p.slug}`}
-                  onClick={() =>
-                    track('partner_card_click', {
-                      partner: p.slug,
-                      category: p.category,
-                      destination: 'profile',
-                    })
-                  }
-                >
-                  Read partnership profile
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-                    <path d="M3 7h8M7 3l4 4-4 4" />
-                  </svg>
-                </a>
-              ) : p.website ? (
-                <a
-                  className="p-card-link"
-                  href={p.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() =>
-                    track('partner_card_click', {
-                      partner: p.name,
-                      category: p.category,
-                      destination: 'website',
-                    })
-                  }
-                >
-                  Visit website
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-                    <path d="M3 7h8M7 3l4 4-4 4" />
-                  </svg>
-                </a>
-              ) : (
-                <a className="p-card-link" href="#contact">
-                  Read partnership profile
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-                    <path d="M3 7h8M7 3l4 4-4 4" />
-                  </svg>
-                </a>
-              )}
-            </article>
-          ))}
-        </div>
+        <RecruitmentCard config={recruitmentCard ?? {}} />
       </div>
     </section>
   );

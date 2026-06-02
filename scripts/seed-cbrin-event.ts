@@ -28,17 +28,18 @@ const EVENT_DEFAULTS = {
   title: 'AI for Small Business — with CBR Innovation Network',
   slug: EVENT_SLUG,
   description:
-    "A working session for Canberra small businesses on putting AI to work this quarter — practical tools, hands-on demos, and a Q&A. Co-hosted with CBR Innovation Network at their Civic hub. Free; coffee on us.",
-  // 9 July 2026 (working title — confirm with CBRIn before publishing).
-  date: new Date('2026-07-09T12:30:00.000Z').toISOString(),
-  time: '12:30 – 2:00 pm',
+    "A free, all-day expo for Canberra small business — start, build, grow. Concurrent workshops, help-desks and 30+ stallholders across the day, covering AI and automation, digital marketing, cyber security, branding, websites and business planning. Co-hosted with CBR Innovation Network at their Civic hub. All welcome.",
+  // Thursday 9 July 2026 · full-day expo at CBRIN. Midday-UTC anchor keeps the
+  // displayed date on 9 July across AEST/AEDT regardless of server timezone.
+  date: new Date('2026-07-09T02:30:00.000Z').toISOString(),
+  time: '9:00 am – 5:00 pm',
   type: 'workshop' as const,
   location: 'CBR Innovation Network · Level 5, 1 Moore Street, Canberra ACT',
-  seats: 'Open registration · cap 40',
+  seats: 'Free · all welcome · drop-ins subject to room capacity',
   registerUrl: '',
   featured: true,
-  category: 'workshop' as const,
-  tag: 'Workshop · with CBRIN',
+  category: 'summit' as const,
+  tag: 'Full-day expo · with CBRIN',
   audience: 'Owners & operators of Canberra small businesses',
   cost: 'Free',
   dateDisplay: '',
