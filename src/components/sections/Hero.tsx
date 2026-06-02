@@ -45,6 +45,13 @@ export interface HeroProps {
   ctaHref?: string | null;
   secondaryCtaLabel?: string | null;
   secondaryCtaHref?: string | null;
+  /** Optional tertiary CTA. When omitted, the default "Join free" CTA renders.
+   *  Pass `tertiaryCta: null` to hide the tertiary slot entirely. */
+  tertiaryCtaLabel?: string | null;
+  tertiaryCtaHref?: string | null;
+  tertiaryCtaHint?: string | null;
+  tertiaryCtaAriaLabel?: string | null;
+  hideTertiaryCta?: boolean;
   chips?: Array<{ text: string; id?: string | null }> | null;
   /** "dark" renders the hero with a teal background and eggshell text */
   variant?: "light" | "dark";
@@ -61,6 +68,11 @@ export default function Hero({
   ctaHref,
   secondaryCtaLabel,
   secondaryCtaHref,
+  tertiaryCtaLabel,
+  tertiaryCtaHref,
+  tertiaryCtaHint,
+  tertiaryCtaAriaLabel,
+  hideTertiaryCta,
   chips,
   variant,
   className,
@@ -113,13 +125,16 @@ export default function Hero({
           <Link className="btn btn-secondary" href={secondaryCtaHref ?? DEFAULTS.secondaryCtaHref}>
             {secondaryCtaLabel ?? DEFAULTS.secondaryCtaLabel}
           </Link>
-          <Link
-            className="btn btn-tertiary"
-            href="/sign-up?redirect_url=%2Fdashboard"
-            aria-label="Join free — no card needed"
-          >
-            Join free <span className="hero-cta-hint">— no card needed</span>
-          </Link>
+          {!hideTertiaryCta && (
+            <Link
+              className="btn btn-tertiary"
+              href={tertiaryCtaHref ?? "/sign-up?redirect_url=%2Fdashboard"}
+              aria-label={tertiaryCtaAriaLabel ?? `${tertiaryCtaLabel ?? "Join free"} ${tertiaryCtaHint ?? "— no card needed"}`}
+            >
+              {tertiaryCtaLabel ?? "Join free"}{" "}
+              <span className="hero-cta-hint">{tertiaryCtaHint ?? "— no card needed"}</span>
+            </Link>
+          )}
         </div>
 
         <div className="hero-chips">

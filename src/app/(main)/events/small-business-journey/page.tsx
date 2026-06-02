@@ -75,8 +75,9 @@ const PROGRAM: ProgramSlot[] = [
     title: 'Build & automate',
     blurb: 'Putting the pieces together — your website, your brand, and AI to do the boring bits.',
     sessions: [
-      { t: 'Website Building & Branding', p: 'Caual Dot · The Chatbot Agency' },
+      { t: 'Website Building & Branding', p: 'Casual Dot · The Chatbot Agency' },
       { t: 'AI & Automation for Productivity', p: 'TBC' },
+      { t: 'Best Practices of Gen AI Prompting', p: 'Cyber Cure' },
     ],
   },
   { time: '5:00pm', end: 'late', type: 'pin', title: 'Networking drinks & informal connections', blurb: 'Continuing the conversation — likely at an external venue/pub. Details TBC.' },
@@ -96,24 +97,35 @@ const WAYS_TO_HELP = [
 const STAKEHOLDERS = [
   { name: 'The Growth Hub', role: 'Host & convenor', host: true },
   { name: 'Himayat', role: 'Co-host & community' },
-  { name: 'Asuria', role: 'Business planning' },
-  { name: 'Realise Business', role: 'Advisory' },
-  { name: 'Many Rivers', role: 'Microfinance' },
-  { name: 'Canberra Business Chamber', role: 'Industry' },
-  { name: 'Navitas', role: 'Skills & training' },
+  { name: 'CBRIN', role: 'Venue & ecosystem' },
+  { name: 'Asuria', role: 'Business planning & employment' },
+  { name: 'Many Rivers', role: 'Microenterprise & microfinance' },
+  { name: 'Canberra Business Chamber', role: 'Industry & advocacy' },
+  { name: 'Navitas Skilled Futures', role: 'Skills & training' },
   { name: 'Normtech', role: 'IT & cyber security' },
-  { name: 'What Works', role: 'Tradie support' },
+  { name: 'What Works', role: 'Tradie & workflow support' },
   { name: 'Her Zest', role: 'Women in business' },
+  { name: 'Canberra Women in Business', role: 'Women in business' },
   { name: 'National Self Employment Association', role: 'Self-employment' },
   { name: 'DEWR', role: 'Government' },
   { name: 'RD Consulting', role: 'Marketing & LinkedIn' },
   { name: 'Small Business Digital', role: 'Digital programs' },
   { name: 'ICN', role: 'Industry capability' },
-  { name: 'CWB', role: 'Community business' },
-  { name: 'MARSS', role: 'Migrant & refugee' },
-  { name: 'Red Cross', role: 'Community services' },
+  { name: 'MARSS ACT', role: 'Migrant & refugee settlement' },
+  { name: 'Australian Red Cross (ACT)', role: 'Community services' },
   { name: 'Hands Across Canberra', role: 'Community funding' },
-  { name: 'Mill House Ventures', role: 'Social enterprise' },
+  { name: 'The Mill House Ventures', role: 'Social enterprise & ventures' },
+  { name: 'RKDN', role: 'Advisory & consulting' },
+  { name: 'Canberra Business Advice & Support Service', role: 'Business advisory' },
+  { name: 'Bendigo Bank', role: 'Banking & finance' },
+  { name: 'Canberra Multicultural Community Forum', role: 'Multicultural community' },
+  { name: 'Multicultural Hub Canberra', role: 'Multicultural community' },
+  { name: 'MTC Australia', role: 'Employment & training' },
+  { name: 'Master Builders Association', role: 'Building industry' },
+  { name: 'Allara Creative', role: 'Creative & branding' },
+  { name: "Women's Centre for Health Matters", role: 'Health & wellbeing' },
+  { name: 'Catalysr', role: 'Migrant entrepreneur accelerator' },
+  { name: 'Justin Stanic', role: 'Small business mentor' },
 ];
 
 export default async function SmallBusinessJourneyPage() {
@@ -156,10 +168,10 @@ export default async function SmallBusinessJourneyPage() {
           </div>
 
           <div className="event-keyfacts">
-            <div className="event-keyfact"><span className="lbl">Date</span><span className="val"><em>To be confirmed</em> · 2026</span></div>
-            <div className="event-keyfact"><span className="lbl">Location</span><span className="val">Canberra ACT</span></div>
-            <div className="event-keyfact"><span className="lbl">Format</span><span className="val">Free · all-day · inclusive</span></div>
-            <div className="event-keyfact"><span className="lbl">Audience</span><span className="val">Small &amp; emerging business</span></div>
+            <div className="event-keyfact"><span className="lbl">Date</span><span className="val">Thursday 9 July 2026</span></div>
+            <div className="event-keyfact"><span className="lbl">Location</span><span className="val">CBRIN, Canberra</span></div>
+            <div className="event-keyfact"><span className="lbl">Hours</span><span className="val">9:00am – 5:00pm</span></div>
+            <div className="event-keyfact"><span className="lbl">Cost</span><span className="val">Free · all welcome</span></div>
           </div>
         </div>
       </section>

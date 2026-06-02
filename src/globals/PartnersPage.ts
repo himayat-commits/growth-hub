@@ -52,6 +52,26 @@ export const PartnersPage: GlobalConfig = {
           defaultValue: '#directory',
         },
         {
+          name: 'heroTertiaryCtaLabel',
+          type: 'text',
+          defaultValue: 'Refer a partner',
+          admin: { description: 'Optional third hero CTA. Defaults to "Refer a partner".' },
+        },
+        {
+          name: 'heroTertiaryCtaHref',
+          type: 'text',
+          admin: {
+            description:
+              'Where the tertiary CTA points. Defaults to mailto: the site support email with a Partner referral subject.',
+          },
+        },
+        {
+          name: 'heroTertiaryCtaHint',
+          type: 'text',
+          defaultValue: '— know someone we should meet?',
+          admin: { description: 'Small grey hint shown after the tertiary CTA label.' },
+        },
+        {
           name: 'heroChips',
           type: 'array',
           fields: [{ name: 'text', type: 'text', required: true }],
@@ -88,6 +108,43 @@ export const PartnersPage: GlobalConfig = {
         {
           name: 'directoryLead',
           type: 'text',
+        },
+      ],
+    },
+    // ── Inline Recruitment Card (rendered at the end of the directory) ────
+    {
+      type: 'collapsible',
+      label: 'Directory Recruitment Card',
+      fields: [
+        {
+          name: 'recruitHeading',
+          type: 'text',
+          defaultValue: 'Could you be here?',
+          admin: { description: 'Headline on the inline recruitment card.' },
+        },
+        {
+          name: 'recruitBody',
+          type: 'textarea',
+          admin: { description: 'Short paragraph beneath the headline.' },
+        },
+        {
+          name: 'recruitNeeds',
+          type: 'array',
+          admin: {
+            description:
+              'Specific partner roles we are recruiting for, rendered as pill tags (e.g. "Legal", "Accounting", "Trades training").',
+          },
+          fields: [{ name: 'text', type: 'text', required: true }],
+        },
+        {
+          name: 'recruitCtaLabel',
+          type: 'text',
+          defaultValue: 'Become a partner',
+        },
+        {
+          name: 'recruitCtaHref',
+          type: 'text',
+          defaultValue: '#become',
         },
       ],
     },

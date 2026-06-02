@@ -63,6 +63,32 @@ export const Partners: CollectionConfig = {
       admin: { description: 'Used for directory filter chips and grouping' },
     },
     {
+      name: 'secondaryCategories',
+      type: 'select',
+      hasMany: true,
+      options: [
+        { label: 'Technology', value: 'technology' },
+        { label: 'Creative & Media', value: 'creative-media' },
+        { label: 'Community & Delivery', value: 'community-delivery' },
+        { label: 'Industry & Government', value: 'industry-government' },
+        { label: 'Accelerator & Capital', value: 'accelerator-capital' },
+        { label: 'Research & Education', value: 'research-education' },
+      ],
+      admin: {
+        description:
+          'Optional. Additional categories this partner serves. Used for anchor partners (e.g. ACT Government, ANU CSI) that span more than one role. Partner appears in every matching section when the directory is grouped.',
+      },
+    },
+    {
+      name: 'isAnchor',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Mark this partner as an anchor — renders with elevated visual weight (2-col card, "Anchor partner" label) and sorts first within its category section. Reserve for foundational relationships.',
+      },
+    },
+    {
       name: 'shape',
       type: 'select',
       options: [
