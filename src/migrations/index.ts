@@ -12,6 +12,8 @@ import * as migration_20260523_add_strategists from './20260523_add_strategists'
 import * as migration_20260526_events_member_preview_until from './20260526_events_member_preview_until';
 import * as migration_20260527_polish_event_metrics_and_case_study_partner from './20260527_polish_event_metrics_and_case_study_partner';
 import * as migration_20260529_partners_directory_gtm from './20260529_partners_directory_gtm';
+import * as migration_20260603_fix_partners_secondary_categories_columns from './20260603_fix_partners_secondary_categories_columns';
+import * as migration_20260603_logo_strip_partners from './20260603_logo_strip_partners';
 
 export const migrations = [
   {
@@ -83,5 +85,15 @@ export const migrations = [
     up: migration_20260529_partners_directory_gtm.up,
     down: migration_20260529_partners_directory_gtm.down,
     name: '20260529_partners_directory_gtm',
+  },
+  {
+    up: migration_20260603_fix_partners_secondary_categories_columns.up,
+    down: migration_20260603_fix_partners_secondary_categories_columns.down,
+    name: '20260603_fix_partners_secondary_categories_columns',
+  },
+  {
+    up: migration_20260603_logo_strip_partners.up,
+    down: migration_20260603_logo_strip_partners.down,
+    name: '20260603_logo_strip_partners',
   },
 ];

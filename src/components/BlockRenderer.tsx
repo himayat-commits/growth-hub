@@ -93,6 +93,7 @@ export default function BlockRenderer({ blocks, siteSettings }: BlockRendererPro
               <SupportedBy
                 key={i}
                 heading={block.heading}
+                partners={block.partners}
                 textItems={block.textItems}
               />
             );

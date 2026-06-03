@@ -256,10 +256,17 @@ export interface Page {
           }
         | {
             heading?: string | null;
+            /**
+             * Partners to feature in the home marquee. Each shows its uploaded logo (from the Partner record) and links to its /partners/{slug} page. Partners without a logo fall back to a name + glyph. Leave empty to use the text-only items below.
+             */
+            partners?: (number | Partner)[] | null;
+            /**
+             * Legacy generic-logo relationship. Prefer the Partners field above, which links each logo to its partner page.
+             */
             logos?: (number | Logo)[] | null;
             autoScroll?: boolean | null;
             /**
-             * Text-only items (no image) — e.g. partner or funder names
+             * Text-only fallback items (no image) — used only when no Partners are selected above.
              */
             textItems?:
               | {
@@ -609,6 +616,94 @@ export interface Faq {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners".
+ */
+export interface Partner {
+  id: number;
+  name: string;
+  /**
+   * URL slug for /partners/{slug} deep page. Auto-generated from name on save if left blank.
+   */
+  slug?: string | null;
+  /**
+   * Used for directory filter chips and grouping
+   */
+  category:
+    | 'technology'
+    | 'creative-media'
+    | 'community-delivery'
+    | 'industry-government'
+    | 'accelerator-capital'
+    | 'research-education';
+  /**
+   * Optional. Additional categories this partner serves. Used for anchor partners (e.g. ACT Government, ANU CSI) that span more than one role. Partner appears in every matching section when the directory is grouped.
+   */
+  secondaryCategories?:
+    | (
+        | 'technology'
+        | 'creative-media'
+        | 'community-delivery'
+        | 'industry-government'
+        | 'accelerator-capital'
+        | 'research-education'
+      )[]
+    | null;
+  /**
+   * Mark this partner as an anchor — renders with elevated visual weight (2-col card, "Anchor partner" label) and sorts first within its category section. Reserve for foundational relationships.
+   */
+  isAnchor?: boolean | null;
+  /**
+   * Abstract mono glyph used as a placeholder partner mark. Leave blank to use a sensible default by category.
+   */
+  shape?: ('circle' | 'diamond' | 'triangle' | 'leaf' | 'hex' | 'arc' | 'bars' | 'cross') | null;
+  /**
+   * Short description shown in the directory card
+   */
+  description?: string | null;
+  /**
+   * e.g. "Canberra", "ACT", "Sydney", "ACT · Global"
+   */
+  region?: string | null;
+  /**
+   * Year the partnership began, e.g. "2023" or "2024"
+   */
+  since?: string | null;
+  /**
+   * What this partner brings — e.g. "Reviews automation · AI customer messaging · listing management". Rendered under "What they bring" on the directory card.
+   */
+  contribution?: string | null;
+  /**
+   * How we collaborate — e.g. "Bundled into client subscriptions; we configure and support locally." Rendered under "How we work together".
+   */
+  howWeWork?: string | null;
+  /**
+   * Full URL including https://
+   */
+  website?: string | null;
+  /**
+   * Primary contact person (optional)
+   */
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  /**
+   * Optional logo image (square or landscape, min 200px wide)
+   */
+  logo?: (number | null) | Media;
+  /**
+   * Show in the Featured Partners wall at the top of the /partners page
+   */
+  featured?: boolean | null;
+  /**
+   * Lower numbers appear first
+   */
+  order?: number | null;
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "logos".
  */
 export interface Logo {
@@ -711,77 +806,6 @@ export interface CaseStudy {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partners".
- */
-export interface Partner {
-  id: number;
-  name: string;
-  /**
-   * URL slug for /partners/{slug} deep page. Auto-generated from name on save if left blank.
-   */
-  slug?: string | null;
-  /**
-   * Used for directory filter chips and grouping
-   */
-  category:
-    | 'technology'
-    | 'creative-media'
-    | 'community-delivery'
-    | 'industry-government'
-    | 'accelerator-capital'
-    | 'research-education';
-  /**
-   * Abstract mono glyph used as a placeholder partner mark. Leave blank to use a sensible default by category.
-   */
-  shape?: ('circle' | 'diamond' | 'triangle' | 'leaf' | 'hex' | 'arc' | 'bars' | 'cross') | null;
-  /**
-   * Short description shown in the directory card
-   */
-  description?: string | null;
-  /**
-   * e.g. "Canberra", "ACT", "Sydney", "ACT · Global"
-   */
-  region?: string | null;
-  /**
-   * Year the partnership began, e.g. "2023" or "2024"
-   */
-  since?: string | null;
-  /**
-   * What this partner brings — e.g. "Reviews automation · AI customer messaging · listing management". Rendered under "What they bring" on the directory card.
-   */
-  contribution?: string | null;
-  /**
-   * How we collaborate — e.g. "Bundled into client subscriptions; we configure and support locally." Rendered under "How we work together".
-   */
-  howWeWork?: string | null;
-  /**
-   * Full URL including https://
-   */
-  website?: string | null;
-  /**
-   * Primary contact person (optional)
-   */
-  contactName?: string | null;
-  contactEmail?: string | null;
-  contactPhone?: string | null;
-  /**
-   * Optional logo image (square or landscape, min 200px wide)
-   */
-  logo?: (number | null) | Media;
-  /**
-   * Show in the Featured Partners wall at the top of the /partners page
-   */
-  featured?: boolean | null;
-  /**
-   * Lower numbers appear first
-   */
-  order?: number | null;
-  status: 'draft' | 'published';
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1218,6 +1242,7 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               heading?: T;
+              partners?: T;
               logos?: T;
               autoScroll?: T;
               textItems?:
@@ -1559,6 +1584,8 @@ export interface PartnersSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   category?: T;
+  secondaryCategories?: T;
+  isAnchor?: T;
   shape?: T;
   description?: T;
   region?: T;
@@ -1887,6 +1914,18 @@ export interface PartnersPage {
   heroCtaHref?: string | null;
   heroSecondaryCtaLabel?: string | null;
   heroSecondaryCtaHref?: string | null;
+  /**
+   * Optional third hero CTA. Defaults to "Refer a partner".
+   */
+  heroTertiaryCtaLabel?: string | null;
+  /**
+   * Where the tertiary CTA points. Defaults to mailto: the site support email with a Partner referral subject.
+   */
+  heroTertiaryCtaHref?: string | null;
+  /**
+   * Small grey hint shown after the tertiary CTA label.
+   */
+  heroTertiaryCtaHint?: string | null;
   heroChips?:
     | {
         text: string;
@@ -1900,6 +1939,25 @@ export interface PartnersPage {
   featuredWallLead?: string | null;
   directoryHeading?: string | null;
   directoryLead?: string | null;
+  /**
+   * Headline on the inline recruitment card.
+   */
+  recruitHeading?: string | null;
+  /**
+   * Short paragraph beneath the headline.
+   */
+  recruitBody?: string | null;
+  /**
+   * Specific partner roles we are recruiting for, rendered as pill tags (e.g. "Legal", "Accounting", "Trades training").
+   */
+  recruitNeeds?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  recruitCtaLabel?: string | null;
+  recruitCtaHref?: string | null;
   benefitsHeading?: string | null;
   benefitsLead?: string | null;
   /**
@@ -2121,6 +2179,9 @@ export interface PartnersPageSelect<T extends boolean = true> {
   heroCtaHref?: T;
   heroSecondaryCtaLabel?: T;
   heroSecondaryCtaHref?: T;
+  heroTertiaryCtaLabel?: T;
+  heroTertiaryCtaHref?: T;
+  heroTertiaryCtaHint?: T;
   heroChips?:
     | T
     | {
@@ -2131,6 +2192,16 @@ export interface PartnersPageSelect<T extends boolean = true> {
   featuredWallLead?: T;
   directoryHeading?: T;
   directoryLead?: T;
+  recruitHeading?: T;
+  recruitBody?: T;
+  recruitNeeds?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  recruitCtaLabel?: T;
+  recruitCtaHref?: T;
   benefitsHeading?: T;
   benefitsLead?: T;
   benefits?:
