@@ -38,6 +38,23 @@ img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
+/* ---- Accessibility: consistent keyboard focus ring ----
+   Several interactive elements reset `outline: none` on :focus; this restores
+   a visible indicator for keyboard users (only :focus-visible, so it never
+   shows on mouse click) across links, buttons, inputs and custom controls. */
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* On dark teal surfaces the ring needs to be light to stay visible. */
+.hero-dark :focus-visible,
+.final :focus-visible,
+.benefits :focus-visible,
+.gh-newsletter-strip :focus-visible {
+  outline-color: var(--lime);
+}
+
 .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
 .handscript { font-family: var(--font-script, 'Kalam', cursive); font-weight: 500; letter-spacing: 0.01em; }
 
@@ -105,11 +122,17 @@ section { padding: clamp(72px, 9vw, 140px) 0; position: relative; }
 .supported-head { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
 .supported-head h4 { font-style: italic; font-weight: 500; font-size: 24px; color: var(--plum); margin: 0; }
 .supported-head span { font-size: 13px; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+.supported-all { font-size: 13px; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; transition: color 0.15s ease; }
+.supported-all:hover { color: var(--teal); }
 .marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
 .marquee-track { display: flex; gap: 72px; width: max-content; animation: marquee 44s linear infinite; align-items: center; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.logo-item { display: inline-flex; align-items: center; gap: 10px; font-size: 20px; color: var(--teal); opacity: 0.7; white-space: nowrap; }
+.logo-item { display: inline-flex; align-items: center; gap: 10px; font-size: 20px; color: var(--teal); opacity: 0.7; white-space: nowrap; text-decoration: none; transition: opacity 0.15s ease; }
+a.logo-item:hover { opacity: 1; }
 .logo-item .glyph { width: 26px; height: 26px; border-radius: 6px; background: rgba(13, 63, 72, 0.08); display: inline-flex; align-items: center; justify-content: center; }
+.logo-item--img { opacity: 0.65; }
+.logo-item--img img { height: 34px; width: auto; max-width: 180px; object-fit: contain; display: block; }
+a.logo-item--img:hover { opacity: 1; }
 
 /* ---- How it works ---- */
 .how-layout { display: grid; grid-template-columns: 1fr 1.05fr; grid-template-rows: auto 1fr; column-gap: 72px; row-gap: 16px; margin-top: 8px; }
@@ -403,6 +426,44 @@ section { padding: clamp(72px, 9vw, 140px) 0; position: relative; }
 .cf2-success-icon { width: 56px; height: 56px; border-radius: 999px; background: var(--lime); display: flex; align-items: center; justify-content: center; }
 .cf2-success h3 { font-size: 28px; font-weight: 400; color: var(--teal); margin: 0; }
 .cf2-success p { font-size: 16px; color: var(--muted); margin: 0; max-width: 40ch; }
+
+/* ---- HubSpot embedded form → Growth Hub "letterhead" skin ----
+   HubSpot injects its own markup (.hs-form, .hs-input, .hs-button, …) into
+   the #hs-expo-form target outside our JSX, so these rules live in global CSS
+   and are scoped under .hs-embed to stay contained. Mirrors the .cf2-* fields
+   above. !important / width overrides are needed because the embed ships its
+   own inline-ish defaults (notably a 500px fieldset cap and per-input width). */
+.hs-embed .hs-form { font-family: var(--font-serif, 'Iowan Old Style', Georgia, serif); color: var(--teal); display: flex; flex-direction: column; gap: 24px; }
+.hs-embed fieldset { max-width: none !important; }
+.hs-embed fieldset .input { margin-right: 0 !important; }
+.hs-embed .hs-form-field > label,
+.hs-embed .hs-form-field > legend { display: block; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(13,63,72,0.55); font-weight: 600; margin-bottom: 8px; }
+.hs-embed .hs-form-field > label .hs-form-required { color: var(--plum); margin-left: 2px; }
+.hs-embed .hs-field-desc { font-size: 13px; font-style: italic; color: rgba(13,63,72,0.5); margin: 0 0 8px; text-transform: none; letter-spacing: 0; }
+.hs-embed .hs-input:not([type="checkbox"]):not([type="radio"]),
+.hs-embed textarea.hs-input,
+.hs-embed select.hs-input { width: 100% !important; font-size: 20px; font-family: inherit; color: var(--teal); background: transparent; border: none; border-bottom: 1.5px solid rgba(13,63,72,0.2); border-radius: 0; padding: 6px 0 10px; outline: none; box-shadow: none; transition: border-color 0.2s; }
+.hs-embed textarea.hs-input { resize: vertical; min-height: 100px; line-height: 1.5; padding-bottom: 14px; }
+.hs-embed .hs-input:focus { border-bottom-color: var(--plum); }
+.hs-embed .hs-input::placeholder { color: rgba(13,63,72,0.3); font-style: italic; }
+.hs-embed select.hs-input { -webkit-appearance: none; appearance: none; }
+/* checkbox / radio groups — the "I'm applying as" role selector */
+.hs-embed .inputs-list { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.hs-embed .hs-form-booleancheckbox-display,
+.hs-embed .hs-form-checkbox-display,
+.hs-embed .hs-form-radio-display { display: flex; align-items: flex-start; gap: 10px; font-size: 17px; color: var(--teal); text-transform: none; letter-spacing: 0; font-weight: 400; cursor: pointer; }
+.hs-embed .hs-form-booleancheckbox-display input,
+.hs-embed .hs-form-checkbox-display input,
+.hs-embed .hs-form-radio-display input { width: 18px; height: 18px; margin-top: 4px; accent-color: var(--teal); flex: none; }
+.hs-embed .hs-button,
+.hs-embed input[type="submit"].hs-button { display: inline-flex; align-items: center; gap: 10px; font-family: inherit; font-weight: 600; font-size: 15px; letter-spacing: 0.01em; background: var(--teal); color: var(--eggshell); border: none; border-radius: 99px; padding: 16px 26px; cursor: pointer; box-shadow: 0 8px 20px -10px rgba(13,63,72,0.5); transition: background 0.2s, transform 0.2s; }
+.hs-embed .hs-button:hover { background: var(--plum); transform: translateY(-1px); }
+.hs-embed .hs-error-msg,
+.hs-embed .hs-error-msgs label { color: #A8423E; font-size: 13px; font-weight: 400; font-style: normal; }
+.hs-embed .hs_error_rollup { margin-top: 8px; }
+.hs-embed .legal-consent-container { font-size: 13px; color: rgba(13,63,72,0.6); }
+.hs-embed .legal-consent-container .hs-form-booleancheckbox-display { font-size: 13px; color: rgba(13,63,72,0.7); }
+.hs-embed .submitted-message { font-size: 18px; color: var(--teal); text-align: center; padding: 24px 0; }
 .contact-strip { max-width: 880px; margin: 40px auto 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(13,63,72,0.1); border: 1px solid rgba(13,63,72,0.1); border-radius: 4px; overflow: hidden; }
 .cs-item { background: var(--eggshell); padding: 20px 22px; display: flex; flex-direction: column; gap: 4px; }
 .cs-lbl { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(13,63,72,0.5); font-weight: 600; }

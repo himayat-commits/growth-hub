@@ -23,6 +23,14 @@ const nextConfig: NextConfig = {
       { source: '/portal', destination: '/dashboard', permanent: true },
       { source: '/portal/:path*', destination: '/dashboard', permanent: true },
       { source: '/account', destination: '/profile', permanent: true },
+      // Summit consolidation → the canonical "Entrepreneurship for Everyone"
+      // landing page. The old working titles ("Small Business Journey",
+      // "AI for Small Business") and the bare /expo path all funnel here.
+      // NB: '/expo' matches exactly (no nested paths), so /expo/apply — the
+      // contributor application form — is intentionally left untouched.
+      { source: '/events/small-business-journey', destination: '/events/entrepreneurship-for-everyone', permanent: true },
+      { source: '/events/ai-for-small-business-9-july', destination: '/events/entrepreneurship-for-everyone', permanent: true },
+      { source: '/expo', destination: '/events/entrepreneurship-for-everyone', permanent: true },
     ];
   },
 };

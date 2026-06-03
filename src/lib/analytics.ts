@@ -42,9 +42,12 @@ export type AnalyticsEvent =
   | 'contact_form_submit'        // homepage Contact form submitted
   | 'event_rsvp_intent'          // clicked RSVP CTA on /events/[slug]
   | 'event_add_to_calendar'      // clicked Add to Calendar (.ics download)
+  | 'summit_register_intent'     // attendee clicked the Eventbrite "Register" CTA for the summit
+  | 'summit_apply_click'         // contributor clicked "Apply" (stallholder/speaker/sponsor) for the summit
   | 'partner_card_click'         // clicked a partner-directory card
   | 'partner_need_click'         // clicked a need-based discovery chip in /partners directory
   | 'partner_recruit_click'      // clicked the inline "Could you be here?" recruitment card
+  | 'partner_summit_cta_click'   // clicked a summit-recruitment CTA on /partners
   | 'case_study_open'            // viewed a /case-studies/[slug] page
   // Add-ons / referrals
   | 'referral_link_copy'         // copied referral link from /benefits
@@ -116,9 +119,12 @@ const EVENT_MAP: Partial<Record<AnalyticsEvent, PlatformMap>> = {
   contact_form_submit:  { ga4: 'generate_lead', meta: 'Contact', linkedinEnvKey: 'CONTACT' },
   event_rsvp_intent:    { ga4: 'generate_lead', meta: 'Lead', linkedinEnvKey: 'RSVP' },
   event_add_to_calendar:{ ga4: 'event_add_to_calendar', meta: 'Schedule' },
+  summit_register_intent:{ ga4: 'generate_lead', meta: 'Lead', linkedinEnvKey: 'SUMMIT_REGISTER' },
+  summit_apply_click:    { ga4: 'generate_lead', meta: 'Lead', linkedinEnvKey: 'SUMMIT_APPLY' },
   partner_card_click:    { ga4: 'partner_card_click' },
   partner_need_click:    { ga4: 'partner_need_click' },
   partner_recruit_click: { ga4: 'partner_recruit_click', meta: 'Lead' },
+  partner_summit_cta_click: { ga4: 'partner_summit_cta_click', meta: 'Lead' },
   case_study_open:      { ga4: 'case_study_open', meta: 'ViewContent' },
 
   // Referrals

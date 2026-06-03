@@ -7,13 +7,30 @@ import PartnerDirectory from "@/components/sections/partners/PartnerDirectory";
 import PartnerBenefits from "@/components/sections/partners/PartnerBenefits";
 import PartnerProof from "@/components/sections/partners/PartnerProof";
 import BecomePartnerCTA from "@/components/sections/partners/BecomePartnerCTA";
+import SummitRecruitBanner from "@/components/sections/partners/SummitRecruitBanner";
 import Contact from "@/components/sections/Contact";
 import NewsletterStrip from "@/components/NewsletterStrip";
 
+const PARTNERS_DESC =
+  "Meet the technology providers, community organisations, and funding bodies that power the Growth Hub ecosystem — and co-host Canberra's free Entrepreneurship for Everyone summit.";
+
 export const metadata: Metadata = {
   title: "Strategic Partners — Growth Hub by Himayat",
-  description:
-    "Meet the technology providers, community organisations, and funding bodies that power the Growth Hub ecosystem.",
+  description: PARTNERS_DESC,
+  alternates: { canonical: "/partners" },
+  openGraph: {
+    title: "Strategic Partners — Growth Hub by Himayat",
+    description: PARTNERS_DESC,
+    url: "/partners",
+    type: "website",
+    siteName: "Growth Hub by Himayat",
+    locale: "en_AU",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Strategic Partners — Growth Hub by Himayat",
+    description: PARTNERS_DESC,
+  },
 };
 
 // ISR: revalidated when the 'partners' or 'partners-page' CMS tags are purged.
@@ -93,6 +110,9 @@ export default async function PartnersPage() {
               ]
         }
       />
+
+      {/* Summit co-host recruitment — activates the contributor funnel */}
+      <SummitRecruitBanner />
 
       {/* Featured Partners Wall */}
       <FeaturedWall
