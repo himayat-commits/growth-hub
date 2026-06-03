@@ -49,7 +49,7 @@ export const SUMMIT: SummitInfo = {
   venue: 'CBR Innovation Network, Canberra',
   venueFull: 'CBR Innovation Network · Level 5, 1 Moore Street, Canberra ACT 2601',
   cost: 'Free · all welcome',
-  eventbriteUrl: '',
+  eventbriteUrl: 'https://www.eventbrite.com.au/e/entrepreneurship-for-everyone-tickets-1990920554974',
   applyPath: '/expo/apply',
 };
 
