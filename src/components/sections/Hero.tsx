@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import JourneyArt from "./JourneyArt";
 
 function Underline({ color = "#E3F29C" }: { color?: string }) {
   return (
@@ -147,18 +148,25 @@ export default function Hero({
       </div>
 
       <div className="hero-art" aria-hidden="true">
-        <Image
-          src="/images/himayat-logo.png"
-          alt=""
-          width={520}
-          height={520}
-          style={{
-            objectFit: "contain",
-            filter: "opacity(0.14)",
-            width: "100%",
-            height: "auto",
-          }}
-        />
+        {variant === "dark" ? (
+          // Dark hero (e.g. partners): faint logomark — the teal journey curve
+          // would be invisible on the teal background.
+          <Image
+            src="/images/himayat-logo.png"
+            alt=""
+            width={520}
+            height={520}
+            style={{
+              objectFit: "contain",
+              filter: "opacity(0.14)",
+              width: "100%",
+              height: "auto",
+            }}
+          />
+        ) : (
+          // Light hero (home): animated "business journey" growth curve.
+          <JourneyArt />
+        )}
       </div>
     </section>
   );
