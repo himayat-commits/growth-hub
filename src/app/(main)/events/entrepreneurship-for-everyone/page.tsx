@@ -1,12 +1,36 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Contact from '@/components/sections/Contact';
+import NewsletterStrip from '@/components/NewsletterStrip';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 import { getSiteSettings } from '@/lib/cms';
+import { SUMMIT } from '@/lib/summit';
+import CaptureAttribution from '../[slug]/CaptureAttribution';
+import SummitCtas, { SummitApplyLink } from './SummitCtas';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
+
+const OG_DESC =
+  'A free full-day summit for Canberra small business — talks, workshops and help-desks on 9 July 2026 at CBR Innovation Network. Tracks for diverse founders, tradies and community-service operators.';
 
 export const metadata: Metadata = {
-  title: 'The Small Business Journey — Growth Hub by Himayat',
-  description:
-    "A full-day community event for Canberra small business. Working title — we'd love your input on the name, the program, and who else should be at the table.",
+  title: `${SUMMIT.name} — a free small-business summit | Growth Hub by Himayat`,
+  description: OG_DESC,
+  alternates: { canonical: SUMMIT.path },
+  openGraph: {
+    title: `${SUMMIT.name} — 9 July 2026, Canberra`,
+    description: OG_DESC,
+    url: SUMMIT.path,
+    type: 'website',
+    siteName: 'Growth Hub by Himayat',
+    locale: 'en_AU',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SUMMIT.name} — 9 July 2026, Canberra`,
+    description: OG_DESC,
+  },
 };
 
 export const revalidate = 3600;
@@ -80,7 +104,7 @@ const PROGRAM: ProgramSlot[] = [
       { t: 'Best Practices of Gen AI Prompting', p: 'Cyber Cure' },
     ],
   },
-  { time: '5:00pm', end: 'late', type: 'pin', title: 'Networking drinks & informal connections', blurb: 'Continuing the conversation — likely at an external venue/pub. Details TBC.' },
+  { time: '5:00pm', end: 'late', type: 'pin', title: 'Networking drinks & informal connections', blurb: 'Continuing the conversation — likely at an external venue/pub. Details to follow.' },
 ];
 
 const WAYS_TO_HELP = [
@@ -91,7 +115,7 @@ const WAYS_TO_HELP = [
   { t: 'Promotion through stakeholder networks', d: "Share the event with your members, clients and database. We'll provide co-branded assets.", tag: 'Promotion' },
   { t: 'Help desk or advisory support', d: 'Staff a one-to-one help desk — getting online, business planning, or general advice.', tag: 'Advisor' },
   { t: 'Sponsorship', d: 'Underwrite catering, materials, lucky-door prizes, or after-hours drinks. Tiered options available.', tag: 'Sponsor' },
-  { t: "Collaborative opportunities", d: "Have an idea we haven't listed? Co-deliver something with us. Get in touch.", tag: 'Open' },
+  { t: 'Collaborative opportunities', d: "Have an idea we haven't listed? Co-deliver something with us. Get in touch.", tag: 'Open' },
 ];
 
 const STAKEHOLDERS = [
@@ -128,11 +152,52 @@ const STAKEHOLDERS = [
   { name: 'Justin Stanic', role: 'Small business mentor' },
 ];
 
-export default async function SmallBusinessJourneyPage() {
+const eventJsonLd: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: SUMMIT.name,
+  description: OG_DESC,
+  startDate: SUMMIT.startIso,
+  endDate: SUMMIT.endIso,
+  eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  organizer: { '@type': 'Organization', name: 'Growth Hub by Himayat', url: SITE_URL },
+  location: {
+    '@type': 'Place',
+    name: 'CBR Innovation Network',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Level 5, 1 Moore Street',
+      addressLocality: 'Canberra',
+      addressRegion: 'ACT',
+      postalCode: '2601',
+      addressCountry: 'AU',
+    },
+  },
+  offers: {
+    '@type': 'Offer',
+    url: `${SITE_URL}${SUMMIT.path}`,
+    price: '0',
+    priceCurrency: 'AUD',
+    availability: 'https://schema.org/InStock',
+  },
+  url: `${SITE_URL}${SUMMIT.path}`,
+};
+
+export default async function EntrepreneurshipForEveryonePage() {
   const siteSettings = await getSiteSettings();
 
   return (
     <main>
+      <CaptureAttribution slug={SUMMIT.slug} />
+      <JsonLd data={eventJsonLd} />
+      <BreadcrumbListJsonLd
+        crumbs={[
+          { name: 'Events', path: '/events' },
+          { name: SUMMIT.name, path: SUMMIT.path },
+        ]}
+      />
+
       {/* HERO */}
       <section className="hero event-hero" id="top">
         <div className="wrap">
@@ -145,33 +210,27 @@ export default async function SmallBusinessJourneyPage() {
           </Link>
           <div className="hero-eyebrow">
             <span className="dot" />
-            A community day for Canberra small business
+            A free community day for Canberra small business · with CBR Innovation Network
           </div>
           <h1 className="hero-h1">
-            The Small Business <span className="grow">Journey</span>
-            <span className="draft-tag">Working title</span>
+            Entrepreneurship for <span className="grow">Everyone</span>
           </h1>
           <div className="hero-handnote" style={{ marginTop: 24 }}>
-            <span className="txt handscript">Start. Build. Grow — together.</span>
+            <span className="txt handscript">{SUMMIT.tagline}</span>
           </div>
           <p className="hero-sub">
-            A one-day program of talks, workshops and help-desks for people starting,
-            running and growing small businesses in Canberra — with dedicated tracks
-            for diverse founders, tradies, and emerging community-service operators.
+            A free, full-day program of talks, workshops and help-desks for people starting,
+            running and growing small businesses in Canberra — with dedicated tracks for
+            diverse founders, tradies, and emerging community-service operators.
           </p>
-          <div className="hero-ctas">
-            <a className="btn btn-primary" href="#involved">
-              Get involved
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 7h8M7 3l4 4-4 4" /></svg>
-            </a>
-            <a className="btn btn-secondary" href="#program">See the draft program</a>
-          </div>
+
+          <SummitCtas surface="hero" />
 
           <div className="event-keyfacts">
-            <div className="event-keyfact"><span className="lbl">Date</span><span className="val">Thursday 9 July 2026</span></div>
-            <div className="event-keyfact"><span className="lbl">Location</span><span className="val">CBRIN, Canberra</span></div>
-            <div className="event-keyfact"><span className="lbl">Hours</span><span className="val">9:00am – 5:00pm</span></div>
-            <div className="event-keyfact"><span className="lbl">Cost</span><span className="val">Free · all welcome</span></div>
+            <div className="event-keyfact"><span className="lbl">Date</span><span className="val">{SUMMIT.dateLong}</span></div>
+            <div className="event-keyfact"><span className="lbl">Location</span><span className="val">{SUMMIT.venue}</span></div>
+            <div className="event-keyfact"><span className="lbl">Hours</span><span className="val">{SUMMIT.time}</span></div>
+            <div className="event-keyfact"><span className="lbl">Cost</span><span className="val">{SUMMIT.cost}</span></div>
           </div>
         </div>
       </section>
@@ -180,16 +239,17 @@ export default async function SmallBusinessJourneyPage() {
       <section className="schedule" id="program">
         <div className="wrap">
           <div className="schedule-head">
-            <span className="section-label">Draft program</span>
+            <span className="section-label">Program</span>
             <h2 className="section-h2">A full day of practical<br />help — from welcome<br />to last orders.</h2>
             <p className="naming-lead">
-              For discussion purposes only. The schedule will continue evolving as
-              stakeholders come onboard and we expand content around NDIS, aged care,
-              disability-led businesses and community service pathways.
+              The running order for the day. A handful of sessions are still locking in
+              presenters — everything else is confirmed. We&apos;re continuing to expand
+              content around NDIS, aged care, disability-led businesses and community-service
+              pathways.
             </p>
             <span className="draft-pill">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="7" cy="7" r="5" /><path d="M7 4v3l2 1.5" /></svg>
-              Subject to change · stakeholders welcome
+              Free entry · {SUMMIT.dateLong}
             </span>
           </div>
 
@@ -239,8 +299,9 @@ export default async function SmallBusinessJourneyPage() {
           <span className="section-label">Get involved</span>
           <h2 className="section-h2">Eight ways to be<br />part of the day.</h2>
           <p className="involved-lead">
-            We&apos;re actively seeking stakeholder involvement across the program. If any of
-            the following fits what your organisation does, we&apos;d love to hear from you.
+            We&apos;re bringing partners in across the whole program. If any of the following
+            fits what your organisation does, apply to take part — we read every application
+            and reply within a few business days.
           </p>
           <div className="involved-grid">
             {WAYS_TO_HELP.map((w, i) => (
@@ -251,6 +312,9 @@ export default async function SmallBusinessJourneyPage() {
                 <span className="inv-tag">{w.tag}</span>
               </div>
             ))}
+          </div>
+          <div className="hero-ctas" style={{ marginTop: 32 }}>
+            <SummitApplyLink surface="involved" label="Apply to take part" />
           </div>
         </div>
       </section>
@@ -279,49 +343,48 @@ export default async function SmallBusinessJourneyPage() {
           <div className="stakes-foot">
             <span>And not limited to the above.</span>
             <span className="dot" />
-            <span>Want to be added? <a href="#feedback" style={{ color: 'var(--plum)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Drop us a line.</a></span>
+            <span>Want to be added? <Link href={SUMMIT.applyPath} style={{ color: 'var(--plum)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Apply to take part.</Link></span>
           </div>
         </div>
       </section>
 
-      {/* FEEDBACK CTA */}
-      <section className="feedback-cta" id="feedback">
+      {/* REGISTER / GET NOTIFIED */}
+      <section className="feedback-cta" id="get-notified">
         <div className="wrap">
           <div className="feedback-card">
             <div>
               <span className="section-label handscript" style={{ color: 'var(--lime)', textTransform: 'none', fontSize: 22, letterSpacing: 0 }}>
-                We&apos;d love your input →
+                Save the date →
               </span>
-              <h2 className="section-h2" style={{ marginTop: 12 }}>Help shape the day.</h2>
+              <h2 className="section-h2" style={{ marginTop: 12 }}>Be there on 9 July.</h2>
               <p>
-                We&apos;re still building this — the name, the program, the stallholders, the
-                after-hours pub. Tell us what we&apos;re missing, what you&apos;d attend, or what
-                your organisation could bring.
+                Entry is free and everyone&apos;s welcome — founders, tradies, side-hustlers,
+                and anyone thinking about starting. Add the day to your calendar now, and
+                we&apos;ll send the registration link and final program as soon as they&apos;re
+                live.
               </p>
-              <span className="hand">— honest feedback only, no marketing speak.</span>
-              <div className="hero-ctas" style={{ marginTop: 24 }}>
-                <a className="btn btn-primary" href="mailto:hello@himayat.com.au?subject=Event%20feedback%20%E2%80%94%20Small%20Business%20Journey">
-                  Send feedback
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 7h8M7 3l4 4-4 4" /></svg>
-                </a>
-                <a className="btn btn-secondary" href="mailto:hello@himayat.com.au?subject=Stakeholder%20interest%20%E2%80%94%20Small%20Business%20Journey">
-                  Register interest
-                </a>
-              </div>
+              <span className="hand">— no spam, no drip sequence. One email when it matters.</span>
+              <SummitCtas surface="register-section" />
             </div>
             <div className="feedback-side">
-              <h4>What we&apos;re asking</h4>
+              <h4>On the day</h4>
               <ul>
-                <li>Which working name lands best — or what should we call it?</li>
-                <li>Are there sessions or topics missing from the draft program?</li>
-                <li>What role would your organisation like to play?</li>
-                <li>Who else should be at the table?</li>
-                <li>What would make this day genuinely accessible for your community?</li>
+                <li>{SUMMIT.dateLong}, {SUMMIT.time}</li>
+                <li>{SUMMIT.venueFull}</li>
+                <li>Free entry · all welcome</li>
+                <li>Talks, hands-on workshops &amp; one-to-one help desks</li>
+                <li>Quiet catch-up area &amp; accessibility support</li>
               </ul>
             </div>
           </div>
         </div>
       </section>
+
+      <NewsletterStrip
+        source={`event-${SUMMIT.slug}`}
+        heading="Get the registration link first."
+        sub="One email when attendee registration opens — plus the final program. No drip sequence."
+      />
 
       <Contact
         supportEmail={siteSettings?.supportEmail ?? null}

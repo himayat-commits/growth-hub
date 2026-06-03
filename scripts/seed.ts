@@ -863,19 +863,24 @@ async function seed() {
     // one event on both surfaces.
     const sampleEvents = [
       {
-        title: 'The Small Business Journey',
-        slug: 'small-business-journey',
+        // Canonical flagship summit. Slug matches scripts/seed-cbrin-event.ts
+        // (which additionally wires the CBRIN host relationship), so the two
+        // seeders upsert the same row rather than creating duplicates. The
+        // public landing page is the hand-built static route at
+        // /events/entrepreneurship-for-everyone (bespoke → skips [slug]).
+        title: 'Entrepreneurship for Everyone',
+        slug: 'entrepreneurship-for-everyone',
         description:
-          'A full-day program of talks, workshops and help-desks for people starting, running and growing small businesses in Canberra. With dedicated tracks for diverse founders, tradies and community-service operators.',
-        date: inDays(120).toISOString(),
-        dateDisplay: 'Date to be confirmed',
-        time: '9am – late',
+          'A free, full-day small-business summit for Canberra — talks, workshops and help-desks for people starting, running and growing small businesses. With dedicated tracks for diverse founders, tradies and community-service operators.',
+        date: new Date('2026-07-09T02:30:00.000Z').toISOString(),
+        dateDisplay: '',
+        time: '9:00 am – 5:00 pm',
         type: 'community' as const,
         category: 'summit' as const,
-        tag: 'Annual Summit',
+        tag: 'Free full-day summit',
         audience: 'Small & emerging business',
         cost: 'Free',
-        location: 'Canberra ACT',
+        location: 'CBR Innovation Network · Level 5, 1 Moore Street, Canberra ACT',
         featured: true,
         bespoke: true,
       },

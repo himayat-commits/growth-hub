@@ -37,6 +37,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     entry('/', null, 'weekly', 1),
     entry('/events', null, 'daily', 0.9),
+    entry('/events/entrepreneurship-for-everyone', null, 'weekly', 0.8),
+    entry('/expo/apply', null, 'monthly', 0.7),
     entry('/partners', null, 'weekly', 0.8),
     entry('/case-studies', null, 'weekly', 0.7),
     entry('/insights', null, 'weekly', 0.7),

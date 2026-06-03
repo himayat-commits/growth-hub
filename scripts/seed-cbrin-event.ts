@@ -6,7 +6,7 @@
  * Behaviour:
  *   1. Ensures a `partners` row exists for "CBR Innovation Network" — if the
  *      `partners:add-missing` script has already been run, this is a no-op.
- *   2. Upserts an `events` row keyed on slug `ai-for-small-business-9-july`
+ *   2. Upserts an `events` row keyed on slug `entrepreneurship-for-everyone`
  *      with the date, time, location, audience and host wired to CBRIn.
  *   3. Safe to re-run — re-running updates the event's editable fields
  *      (description, audience, cost) but never overwrites the slug.
@@ -15,21 +15,21 @@
  * CBRIn partner row already exists) and after the Drizzle/Payload
  * migration that adds the `host` + `partners` relationship columns to the
  * events table. The event will then appear at:
- *   /events/ai-for-small-business-9-july
+ *   /events/entrepreneurship-for-everyone   (hand-built static landing page)
  * and surface on /partners/cbr-innovation-network under "Upcoming with us".
  */
 import { getPayload } from 'payload';
 import config from '../src/payload.config';
 
-const EVENT_SLUG = 'ai-for-small-business-9-july';
+const EVENT_SLUG = 'entrepreneurship-for-everyone';
 const CBRIN_NAME = 'CBR Innovation Network';
 
 const EVENT_DEFAULTS = {
-  title: 'AI for Small Business — with CBR Innovation Network',
+  title: 'Entrepreneurship for Everyone — with CBR Innovation Network',
   slug: EVENT_SLUG,
   description:
-    "A free, all-day expo for Canberra small business — start, build, grow. Concurrent workshops, help-desks and 30+ stallholders across the day, covering AI and automation, digital marketing, cyber security, branding, websites and business planning. Co-hosted with CBR Innovation Network at their Civic hub. All welcome.",
-  // Thursday 9 July 2026 · full-day expo at CBRIN. Midday-UTC anchor keeps the
+    "A free, all-day small-business summit for Canberra — start, build, grow. Concurrent workshops, help-desks and 30+ stallholders across the day, covering AI and automation, digital marketing, cyber security, branding, websites and business planning. Co-hosted with CBR Innovation Network at their Civic hub. All welcome.",
+  // Thursday 9 July 2026 · full-day summit at CBRIN. Midday-UTC anchor keeps the
   // displayed date on 9 July across AEST/AEDT regardless of server timezone.
   date: new Date('2026-07-09T02:30:00.000Z').toISOString(),
   time: '9:00 am – 5:00 pm',
@@ -39,11 +39,15 @@ const EVENT_DEFAULTS = {
   registerUrl: '',
   featured: true,
   category: 'summit' as const,
-  tag: 'Full-day expo · with CBRIN',
+  tag: 'Free full-day summit · with CBRIN',
   audience: 'Owners & operators of Canberra small businesses',
   cost: 'Free',
   dateDisplay: '',
-  bespoke: false,
+  // Bespoke: the canonical landing page is a hand-built static route at
+  // /events/entrepreneurship-for-everyone, so this event must NOT also render
+  // through the generic [slug] route. (The dynamic route redirects bespoke
+  // events to /events/{slug}, where the static page wins.)
+  bespoke: true,
 };
 
 async function main() {

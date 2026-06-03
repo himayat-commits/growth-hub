@@ -5,6 +5,7 @@ import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SummitAnnouncementBar from "@/components/SummitAnnouncementBar";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import PostHogProvider from "@/components/PostHogProvider";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
@@ -68,6 +69,7 @@ export default function MainLayout({
           <PostHogProvider>
             <Pixels />
             <OrganizationJsonLd />
+            <SummitAnnouncementBar />
             <Navbar />
             {children}
             <Footer />

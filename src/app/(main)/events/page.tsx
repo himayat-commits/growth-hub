@@ -6,6 +6,23 @@ import Contact from '@/components/sections/Contact';
 import NewsletterStrip from '@/components/NewsletterStrip';
 import { getPublicEvents, getPastEvents, getSiteSettings } from '@/lib/cms';
 import type { Event as PayloadEvent } from '@/payload-types';
+import { SUMMIT } from '@/lib/summit';
+
+// Slugs that all resolve to the canonical "Entrepreneurship for Everyone"
+// summit (the working titles + the new slug). When the featured event is the
+// summit, the card renders from the SUMMIT constants so the hub stays correct
+// even before the CMS event is renamed/re-dated.
+const SUMMIT_SLUGS = new Set([
+  'small-business-journey',
+  'ai-for-small-business-9-july',
+  'entrepreneurship-for-everyone',
+]);
+// Fixed display parts for the summit date block (9 Jul 2026), anchored at
+// midday so the calendar day never shifts under server timezone.
+const SUMMIT_DATE = new Date(`${SUMMIT.dateIso}T12:00:00`);
+const SUMMIT_MONTH = SUMMIT_DATE.toLocaleString('en-AU', { month: 'short' });
+const SUMMIT_DAY = String(SUMMIT_DATE.getDate()).padStart(2, '0');
+const SUMMIT_YEAR = String(SUMMIT_DATE.getFullYear());
 
 export const metadata: Metadata = {
   title: 'Events — Growth Hub by Himayat',
@@ -53,7 +70,7 @@ function PartnerGlyph({ shape }: { shape: string }) {
   );
 }
 
-// Stallholders confirmed for the 9 July 2026 AI for Small Business expo at CBRIN.
+// Orgs involved in the 9 July 2026 "Entrepreneurship for Everyone" summit at CBRIN.
 const EVENT_PARTNERS: Array<{ name: string; shape: string; role: string }> = [
   { name: 'Himayat', shape: 'leaf', role: 'Co-host & community' },
   { name: 'CBRIN', shape: 'hex', role: 'Venue & ecosystem' },
@@ -101,9 +118,26 @@ export default async function EventsHubPage() {
     getPublicEvents(),
     getPastEvents(6),
   ]);
-  const PUBLIC_EVENTS = toPublicEvents(eventDocs as PayloadEvent[]);
-  const PAST_PUBLIC_EVENTS = toPublicEvents(pastDocs as PayloadEvent[]);
+  // Relabel any summit-slug event to the canonical name + link so BOTH the
+  // featured card and the upcoming list stay consistent with the landing page,
+  // independent of what the CMS event row is currently titled.
+  const relabelSummit = (e: ReturnType<typeof toPublicEvents>[number]) =>
+    SUMMIT_SLUGS.has(e.slug)
+      ? { ...e, title: SUMMIT.name, slug: SUMMIT.slug, tag: 'Summit', tagClass: 'tag-summit' }
+      : e;
+  const PUBLIC_EVENTS = toPublicEvents(eventDocs as PayloadEvent[]).map(relabelSummit);
+  const PAST_PUBLIC_EVENTS = toPublicEvents(pastDocs as PayloadEvent[]).map(relabelSummit);
   const featured = PUBLIC_EVENTS.find((e) => e.featured) ?? PUBLIC_EVENTS[0];
+  const featuredIsSummit = featured ? SUMMIT_SLUGS.has(featured.slug) : false;
+  // When the featured event is the summit, drive the card from SUMMIT so the
+  // name/date/link are right regardless of the CMS event's current state.
+  const featuredHref = featuredIsSummit ? SUMMIT.path : featured ? `/events/${featured.slug}` : '#';
+  const featuredTitle = featuredIsSummit ? SUMMIT.name : featured?.title;
+  const featuredWhen = featuredIsSummit ? SUMMIT.dateLong : featured?.dateLong;
+  const featuredWhere = featuredIsSummit ? SUMMIT.venue : featured?.location;
+  const featuredMonth = featuredIsSummit ? SUMMIT_MONTH : featured?.monthShort;
+  const featuredDay = featuredIsSummit ? SUMMIT_DAY : featured?.day;
+  const featuredYear = featuredIsSummit ? SUMMIT_YEAR : featured?.year;
 
   return (
     <main>
@@ -138,18 +172,18 @@ export default async function EventsHubPage() {
       {featured && (
         <section className="featured-event">
           <div className="wrap">
-            <Link className="featured-card" href={`/events/${featured.slug}`}>
+            <Link className="featured-card" href={featuredHref}>
               <div className="fe-copy">
                 <div>
-                  <span className="fe-badge"><span className="pulse" />Next up · free full-day expo</span>
-                  <h2>{featured.title}</h2>
-                  <span className="fe-script">Start. Build. Grow — together.</span>
+                  <span className="fe-badge"><span className="pulse" />Next up · free full-day summit</span>
+                  <h2>{featuredTitle}</h2>
+                  <span className="fe-script">{SUMMIT.tagline}</span>
                   <p className="fe-desc">{featured.desc}</p>
                 </div>
                 <div>
                   <div className="fe-meta">
-                    <div className="it"><span className="l">When</span><span className="v">{featured.dateLong}</span></div>
-                    <div className="it"><span className="l">Where</span><span className="v">{featured.location}</span></div>
+                    <div className="it"><span className="l">When</span><span className="v">{featuredWhen}</span></div>
+                    <div className="it"><span className="l">Where</span><span className="v">{featuredWhere}</span></div>
                     <div className="it"><span className="l">Cost</span><span className="v">{featured.cost} · all-day</span></div>
                   </div>
                   <span className="fe-arrow">
@@ -162,14 +196,14 @@ export default async function EventsHubPage() {
               </div>
               <div className="fe-side">
                 <div className="fe-date-block">
-                  <span className="month">{featured.monthShort}</span>
-                  <span className="day">{featured.day === '?' ? <em>?</em> : featured.day}</span>
-                  <span className="year">{featured.year}</span>
+                  <span className="month">{featuredMonth}</span>
+                  <span className="day">{featuredDay === '?' ? <em>?</em> : featuredDay}</span>
+                  <span className="year">{featuredYear}</span>
                 </div>
                 <div className="fe-side-foot">
                   <span className="label">On the day</span>
-                  <div className="row"><span>Format</span><span className="v">9am – 5pm</span></div>
-                  <div className="row"><span>Stallholders</span><span className="v">30+ confirmed</span></div>
+                  <div className="row"><span>Format</span><span className="v">{SUMMIT.time}</span></div>
+                  <div className="row"><span>Orgs involved</span><span className="v">30+</span></div>
                   <div className="row"><span>Entry</span><span className="v">Free · all welcome</span></div>
                 </div>
               </div>
