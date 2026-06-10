@@ -46,6 +46,7 @@ export default function HowItWorks({ heading, steps, sectionImage, imageBadge }:
                 src={sectionImage?.url ?? "/images/workshop.jpg"}
                 alt={sectionImage?.alt ?? "Growth Hub community workshop in Canberra"}
                 fill
+                loading="eager"
                 style={{ objectFit: "cover" }}
                 sizes="(max-width: 900px) 100vw, 50vw"
               />

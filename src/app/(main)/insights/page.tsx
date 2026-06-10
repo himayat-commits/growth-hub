@@ -15,6 +15,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getPosts } from '@/lib/cms';
+import NewsletterStrip from '@/components/NewsletterStrip';
 
 export const metadata: Metadata = {
   title: 'Insights — Growth Hub by Himayat',
@@ -60,23 +61,21 @@ export default async function InsightsHubPage() {
       </section>
 
       {posts.length === 0 ? (
-        <section style={{ padding: '80px 0' }}>
+        <section className="post-list">
           <div className="wrap">
-            <p style={{ color: 'rgba(243,240,231,0.65)' }}>
-              The first articles are landing soon. Bookmark this page.
-            </p>
+            <div className="posts-empty">
+              <h2>The first articles are landing soon.</h2>
+              <p>
+                We&apos;re writing practical guides on AI, marketing and funding for Canberra
+                small businesses. Subscribe below and they&apos;ll land in your inbox first.
+              </p>
+            </div>
           </div>
         </section>
       ) : (
-        <section style={{ paddingTop: 'clamp(48px, 6vw, 80px)' }}>
+        <section className="post-list">
           <div className="wrap">
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                gap: 28,
-              }}
-            >
+            <div className="post-grid">
               {posts.map((p) => {
                 const slug = String((p as { slug?: string }).slug ?? '');
                 const title = String(p.title);
@@ -85,30 +84,9 @@ export default async function InsightsHubPage() {
                 const cover =
                   (p as { coverImage?: { url?: string; alt?: string } | null }).coverImage;
                 return (
-                  <Link
-                    key={slug}
-                    href={`/insights/${slug}`}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      padding: 24,
-                      borderRadius: 16,
-                      background: 'rgba(243,240,231,0.04)',
-                      border: '1px solid rgba(243,240,231,0.10)',
-                      textDecoration: 'none',
-                      color: 'inherit',
-                      gap: 16,
-                    }}
-                  >
+                  <Link key={slug} href={`/insights/${slug}`} className="post-card">
                     {cover?.url && (
-                      <div
-                        style={{
-                          aspectRatio: '16/9',
-                          borderRadius: 10,
-                          overflow: 'hidden',
-                          position: 'relative',
-                        }}
-                      >
+                      <div className="post-card-img">
                         <Image
                           src={cover.url}
                           alt={cover.alt ?? title}
@@ -119,24 +97,11 @@ export default async function InsightsHubPage() {
                       </div>
                     )}
                     {publishedAt && (
-                      <span
-                        style={{
-                          fontSize: 12,
-                          letterSpacing: '0.08em',
-                          textTransform: 'uppercase',
-                          color: 'rgba(243,240,231,0.55)',
-                        }}
-                      >
-                        {formatPublishedAt(publishedAt)}
-                      </span>
+                      <span className="post-card-date">{formatPublishedAt(publishedAt)}</span>
                     )}
-                    <h3 style={{ margin: 0, fontSize: 22, lineHeight: 1.25 }}>{title}</h3>
-                    {excerpt && (
-                      <p style={{ margin: 0, color: 'rgba(243,240,231,0.75)' }}>{excerpt}</p>
-                    )}
-                    <span style={{ marginTop: 'auto', color: '#E3F29C', fontSize: 14 }}>
-                      Read →
-                    </span>
+                    <h3>{title}</h3>
+                    {excerpt && <p>{excerpt}</p>}
+                    <span className="post-card-link">Read →</span>
                   </Link>
                 );
               })}
@@ -144,6 +109,12 @@ export default async function InsightsHubPage() {
           </div>
         </section>
       )}
+
+      <NewsletterStrip
+        source="insights"
+        heading="New articles, straight to your inbox."
+        sub="One monthly email with the latest insights, workshops and member wins. No drip sequence."
+      />
     </main>
   );
 }
