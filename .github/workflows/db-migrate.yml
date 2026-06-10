@@ -1,0 +1,49 @@
+name: DB migrate (production)
+
+# Applies pending Drizzle migrations to the production Neon database.
+#
+# Why this exists: Vercel deploys are decoupled from schema migrations. A
+# missing migration file (0010) once silently broke `drizzle-kit migrate`,
+# so 0011 never applied and every authenticated dashboard load 500'd on a
+# missing `photo_url` column. This workflow makes the migrate step part of
+# shipping to master instead of a manual command someone has to remember.
+#
+# Ordering note: this runs in parallel with the Vercel build (both trigger
+# on push to master). Migrations here are additive and idempotent, so the
+# brief window where new code may serve before a column lands is tolerable;
+# keep migrations backward-compatible (add columns nullable, no destructive
+# changes in the same deploy as the code that stops using them).
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'drizzle/**'
+      - 'src/lib/db/schema.ts'
+      - '.github/workflows/db-migrate.yml'
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+# Never let two migrate runs overlap — serialize on the branch.
+concurrency:
+  group: db-migrate-production
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply pending migrations
+        run: npx drizzle-kit migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
