@@ -42,66 +42,20 @@ export default function SummitAnnouncementBar() {
   };
 
   return (
-    <div
-      role="region"
-      aria-label="Event announcement"
-      style={{
-        position: 'relative',
-        background: 'var(--lime)',
-        color: 'var(--teal)',
-        fontSize: 14,
-        lineHeight: 1.4,
-      }}
-    >
-      <div
-        className="wrap"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 14,
-          flexWrap: 'wrap',
-          paddingTop: 10,
-          paddingBottom: 10,
-          textAlign: 'center',
-        }}
-      >
+    <div role="region" aria-label="Event announcement" className="summit-bar">
+      <div className="summit-bar-inner">
         <span>
           <strong>Free summit · {SUMMIT.name}</strong>
           <span style={{ opacity: 0.85 }}> — {SUMMIT.dateLong}, {SUMMIT.venue}</span>
         </span>
         <Link
           href={SUMMIT.path}
+          className="summit-bar-link"
           onClick={() => track('summit_register_intent', { slug: SUMMIT.slug, channel: 'announce-bar', surface: 'announcement' })}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            fontWeight: 600,
-            color: 'var(--teal)',
-            textDecoration: 'underline',
-            textUnderlineOffset: 3,
-            whiteSpace: 'nowrap',
-          }}
         >
           See the program →
         </Link>
-        <button
-          type="button"
-          onClick={dismiss}
-          aria-label="Dismiss announcement"
-          style={{
-            position: 'absolute',
-            right: 16,
-            background: 'transparent',
-            border: 0,
-            color: 'var(--teal)',
-            fontSize: 18,
-            lineHeight: 1,
-            cursor: 'pointer',
-            padding: 6,
-          }}
-        >
+        <button type="button" onClick={dismiss} aria-label="Dismiss announcement" className="summit-bar-close">
           ×
         </button>
       </div>

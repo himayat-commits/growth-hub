@@ -78,6 +78,7 @@ export default function NavbarClient({
             alt="Himayat logomark"
             width={30}
             height={30}
+            loading="eager"
             style={{ objectFit: "contain" }}
           />
           <span className="wordmark">

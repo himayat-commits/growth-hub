@@ -47,16 +47,36 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   outline-offset: 2px;
   border-radius: 4px;
 }
-/* On dark teal surfaces the ring needs to be light to stay visible. */
+/* On dark teal/plum surfaces the ring needs to be light to stay visible. */
 .hero-dark :focus-visible,
 .final :focus-visible,
 .benefits :focus-visible,
-.gh-newsletter-strip :focus-visible {
+.gh-newsletter-strip :focus-visible,
+.community :focus-visible,
+.proof :focus-visible,
+.become-card :focus-visible,
+.featured-card :focus-visible,
+.propose-card :focus-visible,
+.feedback-card :focus-visible,
+.dir-recruit :focus-visible,
+.bq-card :focus-visible,
+.pkg-card.featured :focus-visible,
+footer.foot :focus-visible {
   outline-color: var(--lime);
 }
 
 .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
 .handscript { font-family: var(--font-script, 'Kalam', cursive); font-weight: 500; letter-spacing: 0.01em; }
+
+/* ---- Summit announcement bar ---- */
+.summit-bar { position: relative; background: var(--lime); color: var(--teal); font-size: 14px; line-height: 1.45; }
+.summit-bar-inner { display: flex; align-items: center; justify-content: center; gap: 6px 14px; flex-wrap: wrap; padding: 10px 48px; text-align: center; }
+.summit-bar-link { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--teal); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.summit-bar-close { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: 0; color: var(--teal); font-size: 18px; line-height: 1; cursor: pointer; padding: 10px; }
+@media (max-width: 640px) {
+  .summit-bar { font-size: 13px; }
+  .summit-bar-inner { padding: 8px 40px; gap: 2px 10px; }
+}
 
 /* ---- NAV ---- */
 .nav {
@@ -109,6 +129,9 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 .chip .chip-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--lime); box-shadow: 0 0 0 2px rgba(227, 242, 156, 0.3); }
 .hero-art { position: absolute; right: clamp(24px, 3vw, 100px); top: 7%; width: min(57vw, 1000px); pointer-events: none; }
 @media (max-width: 1300px) { .hero-art { position: relative; right: auto; top: auto; width: 70%; margin: 40px 0 -40px auto; } }
+/* Phones: at 70% width the journey labels become illegible — let the art
+   breathe across the full column instead. */
+@media (max-width: 640px) { .hero-art { width: 100%; margin: 36px 0 -24px; } }
 
 /* ---- Animated "business journey" hero mark ---- */
 .journey-num { paint-order: stroke fill; }
@@ -206,6 +229,11 @@ a.logo-item:hover { opacity: 1; }
 .logo-item--img { opacity: 0.65; }
 .logo-item--img img { height: 34px; width: auto; max-width: 180px; object-fit: contain; display: block; }
 a.logo-item--img:hover { opacity: 1; }
+/* Phones: the baseline-justified head wraps mid-phrase ("Supported / by" next
+   to a broken "Partners & funders →") — stack it instead. */
+@media (max-width: 600px) {
+  .supported-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
 
 /* ---- How it works ---- */
 .how-layout { display: grid; grid-template-columns: 1fr 1.05fr; grid-template-rows: auto 1fr; column-gap: 72px; row-gap: 16px; margin-top: 8px; }
@@ -355,6 +383,10 @@ a.logo-item--img:hover { opacity: 1; }
 
 /* ---- Community ---- */
 .community { background: var(--teal); color: var(--eggshell); }
+/* Secondary buttons inherit teal-on-transparent from .btn-secondary, which
+   disappears on this dark teal surface — flip them light here. */
+.community .btn-secondary { color: var(--eggshell); border-color: rgba(243, 240, 231, 0.4); }
+.community .btn-secondary:hover { background: var(--eggshell); color: var(--teal); border-color: var(--eggshell); }
 .comm-h2 { font-weight: 600; font-size: clamp(28px, 3.6vw, 44px); line-height: 1.18; letter-spacing: -0.01em; color: var(--eggshell); text-align: center; margin: 0 auto 48px; max-width: 880px; }
 .comm-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
 .comm-tab { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 12px; padding: 22px 18px 20px; background: rgba(243, 240, 231, 0.04); border: 1px solid rgba(243, 240, 231, 0.1); border-radius: 14px; color: var(--eggshell); cursor: pointer; text-align: center; transition: background .22s ease, border-color .22s ease; }
@@ -387,7 +419,16 @@ a.logo-item--img:hover { opacity: 1; }
 .comm-event-title { font-weight: 600; font-size: 17px; color: var(--eggshell); line-height: 1.3; }
 .comm-event-loc { font-size: 13px; color: rgba(243, 240, 231, 0.55); }
 @media (max-width: 900px) { .comm-tabs { grid-template-columns: repeat(2, 1fr); } .comm-panel-inner { grid-template-columns: 1fr; gap: 28px; } }
-@media (max-width: 520px) { .comm-tabs { grid-template-columns: 1fr; } }
+/* Phones: keep the 2x2 tab grid but compact — a 1-col stack of tall card-tabs
+   pushed the panel ~700px below the heading and read as content, not controls. */
+@media (max-width: 520px) {
+  .comm-tabs { gap: 10px; }
+  .comm-tab { padding: 14px 10px 12px; gap: 8px; }
+  .comm-tab-icon { width: 36px; height: 36px; }
+  .comm-tab-icon svg { width: 18px; height: 18px; }
+  .comm-tab-label { font-size: 13.5px; }
+  .comm-tab-badge { padding: 4px 8px; font-size: 9px; }
+}
 
 /* ---- Big Quote ---- */
 .big-quote { background: var(--eggshell); padding: clamp(60px, 8vw, 110px) 0; }
@@ -407,7 +448,12 @@ a.logo-item--img:hover { opacity: 1; }
 .ttg-track { display: flex; gap: 16px; width: max-content; animation: ttgScroll 60s linear infinite; }
 .ttg-marquee:hover .ttg-track { animation-play-state: paused; }
 @keyframes ttgScroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
-@media (prefers-reduced-motion: reduce) { .ttg-track { animation: none; } .marquee-track { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .ttg-track { animation: none; }
+  .marquee-track { animation: none; }
+  .how-photo-badge .pulse { animation: none; }
+  .reveal, .reveal-init { transition: none; }
+}
 .ttg-card { flex: 0 0 auto; width: 280px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
 .ttg-stars { color: #E2B842; font-size: 12px; letter-spacing: 2px; line-height: 1; }
 .ttg-card p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--teal); }
@@ -1446,4 +1492,20 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .case-study-card p { color: var(--muted); font-size: 15px; line-height: 1.55; margin: 4px 0 0; }
 .case-study-card-link { margin-top: auto; padding-top: 16px; font-size: 14px; color: var(--plum); }
 .case-study-empty { max-width: 640px; padding: 48px 0; }
+
+/* Insights hub — /insights post list + empty state. These sit on the light
+   eggshell page surface (the page once shipped with dark-surface colors,
+   which rendered near-invisible). Mirrors .case-study-card. */
+.post-list { padding: 0 0 clamp(64px, 8vw, 96px); }
+.post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+.post-card { display: flex; flex-direction: column; gap: 14px; padding: 26px; background: #fff; border: 1px solid var(--line); border-radius: 18px; transition: transform .2s, box-shadow .2s; }
+.post-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px -16px rgba(13, 63, 72, 0.18); }
+.post-card-img { aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; position: relative; }
+.post-card-date { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.post-card h3 { margin: 0; font-size: 22px; line-height: 1.25; color: var(--teal); font-weight: 400; letter-spacing: -0.01em; }
+.post-card p { margin: 0; color: rgba(13, 63, 72, 0.75); font-size: 15.5px; line-height: 1.55; }
+.post-card-link { margin-top: auto; padding-top: 12px; font-size: 14px; color: var(--plum); }
+.posts-empty { max-width: 640px; background: var(--eggshell-warm); border: 1px solid var(--line); border-radius: 18px; padding: 32px 36px; }
+.posts-empty h2 { font-weight: 400; font-size: 26px; color: var(--teal); margin: 0 0 10px; letter-spacing: -0.015em; }
+.posts-empty p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
 
