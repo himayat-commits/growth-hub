@@ -1,0 +1,9 @@
+-- No-op migration.
+--
+-- This entry exists in drizzle/meta/_journal.json (idx 10) but its .sql file
+-- was never committed, which made `drizzle-kit migrate` fail to load the
+-- journal and silently skip every later migration (including
+-- 0011_add_user_photo) on production. Restoring the file as an explicit no-op
+-- lets the migrator advance past this index again.
+--
+-- Intentionally empty: no statements to run.
