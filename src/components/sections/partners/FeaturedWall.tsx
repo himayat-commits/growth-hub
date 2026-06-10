@@ -17,6 +17,10 @@ export interface FeaturedWallProps {
     category?: string | null;
     type?: string | null;
     shape?: string | null;
+    /** Real logo image URL (from the CMS `logo` upload field). When absent we
+     *  fall back to the abstract PartnerMark glyph. */
+    logoUrl?: string | null;
+    logoAlt?: string | null;
   }> | null;
 }
 
@@ -69,6 +73,8 @@ export default function FeaturedWall({ heading, lead, partners }: FeaturedWallPr
             name: p.name,
             category: cat,
             shape: resolveShape(p.shape, cat),
+            logoUrl: p.logoUrl ?? null,
+            logoAlt: p.logoAlt ?? null,
           };
         })
       : DEFAULT_PARTNERS.map((p) => ({
@@ -76,6 +82,8 @@ export default function FeaturedWall({ heading, lead, partners }: FeaturedWallPr
           name: p.name,
           category: p.category,
           shape: p.shape,
+          logoUrl: null as string | null,
+          logoAlt: null as string | null,
         }));
 
   return (
@@ -94,8 +102,13 @@ export default function FeaturedWall({ heading, lead, partners }: FeaturedWallPr
         <div className="fw-grid">
           {resolved.map((p, i) => (
             <div className="fw-cell" key={p.id ?? `${p.name}-${i}`}>
-              <span className="fw-mark">
-                <PartnerMark shape={p.shape} />
+              <span className={`fw-mark${p.logoUrl ? " has-logo" : ""}`}>
+                {p.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={p.logoUrl} alt={p.logoAlt || `${p.name} logo`} loading="lazy" />
+                ) : (
+                  <PartnerMark shape={p.shape} />
+                )}
               </span>
               <span className="fw-name">{p.name}</span>
               <span className="fw-type">{p.category ? CATEGORY_LABELS[p.category] : ""}</span>

@@ -45,6 +45,17 @@ export default async function PartnersPage() {
 
   const partners = partnersResult?.docs ?? [];
 
+  // The `logo` upload relation is populated as a full media object at depth>=1
+  // (getPartners uses depth:1). Extract a usable absolute URL + alt text; null
+  // when no logo is set, so the components fall back to the abstract glyph.
+  const logoOf = (p: unknown): { url: string | null; alt: string | null } => {
+    const logo = (p as { logo?: { url?: string | null; alt?: string | null } | null }).logo;
+    return {
+      url: logo && typeof logo === "object" ? logo.url ?? null : null,
+      alt: logo && typeof logo === "object" ? logo.alt ?? null : null,
+    };
+  };
+
   // Split partners: featured wall vs. full directory.
   // `category` is the canonical field (post-Phase-9 schema). The
   // shared.ts → legacyCategoryFallback() also handles older `type` values
@@ -56,6 +67,8 @@ export default async function PartnersPage() {
       name: p.name,
       category: (p as { category?: string | null }).category ?? null,
       shape: (p as { shape?: string | null }).shape ?? null,
+      logoUrl: logoOf(p).url,
+      logoAlt: logoOf(p).alt,
     }));
 
   const directoryPartners = partners.map((p) => ({
@@ -75,6 +88,8 @@ export default async function PartnersPage() {
     website: p.website ?? null,
     contactName: p.contactName ?? null,
     contactEmail: p.contactEmail ?? null,
+    logoUrl: logoOf(p).url,
+    logoAlt: logoOf(p).alt,
   }));
 
   return (

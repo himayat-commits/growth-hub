@@ -94,6 +94,14 @@ export default buildConfig({
     // Keep Payload's tables in the 'payload' schema — isolated from
     // Drizzle's 'subscriptions' table in the public schema.
     schemaName: 'payload',
+    // This project's schema is managed exclusively via the hand-written
+    // migrations in src/migrations. Payload's dev-only auto-push (on by
+    // default when NODE_ENV !== 'production') mis-diffs the hand-created
+    // junction tables and emits an invalid `ALTER COLUMN "id" SET DATA TYPE
+    // serial` (serial is not a real Postgres type), which throws during init
+    // and takes down ALL CMS reads locally. Production already runs with push
+    // off (NODE_ENV=production), so disabling it here just makes dev match prod.
+    push: false,
   }),
 
   email: resendAdapter({
