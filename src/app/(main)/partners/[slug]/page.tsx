@@ -66,6 +66,10 @@ export default async function PartnerProfilePage({ params }: { params: Params })
   const shape: PartnerShape =
     ((partner as { shape?: string | null }).shape as PartnerShape | null) ??
     defaultShapeForCategory(category);
+  // Real logo (CMS `logo` upload, populated at depth>=1). Falls back to glyph.
+  const logo = (partner as { logo?: { url?: string | null; alt?: string | null } | null }).logo;
+  const logoUrl = logo && typeof logo === 'object' ? logo.url ?? null : null;
+  const logoAlt = logo && typeof logo === 'object' ? logo.alt ?? null : null;
 
   const region = (partner as { region?: string | null }).region ?? null;
   const since = (partner as { since?: string | null }).since ?? null;
@@ -102,12 +106,23 @@ export default async function PartnerProfilePage({ params }: { params: Params })
                 width: 64,
                 height: 64,
                 borderRadius: 16,
-                background: 'rgba(243,240,231,0.08)',
+                background: logoUrl ? '#fff' : 'rgba(243,240,231,0.08)',
+                padding: logoUrl ? 8 : 0,
+                boxSizing: 'border-box',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <PartnerMark shape={shape} />
+              {logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={logoUrl}
+                  alt={logoAlt || `${name} logo`}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                />
+              ) : (
+                <PartnerMark shape={shape} />
+              )}
             </span>
             <h1 className="hero-h1" style={{ margin: 0 }}>{name}</h1>
           </div>
@@ -190,10 +205,19 @@ export default async function PartnerProfilePage({ params }: { params: Params })
                 const rShape = ((r as { shape?: string }).shape as PartnerShape | null) ?? defaultShapeForCategory(category);
                 const rRegion = (r as { region?: string }).region ?? null;
                 const rSince = (r as { since?: string }).since ?? null;
+                const rLogo = (r as { logo?: { url?: string | null; alt?: string | null } | null }).logo;
+                const rLogoUrl = rLogo && typeof rLogo === 'object' ? rLogo.url ?? null : null;
                 return (
                   <article className="p-card" key={String(r.id)}>
                     <header className="p-card-top">
-                      <span className="p-card-mark"><PartnerMark shape={rShape} /></span>
+                      <span className={`p-card-mark${rLogoUrl ? ' has-logo' : ''}`}>
+                        {rLogoUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={rLogoUrl} alt={(rLogo && typeof rLogo === 'object' ? rLogo.alt : null) || `${String(r.name)} logo`} loading="lazy" />
+                        ) : (
+                          <PartnerMark shape={rShape} />
+                        )}
+                      </span>
                       <div className="p-card-id">
                         <h3>{String(r.name)}</h3>
                         <span className="p-card-meta">

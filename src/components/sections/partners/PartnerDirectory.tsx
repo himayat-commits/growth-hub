@@ -34,6 +34,10 @@ export interface DirectoryPartner {
   website?: string | null;
   contactName?: string | null;
   contactEmail?: string | null;
+  /** Real logo image URL (from the CMS `logo` upload field). When absent the
+   *  card falls back to the abstract PartnerMark glyph. */
+  logoUrl?: string | null;
+  logoAlt?: string | null;
 }
 
 export interface RecruitmentCardConfig {
@@ -311,8 +315,13 @@ function PartnerCard({ p }: { p: ResolvedPartner }) {
       {p.isAnchor && <span className="p-card-anchor">Anchor partner</span>}
       <span className="p-card-cat">{CATEGORY_LABELS[p.category]}</span>
       <header className="p-card-top">
-        <span className="p-card-mark">
-          <PartnerMark shape={p.shape} />
+        <span className={`p-card-mark${p.logoUrl ? " has-logo" : ""}`}>
+          {p.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={p.logoUrl} alt={p.logoAlt || `${p.name} logo`} loading="lazy" />
+          ) : (
+            <PartnerMark shape={p.shape} />
+          )}
         </span>
         <div className="p-card-id">
           <h3>{p.name}</h3>
