@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { track } from "@/lib/analytics";
 
 const schema = z.object({
   name: z.string().min(1, "Your name is required"),
@@ -67,6 +68,7 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
         body: JSON.stringify({ ...data, interests: [...interests], ref }),
       });
       if (!res.ok) throw new Error();
+      track("contact_form_submit", { interests: [...interests].join(", ") });
       setStatus("sent");
     } catch {
       setStatus("error");
