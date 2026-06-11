@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "payload generate:importmap && next build",
+    "vercel-build": "node scripts/prod-migrate.mjs && payload generate:importmap && next build",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
