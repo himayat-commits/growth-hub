@@ -106,7 +106,7 @@ export default function NavbarClient({
               className="btn btn-primary nav-cta"
               href={resolvedCtaHref}
               onClick={() =>
-                track('cta_click_signup', {
+                track('cta_click_portal', {
                   location: 'navbar',
                   signedIn: isSignedIn,
                 })

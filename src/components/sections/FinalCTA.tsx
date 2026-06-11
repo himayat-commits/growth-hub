@@ -51,7 +51,7 @@ export default function FinalCTA({
                   <path d="M3 7h8M7 3l4 4-4 4" />
                 </svg>
               </a>
-              <a className="btn btn-secondary" href={secondaryCtaHref ?? "#contact"}>
+              <a className="btn btn-secondary" href={secondaryCtaHref ?? "/sign-up?redirect_url=%2Fportal"}>
                 {secondaryCtaLabel ?? "Sign Up Now"}
               </a>
             </div>

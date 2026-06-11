@@ -28,6 +28,9 @@ declare global {
 export type AnalyticsEvent =
   // Signup funnel
   | 'cta_click_signup'           // any "Sign Up Now" / "Join free" CTA
+  | 'cta_click_portal'           // signed-in navbar "My Growth Hub" CTA — not a signup;
+                                 // deliberately absent from EVENT_MAP so it never fires
+                                 // ad-pixel conversions
   | 'cta_click_upgrade'          // pricing tier "Start with X" buttons
   | 'free_tier_join'             // the dedicated Free banner CTA
   | 'pricing_interval_toggle'    // monthly/annual toggle on /pricing
