@@ -85,6 +85,13 @@
       "when": 1779545300000,
       "tag": "0011_add_user_photo",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1781105479758,
+      "tag": "0012_add_rsvp_attribution",
+      "breakpoints": true
     }
   ]
 }
