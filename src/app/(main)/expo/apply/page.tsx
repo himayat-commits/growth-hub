@@ -3,15 +3,10 @@ import Link from 'next/link';
 import { SUMMIT } from '@/lib/summit';
 import HubSpotForm from './HubSpotForm';
 
-// Event facts come from the single source of truth in src/lib/summit.ts so a
-// date / venue / name change updates the landing page and this form together.
-const EVENT = {
-  title: SUMMIT.name,
-  partner: 'with CBR Innovation Network',
-  dateLong: SUMMIT.dateLong,
-  time: SUMMIT.time,
-  location: SUMMIT.venueFull,
-};
+// Two-column layout mirroring the signup pages: event pitch + key facts on
+// the left, the HubSpot application form on the right. Event facts come from
+// the single source of truth in src/lib/summit.ts so a date / venue / name
+// change updates the landing page and this form together.
 
 const OG_DESC =
   'Apply to take part in Entrepreneurship for Everyone — a free, all-day small-business summit on 9 July 2026 at CBR Innovation Network, Canberra.';
@@ -38,71 +33,92 @@ export const metadata: Metadata = {
   },
 };
 
+const ROLES = [
+  {
+    title: 'Host a stall',
+    desc: 'Showcase your product or service at your own table in the expo hall, all day.',
+  },
+  {
+    title: 'Run a workshop',
+    desc: 'Teach a hands-on session that helps Canberra small businesses run and grow.',
+  },
+  {
+    title: 'Speak on stage',
+    desc: 'Share your story or expertise with a full house of local business owners.',
+  },
+];
+
 export default function ExpoApplyPage() {
   return (
-    <main>
-      {/* HERO */}
-      <section className="hero event-hero" id="top">
-        <div className="wrap">
-          <Link
-            href={SUMMIT.path}
-            className="ed-back"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              color: 'var(--plum)',
-              fontSize: 14,
-              marginBottom: 24,
-            }}
-          >
-            ← Back to the event
-          </Link>
-          <div className="hero-eyebrow">
-            <span className="dot" />
-            Call for involvement · {EVENT.partner}
-          </div>
-          <h1 className="hero-h1">
-            Stallholders, facilitators <span className="grow">&amp; speakers.</span>
-          </h1>
-          <p className="hero-sub">
-            We&apos;re building a free, all-day expo for Canberra small business — and
-            we&apos;d love you to be part of it. Apply to host a stall, run a workshop, or
-            take the stage as a speaker at <strong>{EVENT.title}</strong>.
-          </p>
+    <main className="signup-main">
+      <div className="wrap">
+        <Link href={SUMMIT.path} className="signup-back">
+          ← Back to the event
+        </Link>
 
-          <div className="event-keyfacts">
-            <div className="event-keyfact"><span className="lbl">When</span><span className="val">{EVENT.dateLong}</span></div>
-            <div className="event-keyfact"><span className="lbl">Time</span><span className="val">{EVENT.time}</span></div>
-            <div className="event-keyfact"><span className="lbl">Where</span><span className="val">{EVENT.location}</span></div>
-            <div className="event-keyfact"><span className="lbl">To take part</span><span className="val"><em>Free</em></span></div>
-          </div>
-        </div>
-      </section>
-
-      {/* APPLICATION FORM */}
-      <section className="contact" id="apply">
-        <div className="wrap contact-wrap">
-          <div className="contact-head">
-            <span className="contact-eyebrow">
-              <span className="dot" /> Apply to take part
-            </span>
-            <h2 className="contact-h2">
-              Three ways in.<br />
-              <em className="contact-h2-em">Tell us how you&apos;d like to help.</em>
-            </h2>
-            <p className="contact-lede">
-              One short form for all three roles — tick whichever fit (you can choose more
-              than one) and we&apos;ll only ask what&apos;s relevant. We read every
-              application and reply within a few business days.
+        <div className="signup-grid">
+          {/* Left summary column */}
+          <div className="signup-summary">
+            <div className="signup-eyebrow">
+              Call for involvement · with CBR Innovation Network
+            </div>
+            <h1 className="signup-title">
+              Stallholders, facilitators &amp; speakers.
+            </h1>
+            <p className="signup-tagline">
+              We&apos;re building a free, all-day expo for Canberra small business —
+              and we&apos;d love you to be part of it.
             </p>
+
+            <div className="signup-pricecard featured">
+              <div className="signup-price">
+                Free<span className="unit"> to take part</span>
+              </div>
+              <p style={{ fontSize: 13, margin: '8px 0 20px', opacity: 0.7 }}>
+                {SUMMIT.name} · {SUMMIT.tagline}
+              </p>
+              <ul className="signup-features">
+                <li>{SUMMIT.dateLong}</li>
+                <li>{SUMMIT.time}</li>
+                <li>{SUMMIT.venueFull}</li>
+              </ul>
+            </div>
+
+            <ol className="expo-roles">
+              {ROLES.map((role, i) => (
+                <li className="expo-role" key={role.title}>
+                  <span className="expo-role-num">{i + 1}</span>
+                  <div>
+                    <p className="expo-role-title">{role.title}</p>
+                    <p className="expo-role-desc">{role.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
 
-          <div className="contact-letter">
-            <HubSpotForm />
+          {/* Right form column */}
+          <div>
+            <div className="signup-formwrap">
+              <div className="signup-form-head">
+                <p className="signup-form-eyebrow">Apply to take part</p>
+                <h2 className="signup-form-title">
+                  Three ways in.{' '}
+                  <em style={{ color: 'var(--plum)' }}>
+                    Tell us how you&apos;d like to help.
+                  </em>
+                </h2>
+                <p className="signup-form-sub">
+                  One short form for all three roles — tick whichever fit (you can
+                  choose more than one) and we&apos;ll only ask what&apos;s relevant.
+                  We read every application and reply within a few business days.
+                </p>
+              </div>
+              <HubSpotForm />
+            </div>
           </div>
         </div>
-      </section>
+      </div>
     </main>
   );
 }

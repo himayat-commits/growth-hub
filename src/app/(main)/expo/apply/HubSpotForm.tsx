@@ -17,6 +17,13 @@ const PORTAL_ID = process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID;
 const FORM_ID = process.env.NEXT_PUBLIC_HUBSPOT_EXPO_FORM_ID;
 const REGION = process.env.NEXT_PUBLIC_HUBSPOT_REGION || "na1";
 
+// Non-default regions (eu1, ap1, …) serve the loader from their own host;
+// js.hsforms.net only covers na1.
+const SCRIPT_SRC =
+  REGION === "na1"
+    ? "https://js.hsforms.net/forms/embed/v2.js"
+    : `https://js-${REGION}.hsforms.net/forms/embed/v2.js`;
+
 declare global {
   interface Window {
     hbspt?: {
@@ -62,7 +69,7 @@ export default function HubSpotForm() {
       <div id="hs-expo-form" className="hs-embed" />
       <Script
         id="hs-forms-v2"
-        src="https://js.hsforms.net/forms/embed/v2.js"
+        src={SCRIPT_SRC}
         strategy="afterInteractive"
         onLoad={buildForm}
         onReady={buildForm}
