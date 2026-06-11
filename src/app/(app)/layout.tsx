@@ -36,7 +36,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const [sub, unreadCount, profile] = await Promise.all([
-    getSubscription(),
+    getSubscription(user.id).catch(() => null),
     getUnreadNotificationCount(user.id).catch(() => 0),
     getProfile(user.id).catch(() => null),
   ])
