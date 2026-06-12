@@ -5,7 +5,7 @@ import NewsletterStrip from '@/components/NewsletterStrip';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 import { getSiteSettings } from '@/lib/cms';
-import { SUMMIT } from '@/lib/summit';
+import { SUMMIT, isSummitRegistrationOpen } from '@/lib/summit';
 import CaptureAttribution from '../[slug]/CaptureAttribution';
 import SummitCtas, { SummitApplyLink } from './SummitCtas';
 
@@ -354,15 +354,23 @@ export default async function EntrepreneurshipForEveryonePage() {
           <div className="feedback-card">
             <div>
               <span className="section-label handscript" style={{ color: 'var(--lime)', textTransform: 'none', fontSize: 22, letterSpacing: 0 }}>
-                Save the date →
+                {isSummitRegistrationOpen() ? 'Registration is open →' : 'Save the date →'}
               </span>
               <h2 className="section-h2" style={{ marginTop: 12 }}>Be there on 9 July.</h2>
-              <p>
-                Entry is free and everyone&apos;s welcome — founders, tradies, side-hustlers,
-                and anyone thinking about starting. Add the day to your calendar now, and
-                we&apos;ll send the registration link and final program as soon as they&apos;re
-                live.
-              </p>
+              {isSummitRegistrationOpen() ? (
+                <p>
+                  Entry is free and everyone&apos;s welcome — founders, tradies, side-hustlers,
+                  and anyone thinking about starting. Grab your free ticket on Eventbrite,
+                  and we&apos;ll email the final program before the day.
+                </p>
+              ) : (
+                <p>
+                  Entry is free and everyone&apos;s welcome — founders, tradies, side-hustlers,
+                  and anyone thinking about starting. Add the day to your calendar now, and
+                  we&apos;ll send the registration link and final program as soon as they&apos;re
+                  live.
+                </p>
+              )}
               <span className="hand">— no spam, no drip sequence. One email when it matters.</span>
               <SummitCtas surface="register-section" />
             </div>
@@ -382,8 +390,16 @@ export default async function EntrepreneurshipForEveryonePage() {
 
       <NewsletterStrip
         source={`event-${SUMMIT.slug}`}
-        heading="Get the registration link first."
-        sub="One email when attendee registration opens — plus the final program. No drip sequence."
+        heading={
+          isSummitRegistrationOpen()
+            ? 'Get the final program first.'
+            : 'Get the registration link first.'
+        }
+        sub={
+          isSummitRegistrationOpen()
+            ? 'One email with the full session lineup before the day — plus any late additions. No drip sequence.'
+            : 'One email when attendee registration opens — plus the final program. No drip sequence.'
+        }
       />
 
       <Contact

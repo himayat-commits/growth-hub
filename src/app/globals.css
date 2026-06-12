@@ -93,6 +93,9 @@ footer.foot :focus-visible {
 .nav-links a { position: relative; }
 .nav-links a:hover::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: var(--teal); }
 .btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 999px; font-size: 16px; font-weight: 500; transition: transform .2s, background .2s, color .2s; white-space: nowrap; }
+/* Long labels ("Become a stallholder, speaker or sponsor") exceed a phone's
+   width as a single line and force page-level horizontal scroll. */
+@media (max-width: 480px) { .btn { white-space: normal; text-align: left; } }
 .btn-primary { background: var(--teal); color: var(--eggshell); }
 .btn-primary:hover { background: var(--teal-deep); transform: translateY(-1px); }
 .btn-secondary { background: transparent; color: var(--teal); border: 1px solid rgba(13, 63, 72, 0.35); }
@@ -119,6 +122,9 @@ footer.foot :focus-visible {
 .hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px; border: 1px solid rgba(13, 63, 72, 0.25); border-radius: 999px; font-size: 14px; color: var(--teal); background: rgba(243, 240, 231, 0.5); }
 .hero-eyebrow .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--teal); }
 .hero-h1 { font-weight: 400; font-size: clamp(48px, 6.8vw, 88px); line-height: 1.05; letter-spacing: -0.025em; color: var(--teal); margin: 28px 0 0; max-width: 16ch; text-wrap: pretty; }
+/* The summit title's single word "Entrepreneurship" needs ~388px at the 48px
+   clamp floor — wider than a small phone. A lower floor for event heroes only. */
+.event-hero .hero-h1 { font-size: clamp(38px, 6.8vw, 88px); }
 .hero-h1 .grow { display: inline-block; position: relative; }
 .hero-handnote { position: relative; display: inline-block; margin-top: 24px; }
 .hero-handnote .txt { font-size: clamp(28px, 3vw, 44px); color: var(--plum); line-height: 1; }
@@ -1457,7 +1463,7 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .feedback-side ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
 .feedback-side li { font-size: 14px; color: rgba(243,240,231,0.78); padding-left: 18px; position: relative; }
 .feedback-side li::before { content: '·'; position: absolute; left: 4px; color: var(--lime); font-size: 22px; line-height: 0.6; }
-@media (max-width: 800px) { .feedback-cta .feedback-card { grid-template-columns: 1fr; } }
+@media (max-width: 800px) { .feedback-cta .feedback-card { grid-template-columns: minmax(0, 1fr); } }
 
 /* Generic event detail page (driven by /events/[slug]) */
 .event-detail .ed-back { display: inline-flex; align-items: center; gap: 8px; color: var(--plum); font-size: 14px; margin-bottom: 24px; }
