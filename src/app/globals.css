@@ -126,6 +126,17 @@ footer.foot :focus-visible {
    clamp floor — wider than a small phone. A lower floor for event heroes only. */
 .event-hero .hero-h1 { font-size: clamp(38px, 6.8vw, 88px); }
 .hero-h1 .grow { display: inline-block; position: relative; }
+/* Roll-call headline: the variable line cycles through the real audiences and
+   settles on "Everyone", over a hand-drawn lime underline. */
+.hero-roll { display: inline-block; position: relative; color: var(--teal); white-space: nowrap; }
+.hero-roll-word { display: inline-block; animation: hero-roll-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.hero-roll-underline { position: absolute; left: -0.04em; right: -0.04em; bottom: -0.04em; width: auto; height: 0.22em; overflow: visible; }
+.hero-roll-underline path { stroke: var(--lime); }
+@keyframes hero-roll-in { from { opacity: 0; transform: translateY(0.16em); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .hero-roll-word { animation: none; } }
+/* On narrow screens the longer audience words ("women in business") exceed the
+   line; let them wrap rather than clip. The settled "Everyone" is one line. */
+@media (max-width: 600px) { .hero-roll { white-space: normal; } }
 .hero-handnote { position: relative; display: inline-block; margin-top: 24px; }
 .hero-handnote .txt { font-size: clamp(28px, 3vw, 44px); color: var(--plum); line-height: 1; }
 .hero-sub { max-width: 620px; font-size: clamp(18px, 1.5vw, 22px); color: var(--teal); opacity: 0.85; margin: 36px 0 0; line-height: 1.5; }
@@ -638,6 +649,9 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .signup-features li { position: relative; padding-left: 28px; font-size: 16px; }
 .signup-features li::before { content: '✓'; position: absolute; left: 0; color: var(--plum); font-weight: 600; }
 .signup-pricecard.featured .signup-features li::before { color: var(--lime); }
+.signup-freetag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal); background: var(--lime); border-radius: 99px; padding: 6px 13px; margin-bottom: 18px; }
+.signup-pricecard-name { font-size: 21px; line-height: 1.25; margin: 0 0 4px; color: inherit; }
+.signup-pricecard-tagline { font-size: 15px; font-style: italic; margin: 0; opacity: 0.78; }
 .signup-trust { display: flex; flex-direction: column; gap: 14px; }
 .signup-trust-item { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--muted); }
 .signup-trust-item svg { color: var(--plum); flex-shrink: 0; }
@@ -654,10 +668,12 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .signup-form-sub { font-size: 16px; line-height: 1.55; color: rgba(13,63,72,0.72); margin: 0 0 28px; }
 @media (max-width: 960px) { .signup-grid { grid-template-columns: 1fr; } .signup-summary { position: static; } }
 
-/* ---- Expo apply: numbered role cards in the signup-style left column ---- */
+/* ---- Expo apply: peer role cards in the signup-style left column ---- */
+.signup-main.signup-main--tight { padding-top: 24px; }
 .expo-roles { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
 .expo-role { display: flex; align-items: flex-start; gap: 14px; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
-.expo-role-num { width: 26px; height: 26px; border-radius: 8px; background: var(--teal); color: var(--eggshell); font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.expo-role-icon { width: 40px; height: 40px; border-radius: 11px; background: var(--teal); color: var(--eggshell); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.expo-role-icon svg { width: 20px; height: 20px; }
 .expo-role-title { font-size: 15px; font-weight: 600; color: var(--teal); margin: 0 0 2px; }
 .expo-role-desc { font-size: 14px; line-height: 1.5; color: var(--muted); margin: 0; }
 
@@ -1428,6 +1444,10 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .session-pres { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
 .session-pres .pres-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--plum); }
 .session-pres .tbc { font-style: italic; }
+/* A presenter still being confirmed shouldn't pull weight from the locked-in
+   sessions: dim the line and hollow out its dot. The session title stays full. */
+.session.is-tbc .session-pres { color: var(--fg-subtle); }
+.session.is-tbc .session-pres .pres-dot { background: transparent; border: 1px solid var(--fg-subtle); }
 .proposed-tag { padding: 1px 6px; border-radius: 4px; background: rgba(95,48,75,0.12); color: var(--plum); font-size: 10px; letter-spacing: 0.05em; }
 @media (max-width: 760px) {
   .slot { grid-template-columns: 1fr; gap: 8px; }
@@ -1442,14 +1462,15 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .involved-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
 .inv-card { background: var(--eggshell); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 10px; transition: transform .2s; }
 .inv-card:hover { transform: translateY(-2px); }
-.inv-num { font-family: var(--font-script); color: var(--plum); font-size: 18px; }
 .inv-card h3 { font-size: 20px; color: var(--teal); letter-spacing: -0.01em; font-weight: 400; margin: 0; }
 .inv-card p { color: var(--muted); font-size: 14.5px; line-height: 1.55; }
-.inv-tag { align-self: flex-start; margin-top: auto; padding: 4px 10px; border-radius: 999px; background: rgba(13,63,72,0.06); color: var(--teal); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.inv-tag { align-self: flex-start; padding: 5px 11px; border-radius: 999px; background: rgba(95,48,75,0.08); color: var(--plum); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
 
 /* Stakeholders */
 .stakes { background: var(--eggshell-warm); }
 .stakes-head { display: flex; justify-content: space-between; gap: 28px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 36px; }
+.stakes-groups { display: flex; flex-direction: column; gap: 32px; }
+.stake-group-label { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); margin: 0 0 14px; }
 .stakes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
 .stake-cell { background: var(--eggshell); padding: 22px; display: flex; flex-direction: column; gap: 4px; }
 .stake-cell.is-host { background: var(--teal); color: var(--eggshell); }
