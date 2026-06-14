@@ -136,11 +136,17 @@ export default function NavbarClient({
                     {userEmail}
                   </p>
                 )}
-                <Link role="menuitem" href="/account" onClick={() => setMenuOpen(false)}>
-                  Account &amp; billing
-                </Link>
-                <Link role="menuitem" href="/portal" onClick={() => setMenuOpen(false)}>
+                {/* "My Growth Hub" is already a pill to the left of this menu,
+                    so it only appears here at the 720–900px window where that
+                    pill is hidden — avoids duplicating the same action twice. */}
+                <Link role="menuitem" className="nav-account-portal-link" href="/portal" onClick={() => setMenuOpen(false)}>
                   My Growth Hub
+                </Link>
+                <Link role="menuitem" href="/profile" onClick={() => setMenuOpen(false)}>
+                  Profile &amp; settings
+                </Link>
+                <Link role="menuitem" href="/plan" onClick={() => setMenuOpen(false)}>
+                  Plan &amp; billing
                 </Link>
                 <div className="nav-account-divider" />
                 <SignOutButton className="nav-account-signout" />
@@ -185,8 +191,11 @@ export default function NavbarClient({
           )}
           {isSignedIn && (
             <>
-              <Link href="/account" onClick={() => setOpen(false)}>
-                Account &amp; billing
+              <Link href="/profile" onClick={() => setOpen(false)}>
+                Profile &amp; settings
+              </Link>
+              <Link href="/plan" onClick={() => setOpen(false)}>
+                Plan &amp; billing
               </Link>
               <SignOutButton className="nav-drawer-signout" />
             </>

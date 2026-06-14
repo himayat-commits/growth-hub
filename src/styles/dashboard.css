@@ -255,6 +255,7 @@ p { margin: 0; }
   background: var(--plum);
   border: 1.5px solid var(--surface);
 }
+.gh-account { position: relative; }
 .gh-profile-chip {
   display: flex; align-items: center; gap: 10px;
   padding: 4px 10px 4px 4px;
@@ -262,6 +263,8 @@ p { margin: 0; }
   border: 1px solid var(--rule);
   background: var(--surface);
   cursor: pointer;
+  /* Reset <button> UA defaults — this used to be an <a>. */
+  font: inherit; color: inherit; text-align: left;
 }
 .gh-profile-chip:hover { background: var(--bg); }
 .gh-avatar {
@@ -277,7 +280,44 @@ p { margin: 0; }
 .gh-avatar.xl { width: 72px; height: 72px; font-size: 24px; }
 .gh-profile-name { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.1; }
 .gh-profile-role { font-size: 11px; color: var(--ink-50); }
-.gh-profile-chip .caret { color: var(--ink-50); }
+.gh-profile-chip .caret { color: var(--ink-50); transition: transform .14s ease; }
+.gh-profile-chip .caret.is-open { transform: rotate(180deg); }
+
+/* Account dropdown — opened by the topbar profile chip. Gives in-app access
+   to profile, billing, and sign-out (sign-out was previously buried at the
+   bottom of /profile). */
+.gh-account-menu {
+  position: absolute; right: 0; top: calc(100% + 8px);
+  min-width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-lg);
+  box-shadow: 0 18px 40px -22px rgba(13, 63, 72, 0.3), 0 1px 0 rgba(13, 63, 72, 0.04);
+  padding: 8px;
+  display: flex; flex-direction: column; gap: 2px;
+  z-index: 60;
+}
+.gh-account-menu a,
+.gh-account-menu form button {
+  display: block;
+  width: 100%; text-align: left;
+  font: inherit; font-size: 14px; color: var(--ink);
+  background: none; border: 0;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  text-decoration: none;
+}
+.gh-account-menu a:hover,
+.gh-account-menu form button:hover { background: var(--bg); }
+.gh-account-divider { height: 1px; background: var(--rule); margin: 6px -8px; }
+.gh-account-signout { color: var(--plum) !important; font-weight: 500; }
+
+/* On narrow screens collapse the chip to just the avatar + caret. */
+@media (max-width: 640px) {
+  .gh-profile-meta { display: none; }
+  .gh-profile-chip { padding: 4px; }
+}
 
 /* ── Content scroll area ───────────────────────────────────────────── */
 .gh-content {
