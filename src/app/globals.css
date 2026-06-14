@@ -999,17 +999,24 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 /* Navbar account dropdown — visible only when the visitor is signed in.
    Sits to the right of the primary CTA ("My Growth Hub"). */
 .nav-account { position: relative; display: flex; align-items: center; gap: 10px; }
+/* Demoted to a plain avatar + caret (no pill/border) so it reads as a
+   secondary control next to the "My Growth Hub" CTA rather than a second
+   competing button. */
 .nav-account-toggle {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 8px 4px 4px;
-  border: 1px solid rgba(13, 63, 72, 0.18);
-  background: white;
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 4px 3px 3px;
+  border: 0;
+  background: transparent;
   border-radius: 999px;
   cursor: pointer;
   color: var(--teal);
   transition: background-color 120ms ease;
 }
-.nav-account-toggle:hover { background: rgba(227, 242, 156, 0.45); }
+.nav-account-toggle:hover { background: rgba(13, 63, 72, 0.06); }
+/* The portal link inside the menu is redundant while the CTA pill is shown
+   (>900px). It only surfaces in the 720–900px band where .nav-cta is hidden. */
+.nav-account-portal-link { display: none; }
+@media (max-width: 900px) { .nav-account-portal-link { display: block; } }
 .nav-account-avatar {
   display: inline-flex; align-items: center; justify-content: center;
   width: 26px; height: 26px;
