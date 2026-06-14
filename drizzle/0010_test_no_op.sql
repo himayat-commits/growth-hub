@@ -1,9 +1,15 @@
--- No-op migration.
+-- No-op migration (placeholder for journal idx 10).
 --
--- This entry exists in drizzle/meta/_journal.json (idx 10) but its .sql file
--- was never committed, which made `drizzle-kit migrate` fail to load the
--- journal and silently skip every later migration (including
--- 0011_add_user_photo) on production. Restoring the file as an explicit no-op
--- lets the migrator advance past this index again.
+-- History: idx 10 existed in drizzle/meta/_journal.json but its .sql file was
+-- never committed, which made `drizzle-kit migrate` fail to load the journal
+-- and silently skip every later migration (including 0011_add_user_photo) on
+-- production. The fix is to keep a valid .sql file at this index.
 --
--- Intentionally empty: no statements to run.
+-- It MUST contain at least one statement: `drizzle-kit generate` prunes
+-- migration files that have no statements, which would re-introduce the
+-- original bug. The statement below is an intentional no-op (it changes
+-- nothing) and is safe to re-run on any database.
+--
+-- Migrations are applied by timestamp ordering, so editing this file does not
+-- cause it to re-run on databases that have already advanced past idx 10.
+SELECT 1;

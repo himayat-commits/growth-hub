@@ -109,26 +109,30 @@ export default async function DashboardPage() {
     obRows,
     activeBookings,
   ] = await Promise.all([
-    getSubscription(),
-    getFeaturedResources(3),
-    getUpcomingEvents(50),
-    getUserRsvpSet(user.id),
-    getNotifications(user.id, 3),
-    getThread(user.id),
-    getUnreadMessageCount(user.id),
+    // Each source degrades to an empty/neutral fallback so one flaky query
+    // (or a schema drift) renders a partial dashboard instead of 500ing the
+    // whole page. ensureUserRecord() above is the one hard dependency.
+    getSubscription(user.id).catch(() => null),
+    getFeaturedResources(3).catch(() => []),
+    getUpcomingEvents(50).catch(() => []),
+    getUserRsvpSet(user.id).catch(() => new Set<number>()),
+    getNotifications(user.id, 3).catch(() => []),
+    getThread(user.id).catch(() => []),
+    getUnreadMessageCount(user.id).catch(() => 0),
     getDb()
       .select()
       .from(onboardingStates)
       .where(eq(onboardingStates.userId, user.id))
-      .limit(1),
-    getActiveBookings(user.id),
+      .limit(1)
+      .catch(() => []),
+    getActiveBookings(user.id).catch(() => []),
   ]);
   const wizardState = obRows[0]?.state as WizardState | undefined;
   const tier = getEffectivePlan(sub);
   const plan = PLANS[tier];
 
   const strategist = profile.assignedStrategistId
-    ? await getStrategistBySlug(profile.assignedStrategistId)
+    ? await getStrategistBySlug(profile.assignedStrategistId).catch(() => null)
     : null;
 
   // The user's next 1-2 upcoming sessions (events they've RSVP'd to).
