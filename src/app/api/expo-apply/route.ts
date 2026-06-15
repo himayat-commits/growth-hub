@@ -23,12 +23,12 @@ import * as Sentry from '@sentry/nextjs';
 export const runtime = 'nodejs';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ROLES = ['host_a_stall', 'run_a_workshop', 'speak_on_stage'] as const;
+const ROLES = ['host_a_stall', 'run_a_workshop', 'help_desk_advisory'] as const;
 type Role = (typeof ROLES)[number];
 const ROLE_LABELS: Record<Role, string> = {
   host_a_stall: 'Host a stall',
   run_a_workshop: 'Run a workshop',
-  speak_on_stage: 'Speak on stage',
+  help_desk_advisory: 'Help desk or advisory support',
 };
 
 type Body = {
@@ -128,10 +128,12 @@ export async function POST(req: Request) {
   if (website) fields.push({ objectTypeId: '0-1', name: 'website', value: website });
   const stallDetails = roles.includes('host_a_stall') ? str(body.expo_stall_details) : '';
   const workshopDetails = roles.includes('run_a_workshop') ? str(body.expo_workshop_details) : '';
-  const speakerDetails = roles.includes('speak_on_stage') ? str(body.expo_speaker_details) : '';
+  // Help desk / advisory answers reuse the existing expo_speaker_details
+  // property (relabelled in HubSpot) — see scripts/update-expo-advisory.mjs.
+  const advisoryDetails = roles.includes('help_desk_advisory') ? str(body.expo_speaker_details) : '';
   if (stallDetails) fields.push({ objectTypeId: '0-1', name: 'expo_stall_details', value: stallDetails });
   if (workshopDetails) fields.push({ objectTypeId: '0-1', name: 'expo_workshop_details', value: workshopDetails });
-  if (speakerDetails) fields.push({ objectTypeId: '0-1', name: 'expo_speaker_details', value: speakerDetails });
+  if (advisoryDetails) fields.push({ objectTypeId: '0-1', name: 'expo_speaker_details', value: advisoryDetails });
   if (message) fields.push({ objectTypeId: '0-1', name: 'message', value: message });
 
   const payload = {
