@@ -9,6 +9,7 @@ import { SUMMIT, isSummitRegistrationOpen } from '@/lib/summit';
 import CaptureAttribution from '../[slug]/CaptureAttribution';
 import SummitCtas, { SummitApplyLink } from './SummitCtas';
 import SummitHeroHeadline from './SummitHeroHeadline';
+import PlanYourDayPanel from './PlanYourDayPanel';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
 
@@ -222,6 +223,14 @@ const eventJsonLd: Record<string, unknown> = {
 export default async function EntrepreneurshipForEveryonePage() {
   const siteSettings = await getSiteSettings();
 
+  // Condensed running order for the hero "see the draft program" disclosure.
+  const programBlocks = PROGRAM.map((s) => ({
+    time: s.time,
+    title: s.title,
+    pin: s.type === 'pin',
+    brk: s.type === 'break',
+  }));
+
   return (
     <main>
       <CaptureAttribution slug={SUMMIT.slug} />
@@ -236,13 +245,6 @@ export default async function EntrepreneurshipForEveryonePage() {
       {/* HERO */}
       <section className="hero event-hero" id="top">
         <div className="wrap">
-          <Link
-            href="/events"
-            className="ed-back"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--plum)', fontSize: 14, marginBottom: 24 }}
-          >
-            ← All events
-          </Link>
           <div className="hero-eyebrow">
             <span className="dot" />
             A free community day for Canberra small business · with CBR Innovation Network
@@ -251,13 +253,22 @@ export default async function EntrepreneurshipForEveryonePage() {
           <div className="hero-handnote" style={{ marginTop: 24 }}>
             <span className="txt handscript">{SUMMIT.tagline}</span>
           </div>
-          <p className="hero-sub">
-            A free, full-day program of talks, workshops and help-desks for people starting,
-            running and growing small businesses in Canberra — with dedicated tracks for
-            diverse founders, tradies, and emerging community-service operators.
-          </p>
 
-          <SummitCtas surface="hero" />
+          <div className="event-hero-grid">
+            <div className="event-hero-main">
+              <p className="hero-sub">
+                A free, full-day program of talks, workshops and help-desks for people starting,
+                running and growing small businesses in Canberra — with dedicated tracks for
+                diverse founders, tradies, and emerging community-service operators.
+              </p>
+
+              <SummitCtas surface="hero" />
+            </div>
+
+            <aside className="event-hero-side" aria-label="Plan your day">
+              <PlanYourDayPanel blocks={programBlocks} />
+            </aside>
+          </div>
 
           <div className="event-keyfacts">
             <div className="event-keyfact"><span className="lbl">Date</span><span className="val">{SUMMIT.dateLong}</span></div>

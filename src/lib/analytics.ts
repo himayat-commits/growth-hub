@@ -47,6 +47,7 @@ export type AnalyticsEvent =
   | 'event_add_to_calendar'      // clicked Add to Calendar (.ics download)
   | 'summit_register_intent'     // attendee clicked the Eventbrite "Register" CTA for the summit
   | 'summit_apply_click'         // contributor clicked "Apply" (stallholder/speaker/sponsor) for the summit
+  | 'summit_plan_expand'         // attendee expanded a "plan your day" panel row on the summit hero
   | 'partner_card_click'         // clicked a partner-directory card
   | 'partner_need_click'         // clicked a need-based discovery chip in /partners directory
   | 'partner_recruit_click'      // clicked the inline "Could you be here?" recruitment card
