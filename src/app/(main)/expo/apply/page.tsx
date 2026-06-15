@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SUMMIT } from '@/lib/summit';
-import HubSpotForm from './HubSpotForm';
+import ExpoApplyForm from './ExpoApplyForm';
 
 // Two-column layout mirroring the signup pages: event pitch + key facts on
 // the left, the HubSpot application form on the right. Event facts come from
@@ -99,22 +99,8 @@ export default function ExpoApplyPage() {
 
           {/* Right form column */}
           <div>
-            <div className="signup-formwrap">
-              <div className="signup-form-head">
-                <p className="signup-form-eyebrow">Apply to take part</p>
-                <h2 className="signup-form-title">
-                  Three ways in.{' '}
-                  <em style={{ color: 'var(--plum)' }}>
-                    Tell us how you&apos;d like to help.
-                  </em>
-                </h2>
-                <p className="signup-form-sub">
-                  One short form for all three roles — tick whichever fit (you can
-                  choose more than one) and we&apos;ll only ask what&apos;s relevant.
-                  We read every application and reply within a few business days.
-                </p>
-              </div>
-              <HubSpotForm />
+            <div className="signup-formwrap signup-formwrap--steps">
+              <ExpoApplyForm />
             </div>
           </div>
         </div>
