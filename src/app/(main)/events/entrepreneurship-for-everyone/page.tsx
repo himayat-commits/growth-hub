@@ -8,6 +8,7 @@ import { getSiteSettings } from '@/lib/cms';
 import { SUMMIT, isSummitRegistrationOpen } from '@/lib/summit';
 import CaptureAttribution from '../[slug]/CaptureAttribution';
 import SummitCtas, { SummitApplyLink } from './SummitCtas';
+import SummitHeroHeadline from './SummitHeroHeadline';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
 
@@ -118,38 +119,72 @@ const WAYS_TO_HELP = [
   { t: 'Collaborative opportunities', d: "Have an idea we haven't listed? Co-deliver something with us. Get in touch.", tag: 'Open' },
 ];
 
-const STAKEHOLDERS = [
-  { name: 'The Growth Hub', role: 'Host & convenor', host: true },
-  { name: 'Himayat', role: 'Co-host & community' },
-  { name: 'CBRIN', role: 'Venue & ecosystem' },
-  { name: 'Asuria', role: 'Business planning & employment' },
-  { name: 'Many Rivers', role: 'Microenterprise & microfinance' },
-  { name: 'Canberra Business Chamber', role: 'Industry & advocacy' },
-  { name: 'Navitas Skilled Futures', role: 'Skills & training' },
-  { name: 'Normtech', role: 'IT & cyber security' },
-  { name: 'What Works', role: 'Tradie & workflow support' },
-  { name: 'Her Zest', role: 'Women in business' },
-  { name: 'Canberra Women in Business', role: 'Women in business' },
-  { name: 'National Self Employment Association', role: 'Self-employment' },
-  { name: 'DEWR', role: 'Government' },
-  { name: 'RD Consulting', role: 'Marketing & LinkedIn' },
-  { name: 'Small Business Digital', role: 'Digital programs' },
-  { name: 'ICN', role: 'Industry capability' },
-  { name: 'MARSS ACT', role: 'Migrant & refugee settlement' },
-  { name: 'Australian Red Cross (ACT)', role: 'Community services' },
-  { name: 'Hands Across Canberra', role: 'Community funding' },
-  { name: 'The Mill House Ventures', role: 'Social enterprise & ventures' },
-  { name: 'RKDN', role: 'Advisory & consulting' },
-  { name: 'Canberra Business Advice & Support Service', role: 'Business advisory' },
-  { name: 'Bendigo Bank', role: 'Banking & finance' },
-  { name: 'Canberra Multicultural Community Forum', role: 'Multicultural community' },
-  { name: 'Multicultural Hub Canberra', role: 'Multicultural community' },
-  { name: 'MTC Australia', role: 'Employment & training' },
-  { name: 'Master Builders Association', role: 'Building industry' },
-  { name: 'Allara Creative', role: 'Creative & branding' },
-  { name: "Women's Centre for Health Matters", role: 'Health & wellbeing' },
-  { name: 'Catalysr', role: 'Migrant entrepreneur accelerator' },
-  { name: 'Justin Stanic', role: 'Small business mentor' },
+interface Stakeholder {
+  name: string;
+  role: string;
+  host?: boolean;
+}
+
+// Grouped by what each organisation brings to the day, so 30+ names read as a
+// map of the ecosystem rather than an undifferentiated wall. The host leads
+// the first group.
+const STAKEHOLDER_GROUPS: Array<{ label: string; members: Stakeholder[] }> = [
+  {
+    label: 'Hosts & venue',
+    members: [
+      { name: 'The Growth Hub', role: 'Host & convenor', host: true },
+      { name: 'Himayat', role: 'Co-host & community' },
+      { name: 'CBRIN', role: 'Venue & ecosystem' },
+    ],
+  },
+  {
+    label: 'Advice, mentoring & funding',
+    members: [
+      { name: 'Asuria', role: 'Business planning & employment' },
+      { name: 'Many Rivers', role: 'Microenterprise & microfinance' },
+      { name: 'National Self Employment Association', role: 'Self-employment' },
+      { name: 'The Mill House Ventures', role: 'Social enterprise & ventures' },
+      { name: 'RKDN', role: 'Advisory & consulting' },
+      { name: 'Canberra Business Advice & Support Service', role: 'Business advisory' },
+      { name: 'Bendigo Bank', role: 'Banking & finance' },
+      { name: 'Hands Across Canberra', role: 'Community funding' },
+      { name: 'Justin Stanic', role: 'Small business mentor' },
+    ],
+  },
+  {
+    label: 'Industry, trades & skills',
+    members: [
+      { name: 'Canberra Business Chamber', role: 'Industry & advocacy' },
+      { name: 'What Works', role: 'Tradie & workflow support' },
+      { name: 'ICN', role: 'Industry capability' },
+      { name: 'Master Builders Association', role: 'Building industry' },
+      { name: 'Navitas Skilled Futures', role: 'Skills & training' },
+      { name: 'MTC Australia', role: 'Employment & training' },
+      { name: 'DEWR', role: 'Government' },
+      { name: 'Small Business Digital', role: 'Digital programs' },
+    ],
+  },
+  {
+    label: 'Digital, marketing & creative',
+    members: [
+      { name: 'RD Consulting', role: 'Marketing & LinkedIn' },
+      { name: 'Normtech', role: 'IT & cyber security' },
+      { name: 'Allara Creative', role: 'Creative & branding' },
+    ],
+  },
+  {
+    label: 'Community, multicultural & inclusion',
+    members: [
+      { name: 'Her Zest', role: 'Women in business' },
+      { name: 'Canberra Women in Business', role: 'Women in business' },
+      { name: 'MARSS ACT', role: 'Migrant & refugee settlement' },
+      { name: 'Catalysr', role: 'Migrant entrepreneur accelerator' },
+      { name: 'Australian Red Cross (ACT)', role: 'Community services' },
+      { name: 'Canberra Multicultural Community Forum', role: 'Multicultural community' },
+      { name: 'Multicultural Hub Canberra', role: 'Multicultural community' },
+      { name: "Women's Centre for Health Matters", role: 'Health & wellbeing' },
+    ],
+  },
 ];
 
 const eventJsonLd: Record<string, unknown> = {
@@ -212,9 +247,7 @@ export default async function EntrepreneurshipForEveryonePage() {
             <span className="dot" />
             A free community day for Canberra small business · with CBR Innovation Network
           </div>
-          <h1 className="hero-h1">
-            Entrepreneurship for <span className="grow">Everyone</span>
-          </h1>
+          <SummitHeroHeadline />
           <div className="hero-handnote" style={{ marginTop: 24 }}>
             <span className="txt handscript">{SUMMIT.tagline}</span>
           </div>
@@ -240,7 +273,7 @@ export default async function EntrepreneurshipForEveryonePage() {
         <div className="wrap">
           <div className="schedule-head">
             <span className="section-label">Program</span>
-            <h2 className="section-h2">A full day of practical<br />help — from welcome<br />to last orders.</h2>
+            <h2 className="section-h2">A full day of practical help — from welcome to last orders.</h2>
             <p className="naming-lead">
               The running order for the day. A handful of sessions are still locking in
               presenters — everything else is confirmed. We&apos;re continuing to expand
@@ -275,7 +308,7 @@ export default async function EntrepreneurshipForEveryonePage() {
                   {slot.sessions && (
                     <ul className="sessions">
                       {slot.sessions.map((s, j) => (
-                        <li key={j} className={'session' + (s.helpdesk ? ' is-helpdesk' : '') + (s.proposed ? ' is-proposed' : '')}>
+                        <li key={j} className={'session' + (s.helpdesk ? ' is-helpdesk' : '') + (s.proposed ? ' is-proposed' : '') + (s.p === 'TBC' ? ' is-tbc' : '')}>
                           <span className="session-title">{s.t}</span>
                           <span className="session-pres">
                             <span className="pres-dot" />
@@ -297,7 +330,7 @@ export default async function EntrepreneurshipForEveryonePage() {
       <section className="involved" id="involved">
         <div className="wrap">
           <span className="section-label">Get involved</span>
-          <h2 className="section-h2">Eight ways to be<br />part of the day.</h2>
+          <h2 className="section-h2">Eight ways to be part of the day.</h2>
           <p className="involved-lead">
             We&apos;re bringing partners in across the whole program. If any of the following
             fits what your organisation does, apply to take part — we read every application
@@ -306,10 +339,9 @@ export default async function EntrepreneurshipForEveryonePage() {
           <div className="involved-grid">
             {WAYS_TO_HELP.map((w, i) => (
               <div className="inv-card" key={i}>
-                <span className="inv-num">No. 0{i + 1}</span>
+                <span className="inv-tag">{w.tag}</span>
                 <h3>{w.t}</h3>
                 <p>{w.d}</p>
-                <span className="inv-tag">{w.tag}</span>
               </div>
             ))}
           </div>
@@ -332,11 +364,18 @@ export default async function EntrepreneurshipForEveryonePage() {
               organisation here, that&apos;s our cue to send the next invite.
             </p>
           </div>
-          <div className="stakes-grid">
-            {STAKEHOLDERS.map((s) => (
-              <div className={'stake-cell' + (s.host ? ' is-host' : '')} key={s.name}>
-                <span className="stake-name">{s.name}</span>
-                <span className="stake-role">{s.role}</span>
+          <div className="stakes-groups">
+            {STAKEHOLDER_GROUPS.map((g) => (
+              <div className="stake-group" key={g.label}>
+                <h3 className="stake-group-label">{g.label}</h3>
+                <div className="stakes-grid">
+                  {g.members.map((s) => (
+                    <div className={'stake-cell' + (s.host ? ' is-host' : '')} key={s.name}>
+                      <span className="stake-name">{s.name}</span>
+                      <span className="stake-role">{s.role}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
