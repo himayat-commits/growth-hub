@@ -19,7 +19,6 @@
 
 import { NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
-import { Resend } from 'resend';
 
 export const runtime = 'nodejs';
 
@@ -161,18 +160,9 @@ export async function POST(req: Request) {
       throw new Error(`HubSpot ${res.status}: ${detail.slice(0, 120)}`);
     }
 
-    // Best-effort internal notification. HubSpot's v3 Forms API can't set
-    // form notification recipients, so we email the team ourselves (same
-    // Resend setup as /api/contact). Never let an email failure fail the
-    // application — the lead is already safely in HubSpot by this point.
-    await notifyTeam({
-      firstname, lastname, email, phone, company, website, message,
-      roles, stallDetails, workshopDetails, speakerDetails,
-    }).catch((e) => {
-      console.warn('[expo-apply] notification email failed (non-fatal)', e);
-      Sentry.captureException(e, { tags: { area: 'expo-apply', step: 'notify' } });
-    });
-
+    // Submission notifications are handled by HubSpot's native form
+    // notifications (configured in the form's Options), since this submits
+    // through the form itself.
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[expo-apply] HubSpot submit failed', err);
@@ -185,62 +175,4 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
-}
-
-// ---------------------------------------------------------------------------
-// Internal "new application" email. Mirrors /api/contact: from the verified
-// himayat.com.au sender, reply-to the applicant. No-ops cleanly when
-// RESEND_API_KEY is unset (e.g. local dev) so it never blocks a submission.
-// ---------------------------------------------------------------------------
-
-type Notification = {
-  firstname: string; lastname: string; email: string; phone: string;
-  company: string; website: string; message: string; roles: Role[];
-  stallDetails: string; workshopDetails: string; speakerDetails: string;
-};
-
-function esc(s: string) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-async function notifyTeam(n: Notification) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return; // unconfigured (local/dev) — skip silently
-
-  const rolesLine = n.roles.map((r) => ROLE_LABELS[r]).join(' · ') || '—';
-  const block = (title: string, body: string) =>
-    body
-      ? `<div style="margin-top:20px;"><p style="font-size:12px;font-weight:600;color:#5F304B;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 8px;">${title}</p><p style="margin:0;line-height:1.6;white-space:pre-wrap;">${esc(body)}</p></div>`
-      : '';
-
-  const html = `
-<div style="font-family:Georgia,serif;max-width:600px;color:#0D3F48;">
-  <div style="background:#0D3F48;color:#F3F0E7;padding:26px 30px;border-radius:8px 8px 0 0;">
-    <h2 style="margin:0;font-weight:400;font-size:22px;">New expo application</h2>
-    <p style="margin:6px 0 0;opacity:0.8;font-size:14px;">Entrepreneurship for Everyone · ${esc(rolesLine)}</p>
-  </div>
-  <div style="background:#FCFAF3;border:1px solid #E6E1D2;border-top:none;padding:26px 30px;border-radius:0 0 8px 8px;">
-    <table style="width:100%;border-collapse:collapse;font-size:16px;">
-      <tr><td style="padding:8px 0;border-bottom:1px solid #E6E1D2;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#5F304B;width:130px;">Name</td><td style="padding:8px 0;border-bottom:1px solid #E6E1D2;">${esc(n.firstname)} ${esc(n.lastname)}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #E6E1D2;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#5F304B;">Email</td><td style="padding:8px 0;border-bottom:1px solid #E6E1D2;"><a href="mailto:${esc(n.email)}" style="color:#0D3F48;">${esc(n.email)}</a></td></tr>
-      ${n.phone ? `<tr><td style="padding:8px 0;border-bottom:1px solid #E6E1D2;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#5F304B;">Phone</td><td style="padding:8px 0;border-bottom:1px solid #E6E1D2;">${esc(n.phone)}</td></tr>` : ''}
-      <tr><td style="padding:8px 0;border-bottom:1px solid #E6E1D2;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#5F304B;">Business</td><td style="padding:8px 0;border-bottom:1px solid #E6E1D2;">${esc(n.company)}</td></tr>
-      ${n.website ? `<tr><td style="padding:8px 0;border-bottom:1px solid #E6E1D2;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#5F304B;">Link</td><td style="padding:8px 0;border-bottom:1px solid #E6E1D2;">${esc(n.website)}</td></tr>` : ''}
-    </table>
-    ${block('Stall', n.stallDetails)}
-    ${block('Workshop', n.workshopDetails)}
-    ${block('Talk', n.speakerDetails)}
-    ${block('Anything else', n.message)}
-    <div style="margin-top:28px;padding-top:18px;border-top:1px solid #E6E1D2;font-size:13px;color:#7A9098;">Reply directly to this email to reach ${esc(n.firstname)}.</div>
-  </div>
-</div>`;
-
-  const resend = new Resend(key);
-  await resend.emails.send({
-    from: 'Growth Hub <noreply@himayat.com.au>',
-    to: ['hello@himayat.com.au'],
-    replyTo: n.email,
-    subject: `New expo application — ${n.firstname} ${n.lastname} (${n.company})`,
-    html,
-  });
 }
