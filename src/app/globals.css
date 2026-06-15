@@ -656,8 +656,6 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .signup-trust-item { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--muted); }
 .signup-trust-item svg { color: var(--plum); flex-shrink: 0; }
 .signup-formwrap { background: #fff; border: 1px solid var(--line); border-radius: 28px; padding: 40px; }
-.signup-back { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--plum); margin-bottom: 32px; letter-spacing: 0.01em; }
-.signup-back:hover { color: var(--teal); }
 .signup-terms { font-size: 13px; color: rgba(243,240,231,0.65); margin-top: 8px; }
 .signup-desc { font-size: 17px; line-height: 1.55; margin: 20px 0 0; }
 .signup-divider { height: 1px; background: rgba(243,240,231,0.18); margin: 20px 0; border: none; }
@@ -667,15 +665,6 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .signup-form-title { font-size: clamp(26px,2.8vw,34px); font-weight: 400; line-height: 1.15; letter-spacing: -0.01em; color: var(--teal); margin: 0 0 8px; }
 .signup-form-sub { font-size: 16px; line-height: 1.55; color: rgba(13,63,72,0.72); margin: 0 0 28px; }
 @media (max-width: 960px) { .signup-grid { grid-template-columns: 1fr; } .signup-summary { position: static; } }
-
-/* ---- Expo apply: peer role cards in the signup-style left column ---- */
-.signup-main.signup-main--tight { padding-top: 24px; }
-.expo-roles { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
-.expo-role { display: flex; align-items: flex-start; gap: 14px; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
-.expo-role-icon { width: 40px; height: 40px; border-radius: 11px; background: var(--teal); color: var(--eggshell); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-.expo-role-icon svg { width: 20px; height: 20px; }
-.expo-role-title { font-size: 15px; font-weight: 600; color: var(--teal); margin: 0 0 2px; }
-.expo-role-desc { font-size: 14px; line-height: 1.5; color: var(--muted); margin: 0; }
 
 /* ---- Onboarding steps panel ---- */
 .ob-banner { display: flex; align-items: center; gap: 12px; background: var(--lime); color: var(--teal); border-radius: 14px; padding: 14px 20px; margin-bottom: 36px; font-size: 15px; font-weight: 500; }
