@@ -1556,7 +1556,7 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
    site's section/cta rules. A utility sans is used for labels, chips,
    buttons and the progress rail; titles inherit the page serif.
    =================================================================== */
-.signup-formwrap--steps { padding: 32px; }
+.signup-formwrap--steps { padding: 32px; box-shadow: 0 40px 80px -52px rgba(13,63,72,0.42); }
 .xa { --xa-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 
 /* Progress rail */
@@ -1583,7 +1583,7 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 
 /* Role picker — the signature element */
 .xa-rolegrid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.xa-rolecard { position: relative; display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; column-gap: 14px; row-gap: 2px; text-align: left; padding: 18px 20px; border-radius: 18px; border: 1.5px solid var(--line); background: #fff; transition: border-color .2s, background .2s, transform .12s, box-shadow .2s; }
+.xa-rolecard { position: relative; display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; column-gap: 14px; row-gap: 2px; text-align: left; padding: 20px 22px; border-radius: 18px; border: 1.5px solid var(--line); background: rgba(243,240,231,0.45); transition: border-color .2s, background .2s, transform .12s, box-shadow .2s; }
 .xa-rolecard:hover { border-color: rgba(13,63,72,0.35); transform: translateY(-1px); }
 .xa-rolecard.is-on { border-color: var(--teal); background: linear-gradient(180deg, rgba(227,242,156,0.32), rgba(227,242,156,0.12)); box-shadow: 0 10px 24px -16px rgba(13,63,72,0.5); }
 .xa-rolecard-icon { grid-row: 1 / span 2; align-self: start; width: 44px; height: 44px; border-radius: 12px; background: var(--eggshell-warm); color: var(--teal); display: flex; align-items: center; justify-content: center; transition: background .2s, color .2s; }
@@ -1591,9 +1591,13 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .xa-rolecard.is-on .xa-rolecard-icon { background: var(--teal); color: var(--lime); }
 .xa-rolecard-title { font-size: 18px; font-weight: 600; color: var(--teal); }
 .xa-rolecard-blurb { font-size: 14px; line-height: 1.45; color: var(--muted); }
-.xa-rolecard-tick { position: absolute; top: 14px; right: 14px; width: 24px; height: 24px; border-radius: 50%; background: var(--teal); color: var(--eggshell); display: flex; align-items: center; justify-content: center; transform: scale(0); transition: transform .22s cubic-bezier(.2,1.5,.4,1); }
-.xa-rolecard-tick svg { width: 13px; height: 13px; }
-.xa-rolecard.is-on .xa-rolecard-tick { transform: scale(1); }
+/* Always-visible selection affordance: an empty ring at rest that fills with a
+   teal check when picked — signals these are multi-select toggles, not links. */
+.xa-rolecard-tick { position: absolute; top: 50%; right: 18px; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 1.6px solid rgba(13,63,72,0.22); color: transparent; display: flex; align-items: center; justify-content: center; transition: background .2s, border-color .2s, color .2s; }
+.xa-rolecard-tick svg { width: 13px; height: 13px; opacity: 0; transition: opacity .18s; }
+.xa-rolecard:hover .xa-rolecard-tick { border-color: rgba(13,63,72,0.45); }
+.xa-rolecard.is-on .xa-rolecard-tick { background: var(--teal); border-color: var(--teal); color: var(--eggshell); }
+.xa-rolecard.is-on .xa-rolecard-tick svg { opacity: 1; }
 
 /* Fields */
 .xa-fields { display: flex; flex-direction: column; gap: 22px; }
