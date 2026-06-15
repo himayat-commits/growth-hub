@@ -1618,14 +1618,6 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .xa-toggle.is-on .xa-toggle-thumb { transform: translateX(18px); }
 .xa-toggle-label { font-size: 16px; color: var(--teal); }
 
-/* Per-role panels (step 3) */
-.xa-panels { display: flex; flex-direction: column; gap: 18px; }
-.xa-panel { border: 1px solid var(--line); border-radius: 18px; padding: 22px; background: linear-gradient(180deg, rgba(243,240,231,0.5), rgba(243,240,231,0)); display: flex; flex-direction: column; gap: 18px; }
-.xa-panel-head { display: flex; align-items: center; gap: 12px; margin: -2px 0 2px; }
-.xa-panel-icon { width: 34px; height: 34px; border-radius: 10px; background: var(--teal); color: var(--lime); display: flex; align-items: center; justify-content: center; flex: none; }
-.xa-panel-icon svg { width: 18px; height: 18px; }
-.xa-panel-title { font-size: 19px; font-weight: 500; color: var(--teal); margin: 0; }
-
 /* Review */
 .xa-review { border: 1px solid var(--line); border-radius: 16px; margin: 0 0 22px; overflow: hidden; }
 .xa-review-row { display: grid; grid-template-columns: 130px 1fr; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
