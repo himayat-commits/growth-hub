@@ -13,12 +13,12 @@ const OG_DESC =
 
 export const metadata: Metadata = {
   title:
-    'Call for stallholders, facilitators & speakers — Entrepreneurship for Everyone | Growth Hub by Himayat',
+    'Call for stallholders, facilitators & advisors — Entrepreneurship for Everyone | Growth Hub by Himayat',
   description:
-    'Apply to host a stall, run a workshop, or speak at Entrepreneurship for Everyone — a free, all-day small-business summit on 9 July 2026 at CBR Innovation Network, Canberra.',
+    'Apply to host a stall, run a workshop, or staff a help desk at Entrepreneurship for Everyone — a free, all-day small-business summit on 9 July 2026 at CBR Innovation Network, Canberra.',
   alternates: { canonical: '/expo/apply' },
   openGraph: {
-    title: 'Call for stallholders, facilitators & speakers — Entrepreneurship for Everyone',
+    title: 'Call for stallholders, facilitators & advisors — Entrepreneurship for Everyone',
     description: OG_DESC,
     url: '/expo/apply',
     type: 'website',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Call for stallholders, facilitators & speakers — Entrepreneurship for Everyone',
+    title: 'Call for stallholders, facilitators & advisors — Entrepreneurship for Everyone',
     description: OG_DESC,
   },
 };
@@ -44,7 +44,7 @@ export default function ExpoApplyPage() {
               Call for involvement · with CBR Innovation Network
             </div>
             <h1 className="signup-title">
-              Stallholders, facilitators &amp; speakers.
+              Stallholders, facilitators &amp; advisors.
             </h1>
             <p className="signup-tagline">
               We&apos;re building a free, all-day expo for Canberra small business —
