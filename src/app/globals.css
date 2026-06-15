@@ -1550,3 +1550,134 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .posts-empty h2 { font-weight: 400; font-size: 26px; color: var(--teal); margin: 0 0 10px; letter-spacing: -0.015em; }
 .posts-empty p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
 
+/* ===================================================================
+   Expo apply — multi-step application form (ExpoApplyForm.tsx).
+   All selectors are namespaced .xa-* so nothing collides with the
+   site's section/cta rules. A utility sans is used for labels, chips,
+   buttons and the progress rail; titles inherit the page serif.
+   =================================================================== */
+.signup-formwrap--steps { padding: 32px; }
+.xa { --xa-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+/* Progress rail */
+.xa-rail { list-style: none; display: flex; align-items: flex-start; gap: 0; margin: 0 0 32px; padding: 0; counter-reset: xa; }
+.xa-rail-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; font-family: var(--xa-sans); }
+/* connector line between dots */
+.xa-rail-step::before { content: ""; position: absolute; top: 14px; left: -50%; width: 100%; height: 2px; background: var(--line); z-index: 0; }
+.xa-rail-step:first-child::before { display: none; }
+.xa-rail-step.is-done::before, .xa-rail-step.is-current::before { background: var(--teal); }
+.xa-rail-dot { position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; background: #fff; border: 2px solid var(--line); color: var(--fg-subtle); transition: background .25s, border-color .25s, color .25s; }
+.xa-rail-dot svg { width: 14px; height: 14px; }
+.xa-rail-step.is-current .xa-rail-dot { border-color: var(--teal); color: var(--teal); box-shadow: 0 0 0 4px rgba(13,63,72,0.08); }
+.xa-rail-step.is-done .xa-rail-dot { background: var(--teal); border-color: var(--teal); color: var(--eggshell); }
+.xa-rail-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; color: var(--fg-subtle); }
+.xa-rail-step.is-current .xa-rail-label { color: var(--teal); }
+.xa-rail-step.is-done .xa-rail-label { color: var(--muted); }
+
+/* Step container + intro type */
+.xa-stepwrap { outline: none; }
+.xa-step { animation: xa-in .35s cubic-bezier(.2,.7,.3,1); }
+.xa-eyebrow { font-family: var(--xa-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); margin: 0 0 10px; }
+.xa-title { font-size: clamp(26px,2.8vw,34px); font-weight: 400; line-height: 1.12; letter-spacing: -0.01em; color: var(--teal); margin: 0 0 8px; }
+.xa-lede { font-size: 16px; line-height: 1.55; color: rgba(13,63,72,0.72); margin: 0 0 26px; }
+
+/* Role picker — the signature element */
+.xa-rolegrid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.xa-rolecard { position: relative; display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; column-gap: 14px; row-gap: 2px; text-align: left; padding: 18px 20px; border-radius: 18px; border: 1.5px solid var(--line); background: #fff; transition: border-color .2s, background .2s, transform .12s, box-shadow .2s; }
+.xa-rolecard:hover { border-color: rgba(13,63,72,0.35); transform: translateY(-1px); }
+.xa-rolecard.is-on { border-color: var(--teal); background: linear-gradient(180deg, rgba(227,242,156,0.32), rgba(227,242,156,0.12)); box-shadow: 0 10px 24px -16px rgba(13,63,72,0.5); }
+.xa-rolecard-icon { grid-row: 1 / span 2; align-self: start; width: 44px; height: 44px; border-radius: 12px; background: var(--eggshell-warm); color: var(--teal); display: flex; align-items: center; justify-content: center; transition: background .2s, color .2s; }
+.xa-rolecard-icon svg { width: 22px; height: 22px; }
+.xa-rolecard.is-on .xa-rolecard-icon { background: var(--teal); color: var(--lime); }
+.xa-rolecard-title { font-size: 18px; font-weight: 600; color: var(--teal); }
+.xa-rolecard-blurb { font-size: 14px; line-height: 1.45; color: var(--muted); }
+.xa-rolecard-tick { position: absolute; top: 14px; right: 14px; width: 24px; height: 24px; border-radius: 50%; background: var(--teal); color: var(--eggshell); display: flex; align-items: center; justify-content: center; transform: scale(0); transition: transform .22s cubic-bezier(.2,1.5,.4,1); }
+.xa-rolecard-tick svg { width: 13px; height: 13px; }
+.xa-rolecard.is-on .xa-rolecard-tick { transform: scale(1); }
+
+/* Fields */
+.xa-fields { display: flex; flex-direction: column; gap: 22px; }
+.xa-row { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.xa-field { display: flex; flex-direction: column; }
+.xa-label { font-family: var(--xa-sans); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(13,63,72,0.6); font-weight: 700; margin-bottom: 8px; }
+.xa-req { color: var(--plum); }
+.xa-hint { font-weight: 500; letter-spacing: 0.06em; color: var(--fg-subtle); text-transform: none; }
+.xa-input { width: 100%; font-family: var(--font-serif, Georgia, serif); font-size: 18px; color: var(--teal); background: transparent; border: none; border-bottom: 1.5px solid rgba(13,63,72,0.2); border-radius: 0; padding: 6px 0 9px; outline: none; transition: border-color .2s; }
+.xa-input:focus { border-bottom-color: var(--plum); }
+.xa-input::placeholder { color: rgba(13,63,72,0.32); font-style: italic; }
+.xa-textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+.xa-field.has-error .xa-input { border-bottom-color: #A8423E; }
+.xa-error { font-family: var(--xa-sans); font-size: 12.5px; color: #A8423E; margin-top: 6px; }
+.xa-error--block { margin-top: 14px; }
+
+/* Choice chips */
+.xa-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.xa-chip { font-family: var(--xa-sans); font-size: 13.5px; font-weight: 500; padding: 8px 15px; border-radius: 99px; border: 1.5px solid rgba(13,63,72,0.18); color: var(--muted); background: #fff; transition: background .15s, border-color .15s, color .15s; }
+.xa-chip:hover { border-color: rgba(13,63,72,0.4); color: var(--teal); }
+.xa-chip.is-on { background: var(--teal); border-color: var(--teal); color: var(--eggshell); }
+
+/* Toggles */
+.xa-toggles { display: flex; flex-direction: column; gap: 12px; }
+.xa-toggle { display: inline-flex; align-items: center; gap: 12px; text-align: left; }
+.xa-toggle-track { position: relative; width: 44px; height: 26px; border-radius: 99px; background: rgba(13,63,72,0.16); flex: none; transition: background .2s; }
+.xa-toggle-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform .2s cubic-bezier(.2,.9,.3,1.2); }
+.xa-toggle.is-on .xa-toggle-track { background: var(--teal); }
+.xa-toggle.is-on .xa-toggle-thumb { transform: translateX(18px); }
+.xa-toggle-label { font-size: 16px; color: var(--teal); }
+
+/* Per-role panels (step 3) */
+.xa-panels { display: flex; flex-direction: column; gap: 18px; }
+.xa-panel { border: 1px solid var(--line); border-radius: 18px; padding: 22px; background: linear-gradient(180deg, rgba(243,240,231,0.5), rgba(243,240,231,0)); display: flex; flex-direction: column; gap: 18px; }
+.xa-panel-head { display: flex; align-items: center; gap: 12px; margin: -2px 0 2px; }
+.xa-panel-icon { width: 34px; height: 34px; border-radius: 10px; background: var(--teal); color: var(--lime); display: flex; align-items: center; justify-content: center; flex: none; }
+.xa-panel-icon svg { width: 18px; height: 18px; }
+.xa-panel-title { font-size: 19px; font-weight: 500; color: var(--teal); margin: 0; }
+
+/* Review */
+.xa-review { border: 1px solid var(--line); border-radius: 16px; margin: 0 0 22px; overflow: hidden; }
+.xa-review-row { display: grid; grid-template-columns: 130px 1fr; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.xa-review-row:last-child { border-bottom: none; }
+.xa-review-row dt { font-family: var(--xa-sans); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; color: var(--fg-subtle); align-self: center; }
+.xa-review-row dd { margin: 0; font-size: 16px; color: var(--teal); }
+.xa-consent { font-size: 13px; line-height: 1.5; color: rgba(13,63,72,0.6); margin: 16px 0 0; }
+
+/* Footer controls */
+.xa-controls { display: flex; align-items: center; justify-content: space-between; margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line); }
+.xa-btn { font-family: var(--xa-sans); font-weight: 600; font-size: 15px; border-radius: 99px; transition: background .2s, transform .12s, color .2s, opacity .2s; }
+.xa-btn--primary { display: inline-flex; align-items: center; gap: 8px; background: var(--teal); color: var(--eggshell); padding: 14px 26px; box-shadow: 0 8px 20px -10px rgba(13,63,72,0.5); }
+.xa-btn--primary:hover { background: var(--plum); transform: translateY(-1px); }
+.xa-btn--primary:disabled { opacity: 0.6; cursor: progress; transform: none; }
+.xa-btn--ghost { color: var(--plum); padding: 14px 6px; }
+.xa-btn--ghost:hover { color: var(--teal); }
+.xa-btn--ghost:disabled { opacity: 0.4; }
+
+/* Success state */
+.xa-done { animation: xa-in .4s cubic-bezier(.2,.7,.3,1); text-align: center; padding: 12px 0 8px; outline: none; }
+.xa-done-mark { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 22px; background: var(--lime); color: var(--teal); display: flex; align-items: center; justify-content: center; animation: xa-pop .45s cubic-bezier(.2,1.4,.4,1) .08s both; }
+.xa-done-mark svg { width: 30px; height: 30px; }
+.xa-done-eyebrow { font-family: var(--xa-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--plum); margin: 0 0 8px; }
+.xa-done-title { font-size: clamp(24px,2.6vw,32px); font-weight: 400; line-height: 1.15; color: var(--teal); margin: 0 0 12px; }
+.xa-done-sub { font-size: 16px; line-height: 1.6; color: rgba(13,63,72,0.75); margin: 0 auto; max-width: 42ch; }
+.xa-done-sub b { color: var(--teal); }
+.xa-done-roles { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0; margin: 24px 0 0; }
+.xa-done-roles li { display: inline-flex; align-items: center; gap: 8px; font-family: var(--xa-sans); font-size: 13.5px; font-weight: 600; color: var(--teal); background: var(--eggshell-warm); border-radius: 99px; padding: 8px 15px 8px 10px; }
+.xa-done-roleicon { width: 24px; height: 24px; border-radius: 7px; background: var(--teal); color: var(--lime); display: flex; align-items: center; justify-content: center; }
+.xa-done-roleicon svg { width: 13px; height: 13px; }
+
+/* Honeypot — kept in the DOM for bots but out of sight + tab order */
+.xa-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+@keyframes xa-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes xa-pop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+
+@media (max-width: 600px) {
+  .signup-formwrap--steps { padding: 24px 20px; }
+  .xa-row { grid-template-columns: 1fr; }
+  .xa-rail-label { font-size: 10px; }
+  .xa-btn--primary { padding: 13px 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .xa-step, .xa-done, .xa-done-mark { animation: none; }
+  .xa-rolecard, .xa-rolecard-tick, .xa-toggle-thumb, .xa-btn--primary { transition: none; }
+}
+
