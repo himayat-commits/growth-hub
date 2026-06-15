@@ -14,17 +14,23 @@
 
 import { useEffect, useState } from 'react';
 
-// The roll lands on the last item and stops there.
+// The roll lands on the last item and stops there. Each entry is a real
+// audience the day is built for; keep them short enough to sit on one line
+// (see .hero-roll — `white-space: nowrap` — in globals.css).
 const ROLL = [
+  'founders',
   'tradies',
+  'sole traders',
   'new migrants',
   'women in business',
-  'NDIS & aged-care',
   'side-hustlers',
+  'NDIS & aged-care',
+  'community groups',
+  'first-timers',
   'Everyone',
 ] as const;
 
-const STEP_MS = 1500;
+const STEP_MS = 1200;
 
 export default function SummitHeroHeadline() {
   // Matches the server render, so hydration is clean; the effect takes it from

@@ -134,9 +134,10 @@ footer.foot :focus-visible {
 .hero-roll-underline path { stroke: var(--lime); }
 @keyframes hero-roll-in { from { opacity: 0; transform: translateY(0.16em); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .hero-roll-word { animation: none; } }
-/* On narrow screens the longer audience words ("women in business") exceed the
-   line; let them wrap rather than clip. The settled "Everyone" is one line. */
-@media (max-width: 600px) { .hero-roll { white-space: normal; } }
+/* Keep every rolling audience on a single line at all widths — no spill onto a
+   second line. On narrow screens we shrink the event-hero headline (rather than
+   wrapping the word) so even the longest audience still fits on one line. */
+@media (max-width: 600px) { .event-hero .hero-h1 { font-size: clamp(23px, 7.2vw, 40px); } }
 .hero-handnote { position: relative; display: inline-block; margin-top: 24px; }
 .hero-handnote .txt { font-size: clamp(28px, 3vw, 44px); color: var(--plum); line-height: 1; }
 .hero-sub { max-width: 620px; font-size: clamp(18px, 1.5vw, 22px); color: var(--teal); opacity: 0.85; margin: 36px 0 0; line-height: 1.5; }
@@ -1389,6 +1390,52 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .event-keyfact .lbl { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .event-keyfact .val { font-size: 16px; color: var(--teal); }
 .event-keyfact .val em { font-style: italic; color: var(--plum); }
+
+/* Hero detail row: supporting copy + CTAs on the left, an interactive
+   "plan your day" panel on the right. Collapses to a single column on
+   tablet / mobile. The rolling headline above stays full-width. */
+.event-hero-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 64px); align-items: start; margin-top: 40px; }
+.event-hero-main { min-width: 0; }
+.event-hero-main .hero-sub { margin-top: 0; }
+.event-hero-side { min-width: 0; }
+@media (max-width: 980px) {
+  .event-hero-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+
+/* "Plan your day" concierge panel (right hero column) */
+.plan-panel { background: var(--eggshell); border: 1px solid var(--eggshell-line); border-radius: 22px; overflow: hidden; box-shadow: 0 24px 54px -36px rgba(13,63,72,0.55); }
+.plan-panel-head { background: var(--teal); color: var(--eggshell); padding: 22px 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.plan-head-text { min-width: 0; }
+.plan-eyebrow { display: block; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lime); }
+.plan-lede { margin: 8px 0 0; font-size: 15px; line-height: 1.45; color: rgba(243,240,231,0.85); }
+.plan-chip { flex: none; margin-top: 2px; padding: 6px 12px; border-radius: 999px; background: var(--lime); color: var(--teal); font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; }
+.plan-acc { padding: 4px 6px; }
+.plan-row { border-bottom: 1px solid var(--eggshell-line); }
+.plan-row:last-child { border-bottom: 0; }
+.plan-q { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border-radius: 12px; text-align: left; font-size: 17px; color: var(--teal); transition: color .2s, background .2s; }
+.plan-q:hover { color: var(--plum); background: rgba(13,63,72,0.045); }
+.plan-row.is-open > .plan-q { color: var(--plum); }
+.plan-q .chev { color: var(--plum); flex: none; transition: transform .25s ease; }
+.plan-row.is-open .plan-q .chev { transform: rotate(90deg); }
+.plan-a-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s ease; }
+.plan-row.is-open .plan-a-wrap { grid-template-rows: 1fr; }
+.plan-a { overflow: hidden; min-height: 0; }
+.plan-a-inner { padding: 0 16px 18px; }
+@media (prefers-reduced-motion: reduce) { .plan-a-wrap, .plan-q .chev { transition: none; } }
+
+.plan-prog { list-style: none; margin: 0; padding: 0; }
+.plan-prog li { display: flex; gap: 12px; align-items: baseline; padding: 7px 0; border-bottom: 1px dashed rgba(13,63,72,0.12); }
+.plan-prog li:last-child { border-bottom: 0; }
+.plan-prog .t { font-family: var(--font-script); color: var(--plum); font-size: 15px; min-width: 72px; flex: none; }
+.plan-prog .n { color: var(--teal); font-size: 14.5px; line-height: 1.4; }
+.plan-jump { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--plum); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.plan-jump:hover { color: var(--teal); }
+
+.plan-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.plan-list li { position: relative; padding-left: 18px; color: var(--teal); font-size: 14.5px; line-height: 1.45; }
+.plan-list li::before { content: ''; position: absolute; left: 2px; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 2px rgba(227,242,156,0.4); }
+.plan-where { margin: 0; color: var(--teal); font-size: 15px; line-height: 1.5; }
+.plan-note { margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
 
 /* Naming concepts */
 .naming { background: var(--eggshell-warm); }
