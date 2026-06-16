@@ -45,9 +45,9 @@ interface ProgramSlot {
 }
 
 const PROGRAM: ProgramSlot[] = [
-  { time: '9:00am', end: '9:30am', type: 'pin', title: 'Welcome to Country & opening', blurb: 'Welcome to Country, introductions, an inclusivity welcome, and an overview of the day.' },
+  { time: '10:00am', end: '10:30am', type: 'pin', title: 'Welcome to Country & opening', blurb: 'Welcome to Country, introductions, an inclusivity welcome, and an overview of the day.' },
   {
-    time: '9:30am', end: '10:45am',
+    time: '10:30am', end: '11:45am',
     title: 'Getting started — fundamentals',
     blurb: 'Foundational sessions for early-stage and first-time founders. Help desk open throughout.',
     sessions: [
@@ -59,9 +59,9 @@ const PROGRAM: ProgramSlot[] = [
       { t: 'Help Desk — Getting Online', p: 'All', helpdesk: true },
     ],
   },
-  { time: '10:45am', end: '11:15am', type: 'break', title: 'Networking break + quiet catch-up area', blurb: "Coffee, conversations, and a low-stimulation room for those who'd rather chat 1:1." },
+  { time: '11:45am', end: '12:15pm', type: 'break', title: 'Networking break + quiet catch-up area', blurb: "Coffee, conversations, and a low-stimulation room for those who'd rather chat 1:1." },
   {
-    time: '11:15am', end: '1:00pm',
+    time: '12:15pm', end: '1:45pm',
     title: 'Marketing, IT & trades',
     blurb: 'For operators ready to sharpen the way they reach customers and protect their business.',
     sessions: [
@@ -71,9 +71,9 @@ const PROGRAM: ProgramSlot[] = [
       { t: 'Small Business Help Desk', p: 'All', helpdesk: true },
     ],
   },
-  { time: '1:00pm', end: '1:30pm', type: 'pin', title: 'Lunch + lucky door prize', blurb: 'Catered lunch with space to keep talking.' },
+  { time: '1:45pm', end: '2:15pm', type: 'pin', title: 'Lunch + lucky door prize', blurb: 'Catered lunch with space to keep talking.' },
   {
-    time: '1:30pm', end: '2:30pm',
+    time: '2:15pm', end: '3:15pm',
     title: 'Brand, content & connections',
     blurb: 'Sharper messaging, smarter networking, and a working LinkedIn presence.',
     sessions: [
@@ -84,27 +84,28 @@ const PROGRAM: ProgramSlot[] = [
     ],
   },
   {
-    time: '2:30pm', end: '3:30pm',
-    title: 'Leads, money & pathways',
-    blurb: 'Funding, financial literacy, and dedicated content for NDIS, aged-care and community-service operators.',
+    time: '3:15pm', end: '4:15pm',
+    title: 'Founder panel & pathways',
+    blurb: 'Entrepreneurs from diverse backgrounds on their journeys, the hurdles, and what they learned — plus funding, financial literacy and community-service pathways.',
     sessions: [
-      { t: 'Meta Business Suite & Lead Generation', p: 'The Chatbot Agency' },
+      { t: 'Founder panel — diverse founders on their journeys', p: 'TBC', proposed: true },
       { t: 'Grants & Funding', p: 'TBC' },
       { t: 'Financial Literacy', p: 'TBC' },
       { t: 'NDIS / Aged Care / Community Business Pathways', p: 'TBC', proposed: true },
     ],
   },
   {
-    time: '3:45pm', end: '5:00pm',
+    time: '4:30pm', end: '5:30pm',
     title: 'Build & automate',
     blurb: 'Putting the pieces together — your website, your brand, and AI to do the boring bits.',
     sessions: [
+      { t: 'Meta Business Suite & Lead Generation', p: 'The Chatbot Agency' },
       { t: 'Website Building & Branding', p: 'Casual Dot · The Chatbot Agency' },
       { t: 'AI & Automation for Productivity', p: 'TBC' },
       { t: 'Best Practices of Gen AI Prompting', p: 'Cyber Cure' },
     ],
   },
-  { time: '5:00pm', end: 'late', type: 'pin', title: 'Networking drinks & informal connections', blurb: 'Continuing the conversation — likely at an external venue/pub. Details to follow.' },
+  { time: '5:30pm', end: '6:30pm', type: 'pin', title: 'Networking drinks & informal connections', blurb: 'Continuing the conversation — likely at an external venue/pub. Details to follow.' },
 ];
 
 const WAYS_TO_HELP = [
