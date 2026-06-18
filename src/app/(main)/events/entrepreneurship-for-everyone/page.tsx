@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import Link from 'next/link';
 import Contact from '@/components/sections/Contact';
 import NewsletterStrip from '@/components/NewsletterStrip';
@@ -246,36 +247,36 @@ export default async function EntrepreneurshipForEveryonePage() {
       {/* HERO */}
       <section className="hero event-hero" id="top">
         <div className="wrap">
-          <div className="hero-eyebrow">
-            <span className="dot" />
+          <p className="event-eyebrow">
+            <span className="rule" aria-hidden="true" />
             A free community day for Canberra small business · with CBR Innovation Network
-          </div>
+          </p>
           <SummitHeroHeadline />
           <div className="hero-handnote" style={{ marginTop: 24 }}>
             <span className="txt handscript">{SUMMIT.tagline}</span>
           </div>
+          <p className="hero-sub">
+            A free, full-day program of talks, workshops and help-desks for people starting,
+            running and growing small businesses in Canberra — with dedicated tracks for
+            diverse founders, tradies, and emerging community-service operators.
+          </p>
+
+          <SummitCtas surface="hero" />
 
           <div className="event-hero-grid">
-            <div className="event-hero-main">
-              <p className="hero-sub">
-                A free, full-day program of talks, workshops and help-desks for people starting,
-                running and growing small businesses in Canberra — with dedicated tracks for
-                diverse founders, tradies, and emerging community-service operators.
-              </p>
-
-              <SummitCtas surface="hero" />
+            <div className="event-hero-facts">
+              <span className="section-label">At a glance</span>
+              <div className="event-keyfacts">
+                <div className="event-keyfact"><span className="lbl">Date</span><span className="val">{SUMMIT.dateLong}</span></div>
+                <div className="event-keyfact"><span className="lbl">Location</span><span className="val">{SUMMIT.venue}</span></div>
+                <div className="event-keyfact"><span className="lbl">Hours</span><span className="val">{SUMMIT.time}</span></div>
+                <div className="event-keyfact"><span className="lbl">Cost</span><span className="val">{SUMMIT.cost}</span></div>
+              </div>
             </div>
 
             <aside className="event-hero-side" aria-label="Plan your day">
               <PlanYourDayPanel blocks={programBlocks} />
             </aside>
-          </div>
-
-          <div className="event-keyfacts">
-            <div className="event-keyfact"><span className="lbl">Date</span><span className="val">{SUMMIT.dateLong}</span></div>
-            <div className="event-keyfact"><span className="lbl">Location</span><span className="val">{SUMMIT.venue}</span></div>
-            <div className="event-keyfact"><span className="lbl">Hours</span><span className="val">{SUMMIT.time}</span></div>
-            <div className="event-keyfact"><span className="lbl">Cost</span><span className="val">{SUMMIT.cost}</span></div>
           </div>
         </div>
       </section>
@@ -299,41 +300,51 @@ export default async function EntrepreneurshipForEveryonePage() {
           </div>
 
           <div className="schedule-list">
-            {PROGRAM.map((slot, i) => (
-              <div
-                key={i}
-                className={
-                  'slot' +
-                  (slot.type === 'pin' ? ' is-pin' : '') +
-                  (slot.type === 'break' ? ' is-break' : '')
-                }
-              >
-                <div className="slot-time">
-                  {slot.time}
-                  {slot.end && <span className="end">→ {slot.end}</span>}
-                </div>
-                <div className="slot-dot" />
-                <div className="slot-body">
-                  <div className="slot-mobile-time">{slot.time}{slot.end ? ` — ${slot.end}` : ''}</div>
-                  <h3>{slot.title}</h3>
-                  {slot.blurb && <p className="slot-blurb">{slot.blurb}</p>}
-                  {slot.sessions && (
-                    <ul className="sessions">
-                      {slot.sessions.map((s, j) => (
-                        <li key={j} className={'session' + (s.helpdesk ? ' is-helpdesk' : '') + (s.proposed ? ' is-proposed' : '') + (s.p === 'TBC' ? ' is-tbc' : '')}>
-                          <span className="session-title">{s.t}</span>
-                          <span className="session-pres">
-                            <span className="pres-dot" />
-                            {s.p === 'TBC' ? <span className="tbc">Presenter TBC</span> : <span>{s.p}</span>}
-                            {s.proposed && <span className="proposed-tag">Proposed</span>}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+            {PROGRAM.map((slot, i) => {
+              const isLunch = slot.title.toLowerCase().startsWith('lunch');
+              return (
+                <Fragment key={i}>
+                  {i === 0 && (
+                    <div className="schedule-part"><span className="schedule-part-label">Morning</span></div>
                   )}
-                </div>
-              </div>
-            ))}
+                  {isLunch && (
+                    <div className="schedule-part"><span className="schedule-part-label">Afternoon</span></div>
+                  )}
+                  <div
+                    className={
+                      'slot' +
+                      (slot.type === 'pin' ? ' is-pin' : '') +
+                      (slot.type === 'break' ? ' is-break' : '')
+                    }
+                  >
+                    <div className="slot-time">
+                      {slot.time}
+                      {slot.end && <span className="end">→ {slot.end}</span>}
+                    </div>
+                    <div className="slot-dot" />
+                    <div className="slot-body">
+                      <div className="slot-mobile-time">{slot.time}{slot.end ? ` — ${slot.end}` : ''}</div>
+                      <h3>{slot.title}</h3>
+                      {slot.blurb && <p className="slot-blurb">{slot.blurb}</p>}
+                      {slot.sessions && (
+                        <ul className="sessions">
+                          {slot.sessions.map((s, j) => (
+                            <li key={j} className={'session' + (s.helpdesk ? ' is-helpdesk' : '') + (s.proposed ? ' is-proposed' : '') + (s.p === 'TBC' ? ' is-tbc' : '')}>
+                              <span className="session-title">{s.t}</span>
+                              <span className="session-pres">
+                                <span className="pres-dot" />
+                                {s.p === 'TBC' ? <span className="tbc">Presenter TBC</span> : <span>{s.p}</span>}
+                                {s.proposed && <span className="proposed-tag">Proposed</span>}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                </Fragment>
+              );
+            })}
           </div>
         </div>
       </section>

@@ -1385,16 +1385,27 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
    ============================================================ */
 
 .event-hero .draft-tag { display: inline-block; vertical-align: middle; margin-left: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(95,48,75,0.12); color: var(--plum); font-size: 12px; letter-spacing: 0.05em; font-family: var(--font-script); }
-.event-keyfacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-top: 56px; border-top: 1px solid var(--line); padding-top: 32px; }
-.event-keyfact { display: flex; flex-direction: column; gap: 6px; }
-.event-keyfact .lbl { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.event-keyfact .val { font-size: 16px; color: var(--teal); }
+/* Editorial kicker (replaces the generic pill); the leading rule echoes
+   .section-label so the page's labels share one motif. */
+.event-eyebrow { display: inline-flex; align-items: center; gap: 12px; margin: 0 0 4px; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 13px; letter-spacing: 0.02em; color: var(--muted); }
+.event-eyebrow .rule { width: 28px; height: 1px; background: var(--plum); flex: none; }
+/* Register free leads the hero now that the CTAs sit above the support row. */
+.event-hero .hero-ctas .btn-primary { padding: 16px 30px; font-size: 16.5px; }
+/* "At a glance" facts now live as a calm card in the left of the hero support
+   row — the single canonical home for the logistics (deduped from the panel). */
+.event-hero-facts { background: var(--eggshell-warm); border: 1px solid var(--eggshell-line); border-radius: 22px; padding: 24px 28px 12px; align-self: start; }
+.event-hero-facts .section-label { margin-bottom: 14px; }
+.event-keyfacts { display: flex; flex-direction: column; margin: 0; }
+.event-keyfact { display: flex; flex-direction: row; align-items: baseline; justify-content: space-between; gap: 18px; padding: 13px 0; border-bottom: 1px dashed rgba(13,63,72,0.14); }
+.event-keyfact:last-child { border-bottom: 0; }
+.event-keyfact .lbl { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); flex: none; }
+.event-keyfact .val { font-size: 16px; color: var(--teal); text-align: right; }
 .event-keyfact .val em { font-style: italic; color: var(--plum); }
 
 /* Hero detail row: supporting copy + CTAs on the left, an interactive
    "plan your day" panel on the right. Collapses to a single column on
    tablet / mobile. The rolling headline above stays full-width. */
-.event-hero-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 64px); align-items: start; margin-top: 40px; }
+.event-hero-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(28px, 4vw, 52px); align-items: start; margin-top: 48px; }
 .event-hero-main { min-width: 0; }
 .event-hero-main .hero-sub { margin-top: 0; }
 .event-hero-side { min-width: 0; }
@@ -1426,7 +1437,7 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .plan-prog { list-style: none; margin: 0; padding: 0; }
 .plan-prog li { display: flex; gap: 12px; align-items: baseline; padding: 7px 0; border-bottom: 1px dashed rgba(13,63,72,0.12); }
 .plan-prog li:last-child { border-bottom: 0; }
-.plan-prog .t { font-family: var(--font-script); color: var(--plum); font-size: 15px; min-width: 72px; flex: none; }
+.plan-prog .t { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; color: var(--plum); font-size: 13px; font-weight: 600; letter-spacing: 0.01em; min-width: 76px; flex: none; }
 .plan-prog .n { color: var(--teal); font-size: 14.5px; line-height: 1.4; }
 .plan-jump { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--plum); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
 .plan-jump:hover { color: var(--teal); }
@@ -1456,14 +1467,21 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .name-suggest input { flex: 1; min-width: 240px; padding: 14px 18px; border: 1px solid var(--line); border-radius: 999px; background: var(--eggshell); font-size: 16px; font-family: inherit; color: var(--teal); }
 .name-suggest input:focus { outline: none; border-color: var(--teal); }
 
-/* Schedule */
-.schedule { padding-top: clamp(80px, 10vw, 140px); }
+/* Schedule — on a subtly warmer ground so the day reads as its own "moment". */
+.schedule { padding: clamp(80px, 10vw, 140px) 0 clamp(56px, 7vw, 96px); background: var(--eggshell-warm); }
 .schedule-head { max-width: 720px; }
 .schedule-head .draft-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: rgba(95,48,75,0.08); color: var(--plum); font-size: 13px; margin-top: 16px; }
 .schedule-list { margin-top: 48px; display: flex; flex-direction: column; }
+/* The day splits at lunch; a labelled hairline turns one long timeline into two acts. */
+.schedule-part { display: flex; align-items: center; gap: 16px; padding: 30px 0 12px; }
+.schedule-part:first-child { padding-top: 0; }
+.schedule-part::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.schedule-part-label { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); }
 .slot { display: grid; grid-template-columns: 140px 24px 1fr; gap: 24px; padding: 22px 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
-.slot-time { font-family: var(--font-script); color: var(--plum); font-size: 22px; line-height: 1; display: flex; flex-direction: column; gap: 4px; }
-.slot-time .end { font-size: 13px; color: var(--muted); font-family: var(--font-serif, serif); }
+/* Times are data you scan down a column — set them in the clean face with
+   tabular figures, not the decorative script. */
+.slot-time { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; color: var(--teal); font-size: 16px; font-weight: 600; line-height: 1.2; letter-spacing: 0.01em; display: flex; flex-direction: column; gap: 4px; }
+.slot-time .end { font-size: 12.5px; font-weight: 400; color: var(--muted); font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; }
 .slot-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--teal); margin-top: 6px; }
 .slot.is-pin .slot-dot { background: var(--lime); border: 1.5px solid var(--teal); }
 .slot.is-break .slot-dot { background: var(--lavender); }
@@ -1488,7 +1506,7 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 @media (max-width: 760px) {
   .slot { grid-template-columns: 1fr; gap: 8px; }
   .slot-time { display: none; }
-  .slot-mobile-time { display: block; font-family: var(--font-script); color: var(--plum); font-size: 18px; margin-bottom: 6px; }
+  .slot-mobile-time { display: block; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; color: var(--teal); font-weight: 600; font-size: 14px; letter-spacing: 0.02em; margin-bottom: 6px; }
   .slot-dot { display: none; }
   .sessions { grid-template-columns: 1fr; }
 }
@@ -1500,7 +1518,8 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .inv-card:hover { transform: translateY(-2px); }
 .inv-card h3 { font-size: 20px; color: var(--teal); letter-spacing: -0.01em; font-weight: 400; margin: 0; }
 .inv-card p { color: var(--muted); font-size: 14.5px; line-height: 1.55; }
-.inv-tag { align-self: flex-start; padding: 5px 11px; border-radius: 999px; background: rgba(95,48,75,0.08); color: var(--plum); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.inv-tag { align-self: flex-start; padding: 5px 11px; border-radius: 999px; background: rgba(95,48,75,0.08); color: var(--plum); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.inv-card { min-height: 184px; }
 
 /* Stakeholders */
 .stakes { background: var(--eggshell-warm); }
