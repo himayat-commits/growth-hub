@@ -124,18 +124,8 @@ export default function PlanYourDayPanel({ blocks }: { blocks: ProgramBlock[] })
             <li>Catered lunch and a lucky-door prize</li>
             <li>Quiet catch-up area &amp; accessibility support</li>
             <li>Networking drinks to finish the day</li>
+            <li>Lift-accessible venue — tell us any access needs when you register</li>
           </ul>,
-        )}
-        {row(
-          'getting-there',
-          'Getting there',
-          <>
-            <p className="plan-where">{SUMMIT.venueFull}</p>
-            <p className="plan-note">
-              {SUMMIT.dateLong} · {SUMMIT.time}. Accessible venue with lift access — tell us about
-              any access needs when you register and we&apos;ll sort them out.
-            </p>
-          </>,
         )}
       </div>
     </div>
