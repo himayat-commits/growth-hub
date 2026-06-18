@@ -123,8 +123,14 @@ footer.foot :focus-visible {
 .hero-eyebrow .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--teal); }
 .hero-h1 { font-weight: 400; font-size: clamp(48px, 6.8vw, 88px); line-height: 1.05; letter-spacing: -0.025em; color: var(--teal); margin: 28px 0 0; max-width: 16ch; text-wrap: pretty; }
 /* The summit title's single word "Entrepreneurship" needs ~388px at the 48px
-   clamp floor — wider than a small phone. A lower floor for event heroes only. */
-.event-hero .hero-h1 { font-size: clamp(38px, 6.8vw, 88px); }
+   clamp floor — wider than a small phone. A lower floor for event heroes only.
+   max-width is lifted so the non-wrapping "for <word>" line is never squeezed
+   into an extra row (see .hero-line1 / .hero-roll-line below). */
+.event-hero .hero-h1 { font-size: clamp(38px, 6.8vw, 88px); max-width: none; }
+/* Always exactly two lines: "Entrepreneurship" / "for <rolling word>". The
+   second line stays on one row no matter which audience is showing. */
+.hero-line1 { display: block; }
+.hero-roll-line { display: block; white-space: nowrap; }
 .hero-h1 .grow { display: inline-block; position: relative; }
 /* Roll-call headline: the variable line cycles through the real audiences and
    settles on "Everyone", over a hand-drawn lime underline. */

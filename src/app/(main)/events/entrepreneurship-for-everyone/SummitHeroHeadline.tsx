@@ -52,21 +52,28 @@ export default function SummitHeroHeadline() {
     return () => window.clearInterval(id);
   }, []);
 
+  // Two deliberate lines: "Entrepreneurship" on its own, then "for <word>" as a
+  // single non-wrapping unit. Gluing "for" to the rolling word means the longest
+  // audiences (e.g. "women in business") can never spill onto a third line as
+  // the word cycles — the headline is always exactly two lines.
   return (
     <h1 className="hero-h1">
-      Entrepreneurship for{' '}
-      <span className="hero-roll" aria-hidden="true">
-        <span key={word} className="hero-roll-word">
-          {word}
+      <span className="hero-line1">Entrepreneurship</span>
+      <span className="hero-roll-line">
+        for{' '}
+        <span className="hero-roll" aria-hidden="true">
+          <span key={word} className="hero-roll-word">
+            {word}
+          </span>
+          <svg
+            className="hero-roll-underline"
+            viewBox="0 0 300 12"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path d="M3 8 Q80 2 160 7 T297 6" fill="none" strokeWidth="9" strokeLinecap="round" />
+          </svg>
         </span>
-        <svg
-          className="hero-roll-underline"
-          viewBox="0 0 300 12"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d="M3 8 Q80 2 160 7 T297 6" fill="none" strokeWidth="9" strokeLinecap="round" />
-        </svg>
       </span>
       <span className="sr-only">Everyone</span>
     </h1>
