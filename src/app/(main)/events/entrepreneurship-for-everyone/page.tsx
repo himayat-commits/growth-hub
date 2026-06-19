@@ -235,9 +235,9 @@ export default async function EntrepreneurshipForEveryonePage() {
             <span className="section-label">Program</span>
             <h2 className="section-h2">A full day of practical help, start to finish.</h2>
             <p className="naming-lead">
-              The running order for the day. We&apos;re still finalising a few sessions and
-              timings — and continuing to add content around NDIS, aged care and
-              community-service pathways.
+              Three things run side by side: hands-on workshops in The Lab, drop-in one-to-one
+              advisors in the Events Room all day, and an afternoon of stalls and a panel up on
+              Level 4. We&apos;re still finalising a few sessions and timings.
             </p>
             <span className="draft-pill">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="7" cy="7" r="5" /><path d="M7 4v3l2 1.5" /></svg>
@@ -245,6 +245,7 @@ export default async function EntrepreneurshipForEveryonePage() {
             </span>
           </div>
 
+          <h3 className="schedule-room is-lead">The Lab <span className="room-sub">workshops</span></h3>
           <div className="schedule-list">
             {PROGRAM.map((slot, i) => {
               const isLunch = slot.title.toLowerCase().startsWith('lunch');
@@ -291,6 +292,24 @@ export default async function EntrepreneurshipForEveryonePage() {
                 </Fragment>
               );
             })}
+          </div>
+
+          <div className="schedule-rooms">
+            <div className="room-card">
+              <h3 className="schedule-room">The Events Room <span className="room-sub">drop-in advisory</span></h3>
+              <p className="room-time">10:00am – 4:00pm</p>
+              <p className="room-note">
+                One-to-one help desks with advisors and mentors — drop in any time across the
+                day, no booking needed.
+              </p>
+            </div>
+            <div className="room-card">
+              <h3 className="schedule-room">Level 4 <span className="room-sub">stalls &amp; panel</span></h3>
+              <ul className="room-lines">
+                <li><span className="t">4:30 – 6:30pm</span> Stalls &amp; networking</li>
+                <li><span className="t">5:00 – 6:00pm</span> Panel discussion</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
