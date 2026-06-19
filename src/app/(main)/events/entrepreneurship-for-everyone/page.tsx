@@ -48,67 +48,14 @@ interface ProgramSlot {
 }
 
 const PROGRAM: ProgramSlot[] = [
-  { time: '10:00am', end: '10:30am', type: 'pin', title: 'Welcome to Country & opening', blurb: 'Welcome to Country, introductions, an inclusivity welcome, and an overview of the day.' },
-  {
-    time: '10:30am', end: '11:45am',
-    title: 'Getting started — fundamentals',
-    blurb: 'Foundational sessions for early-stage and first-time founders. Help desk open throughout.',
-    sessions: [
-      { t: 'Know Your Business', p: 'The Chatbot Agency' },
-      { t: 'Google Business Profile setup', p: 'The Chatbot Agency' },
-      { t: 'Google Analytics', p: 'The Chatbot Agency' },
-      { t: 'Thinking of Starting a Small Business', p: 'Justin' },
-      { t: 'Business Planning Support', p: 'Asuria' },
-      { t: 'Help Desk — Getting Online', p: 'All', helpdesk: true },
-    ],
-  },
-  { time: '11:45am', end: '12:15pm', type: 'break', title: 'Networking break + quiet catch-up area', blurb: "Coffee, conversations, and a low-stimulation room for those who'd rather chat 1:1." },
-  {
-    time: '12:15pm', end: '1:45pm',
-    title: 'Marketing, IT & trades',
-    blurb: 'For operators ready to sharpen the way they reach customers and protect their business.',
-    sessions: [
-      { t: 'Digital Marketing & Social Media', p: 'RD Consulting' },
-      { t: 'IT Basics & Cyber Security', p: 'Normtech' },
-      { t: 'Tradie Business Support', p: 'What Works' },
-      { t: 'Small Business Help Desk', p: 'All', helpdesk: true },
-    ],
-  },
-  { time: '1:45pm', end: '2:15pm', type: 'pin', title: 'Lunch + lucky door prize', blurb: 'Catered lunch with space to keep talking.' },
-  {
-    time: '2:15pm', end: '3:15pm',
-    title: 'Brand, content & connections',
-    blurb: 'Sharper messaging, smarter networking, and a working LinkedIn presence.',
-    sessions: [
-      { t: 'Content Creation & Branding', p: 'TBC' },
-      { t: 'LinkedIn Masterclass', p: 'RD Consulting' },
-      { t: 'Networking & Pitching', p: 'TBC' },
-      { t: 'Business Support Help Desk', p: 'All', helpdesk: true },
-    ],
-  },
-  {
-    time: '3:15pm', end: '4:15pm',
-    title: 'Founder panel & pathways',
-    blurb: 'Entrepreneurs from diverse backgrounds on their journeys, the hurdles, and what they learned — plus funding, financial literacy and community-service pathways.',
-    sessions: [
-      { t: 'Founder panel — diverse founders on their journeys', p: 'TBC', proposed: true },
-      { t: 'Grants & Funding', p: 'TBC' },
-      { t: 'Financial Literacy', p: 'TBC' },
-      { t: 'NDIS / Aged Care / Community Business Pathways', p: 'TBC', proposed: true },
-    ],
-  },
-  {
-    time: '4:30pm', end: '5:30pm',
-    title: 'Build & automate',
-    blurb: 'Putting the pieces together — your website, your brand, and AI to do the boring bits.',
-    sessions: [
-      { t: 'Meta Business Suite & Lead Generation', p: 'The Chatbot Agency' },
-      { t: 'Website Building & Branding', p: 'Casual Dot · The Chatbot Agency' },
-      { t: 'AI & Automation for Productivity', p: 'TBC' },
-      { t: 'Best Practices of Gen AI Prompting', p: 'Cyber Cure' },
-    ],
-  },
-  { time: '5:30pm', end: '6:30pm', type: 'pin', title: 'Networking drinks & informal connections', blurb: 'Continuing the conversation — likely at an external venue/pub. Details to follow.' },
+  { time: '9:00am', end: '9:30am', type: 'pin', title: 'Welcome + housekeeping', blurb: 'A warm welcome, housekeeping, and a quick overview of the day.' },
+  { time: '9:30am', end: '10:30am', title: 'How to Position Your Business', blurb: 'Presented by What Works.' },
+  { time: '10:30am', end: '11:30am', type: 'break', title: 'Networking break + quiet catch-up area', blurb: "Coffee, conversations, and a low-stimulation room for those who'd rather chat 1:1." },
+  { time: '11:30am', end: '12:30pm', title: 'Digital & Social Media Marketing', blurb: 'Presented by RD Consulting.' },
+  { time: '12:30pm', end: '1:30pm', type: 'pin', title: 'Lunch', blurb: 'Catered lunch with space to keep talking.' },
+  { time: '1:30pm', end: '2:30pm', title: 'LinkedIn Masterclass', blurb: 'Presented by RD Consulting.' },
+  { time: '2:30pm', end: '3:00pm', title: 'Safe AI', blurb: 'Presented by CyberWardens.' },
+  { time: '3:00pm', end: '4:00pm', title: 'Intro to Getting Your Business Online', blurb: 'Presented by Small Business Digital.' },
 ];
 
 const WAYS_TO_HELP = [
@@ -286,12 +233,11 @@ export default async function EntrepreneurshipForEveryonePage() {
         <div className="wrap">
           <div className="schedule-head">
             <span className="section-label">Program</span>
-            <h2 className="section-h2">A full day of practical help — from welcome to last orders.</h2>
+            <h2 className="section-h2">A full day of practical help, start to finish.</h2>
             <p className="naming-lead">
-              The running order for the day. A handful of sessions are still locking in
-              presenters — everything else is confirmed. We&apos;re continuing to expand
-              content around NDIS, aged care, disability-led businesses and community-service
-              pathways.
+              The running order for the day. We&apos;re still finalising a few sessions and
+              timings — and continuing to add content around NDIS, aged care and
+              community-service pathways.
             </p>
             <span className="draft-pill">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="7" cy="7" r="5" /><path d="M7 4v3l2 1.5" /></svg>
