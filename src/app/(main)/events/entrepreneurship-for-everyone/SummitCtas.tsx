@@ -27,8 +27,8 @@ const ICS = [
   'DTSTAMP:20260601T000000Z',
   // 9:00am AEST (UTC+10) = 23:00 UTC the day before.
   'DTSTART:20260708T230000Z',
-  // 5:00pm AEST = 07:00 UTC same day.
-  'DTEND:20260709T070000Z',
+  // 6:30pm AEST = 08:30 UTC same day.
+  'DTEND:20260709T083000Z',
   `SUMMARY:${SUMMIT.name}`,
   `LOCATION:${SUMMIT.venueFull.replace(/,/g, '\\,')}`,
   'DESCRIPTION:A free full-day summit for Canberra small business — talks\\, workshops and help-desks. All welcome.',

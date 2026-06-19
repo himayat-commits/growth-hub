@@ -121,9 +121,8 @@ export default function PlanYourDayPanel({ blocks }: { blocks: ProgramBlock[] })
           <ul className="plan-list">
             <li>Free entry — no ticket cost</li>
             <li>Talks, hands-on workshops &amp; one-to-one help desks</li>
-            <li>Catered lunch and a lucky-door prize</li>
+            <li>Catered lunch</li>
             <li>Quiet catch-up area &amp; accessibility support</li>
-            <li>Networking drinks to finish the day</li>
             <li>Lift-accessible venue — tell us any access needs when you register</li>
           </ul>,
         )}
