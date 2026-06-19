@@ -1477,12 +1477,24 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .schedule { padding: clamp(80px, 10vw, 140px) 0 clamp(56px, 7vw, 96px); background: var(--eggshell-warm); }
 .schedule-head { max-width: 720px; }
 .schedule-head .draft-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: rgba(95,48,75,0.08); color: var(--plum); font-size: 13px; margin-top: 16px; }
-.schedule-list { margin-top: 48px; display: flex; flex-direction: column; }
+.schedule-list { margin-top: 20px; display: flex; flex-direction: column; }
 /* The day splits at lunch; a labelled hairline turns one long timeline into two acts. */
 .schedule-part { display: flex; align-items: center; gap: 16px; padding: 30px 0 12px; }
 .schedule-part:first-child { padding-top: 0; }
 .schedule-part::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 .schedule-part-label { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); }
+/* The day runs across three spaces — a room heading labels each. */
+.schedule-room { font-family: var(--font-serif, Georgia, serif); font-weight: 400; font-size: clamp(20px, 1.8vw, 24px); color: var(--teal); letter-spacing: -0.01em; margin: 0 0 16px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.schedule-room.is-lead { font-size: clamp(22px, 2.4vw, 30px); margin: 44px 0 0; }
+.schedule-room .room-sub { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); }
+.schedule-rooms { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 44px; }
+.room-card { background: var(--eggshell); border: 1px solid var(--line); border-radius: 18px; padding: 26px 28px; }
+.room-time { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 600; color: var(--teal); margin: 0; }
+.room-note { color: var(--muted); font-size: 14.5px; line-height: 1.55; margin: 8px 0 0; }
+.room-lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.room-lines li { color: var(--teal); font-size: 15px; display: flex; gap: 12px; align-items: baseline; }
+.room-lines .t { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; font-weight: 600; color: var(--plum); min-width: 104px; flex: none; }
+@media (max-width: 760px) { .schedule-rooms { grid-template-columns: 1fr; } }
 .slot { display: grid; grid-template-columns: 140px 24px 1fr; gap: 24px; padding: 22px 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
 /* Times are data you scan down a column — set them in the clean face with
    tabular figures, not the decorative script. */
