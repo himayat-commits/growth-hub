@@ -50,7 +50,7 @@ interface ProgramSlot {
 const PROGRAM: ProgramSlot[] = [
   { time: '9:00am', end: '9:30am', type: 'pin', title: 'Welcome + housekeeping', blurb: 'A warm welcome, housekeeping, and a quick overview of the day.' },
   { time: '9:30am', end: '10:30am', title: 'How to Position Your Business', blurb: 'Presented by What Works.' },
-  { time: '10:30am', end: '11:30am', type: 'break', title: 'Networking break + quiet catch-up area', blurb: "Coffee, conversations, and a low-stimulation room for those who'd rather chat 1:1." },
+  { time: '10:30am', end: '11:30am', title: 'Networking & Pitching', blurb: 'Presented by CBRIN.' },
   { time: '11:30am', end: '12:30pm', title: 'Digital & Social Media Marketing', blurb: 'Presented by RD Consulting.' },
   { time: '12:30pm', end: '1:30pm', type: 'pin', title: 'Lunch', blurb: 'Catered lunch with space to keep talking.' },
   { time: '1:30pm', end: '2:30pm', title: 'LinkedIn Masterclass', blurb: 'Presented by RD Consulting.' },
