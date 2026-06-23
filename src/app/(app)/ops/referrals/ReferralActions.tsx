@@ -15,9 +15,11 @@ const NEXT_STATES: Record<Status, Status[]> = {
 export default function ReferralActions({
   id,
   currentStatus,
+  canEdit,
 }: {
   id: number;
   currentStatus: Status;
+  canEdit: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -42,7 +44,8 @@ export default function ReferralActions({
     }
   };
 
-  if (nextStates.length === 0) {
+  // Support-role staff see status but can't change it (admin-only action).
+  if (!canEdit || nextStates.length === 0) {
     return <span className="gh-ops-meta">—</span>;
   }
   return (

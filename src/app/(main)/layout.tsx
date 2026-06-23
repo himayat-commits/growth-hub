@@ -10,6 +10,8 @@ import RevealOnScroll from "@/components/RevealOnScroll";
 import PostHogProvider from "@/components/PostHogProvider";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import Pixels from "@/components/analytics/Pixels";
+import ConsentGate from "@/components/analytics/ConsentGate";
+import ConsentBanner from "@/components/analytics/ConsentBanner";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegrowthhub.com.au";
@@ -67,13 +69,16 @@ export default function MainLayout({
       <body>
         <AuthKitProvider>
           <PostHogProvider>
-            <Pixels />
+            <ConsentGate>
+              <Pixels />
+            </ConsentGate>
             <OrganizationJsonLd />
             <SummitAnnouncementBar />
             <Navbar />
             {children}
             <Footer />
             <RevealOnScroll />
+            <ConsentBanner />
           </PostHogProvider>
         </AuthKitProvider>
       </body>

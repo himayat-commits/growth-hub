@@ -92,6 +92,13 @@
       "when": 1781105479758,
       "tag": "0012_add_rsvp_attribution",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1782138522357,
+      "tag": "0013_add_event_rsvps_pk",
+      "breakpoints": true
     }
   ]
 }

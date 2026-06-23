@@ -21,6 +21,10 @@ type Params = Promise<{ id: string }>;
 export async function PATCH(req: NextRequest, { params }: { params: Params }) {
   const opsUser = await getOpsUser();
   if (!opsUser) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  // Reassigning a member's strategist is an admin action.
+  if (opsUser.role !== 'admin') {
+    return NextResponse.json({ error: 'Admins only' }, { status: 403 });
+  }
 
   const { id: userId } = await params;
   if (!userId) return NextResponse.json({ error: 'Invalid id' }, { status: 400 });

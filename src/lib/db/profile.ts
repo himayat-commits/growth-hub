@@ -9,6 +9,7 @@ import { eq, sql } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { userProfiles, type UserProfile } from '@/lib/db/schema';
 import { computeProfileCompletePct } from '@/lib/auth/ensure-user-record';
+import { createNotification } from '@/lib/db/notifications';
 
 interface WorkOSUserLike {
   id: string;
@@ -79,5 +80,19 @@ export async function updateProfile(
   if (!updated[0]) {
     throw new Error(`updateProfile: no row exists for user ${user.id}`);
   }
+
+  // Nudge the member into the community the first time their profile hits
+  // 100%. createNotification never throws, so this can't break the update.
+  const wasComplete = (existing?.profileCompletePct ?? 0) >= 100;
+  if (!wasComplete && pct >= 100) {
+    await createNotification({
+      userId: user.id,
+      kind: 'community',
+      title: "You're all set — benefits unlocked",
+      body: 'Your profile is complete. Jump into the member community groups and the rest of your benefits.',
+      href: '/benefits#community',
+    });
+  }
+
   return updated[0];
 }

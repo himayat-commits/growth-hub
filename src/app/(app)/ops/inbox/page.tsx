@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { desc, eq, sql } from 'drizzle-orm';
 import { getOpsUser } from '@/lib/auth/ops';
-import { getActiveStrategists } from '@/lib/cms';
+import { getOpsStrategistSlug } from '@/lib/auth/ops-inbox';
 import { getDb } from '@/lib/db';
 import { userProfiles, subscriptions } from '@/lib/db/schema';
 
@@ -29,11 +29,8 @@ export default async function OpsInboxPage({
   const filterUnanswered = sp.filter === 'unanswered';
 
   // Resolve the ops user's strategist slug (if any) so we can scope the list.
-  const strategists = await getActiveStrategists().catch(() => []);
-  const myStrategist = strategists.find(
-    (s) => (s as { email?: string | null }).email?.toLowerCase() === opsUser.email.toLowerCase(),
-  );
-  const mySlug = (myStrategist as { slug?: string | null } | undefined)?.slug ?? null;
+  // Same helper the thread view + reply API use to enforce access.
+  const mySlug = await getOpsStrategistSlug(opsUser.email);
 
   const db = getDb();
 

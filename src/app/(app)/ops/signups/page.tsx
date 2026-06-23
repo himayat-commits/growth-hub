@@ -6,11 +6,15 @@ import { desc, eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { userProfiles, subscriptions } from '@/lib/db/schema';
 import { getActiveStrategists } from '@/lib/cms';
+import { getOpsUser } from '@/lib/auth/ops';
 import AssignStrategist, { type StrategistOption } from './AssignStrategist';
 
 export const dynamic = 'force-dynamic';
 
 export default async function OpsSignupsPage() {
+  const opsUser = await getOpsUser();
+  const isAdmin = opsUser?.role === 'admin';
+
   const db = getDb();
   const [rows, strategists] = await Promise.all([
     db
@@ -110,6 +114,7 @@ export default async function OpsSignupsPage() {
                       userId={r.userId}
                       currentSlug={r.assignedStrategistId}
                       options={options}
+                      canEdit={isAdmin}
                     />
                   </td>
                   <td className="gh-ops-meta">{r.referCode ?? '—'}</td>

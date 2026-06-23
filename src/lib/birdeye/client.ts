@@ -58,6 +58,21 @@ function fakeResponse(req: AssembledRequest, onboardingId: string): unknown {
   }
 }
 
+// Retry/timeout policy for live calls. Centralised here so every step of the
+// provisioning sequence is resilient, rather than relying on a single ad-hoc
+// retry at one call site.
+const MAX_ATTEMPTS = 3;
+const TIMEOUT_MS = 15_000;
+
+function isRateLimited(parsed: unknown): boolean {
+  return (
+    typeof parsed === "object" &&
+    parsed !== null &&
+    "code" in parsed &&
+    Number((parsed as { code: unknown }).code) === 1167
+  );
+}
+
 export async function callBirdeye(
   req: AssembledRequest,
   ctx: { onboardingId: string; mode: ClientMode }
@@ -89,39 +104,66 @@ export async function callBirdeye(
   };
   if ("headers" in req.req) Object.assign(headers, req.req.headers);
 
-  try {
-    const res = await fetch(req.req.url, {
-      method: req.req.method,
-      headers,
-      body: JSON.stringify(req.req.body),
-    });
-    const text = await res.text();
-    let parsed: unknown = text;
+  // One network attempt, aborted after TIMEOUT_MS so a hung Birdeye call can't
+  // stall the SSE provisioning stream indefinitely.
+  const attempt = async (): Promise<CallResult> => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
-      parsed = JSON.parse(text);
-    } catch {
-      /* not JSON */
-    }
-    if (!res.ok) {
-      const code =
-        typeof parsed === "object" && parsed && "code" in parsed
-          ? Number((parsed as { code: unknown }).code)
-          : undefined;
-      const hint = code !== undefined ? ERROR_HINTS[code] : undefined;
+      const res = await fetch(req.req.url, {
+        method: req.req.method,
+        headers,
+        body: JSON.stringify(req.req.body),
+        signal: controller.signal,
+      });
+      const text = await res.text();
+      let parsed: unknown = text;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        /* not JSON */
+      }
+      if (!res.ok) {
+        const code =
+          typeof parsed === "object" && parsed && "code" in parsed
+            ? Number((parsed as { code: unknown }).code)
+            : undefined;
+        const hint = code !== undefined ? ERROR_HINTS[code] : undefined;
+        return {
+          ok: false,
+          status: res.status,
+          response: parsed,
+          error: hint ?? `Birdeye returned ${res.status}.`,
+        };
+      }
+      return { ok: true, status: res.status, response: parsed };
+    } catch (err) {
+      const aborted = err instanceof Error && err.name === "AbortError";
       return {
         ok: false,
-        status: res.status,
-        response: parsed,
-        error: hint ?? `Birdeye returned ${res.status}.`,
+        status: 0,
+        response: null,
+        error: aborted
+          ? `Birdeye request timed out after ${TIMEOUT_MS}ms.`
+          : err instanceof Error
+            ? err.message
+            : "Unknown network error",
       };
+    } finally {
+      clearTimeout(timer);
     }
-    return { ok: true, status: res.status, response: parsed };
-  } catch (err) {
-    return {
-      ok: false,
-      status: 0,
-      response: null,
-      error: err instanceof Error ? err.message : "Unknown network error",
-    };
+  };
+
+  // Retry transient failures (network error / timeout / 5xx / rate-limit 1167)
+  // with exponential backoff + jitter. 4xx and success return immediately.
+  let result = await attempt();
+  for (let n = 1; n < MAX_ATTEMPTS; n++) {
+    const transient =
+      !result.ok &&
+      (result.status === 0 || result.status >= 500 || isRateLimited(result.response));
+    if (!transient) break;
+    await sleep(Math.min(8000, 500 * 2 ** (n - 1)) + jitter(0, 250));
+    result = await attempt();
   }
+  return result;
 }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { desc, eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { referrals, userProfiles } from '@/lib/db/schema';
+import { getOpsUser } from '@/lib/auth/ops';
 import ReferralActions from './ReferralActions';
 
 export const dynamic = 'force-dynamic';
@@ -23,6 +24,9 @@ export default async function OpsReferralsPage({
     rawStatus && (STATUS_ORDER as readonly string[]).includes(rawStatus)
       ? (rawStatus as Status)
       : null;
+
+  const opsUser = await getOpsUser();
+  const isAdmin = opsUser?.role === 'admin';
 
   const db = getDb();
   const rows = await db
@@ -112,7 +116,7 @@ export default async function OpsReferralsPage({
                       : '—'}
                   </td>
                   <td>
-                    <ReferralActions id={r.id} currentStatus={r.status as Status} />
+                    <ReferralActions id={r.id} currentStatus={r.status as Status} canEdit={isAdmin} />
                   </td>
                 </tr>
               ))}

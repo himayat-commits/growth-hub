@@ -8,13 +8,24 @@
 // the secret configured in CI / local .env.local.
 
 import { NextResponse } from 'next/server';
+import { timingSafeEqual } from 'node:crypto';
 import { TEST_USER_ID, TEST_COOKIE_NAME } from '@/lib/auth/with-auth';
 
 export const runtime = 'nodejs';
 
+// Constant-time string compare so the token can't be recovered byte-by-byte
+// via response timing. (Defense-in-depth — the endpoint is already 404 in prod.)
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return timingSafeEqual(ab, bb);
+}
+
 export async function POST(req: Request): Promise<NextResponse> {
   // Hard-fail in production or when the feature flag isn't configured.
-  if (!process.env.PLAYWRIGHT_TEST_TOKEN || process.env.VERCEL_ENV === 'production') {
+  const expectedToken = process.env.PLAYWRIGHT_TEST_TOKEN;
+  if (!expectedToken || process.env.VERCEL_ENV === 'production') {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
@@ -25,7 +36,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  if (body.token !== process.env.PLAYWRIGHT_TEST_TOKEN) {
+  if (typeof body.token !== 'string' || !safeEqual(body.token, expectedToken)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

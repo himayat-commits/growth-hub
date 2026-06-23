@@ -85,10 +85,14 @@ export async function POST(req: NextRequest) {
 
   let customerId = existing[0]?.stripeCustomerId ?? null;
   if (!customerId) {
-    const customer = await getStripe().customers.create({
-      email,
-      metadata: { userId },
-    });
+    const customer = await getStripe().customers.create(
+      {
+        email,
+        metadata: { userId },
+      },
+      // Dedupe concurrent checkouts so we never create two customers for one user.
+      { idempotencyKey: `gh-customer-${userId}` },
+    );
     customerId = customer.id;
 
     if (existing.length > 0) {
@@ -107,25 +111,35 @@ export async function POST(req: NextRequest) {
 
   const origin = req.nextUrl.origin;
 
-  const session = await getStripe().checkout.sessions.create({
-    mode: 'subscription',
-    customer: customerId,
-    line_items: lineItems,
-    success_url: `${origin}/onboarding/confirm?checkout=success`,
-    cancel_url: `${origin}/pricing`,
-    allow_promotion_codes: true,
-    billing_address_collection: 'auto',
-    subscription_data: {
+  // Stable idempotency key so an accidental double-submit / client retry
+  // returns the same Checkout Session instead of creating duplicates.
+  const idempotencyKey = `gh-checkout-${userId}-${tier}-${interval}-${lineItems
+    .map((li) => li.price)
+    .sort()
+    .join('.')}`;
+
+  const session = await getStripe().checkout.sessions.create(
+    {
+      mode: 'subscription',
+      customer: customerId,
+      line_items: lineItems,
+      success_url: `${origin}/onboarding/confirm?checkout=success`,
+      cancel_url: `${origin}/pricing`,
+      allow_promotion_codes: true,
+      billing_address_collection: 'auto',
+      subscription_data: {
+        metadata: {
+          userId,
+          planTier: tier,
+          billingInterval: interval,
+        },
+      },
       metadata: {
         userId,
-        planTier: tier,
-        billingInterval: interval,
       },
     },
-    metadata: {
-      userId,
-    },
-  });
+    { idempotencyKey },
+  );
 
   if (!session.url) {
     return NextResponse.json({ error: 'Stripe did not return a checkout URL' }, { status: 500 });

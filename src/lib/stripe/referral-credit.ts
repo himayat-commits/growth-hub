@@ -34,15 +34,24 @@ async function applyBalanceCredit(
   stripeCustomerId: string,
   amountCents: number,
   description: string,
+  idempotencyKey: string,
 ): Promise<void> {
   // `createBalanceTransaction` posts a negative amount to credit the
   // customer's balance. Amount must be in the customer's settlement
   // currency — Australian dollars in this project.
-  await getStripe().customers.createBalanceTransaction(stripeCustomerId, {
-    amount: -amountCents,
-    currency: 'aud',
-    description,
-  });
+  //
+  // The idempotency key (stable per referral + side) ensures a webhook retry
+  // — e.g. if we credit Stripe but the markReferralCredited write below fails
+  // — never issues the credit twice.
+  await getStripe().customers.createBalanceTransaction(
+    stripeCustomerId,
+    {
+      amount: -amountCents,
+      currency: 'aud',
+      description,
+    },
+    { idempotencyKey },
+  );
 }
 
 /**
@@ -81,19 +90,21 @@ export async function tryIssueReferralCredit(userId: string): Promise<void> {
     }
 
     // Issue credit to both sides. If one call fails, the markReferralCredited
-    // call below won't fire, so we'll retry next time. Stripe's idempotency
-    // protects against double-crediting if the retry hits before we mark.
+    // call below won't fire, so we'll retry next time. The per-referral, per-
+    // side idempotency keys ensure that retry never double-credits.
     try {
       await Promise.all([
         applyBalanceCredit(
           referrerCustomerId,
           REFERRAL_CREDIT_CENTS,
           `Growth Hub referral credit (ref ${referral.referCode})`,
+          `gh-refcredit-${referral.id}-referrer`,
         ),
         applyBalanceCredit(
           referredCustomerId,
           REFERRAL_CREDIT_CENTS,
           `Growth Hub welcome credit (ref ${referral.referCode})`,
+          `gh-refcredit-${referral.id}-referred`,
         ),
       ]);
     } catch (e) {
