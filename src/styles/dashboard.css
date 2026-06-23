@@ -931,6 +931,11 @@ p { margin: 0; }
 .gh-refer .gh-refer-code      { color: rgba(243,240,231,0.72); }
 .gh-refer .gh-refer-code code { background: rgba(243,240,231,0.14); border-color: rgba(243,240,231,0.4); color: var(--cream); }
 .gh-refer .gh-pill.lav        { background: var(--lime); color: var(--teal); }
+/* Solid buttons inside the card (e.g. the /benefits ReferralCopyButton, which
+   defaults to .gh-btn = teal fill) would be teal-on-plum — near invisible. Give
+   them the same cream/plum light treatment as .gh-refer-link; the .ghost button
+   keeps its white outline so the primary/secondary split stays. */
+.gh-refer .gh-btn:not(.ghost) { background: var(--cream); color: var(--plum); border-color: rgba(95,48,75,0.18); }
 
 /* Signature: one hand-drawn (wavy) plum underline, applied once via .gh-underline */
 .gh-underline {
