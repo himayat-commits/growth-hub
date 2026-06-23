@@ -535,7 +535,7 @@ export default async function DashboardPage() {
 
         <div className="gh-card gh-refer">
           <div className="gh-card-hd">
-            <div className="gh-card-h" style={{ color: 'var(--plum)' }}>
+            <div className="gh-card-h" style={{ color: 'var(--cream)' }}>
               Refer a friend
               <span className="gh-pill lav">2× credit</span>
             </div>

@@ -228,7 +228,7 @@ p { margin: 0; }
   background: var(--bg);
   border-radius: var(--r-md);
   padding: 0 14px 0 36px;
-  font-size: 13.5px;
+  font-size: 14px;
   color: var(--ink);
   font-family: inherit;
   outline: none;
@@ -353,15 +353,15 @@ p { margin: 0; }
   display: flex; flex-direction: column; gap: 14px;
 }
 .gh-card-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.gh-card-h { font-size: 13.5px; font-weight: 600; letter-spacing: 0.02em; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+.gh-card-h { font-size: 14px; font-weight: 600; letter-spacing: 0.02em; color: var(--ink); display: flex; align-items: center; gap: 8px; }
 .gh-card-h .gh-pill { margin-left: 4px; }
-.gh-card-link { font-size: 12.5px; color: var(--teal); text-decoration: none; font-weight: 500; }
+.gh-card-link { font-size: 12px; color: var(--teal); text-decoration: none; font-weight: 500; }
 .gh-card-link:hover { text-decoration: underline; }
 
 /* ── Pills ─────────────────────────────────────────────────────────── */
 .gh-pill {
   display: inline-flex; align-items: center;
-  font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
   font-weight: 600; padding: 3px 8px; border-radius: 999px;
   background: var(--teal-06); color: var(--teal);
 }
@@ -412,13 +412,13 @@ p { margin: 0; }
   content: ""; position: absolute; inset: 1px 1px 1px auto;
   width: 14px; background: var(--lime); border-radius: 3px;
 }
-.gh-progress-count { font-size: 12.5px; color: var(--ink-70); font-variant-numeric: tabular-nums; }
+.gh-progress-count { font-size: 12px; color: var(--ink-70); font-variant-numeric: tabular-nums; }
 .gh-progress-count b { color: var(--teal); font-weight: 700; }
 .gh-onboard-cta {
   display: inline-flex; align-items: center; gap: 8px;
   background: var(--teal); color: var(--cream); border: none;
   border-radius: 8px; padding: 10px 16px;
-  font-size: 13.5px; font-weight: 600; letter-spacing: 0.005em;
+  font-size: 14px; font-weight: 600; letter-spacing: 0.005em;
   align-self: flex-start; margin-top: 4px;
 }
 .gh-onboard-cta svg { width: 14px; height: 14px; }
@@ -443,8 +443,8 @@ p { margin: 0; }
   color: transparent;
 }
 .check svg { width: 12px; height: 12px; }
-.gh-step-name { font-size: 13.5px; color: var(--ink); font-weight: 500; letter-spacing: -0.005em; }
-.gh-step-name .meta { display: block; font-size: 11.5px; color: var(--ink-50); font-weight: 400; margin-top: 1px; }
+.gh-step-name { font-size: 14px; color: var(--ink); font-weight: 500; letter-spacing: -0.005em; }
+.gh-step-name .meta { display: block; font-size: 12px; color: var(--ink-50); font-weight: 400; margin-top: 1px; }
 .gh-step-action {
   font-size: 12px; color: var(--teal); font-weight: 600;
   text-decoration: none; padding: 4px 8px; border-radius: 6px;
@@ -474,7 +474,7 @@ p { margin: 0; }
 .gh-empty-ic svg { width: 20px; height: 20px; }
 .gh-empty-h { font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: -0.005em; }
 .gh-empty-p { font-size: 13px; color: var(--ink-70); max-width: 36ch; margin: 0; line-height: 1.45; }
-.gh-empty-cta { margin-top: 6px; background: var(--teal); color: var(--cream); border: none; border-radius: 8px; padding: 8px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.gh-empty-cta { margin-top: 6px; background: var(--teal); color: var(--cream); border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
 .gh-empty-cta.ghost { background: transparent; color: var(--teal); border: 1px solid var(--rule-strong); }
 
 /* ── Notifications / messages list ────────────────────────────────── */
@@ -486,8 +486,8 @@ p { margin: 0; }
 .gh-list-ic.lav  { background: var(--lavender); color: var(--plum); }
 .gh-list-ic svg { width: 15px; height: 15px; }
 .gh-list-body { min-width: 0; }
-.gh-list-h { font-size: 13.5px; font-weight: 600; color: var(--ink); line-height: 1.3; letter-spacing: -0.005em; }
-.gh-list-p { font-size: 12.5px; color: var(--ink-70); margin: 2px 0 0; line-height: 1.45; }
+.gh-list-h { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.3; letter-spacing: -0.005em; }
+.gh-list-p { font-size: 12px; color: var(--ink-70); margin: 2px 0 0; line-height: 1.45; }
 .gh-list-time { font-size: 11px; color: var(--ink-50); white-space: nowrap; letter-spacing: 0.02em; padding-top: 2px; }
 
 /* ── Refer card ────────────────────────────────────────────────────── */
@@ -495,8 +495,8 @@ p { margin: 0; }
 .gh-refer::before { content: ""; position: absolute; right: -28px; top: -28px; width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,0.45); pointer-events: none; }
 .gh-refer-h { font-family: var(--font-serif); font-size: 22px; line-height: 1.1; color: var(--plum); letter-spacing: -0.015em; margin: 0; position: relative; }
 .gh-refer-p { font-size: 13px; color: rgba(95,48,75,0.78); margin: 0; line-height: 1.45; position: relative; max-width: 32ch; }
-.gh-refer-link { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--plum); background: var(--cream); border-radius: 8px; padding: 8px 12px; border: 1px solid rgba(95,48,75,0.18); align-self: flex-start; position: relative; }
-.gh-refer-code { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: rgba(95,48,75,0.7); letter-spacing: 0.04em; position: relative; }
+.gh-refer-link { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--plum); background: var(--cream); border-radius: 8px; padding: 8px 12px; border: 1px solid rgba(95,48,75,0.18); align-self: flex-start; position: relative; }
+.gh-refer-code { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(95,48,75,0.7); letter-spacing: 0.04em; position: relative; }
 .gh-refer-code code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: rgba(255,255,255,0.5); border: 1px dashed rgba(95,48,75,0.3); padding: 2px 8px; border-radius: 4px; color: var(--plum); font-weight: 600; }
 
 /* ── Suggested resources ───────────────────────────────────────────── */
@@ -504,7 +504,7 @@ p { margin: 0; }
 .gh-suggest-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .gh-suggest-item { border: 1px solid var(--rule); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 8px; background: var(--cream-soft); text-align: left; min-height: 132px; cursor: pointer; }
 .gh-suggest-h { font-family: var(--font-serif); font-size: 17px; line-height: 1.2; color: var(--teal); margin: 0; letter-spacing: -0.012em; text-wrap: pretty; }
-.gh-suggest-meta { margin-top: auto; font-size: 11.5px; color: var(--ink-50); display: flex; align-items: center; gap: 8px; }
+.gh-suggest-meta { margin-top: auto; font-size: 12px; color: var(--ink-50); display: flex; align-items: center; gap: 8px; }
 .gh-suggest-meta .dot { width: 3px; height: 3px; background: currentColor; border-radius: 50%; }
 .gh-img-thumb { position: relative; height: 130px; border-radius: 10px; overflow: hidden; background: var(--cream); margin-bottom: 10px; }
 .gh-img-placeholder {
@@ -520,7 +520,7 @@ p { margin: 0; }
 .gh-pagehd { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
 .gh-pagehd-kicker { font-family: var(--font-script); color: var(--plum); font-size: 22px; line-height: 1; transform: rotate(-2deg); display: inline-block; margin-bottom: 8px; letter-spacing: 0; }
 .gh-pagehd-title { font-family: var(--font-serif); font-size: 34px; line-height: 1.04; letter-spacing: -0.022em; color: var(--teal); margin: 0; font-weight: 400; }
-.gh-pagehd-sub { font-size: 14.5px; color: var(--ink-70); margin-top: 8px; max-width: 62ch; line-height: 1.5; }
+.gh-pagehd-sub { font-size: 14px; color: var(--ink-70); margin-top: 8px; max-width: 62ch; line-height: 1.5; }
 .gh-pagehd-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
 
 /* ── Buttons ───────────────────────────────────────────────────────── */
@@ -544,14 +544,14 @@ p { margin: 0; }
 .gh-service-ic.lav  { background: var(--lavender); color: var(--plum); border-color: transparent; }
 .gh-service-ic.teal { background: var(--teal); color: var(--cream); border-color: transparent; }
 .gh-service-h { font-family: var(--font-serif); font-size: 21px; line-height: 1.15; letter-spacing: -0.015em; color: var(--teal); margin: 0; }
-.gh-service-p { font-size: 13.5px; color: var(--ink-70); margin: 0; line-height: 1.5; flex: 1; }
+.gh-service-p { font-size: 14px; color: var(--ink-70); margin: 0; line-height: 1.5; flex: 1; }
 .gh-service-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 10px; border-top: 1px solid var(--rule); }
 .gh-service-price { font-size: 13px; color: var(--ink-70); }
 .gh-service-price b { display: block; font-family: var(--font-serif); font-size: 22px; color: var(--teal); letter-spacing: -0.01em; font-weight: 400; }
 
 /* ── Filter chips ──────────────────────────────────────────────────── */
 .gh-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.gh-chip { background: var(--surface); border: 1px solid var(--rule); color: var(--ink-70); padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: inherit; letter-spacing: 0.005em; }
+.gh-chip { background: var(--surface); border: 1px solid var(--rule); color: var(--ink-70); padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; letter-spacing: 0.005em; }
 .gh-chip:hover { background: var(--bg); }
 .gh-chip.is-active { background: var(--teal); color: var(--cream); border-color: var(--teal); }
 
@@ -568,7 +568,7 @@ p { margin: 0; }
 .gh-resource-thumb.plum .gh-resource-tag,
 .gh-resource-thumb.teal .gh-resource-tag { background: rgba(255,255,255,0.18); color: var(--cream); }
 .gh-resource-h { font-family: var(--font-serif); font-size: 17px; line-height: 1.2; letter-spacing: -0.012em; color: var(--teal); margin: 0; text-wrap: pretty; }
-.gh-resource-meta { margin-top: auto; font-size: 11.5px; color: var(--ink-50); display: flex; align-items: center; gap: 8px; }
+.gh-resource-meta { margin-top: auto; font-size: 12px; color: var(--ink-50); display: flex; align-items: center; gap: 8px; }
 .gh-resource-meta .dot { width: 3px; height: 3px; background: currentColor; border-radius: 50%; }
 
 /* ── Events ────────────────────────────────────────────────────────── */
@@ -578,10 +578,10 @@ p { margin: 0; }
 .gh-event-date .day { font-family: var(--font-serif); font-size: 36px; line-height: 1; letter-spacing: -0.02em; }
 .gh-event-date .mo { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-70); margin-top: 4px; }
 .gh-event-body { position: relative; }
-.gh-event-tag { font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(243,240,231,0.7); font-weight: 600; margin-bottom: 8px; }
+.gh-event-tag { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(243,240,231,0.7); font-weight: 600; margin-bottom: 8px; }
 .gh-event-h { font-family: var(--font-serif); font-size: 28px; line-height: 1.1; letter-spacing: -0.018em; margin: 0 0 6px; color: var(--cream); }
 .gh-event-p { font-size: 14px; color: rgba(243,240,231,0.8); margin: 0; max-width: 52ch; line-height: 1.5; }
-.gh-event-meta { display: flex; gap: 18px; font-size: 12.5px; color: rgba(243,240,231,0.75); margin-top: 14px; letter-spacing: 0.02em; }
+.gh-event-meta { display: flex; gap: 18px; font-size: 12px; color: rgba(243,240,231,0.75); margin-top: 14px; letter-spacing: 0.02em; }
 .gh-event-actions { position: relative; display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
 .gh-event-row { display: grid; grid-template-columns: 78px 1fr auto; gap: 20px; align-items: center; padding: 16px 20px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-md); }
 .gh-event-row + .gh-event-row { margin-top: 8px; }
@@ -597,10 +597,10 @@ p { margin: 0; }
 .gh-plan-card.is-featured .gh-plan-price { color: var(--cream); }
 .gh-plan-price small { font-size: 13px; letter-spacing: 0.02em; color: var(--ink-50); font-family: var(--font-ui); margin-left: 6px; }
 .gh-plan-card.is-featured .gh-plan-price small { color: rgba(243,240,231,0.6); }
-.gh-plan-tagline { font-size: 13.5px; color: var(--ink-70); margin: 0; line-height: 1.45; }
+.gh-plan-tagline { font-size: 14px; color: var(--ink-70); margin: 0; line-height: 1.45; }
 .gh-plan-card.is-featured .gh-plan-tagline { color: rgba(243,240,231,0.75); }
 .gh-plan-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.gh-plan-list li { font-size: 13.5px; padding-left: 22px; position: relative; line-height: 1.45; }
+.gh-plan-list li { font-size: 14px; padding-left: 22px; position: relative; line-height: 1.45; }
 .gh-plan-list li::before { content: ""; position: absolute; left: 0; top: 0.42em; width: 14px; height: 8px; border-left: 2px solid var(--teal); border-bottom: 2px solid var(--teal); transform: rotate(-45deg); }
 .gh-plan-card.is-featured .gh-plan-list li::before { border-color: var(--lime); }
 .gh-plan-badge { position: absolute; top: -10px; left: 24px; background: var(--lime); color: var(--teal); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; padding: 4px 10px; border-radius: 4px; }
@@ -617,15 +617,15 @@ p { margin: 0; }
 .gh-msg-thread .gh-avatar { width: 34px; height: 34px; font-size: 12px; }
 .gh-msg-thread-name { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: -0.005em; }
 .gh-msg-thread-preview { font-size: 12px; color: var(--ink-70); margin-top: 2px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; line-height: 1.4; }
-.gh-msg-thread-time { font-size: 10.5px; color: var(--ink-50); white-space: nowrap; }
-.gh-msg-thread .gh-pill { margin-top: 4px; font-size: 9.5px; padding: 1px 6px; }
+.gh-msg-thread-time { font-size: 10px; color: var(--ink-50); white-space: nowrap; }
+.gh-msg-thread .gh-pill { margin-top: 4px; font-size: 10px; padding: 1px 6px; }
 .gh-msg-pane { display: flex; flex-direction: column; }
 .gh-msg-pane-hd { padding: 16px 22px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; gap: 12px; }
 .gh-msg-pane-body { flex: 1; padding: 24px; display: flex; flex-direction: column; gap: 16px; overflow: auto; }
 .gh-msg-bubble { max-width: 70%; padding: 14px 16px; background: var(--cream); border-radius: 14px; border-bottom-left-radius: 4px; font-size: 14px; line-height: 1.5; color: var(--ink); }
 .gh-msg-bubble .who { font-size: 11px; letter-spacing: 0.06em; color: var(--ink-50); text-transform: uppercase; font-weight: 600; margin-bottom: 6px; display: block; }
 .gh-msg-composer { border-top: 1px solid var(--rule); padding: 14px 16px; display: flex; gap: 10px; align-items: center; background: var(--bg); }
-.gh-msg-composer input { flex: 1; height: 38px; border: 1px solid var(--rule); background: var(--surface); border-radius: var(--r-md); padding: 0 14px; font-size: 13.5px; font-family: inherit; outline: none; }
+.gh-msg-composer input { flex: 1; height: 38px; border: 1px solid var(--rule); background: var(--surface); border-radius: var(--r-md); padding: 0 14px; font-size: 14px; font-family: inherit; outline: none; }
 
 /* ── Benefits ──────────────────────────────────────────────────────── */
 .gh-benefit { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-lg); padding: 22px; display: flex; flex-direction: column; gap: 10px; min-height: 200px; }
@@ -636,7 +636,7 @@ p { margin: 0; }
 .gh-benefit-ic svg { width: 20px; height: 20px; }
 .gh-benefit-h { font-family: var(--font-serif); font-size: 19px; line-height: 1.15; letter-spacing: -0.012em; color: var(--teal); margin: 0; }
 .gh-benefit-p { font-size: 13px; color: var(--ink-70); margin: 0; line-height: 1.5; }
-.gh-benefit-tag { margin-top: auto; font-size: 11.5px; font-weight: 600; color: var(--plum); letter-spacing: 0.02em; }
+.gh-benefit-tag { margin-top: auto; font-size: 12px; font-weight: 600; color: var(--plum); letter-spacing: 0.02em; }
 
 /* Locked (paid-only) benefit for free users. Mutes the icon + tag chrome
    while keeping title + body readable; the whole card links to /plan. */
@@ -656,15 +656,15 @@ p { margin: 0; }
 .gh-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
 .gh-field { display: flex; flex-direction: column; gap: 6px; }
 .gh-field.full { grid-column: 1 / -1; }
-.gh-field label { font-size: 11.5px; font-weight: 600; color: var(--ink-70); letter-spacing: 0.02em; }
-.gh-field input, .gh-field select, .gh-field textarea { height: 40px; border: 1px solid var(--rule); background: var(--bg); border-radius: var(--r-sm); padding: 0 12px; font-size: 13.5px; font-family: inherit; color: var(--ink); outline: none; }
+.gh-field label { font-size: 12px; font-weight: 600; color: var(--ink-70); letter-spacing: 0.02em; }
+.gh-field input, .gh-field select, .gh-field textarea { height: 40px; border: 1px solid var(--rule); background: var(--bg); border-radius: var(--r-sm); padding: 0 12px; font-size: 14px; font-family: inherit; color: var(--ink); outline: none; }
 .gh-field textarea { height: 88px; padding: 10px 12px; resize: vertical; }
 .gh-field input:focus, .gh-field select:focus, .gh-field textarea:focus { border-color: var(--teal); background: var(--surface); }
-.gh-field .hint { font-size: 11.5px; color: var(--ink-50); }
+.gh-field .hint { font-size: 12px; color: var(--ink-50); }
 .gh-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--rule); }
 .gh-toggle-row:first-child { border-top: none; }
-.gh-toggle-row-h { font-size: 13.5px; font-weight: 600; color: var(--ink); }
-.gh-toggle-row-p { font-size: 12.5px; color: var(--ink-70); margin-top: 2px; max-width: 60ch; }
+.gh-toggle-row-h { font-size: 14px; font-weight: 600; color: var(--ink); }
+.gh-toggle-row-p { font-size: 12px; color: var(--ink-70); margin-top: 2px; max-width: 60ch; }
 .gh-toggle { width: 38px; height: 22px; border-radius: 999px; background: var(--rule-strong); position: relative; border: none; cursor: pointer; flex-shrink: 0; transition: background .12s; }
 .gh-toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
 .gh-toggle.is-on { background: var(--teal); }
@@ -684,7 +684,7 @@ p { margin: 0; }
 }
 .gh-tab {
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--ink-70);
   background: transparent;
@@ -752,8 +752,8 @@ p { margin: 0; }
 
 /* Tables */
 .gh-ops-table-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 14px; overflow-x: auto; }
-.gh-ops-table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 13.5px; }
-.gh-ops-table th { text-align: left; padding: 12px 16px; background: var(--cream-warm, #ECE7D8); color: var(--ink-50); font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--rule); }
+.gh-ops-table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 14px; }
+.gh-ops-table th { text-align: left; padding: 12px 16px; background: var(--cream-warm, #ECE7D8); color: var(--ink-50); font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--rule); }
 .gh-ops-table td { padding: 14px 16px; border-bottom: 1px solid var(--rule); vertical-align: top; color: var(--ink); }
 .gh-ops-table tbody tr:last-child td { border-bottom: 0; }
 .gh-ops-table tbody tr:hover { background: rgba(13,63,72,0.02); }
@@ -866,7 +866,7 @@ p { margin: 0; }
 
 /* Filter chips */
 .gh-ops-inbox-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-.gh-ops-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 500; border: 1px solid var(--rule); background: #fff; color: var(--ink-70); text-decoration: none; transition: background .14s, border-color .14s, color .14s; }
+.gh-ops-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 1px solid var(--rule); background: #fff; color: var(--ink-70); text-decoration: none; transition: background .14s, border-color .14s, color .14s; }
 .gh-ops-chip:hover { background: var(--cream-warm, #ECE7D8); border-color: var(--teal); color: var(--teal); }
 .gh-ops-chip.is-on { background: var(--teal); border-color: var(--teal); color: #fff; }
 .gh-ops-chip-count { font-size: 11px; opacity: 0.75; }
@@ -880,13 +880,13 @@ p { margin: 0; }
 .gh-ops-inbox-row.is-unanswered { border-left: 3px solid var(--plum, #5F304B); padding-left: 15px; }
 .gh-ops-inbox-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .gh-ops-inbox-row-hd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.gh-ops-inbox-name { font-weight: 600; font-size: 13.5px; color: var(--ink); }
-.gh-ops-inbox-preview { font-size: 12.5px; color: var(--ink-50); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px; }
+.gh-ops-inbox-name { font-weight: 600; font-size: 14px; color: var(--ink); }
+.gh-ops-inbox-preview { font-size: 12px; color: var(--ink-50); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px; }
 .gh-ops-inbox-preview .who { font-weight: 600; color: var(--ink-70); }
-.gh-ops-inbox-row-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 11.5px; color: var(--ink-50); white-space: nowrap; flex-shrink: 0; }
+.gh-ops-inbox-row-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 12px; color: var(--ink-50); white-space: nowrap; flex-shrink: 0; }
 
 /* Unanswered badge */
-.gh-ops-badge { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em; }
+.gh-ops-badge { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.02em; }
 .gh-ops-badge.unanswered { background: rgba(95,48,75,0.1); color: var(--plum, #5F304B); }
 
 /* Thread view */
@@ -895,30 +895,42 @@ p { margin: 0; }
 
 /* Ops reply composer (textarea variant, overrides the input-based default) */
 .gh-ops-composer { flex-direction: column; align-items: stretch; gap: 10px; border-top: 1px solid var(--rule); padding: 14px 0 0; background: transparent; }
-.gh-msg-input { border: 1px solid var(--rule); background: var(--surface); border-radius: var(--r-md); padding: 10px 14px; font-size: 13.5px; font-family: inherit; color: var(--ink); outline: none; resize: vertical; line-height: 1.5; }
+.gh-msg-input { border: 1px solid var(--rule); background: var(--surface); border-radius: var(--r-md); padding: 10px 14px; font-size: 14px; font-family: inherit; color: var(--ink); outline: none; resize: vertical; line-height: 1.5; }
 .gh-msg-input:focus { border-color: var(--teal); }
 .gh-msg-composer-foot { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
 
-/* ===== Design refresh (preview) ===========================================
-   Appended so the cascade wins without disturbing existing rules. Implements
-   the agreed direction: bigger display step, lavender retired from the
-   secondary tiles, and a single hand-drawn underline as the signature.
-   Phase 2 (refer cards → plum, full type ramp) deferred — those need
-   coordinated JSX + a visual pass on this preview.
+/* ===== Design refresh ======================================================
+   Appended so the cascade wins without disturbing the base rules above.
+   Phase 1 — bigger display step, lavender retired from secondary accents,
+   one hand-drawn underline as the signature.
+   Phase 2 — refer/credit card recoloured to plum (below); the half-pixel type
+   scale was normalised to a clean 12/14/16/20/28/40 ramp in the base rules.
    ------------------------------------------------------------------------- */
 
 /* Bigger display step — sharpen hierarchy on the most-seen headings */
-.gh-welcome-h   { font-size: 40px; }
+.gh-welcome-h    { font-size: 40px; }
 .gh-pagehd-title { font-size: 40px; }
-.gh-onboard-h   { font-size: 32px; }
+.gh-onboard-h    { font-size: 32px; }
 
 /* Retire lavender — teal + cream carry the secondary accents now */
-.gh-benefit-ic                       { background: var(--cream); color: var(--teal); }
-.gh-pill.lav                         { background: var(--teal-06); color: var(--teal); }
-.gh-list-ic.lav                      { background: var(--cream); color: var(--teal); }
-.gh-service-ic.lav                   { background: var(--cream); color: var(--teal); }
-.gh-resource-thumb.lav               { background: var(--teal-06); }
-.gh-ops-status.status-in_progress    { background: var(--teal-06); color: var(--teal); }
+.gh-benefit-ic                    { background: var(--cream); color: var(--teal); }
+.gh-pill.lav                      { background: var(--teal-06); color: var(--teal); }
+.gh-list-ic.lav                   { background: var(--cream); color: var(--teal); }
+.gh-service-ic.lav                { background: var(--cream); color: var(--teal); }
+.gh-resource-thumb.lav            { background: var(--teal-06); }
+.gh-ops-status.status-in_progress { background: var(--teal-06); color: var(--teal); }
+
+/* Refer / credit card → plum. Text colours are scoped under .gh-refer because
+   .gh-refer-p is shared with the white community card on /benefits (a global
+   recolour there would be cream-on-white). The card's two inline plum spots
+   (.gh-card-h and the referral-stats row) are flipped to cream in the JSX. */
+.gh-refer             { background: var(--plum); border-color: rgba(243,240,231,0.2); }
+.gh-refer::before     { background: rgba(243,240,231,0.1); }
+.gh-refer .gh-refer-h         { color: var(--cream); }
+.gh-refer .gh-refer-p         { color: rgba(243,240,231,0.82); }
+.gh-refer .gh-refer-code      { color: rgba(243,240,231,0.72); }
+.gh-refer .gh-refer-code code { background: rgba(243,240,231,0.14); border-color: rgba(243,240,231,0.4); color: var(--cream); }
+.gh-refer .gh-pill.lav        { background: var(--lime); color: var(--teal); }
 
 /* Signature: one hand-drawn (wavy) plum underline, applied once via .gh-underline */
 .gh-underline {
