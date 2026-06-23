@@ -166,7 +166,7 @@ export default async function BenefitsPage() {
         style={{ flexDirection: 'row', alignItems: 'center', padding: 28 }}
       >
         <div style={{ flex: 1, position: 'relative' }}>
-          <div className="gh-card-h" style={{ color: 'var(--plum)' }}>
+          <div className="gh-card-h" style={{ color: 'var(--cream)' }}>
             Refer a friend
             <span className="gh-pill lav">2× credit</span>
           </div>
@@ -186,7 +186,7 @@ export default async function BenefitsPage() {
                 gap: 14,
                 margin: '8px 0 12px',
                 fontSize: 13,
-                color: 'var(--ink-70)',
+                color: 'rgba(243,240,231,0.82)',
               }}
             >
               {referralStats.pending > 0 && (
