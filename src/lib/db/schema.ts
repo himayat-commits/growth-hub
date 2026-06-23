@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, varchar, boolean, jsonb, serial, integer, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, varchar, boolean, jsonb, serial, integer, index, primaryKey } from 'drizzle-orm/pg-core';
 
 /**
  * Mirrors the canonical state of a user's Stripe subscription.
@@ -309,7 +309,10 @@ export const eventRsvps = pgTable(
     ref: varchar('ref', { length: 64 }),
   },
   (t) => ({
-    userEventIdx: index('event_rsvps_user_event_idx').on(t.userId, t.eventId),
+    // Compound primary key enforces "one RSVP per user per event" at the DB
+    // level — the app-side check in rsvpToEvent() can't prevent a race between
+    // two concurrent POSTs, but this constraint + onConflictDoNothing can.
+    pk: primaryKey({ columns: [t.userId, t.eventId] }),
   }),
 );
 

@@ -13,10 +13,12 @@ export default function AssignStrategist({
   userId,
   currentSlug,
   options,
+  canEdit,
 }: {
   userId: string;
   currentSlug: string | null;
   options: StrategistOption[];
+  canEdit: boolean;
 }) {
   const router = useRouter();
   const [value, setValue] = useState<string>(currentSlug ?? '');
@@ -45,6 +47,12 @@ export default function AssignStrategist({
       setValue(currentSlug ?? '');
     }
   };
+
+  // Support-role staff see the assignment but can't change it (admin only).
+  if (!canEdit) {
+    const current = options.find((o) => o.slug === currentSlug)?.name;
+    return <span className="gh-ops-meta">{current ?? (currentSlug || '— unassigned —')}</span>;
+  }
 
   return (
     <div className="gh-ops-assign">

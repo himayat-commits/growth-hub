@@ -14,33 +14,30 @@ export interface RsvpAttribution {
   ref?: string | null;
 }
 
-/** Insert an RSVP, idempotent. Returns true if a new row was created.
- *  Attribution is optional — when present it lets /ops/events answer
- *  "where did these RSVPs come from?" */
+/** Insert an RSVP, idempotent. Returns true if a NEW row was created, false
+ *  if the user had already RSVP'd. Race-safe: the (userId, eventId) primary
+ *  key + onConflictDoNothing means two concurrent POSTs can't double-insert —
+ *  exactly one wins and the other returns false. The first RSVP's attribution
+ *  is preserved (we never overwrite on conflict). */
 export async function rsvpToEvent(
   userId: string,
   eventId: number,
   attribution?: RsvpAttribution,
 ): Promise<boolean> {
-  const db = getDb();
-  // Check first so we can return the right boolean without relying on
-  // returning() shape variance across drivers.
-  const existing = await db
-    .select()
-    .from(eventRsvps)
-    .where(and(eq(eventRsvps.userId, userId), eq(eventRsvps.eventId, eventId)))
-    .limit(1);
-  if (existing[0]) return false;
-  await db.insert(eventRsvps).values({
-    userId,
-    eventId,
-    source: attribution?.source ?? null,
-    utmMedium: attribution?.utmMedium ?? null,
-    utmCampaign: attribution?.utmCampaign ?? null,
-    utmContent: attribution?.utmContent ?? null,
-    ref: attribution?.ref ?? null,
-  });
-  return true;
+  const inserted = await getDb()
+    .insert(eventRsvps)
+    .values({
+      userId,
+      eventId,
+      source: attribution?.source ?? null,
+      utmMedium: attribution?.utmMedium ?? null,
+      utmCampaign: attribution?.utmCampaign ?? null,
+      utmContent: attribution?.utmContent ?? null,
+      ref: attribution?.ref ?? null,
+    })
+    .onConflictDoNothing({ target: [eventRsvps.userId, eventRsvps.eventId] })
+    .returning();
+  return inserted.length > 0;
 }
 
 /** Cancel an RSVP. Returns true if a row was actually deleted. */

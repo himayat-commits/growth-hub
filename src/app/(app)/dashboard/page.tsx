@@ -37,6 +37,7 @@ function notificationTone(kind: string): 'plum' | 'lav' | 'teal' {
   switch (kind) {
     case 'welcome':
     case 'message_received':
+    case 'community':
       return 'plum';
     case 'subscription_active':
     case 'event_reminder':

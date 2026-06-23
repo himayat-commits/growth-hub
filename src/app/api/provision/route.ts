@@ -8,9 +8,11 @@
 
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
+import { withAuth } from "@/lib/auth/with-auth";
 import { wizardStateSchema } from "@/lib/wizard/state";
 import { appendProvisioningLog } from "@/lib/wizard/state-store";
 import { createNotification } from "@/lib/db/notifications";
+import { notifyOps } from "@/lib/ops/notify";
 import {
   buildCreateSubaccountPayload,
   buildUpdateBusinessPayload,
@@ -29,6 +31,14 @@ const RESELLER_ID = process.env.BIRDEYE_RESELLER_ID ?? "demo-reseller";
 const API_HOST = process.env.BIRDEYE_API_HOST ?? "https://api.birdeye.com/resources";
 
 export async function POST(req: Request) {
+  const { user } = await withAuth();
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return new Response(
@@ -39,6 +49,16 @@ export async function POST(req: Request) {
 
   const state = parsed.data.state;
   const onboardingId = state.onboardingId;
+
+  // The wizard sets onboardingId to the signed-in user's id. Reject any
+  // attempt to provision on behalf of another user.
+  if (user.id !== onboardingId) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const mode = getMode();
 
   const stream = new ReadableStream<Uint8Array>({
@@ -64,11 +84,9 @@ export async function POST(req: Request) {
           label: REQUEST_LABELS[kind],
           status: "running",
         });
-        let result = await callBirdeye(req, { onboardingId, mode });
-        if (!result.ok && result.status >= 500) {
-          await new Promise((r) => setTimeout(r, 500));
-          result = await callBirdeye(req, { onboardingId, mode });
-        }
+        // callBirdeye() now handles timeout + exponential-backoff retry on
+        // transient failures internally, so a single call is enough here.
+        const result = await callBirdeye(req, { onboardingId, mode });
         await appendProvisioningLog(onboardingId, {
           step,
           kind,
@@ -157,27 +175,19 @@ export async function POST(req: Request) {
       const opsPayload = {
         state: {
           ...state,
-          provisioning: { businessNumber, invitedUsers, mediaIds },
+          provisioning: { ...state.provisioning, businessNumber, invitedUsers, mediaIds },
         },
       };
       try {
-        const origin = req.headers.get("origin") ?? "";
-        if (!origin) {
-          throw new Error("Missing origin header — can't reach /api/notify-ops");
-        }
-        const res = await fetch(`${origin}/api/notify-ops`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(opsPayload),
-        });
-        if (!res.ok) {
-          throw new Error(`notify-ops returned ${res.status}`);
-        }
+        // Call the ops notifier in-process — no internal HTTP round-trip, so
+        // we don't depend on a (user-controllable, sometimes-absent) origin
+        // header to reach our own endpoint.
+        await notifyOps(opsPayload.state);
         await appendProvisioningLog(onboardingId, {
           step: stepCounter++,
           kind: "notify_ops",
           payload: opsPayload,
-          response: { status: res.status },
+          response: { ok: true },
           ok: true,
         });
       } catch (e) {

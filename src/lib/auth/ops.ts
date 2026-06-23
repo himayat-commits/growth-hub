@@ -4,46 +4,68 @@
 //   - Visitor must be signed in via WorkOS.
 //   - Their email must be in OPS_EMAILS (comma-separated env var).
 //
-// Falls back to ['waheed@himayat.com.au'] in dev so the console works
+// Roles: each OPS_EMAILS entry is either "email" or "email:role" where role is
+// `admin` or `support`. A bare email (no role) is treated as `admin`, so any
+// pre-existing allowlist keeps full access — roles are opt-in. `support` can
+// view everything and triage bookings / reply in the inbox, but NOT approve
+// referral credits (money) or reassign strategists — those require `admin`.
+//
+//   OPS_EMAILS="waheed@himayat.com.au:admin, support@himayat.com.au:support"
+//
+// Falls back to ['waheed@himayat.com.au'] (admin) in dev so the console works
 // out of the box for the project owner.
 //
-// Returns the WorkOS user if allowed, null otherwise. Pages call
-// `await requireOpsUser()` at the top and redirect if it returns null.
+// Returns the WorkOS user (with role) if allowed, null otherwise. Pages call
+// `await getOpsUser()` at the top and redirect if it returns null.
 
 import { withAuth } from '@workos-inc/authkit-nextjs';
+
+export type OpsRole = 'admin' | 'support';
 
 export interface OpsUser {
   id: string;
   email: string;
   firstName?: string | null;
   lastName?: string | null;
+  role: OpsRole;
 }
 
 const FALLBACK_ALLOWLIST = ['waheed@himayat.com.au'];
 
-function parseAllowlist(): string[] {
+/** Parse OPS_EMAILS into an email→role map. Entries are "email" or
+ *  "email:role"; a bare email is admin (back-compat), an unrecognised role
+ *  defaults to admin so a typo never silently downgrades someone. */
+function parseAllowlist(): Map<string, OpsRole> {
   const raw = process.env.OPS_EMAILS;
-  if (!raw) return FALLBACK_ALLOWLIST;
-  return raw
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
+  const entries = raw
+    ? raw.split(',').map((s) => s.trim()).filter(Boolean)
+    : FALLBACK_ALLOWLIST;
+  const map = new Map<string, OpsRole>();
+  for (const entry of entries) {
+    const [emailPart, rolePart] = entry.split(':');
+    const email = emailPart?.trim().toLowerCase();
+    if (!email) continue;
+    const role: OpsRole = rolePart?.trim().toLowerCase() === 'support' ? 'support' : 'admin';
+    map.set(email, role);
+  }
+  return map;
 }
 
 export async function getOpsUser(): Promise<OpsUser | null> {
   const { user } = await withAuth().catch(() => ({ user: null }));
   if (!user || !user.email) return null;
-  const allowlist = parseAllowlist();
-  if (!allowlist.includes(user.email.toLowerCase())) return null;
+  const role = parseAllowlist().get(user.email.toLowerCase());
+  if (!role) return null;
   return {
     id: user.id,
     email: user.email,
     firstName: user.firstName ?? null,
     lastName: user.lastName ?? null,
+    role,
   };
 }
 
 export function isOpsEmail(email: string | null | undefined): boolean {
   if (!email) return false;
-  return parseAllowlist().includes(email.toLowerCase());
+  return parseAllowlist().has(email.toLowerCase());
 }

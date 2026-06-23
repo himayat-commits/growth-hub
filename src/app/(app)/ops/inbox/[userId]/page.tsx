@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { getOpsUser } from '@/lib/auth/ops';
+import { canAccessMemberThread } from '@/lib/auth/ops-inbox';
 import { getDb } from '@/lib/db';
 import { userProfiles, subscriptions } from '@/lib/db/schema';
 import { getThread } from '@/lib/db/messages';
@@ -31,6 +32,10 @@ export default async function OpsInboxThreadPage({ params }: { params: Params })
   if (!opsUser) redirect('/dashboard');
 
   const { userId } = await params;
+
+  // Strategists may only open threads for members assigned to them.
+  // (Admin/owner ops users with no strategist record still see everyone.)
+  if (!(await canAccessMemberThread(opsUser, userId))) redirect('/ops/inbox');
 
   const db = getDb();
   const [thread, profileRows, subRows] = await Promise.all([

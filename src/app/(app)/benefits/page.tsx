@@ -5,6 +5,7 @@ import { withAuth } from '@workos-inc/authkit-nextjs';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ensureUserRecord } from '@/lib/auth/ensure-user-record';
 import { getReferralStats } from '@/lib/db/referrals';
+import { getSiteSettings } from '@/lib/cms';
 import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import {
   IcoCal,
@@ -39,7 +40,7 @@ export default async function BenefitsPage() {
   const { user } = await withAuth();
   if (!user) redirect('/sign-in?redirect_url=/benefits');
 
-  const [profile, referralStats, sub] = await Promise.all([
+  const [profile, referralStats, sub, settings] = await Promise.all([
     ensureUserRecord({
       id: user.id,
       firstName: user.firstName,
@@ -48,9 +49,31 @@ export default async function BenefitsPage() {
     }),
     getReferralStats(user.id),
     getSubscription(),
+    getSiteSettings().catch(() => null),
   ]);
   const tier = getEffectivePlan(sub);
   const isPaid = tier !== 'free';
+
+  // Community group invite links come from the SiteSettings CMS global. Only
+  // the ones an editor has filled in are surfaced; if none are set the section
+  // stays hidden and the benefit card keeps its "joins on profile complete" copy.
+  const cl = (
+    settings as {
+      communityLinks?: {
+        slack?: string | null;
+        facebook?: string | null;
+        whatsapp?: string | null;
+        forum?: string | null;
+      };
+    } | null
+  )?.communityLinks;
+  const communityGroups = [
+    { label: 'Slack workspace', href: cl?.slack },
+    { label: 'Facebook group', href: cl?.facebook },
+    { label: 'WhatsApp group', href: cl?.whatsapp },
+    { label: 'Community forum', href: cl?.forum },
+  ].filter((g): g is { label: string; href: string } => !!g.href);
+  const hasCommunity = communityGroups.length > 0;
 
   const referCode = profile.referCode ?? `GROW-${user.id.slice(-6).toUpperCase()}-${new Date().getFullYear()}`;
   const totalCreditDollars = (referralStats.totalCreditCents / 100).toFixed(0);
@@ -99,8 +122,9 @@ export default async function BenefitsPage() {
       tone: 'plum',
       Icon: IcoPeople,
       title: 'Community access',
-      p: 'A small, quiet group of operators across Sydney and beyond. No sales, no noise.',
-      tag: 'Joins on profile complete',
+      p: 'A small, quiet group of operators across Canberra and beyond. No sales, no noise.',
+      tag: hasCommunity ? 'Join the community ↓' : 'Joins on profile complete',
+      href: hasCommunity ? '#community' : undefined,
     },
     {
       tone: 'lime',
@@ -201,6 +225,29 @@ export default async function BenefitsPage() {
           </a>
         </div>
       </div>
+
+      {hasCommunity && (
+        <div id="community" className="gh-card" style={{ padding: 28 }}>
+          <div className="gh-card-h" style={{ color: 'var(--plum)' }}>Join the community</div>
+          <p className="gh-refer-p" style={{ marginTop: 6 }}>
+            Hop into the member groups — peer support, quick questions, and local chat.
+            No sales, no noise.
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
+            {communityGroups.map((g) => (
+              <a
+                key={g.label}
+                href={g.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gh-btn"
+              >
+                {g.label} →
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="gh-grid-3">
         {benefits.map((b) => {
