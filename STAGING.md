@@ -56,9 +56,9 @@ In Vercel → **Settings → Environment Variables**, set these for the
 
 ## 4. Make migrations run on staging
 
-`scripts/prod-migrate.mjs` currently gates on `VERCEL_ENV === 'production'`.
-To migrate the staging DB on deploy, broaden that check so it also runs on the
-staging environment, e.g.:
+`scripts/prod-migrate.mjs` runs **both** Drizzle and Payload migrations, but
+only when `VERCEL_ENV === 'production'`. To migrate the staging DB on deploy,
+broaden that gate so it also fires on the staging branch, e.g.:
 
 ```js
 const env = process.env.VERCEL_ENV ?? '(unset)';
@@ -66,13 +66,14 @@ const env = process.env.VERCEL_ENV ?? '(unset)';
 const isStaging = process.env.VERCEL_GIT_COMMIT_REF === 'staging';
 if (env === 'production' || (env === 'preview' && isStaging)) {
   execSync('npx drizzle-kit migrate', { stdio: 'inherit' });
+  execSync('npx payload migrate', { stdio: 'inherit' });
 }
 ```
 
-Then run the Payload migrations too (the build already runs
-`payload generate:importmap && next build`; add `payload migrate` for staging if
-you rely on the hand-written Payload migrations — e.g. the new
-`20260623_site_settings_community_links`).
+This runs the Drizzle migrations (incl. `0013_add_event_rsvps_pk` with its
+dedupe `DELETE`) and the Payload migrations (incl. the new
+`20260623_site_settings_community_links` that adds the `community_links_*`
+columns to `site_settings`). Both are tracked/idempotent.
 
 > ⚠️ Because today Preview shares the prod `DATABASE_URL`, do **not** broaden the
 > migrate gate until step 3 has repointed staging at the Neon branch — otherwise
