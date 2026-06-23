@@ -1,4 +1,8 @@
-import { authkitMiddleware } from '@workos-inc/authkit-nextjs';
+import {
+  authkitMiddleware,
+  authkit as authkitSession,
+  handleAuthkitProxy,
+} from '@workos-inc/authkit-nextjs';
 import { NextRequest, NextResponse, type NextFetchEvent } from 'next/server';
 
 /**
@@ -88,6 +92,28 @@ export default async function middleware(request: NextRequest, event: NextFetchE
       target.host = MARKETING_HOSTNAME;
       return attachReferralCookie(NextResponse.redirect(target, 308), request);
     }
+  }
+
+  // Protected app surface: gate unauthenticated users HERE, at the proxy,
+  // rather than in a Server Component. A Server Component's redirect() to the
+  // (cross-origin) AuthKit hosted UI can't be followed by a client-side RSC
+  // fetch, so a logged-out soft navigation to /dashboard dies on CORS
+  // (net::ERR_FAILED) + a "Server Components render" error instead of bouncing
+  // to sign-in — incident 2026-06-23. A proxy redirect is followed as a real
+  // navigation on both hard and soft loads. This mirrors AuthKit's own
+  // middlewareAuth path, scoped to APP_PATHS so we don't have to allowlist
+  // every public marketing route. Scoped to the production app host so dev /
+  // preview (and the Playwright session bypass in with-auth.ts) are untouched.
+  if (host === APP_HOSTNAME && isAppPath(pathname)) {
+    const { session, headers, authorizationUrl } = await authkitSession(request);
+    if (!session.user && authorizationUrl) {
+      return attachReferralCookie(
+        handleAuthkitProxy(request, headers, { redirect: authorizationUrl }),
+        request,
+      );
+    }
+    // Authenticated (or session refreshed): forward AuthKit's headers downstream.
+    return attachReferralCookie(handleAuthkitProxy(request, headers), request);
   }
 
   // Everything else: let AuthKit refresh the session cookie as usual.
