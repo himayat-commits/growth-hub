@@ -247,7 +247,6 @@ export default async function DashboardPage() {
     7: 'Seven',
   };
   const totalWord = NUMBER_WORDS[total] ?? String(total);
-  const heading = `${totalWord} quick steps to unlock the Growth Hub.`;
 
   return (
     <>
@@ -275,7 +274,10 @@ export default async function DashboardPage() {
       <div className="gh-onboard">
         <div className="gh-onboard-l">
           <span className="gh-onboard-kicker">Getting started</span>
-          <h2 className="gh-onboard-h">{heading}</h2>
+          <h2 className="gh-onboard-h">
+            {totalWord} quick steps to{' '}
+            <span className="gh-underline">unlock the Growth Hub</span>.
+          </h2>
           <p className="gh-onboard-p">
             Finish these and we&apos;ll surface coaching, courses and events matched to your goals
             — not a generic feed.
