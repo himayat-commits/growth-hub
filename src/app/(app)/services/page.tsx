@@ -10,7 +10,7 @@ import { onboardingStates } from '@/lib/db/schema';
 import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import { ADDONS, getAddOnPriceId, type AddOnId, type PlanTier } from '@/lib/plans';
 import type { WizardState } from '@/lib/wizard/state';
-import { stepsForPackage } from '@/lib/wizard/state';
+import { stepsForPackage, stepsFor } from '@/lib/wizard/state';
 import { isStepComplete } from '@/lib/wizard/initial-state';
 import { getBirdeyeDashboardUrl } from '@/lib/birdeye/dashboard-url';
 import PortalModuleGrid from '@/components/portal/PortalModuleGrid';
@@ -60,8 +60,18 @@ export default async function ServicesPage() {
   const wizardState = obRows[0]?.state as WizardState | undefined;
   const businessNumber = wizardState?.provisioning?.businessNumber ?? null;
   const businessName = wizardState?.business?.name ?? null;
-  const provisioned = !!businessNumber;
+  const runStatus = wizardState?.provisioning?.runStatus ?? null;
+  // A partial run still has a businessNumber (account exists) but some steps
+  // need a retry — surface a distinct "attention" banner for it.
+  const isPartial = runStatus === 'partial';
+  const provisioned = !!businessNumber && !isPartial;
   const hasActivePaidSub = tier !== 'free';
+  const dashboardUrl = getBirdeyeDashboardUrl(businessNumber);
+
+  // Free-tier action-plan progress. Report mode reuses these wizard steps;
+  // once they're all filled the banner switches from "Build" to "View".
+  const reportSteps = stepsFor('report', 'foundations').filter((s) => s.key !== 'action-plan');
+  const reportComplete = !!wizardState && reportSteps.every((s) => isStepComplete(wizardState, s.key));
 
   // For partially-completed wizards, deep-link to the first incomplete step.
   let setupHref = '/onboarding';
@@ -77,7 +87,12 @@ export default async function ServicesPage() {
     const next = wizardState
       ? steps.find((s) => s.key !== 'review' && !isStepComplete(wizardState, s.key))
       : steps[0];
-    setupHref = `/onboarding/${next?.key ?? 'confirm'}`;
+    // A prior failed attempt (or a fully-filled wizard) resumes at the launch
+    // step so the user can retry; otherwise jump to the first gap.
+    setupHref =
+      runStatus === 'failed' || wizardState?.provisioning?.attempts
+        ? '/onboarding/review'
+        : `/onboarding/${next?.key ?? 'review'}`;
   }
 
   // Project Payload services into the lightweight shape the client tab needs.
@@ -133,7 +148,7 @@ export default async function ServicesPage() {
           </div>
           <div className="portal-birdeye-banner-cta">
             <a
-              href={getBirdeyeDashboardUrl(businessNumber)}
+              href={dashboardUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-lime"
@@ -142,30 +157,87 @@ export default async function ServicesPage() {
             </a>
           </div>
         </div>
+      ) : isPartial && hasActivePaidSub ? (
+        <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
+          <div className="portal-birdeye-banner-head">
+            <span className="portal-birdeye-pill portal-birdeye-pill--amber">Setup needs attention</span>
+            <h2 className="portal-birdeye-title">
+              {businessName
+                ? `${businessName} is live, but setup didn't fully finish.`
+                : "Your Birdeye account needs attention."}
+            </h2>
+            <p className="portal-birdeye-sub">
+              Business number <code>{businessNumber}</code> ·{' '}
+              {wizardState?.provisioning?.failedSteps?.length ?? 0} step(s) need a retry.
+            </p>
+          </div>
+          <div className="portal-birdeye-banner-cta">
+            <Link href="/onboarding/review" className="btn btn-primary">
+              Resume / retry <IcoArrow />
+            </Link>
+          </div>
+        </div>
       ) : hasActivePaidSub ? (
         <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
           <div className="portal-birdeye-banner-head">
             <span className="portal-birdeye-pill portal-birdeye-pill--amber">
-              {setupProgress && setupProgress.done > 0 ? 'Setup in progress' : 'Setup pending'}
+              {runStatus === 'failed'
+                ? "Setup didn't finish"
+                : setupProgress && setupProgress.done > 0
+                  ? 'Setup in progress'
+                  : 'Setup pending'}
             </span>
             <h2 className="portal-birdeye-title">
-              {setupProgress && setupProgress.done > 0
-                ? 'Pick up where you left off.'
-                : 'Set up your Birdeye account.'}
+              {runStatus === 'failed'
+                ? "Let's finish setting up your Birdeye account."
+                : setupProgress && setupProgress.done > 0
+                  ? 'Pick up where you left off.'
+                  : 'Set up your Birdeye account.'}
             </h2>
             <p className="portal-birdeye-sub">
-              {setupProgress && setupProgress.done > 0
-                ? `${setupProgress.done} of ${setupProgress.total} steps complete · we'll resume right where you left off.`
-                : "15-minute wizard. Save and resume any time — we'll pick up right where you left off."}
+              {runStatus === 'failed'
+                ? "Your last attempt didn't complete — your answers are saved. Pick up and retry."
+                : setupProgress && setupProgress.done > 0
+                  ? `${setupProgress.done} of ${setupProgress.total} steps complete · we'll resume right where you left off.`
+                  : "15-minute wizard. Save and resume any time — we'll pick up right where you left off."}
             </p>
           </div>
           <div className="portal-birdeye-banner-cta">
             <Link href={setupHref} className="btn btn-primary">
-              {setupProgress && setupProgress.done > 0 ? 'Resume setup' : 'Start setup'} <IcoArrow />
+              {runStatus === 'failed'
+                ? 'Retry setup'
+                : setupProgress && setupProgress.done > 0
+                  ? 'Resume setup'
+                  : 'Start setup'}{' '}
+              <IcoArrow />
             </Link>
           </div>
         </div>
-      ) : null}
+      ) : (
+        <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
+          <div className="portal-birdeye-banner-head">
+            <span className="portal-birdeye-pill portal-birdeye-pill--amber">Free action plan</span>
+            <h2 className="portal-birdeye-title">
+              {reportComplete
+                ? 'Your Birdeye action plan is ready.'
+                : 'Get your free Birdeye action plan.'}
+            </h2>
+            <p className="portal-birdeye-sub">
+              {reportComplete
+                ? 'A personalised local-growth plan built from your answers — plus what Foundations automates for you.'
+                : "Answer a few questions about your business and we'll build a personalised local-growth plan — free, no card needed."}
+            </p>
+          </div>
+          <div className="portal-birdeye-banner-cta">
+            <Link
+              href={reportComplete ? '/onboarding/action-plan' : '/onboarding'}
+              className="btn btn-primary"
+            >
+              {reportComplete ? 'View your action plan' : 'Build your action plan'} <IcoArrow />
+            </Link>
+          </div>
+        </div>
+      )}
 
       {activeBookings.length > 0 && (
         <div className="gh-card" style={{ marginBottom: 24 }}>
@@ -196,7 +268,7 @@ export default async function ServicesPage() {
       )}
 
       <ServicesTabs
-        modules={<PortalModuleGrid tier={tier} activeAddOns={activeAddOns} />}
+        modules={<PortalModuleGrid tier={tier} activeAddOns={activeAddOns} dashboardUrl={dashboardUrl} />}
         services={<ServicesCatalog services={serviceItems} />}
       />
     </>

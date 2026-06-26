@@ -22,6 +22,11 @@ export type CreateSubaccountRequest = {
     phone: string;
     countryCode: "AU";
     aggrOptions: 1;
+    /** Idempotency anchor (== onboardingId). Lets a retry be matched to the
+     *  same sub-account instead of creating a duplicate. NOTE: whether the
+     *  Birdeye create endpoint actually honours this field is a Phase-0
+     *  assumption to confirm against the real API. */
+    externalReferenceId: string;
   };
 };
 
@@ -43,6 +48,7 @@ export function buildCreateSubaccountPayload(
       phone: state.address.phone,
       countryCode: state.address.countryCode,
       aggrOptions: 1,
+      externalReferenceId: state.onboardingId,
     },
   };
 }

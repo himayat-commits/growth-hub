@@ -19,7 +19,7 @@ import { getDb } from '@/lib/db';
 import { onboardingStates } from '@/lib/db/schema';
 import { getSubscription, isActive } from '@/lib/subscription';
 import { createInitialState } from '@/lib/wizard/initial-state';
-import type { WizardState } from '@/lib/wizard/state';
+import type { WizardState, WizardMode } from '@/lib/wizard/state';
 import type { PackageId } from '@/lib/wizard/packages';
 import { WizardProvider } from '@/components/wizard/WizardContext';
 
@@ -33,12 +33,12 @@ export default async function OnboardingLayout({
     redirect('/sign-in?redirect_url=' + encodeURIComponent('/onboarding'));
   }
 
+  // Paid users provision a real Birdeye account; free users get the
+  // action-plan report instead (no /pricing dead-end).
   const sub = await getSubscription();
-  if (!isActive(sub)) {
-    redirect('/pricing');
-  }
+  const mode: WizardMode = isActive(sub) ? 'provision' : 'report';
 
-  const packageId = (sub!.planTier as PackageId | null) ?? 'foundations';
+  const packageId = (sub?.planTier as PackageId | null) ?? 'foundations';
   const userId = user.id;
 
   // Hydrate from Neon if a prior wizard session exists for this user.
@@ -57,8 +57,10 @@ export default async function OnboardingLayout({
     });
 
   return (
-    <WizardProvider initialState={initialState}>
-      {initialState.status === 'provisioned' ? <PostProvisionBanner /> : null}
+    <WizardProvider initialState={initialState} mode={mode}>
+      {mode === 'provision' && initialState.status === 'provisioned' ? (
+        <PostProvisionBanner />
+      ) : null}
       {children}
     </WizardProvider>
   );

@@ -187,5 +187,8 @@ export function isStepComplete(state: WizardState, key: StepKey): boolean {
       return true;
     case "review":
       return state.status === "submitted" || state.status === "provisioned";
+    case "action-plan":
+      // Terminal report view — always reachable once the user gets there.
+      return true;
   }
 }
