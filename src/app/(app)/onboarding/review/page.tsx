@@ -37,6 +37,7 @@ type DoneEvent = {
   businessNumber: string;
   invitedUsers: string[];
   mediaIds: string[];
+  status?: "provisioned" | "partial";
 };
 
 type RunState = "idle" | "running" | "success" | "error";
@@ -65,6 +66,25 @@ export default function ReviewPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ state }),
     });
+
+    // Pre-stream gates (auth, subscription, already-provisioned) return JSON
+    // with a real status code instead of an SSE stream.
+    const contentType = res.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      const data = (await res.json().catch(() => ({}))) as {
+        alreadyProvisioned?: boolean;
+        error?: string;
+      };
+      if (res.ok && data.alreadyProvisioned) {
+        setRunState("success");
+        router.push("/onboarding/done");
+        return;
+      }
+      setRunState("error");
+      setErrorMessage(data.error ?? "Provisioning couldn't start. Please retry.");
+      return;
+    }
+
     if (!res.body) {
       setRunState("error");
       setErrorMessage("Server did not return a response stream. Please retry.");
@@ -98,9 +118,11 @@ export default function ReviewPage() {
                 ...s,
                 status: "provisioned",
                 provisioning: {
+                  ...s.provisioning,
                   businessNumber: ev.businessNumber,
                   invitedUsers: ev.invitedUsers,
                   mediaIds: ev.mediaIds,
+                  runStatus: ev.status ?? "provisioned",
                   completedAt: new Date().toISOString(),
                 },
               }),

@@ -20,12 +20,20 @@ import type { WizardState } from "@/lib/wizard/state";
 export function DoneView({
   onboardingId,
   packageId,
+  serverState,
+  dashboardUrl = "https://app.birdeye.com",
 }: {
   onboardingId: string;
   packageId: PackageId;
+  /** Server-authoritative wizard state. When present it wins over the
+   *  localStorage fallback (reliable cross-device + after a resume). */
+  serverState?: WizardState;
+  /** Resolved Birdeye dashboard deep-link. */
+  dashboardUrl?: string;
 }) {
-  const [state, setState] = React.useState<WizardState | null>(null);
+  const [state, setState] = React.useState<WizardState | null>(serverState ?? null);
   React.useEffect(() => {
+    if (serverState) return; // server data wins — skip localStorage
     try {
       const raw = localStorage.getItem(`gh_wizard_${onboardingId}`);
       if (raw) {
@@ -35,7 +43,7 @@ export function DoneView({
     } catch {
       /* ignore */
     }
-  }, [onboardingId]);
+  }, [onboardingId, serverState]);
 
   const pkg = PACKAGES[packageId];
   const businessNumber = state?.provisioning.businessNumber ?? "—";
@@ -46,6 +54,10 @@ export function DoneView({
   const contactCount = state?.contacts.length ?? 0;
   const businessName = state?.business.name;
 
+  // On a partial run, mark the steps that actually failed as not-ok.
+  const failedKinds = new Set((state?.provisioning.failedSteps ?? []).map((f) => f.kind));
+  const isPartial = state?.provisioning.runStatus === "partial";
+
   const checklist: { label: string; ok: boolean; detail?: string }[] = [
     {
       label: "Business created",
@@ -55,13 +67,17 @@ export function DoneView({
     { label: "Admin invite sent", ok: true, detail: adminEmail },
     {
       label: "Additional users invited",
-      ok: invitedUsers.length > 0,
+      ok: invitedUsers.length > 0 && !failedKinds.has("create_user"),
       detail: invitedUsers.join(", ") || "none",
     },
-    { label: "Listings populated", ok: true, detail: "Google + Facebook + Microsite" },
+    {
+      label: "Listings populated",
+      ok: !failedKinds.has("update_business"),
+      detail: "Google + Facebook + Microsite",
+    },
     {
       label: "Media uploaded",
-      ok: mediaCount > 0,
+      ok: mediaCount > 0 && !failedKinds.has("add_media"),
       detail: `${mediaCount} items`,
     },
     {
@@ -69,10 +85,14 @@ export function DoneView({
       ok: true,
       detail: `6 default + ${faqCount} custom`,
     },
-    { label: "Default review sources set", ok: true, detail: "Google · Facebook" },
+    {
+      label: "Default review sources set",
+      ok: !failedKinds.has("default_review_sources"),
+      detail: "Google · Facebook",
+    },
     {
       label: "Initial contacts uploaded",
-      ok: contactCount > 0,
+      ok: contactCount > 0 && !failedKinds.has("save_contact"),
       detail: `${contactCount} contacts`,
     },
     ...(pkg.id === "accelerate"
@@ -94,7 +114,11 @@ export function DoneView({
       <header className="bg-eggshell/85 border-b border-teal/10 backdrop-blur-md">
         <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
           <Logo />
-          <Pill tone="lime">✓ Provisioned</Pill>
+          {isPartial ? (
+            <Pill tone="amber">Action needed</Pill>
+          ) : (
+            <Pill tone="lime">✓ Provisioned</Pill>
+          )}
         </div>
       </header>
 
@@ -108,6 +132,21 @@ export function DoneView({
           Your Birdeye sub-account is provisioned. Here&apos;s what we did, and
           what to do next.
         </p>
+
+        {isPartial ? (
+          <div className="mt-5 rounded-xl border border-plum/30 bg-plum/[0.04] px-4 py-3 text-sm text-plum leading-relaxed max-w-2xl">
+            <strong className="font-semibold">A few steps didn&apos;t finish.</strong>{" "}
+            Your account is live, but the steps marked below need a retry. Head to{" "}
+            <Link href="/services" className="underline underline-offset-2">
+              Services
+            </Link>{" "}
+            and click <em className="not-italic font-semibold">Resume / retry</em>, or email{" "}
+            <a href="mailto:hello@himayat.com.au" className="underline underline-offset-2">
+              hello@himayat.com.au
+            </a>
+            .
+          </div>
+        ) : null}
 
         <Card className="mt-9">
           <CardHeader>
@@ -182,7 +221,7 @@ export function DoneView({
               </li>
             </ol>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="https://app.birdeye.com" target="_blank">
+              <Link href={dashboardUrl} target="_blank">
                 <Button variant="lime" size="lg">
                   <ExternalLink className="h-4 w-4" />
                   Open Birdeye dashboard

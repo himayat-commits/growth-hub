@@ -272,10 +272,33 @@ export const wizardStateSchema = z.object({
   webchat: webchatSchema.optional(),
   contacts: contactsSchema,
 
-  /** Populated after a successful provisioning run */
+  /** Populated as a provisioning run progresses. Every field beyond the
+   *  original `invitedUsers`/`mediaIds`/`completedAt`/`businessNumber` is
+   *  additive + optional, so existing JSONB rows keep parsing untouched.
+   *
+   *  `runStatus` is the granular per-run state (the top-level `status` stays
+   *  the coarse lifecycle). A *partial* run still leaves `status:provisioned`
+   *  — the Birdeye account exists — but flags `runStatus:partial` +
+   *  `failedSteps` so the UI/ops know some steps need a retry. */
   provisioning: z
     .object({
+      /** Internal id Birdeye returns from create_subaccount. */
+      businessId: z.string().optional(),
+      /** Value threaded into every later call (path, x-business-number,
+       *  businessIds). May equal businessId until the live API says otherwise. */
       businessNumber: z.string().optional(),
+      /** Idempotency anchor — equals onboardingId. Lets a retry/lookup find
+       *  an already-created sub-account instead of duplicating it. */
+      externalReferenceId: z.string().optional(),
+      runStatus: z
+        .enum(["idle", "running", "partial", "provisioned", "failed"])
+        .optional(),
+      /** Kind of the last step that ran (resume cursor). */
+      lastStep: z.string().optional(),
+      attempts: z.number().int().nonnegative().optional(),
+      failedSteps: z
+        .array(z.object({ kind: z.string(), error: z.string() }))
+        .optional(),
       invitedUsers: z.array(z.string()).default([]),
       mediaIds: z.array(z.string()).default([]),
       completedAt: z.string().optional(),
@@ -283,6 +306,7 @@ export const wizardStateSchema = z.object({
     .default({ invitedUsers: [], mediaIds: [] }),
 });
 export type WizardState = z.infer<typeof wizardStateSchema>;
+export type Provisioning = WizardState["provisioning"];
 
 // --- Step list -------------------------------------------------------------
 
@@ -298,7 +322,15 @@ export type StepKey =
   | "faqs"
   | "webchat"
   | "contacts"
-  | "review";
+  | "review"
+  | "action-plan";
+
+/** Who's running the wizard:
+ *  - `provision` — paid user, terminal step provisions a real Birdeye account.
+ *  - `report`    — free user, terminal step renders an action-plan + upgrade CTA.
+ *  Derived from the subscription at render time; never persisted (a user can
+ *  upgrade mid-flow). */
+export type WizardMode = "provision" | "report";
 
 export type StepDef = {
   key: StepKey;
@@ -375,3 +407,40 @@ export const STEPS: StepDef[] = [
 
 export const stepsForPackage = (pkg: WizardState["packageId"]): StepDef[] =>
   STEPS.filter((s) => !s.appliesTo || s.appliesTo(pkg));
+
+// --- Report (free-tier) flow ----------------------------------------------
+//
+// Free users run a focused subset of the same step pages — the inputs that
+// make a meaningful action plan — minus the provisioning-only steps (confirm
+// package, assets uploads, webchat, contacts) and the launch step. The
+// terminal step is `action-plan` instead of `review`.
+
+const REPORT_STEP_KEYS: StepKey[] = [
+  "business",
+  "address",
+  "hours",
+  "about",
+  "taxonomy",
+  "social",
+];
+
+export const ACTION_PLAN_STEP: StepDef = {
+  key: "action-plan",
+  title: "Your action plan",
+  blurb: "Your personalised local-growth plan, built from your answers.",
+};
+
+/** The ordered step list for a given mode. Provision mode is unchanged
+ *  (`stepsForPackage`); report mode is the focused subset + `action-plan`. */
+export const stepsFor = (
+  mode: WizardMode,
+  pkg: WizardState["packageId"],
+): StepDef[] => {
+  if (mode === "report") {
+    return [
+      ...STEPS.filter((s) => REPORT_STEP_KEYS.includes(s.key)),
+      ACTION_PLAN_STEP,
+    ];
+  }
+  return stepsForPackage(pkg);
+};

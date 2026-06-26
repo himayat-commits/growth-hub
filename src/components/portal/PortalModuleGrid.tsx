@@ -15,7 +15,6 @@ interface PortalModule {
   requires: ModuleRequires; // null = all tiers
   icon: React.ReactNode;
   steps: Array<{ text: string }>;
-  platformUrl: string;
   videoUrl?: string;
 }
 
@@ -155,7 +154,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Review your first batch of AI-generated content" },
       { text: "Approve and schedule — the AI handles the rest" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#social-ai",
   },
   {
@@ -171,7 +169,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Approve the corrections — synced everywhere" },
       { text: "Turn on auto-sync to keep listings current" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#listing-ai",
   },
   {
@@ -187,7 +184,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Add team members to share the inbox" },
       { text: "Respond to your first message from the unified view" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#messaging",
   },
   {
@@ -203,7 +199,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Send your first invoice to a customer" },
       { text: "Set up payment reminders for overdue invoices" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#invoicing",
   },
   {
@@ -219,7 +214,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Share the form link with staff or clients" },
       { text: "Review completed records in your dashboard" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#timesheets",
   },
   {
@@ -235,7 +229,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Enable auto-send: review requests go out after every transaction" },
       { text: "Turn on AI responses so every review gets a reply within 24 hours" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#reviews-ai",
   },
   {
@@ -251,7 +244,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Add the review request signature block to your emails" },
       { text: "Share the digital version via WhatsApp or SMS after jobs" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#collateral",
   },
   {
@@ -267,7 +259,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Publish your first AI-generated SEO post" },
       { text: "Set up weekly ranking reports" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#search-ai",
   },
   {
@@ -283,7 +274,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Set up leave approval workflows" },
       { text: "Enable wage cost forecasting to see your weekly labour budget" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#scheduling",
   },
   {
@@ -299,7 +289,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Set up lead capture: name, email, and enquiry type" },
       { text: "Connect Robin leads to your Messaging inbox" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#webchat",
   },
   {
@@ -315,7 +304,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Import your customer list or pull from Messaging contacts" },
       { text: "Schedule and send — track opens and clicks in your dashboard" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#campaigns",
   },
   {
@@ -331,7 +319,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Send your first referral invitations to existing customers" },
       { text: "Track referral conversions and reward payouts" },
     ],
-    platformUrl: "https://app.birdeye.com",
     videoUrl: "https://himayat.com.au/onboarding-videos#referrals",
   },
 ];
@@ -362,9 +349,13 @@ function lockLabel(mod: PortalModule): string {
 interface Props {
   tier: PlanTier;
   activeAddOns: AddOnId[];
+  /** Resolved Birdeye destination for "Open in platform" links. Deep-links
+   *  to the user's business dashboard when provisioned, else the generic
+   *  login. Passed from /services via getBirdeyeDashboardUrl(). */
+  dashboardUrl: string;
 }
 
-export default function PortalModuleGrid({ tier, activeAddOns }: Props) {
+export default function PortalModuleGrid({ tier, activeAddOns, dashboardUrl }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const activeModules = ALL_MODULES.filter((m) => isModuleActive(m, tier, activeAddOns));
@@ -415,7 +406,7 @@ export default function PortalModuleGrid({ tier, activeAddOns }: Props) {
                   </ol>
                   <div className="portal-card-links">
                     <a
-                      href={mod.platformUrl}
+                      href={dashboardUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="portal-card-link primary"

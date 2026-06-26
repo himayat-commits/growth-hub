@@ -6,8 +6,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import type { WizardState, StepKey } from "@/lib/wizard/state";
-import { stepsForPackage } from "@/lib/wizard/state";
+import type { WizardState, StepKey, WizardMode } from "@/lib/wizard/state";
+import { stepsFor } from "@/lib/wizard/state";
 import { isStepComplete } from "@/lib/wizard/initial-state";
 
 type PatchOptions = {
@@ -20,6 +20,7 @@ type PatchOptions = {
 
 type Ctx = {
   state: WizardState;
+  mode: WizardMode;
   setState: (next: WizardState) => void;
   patch: (mutate: (s: WizardState) => WizardState, options?: PatchOptions) => Promise<void>;
   goNext: (currentKey: StepKey) => void;
@@ -38,9 +39,14 @@ export function useWizard() {
 
 export function WizardProvider({
   initialState,
+  mode = "provision",
   children,
 }: {
   initialState: WizardState;
+  /** Drives which steps the wizard walks. `report` (free users) uses the
+   *  focused subset ending at `action-plan`; `provision` (paid) is the full
+   *  flow ending at `review`. */
+  mode?: WizardMode;
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -120,7 +126,7 @@ export function WizardProvider({
     [persist]
   );
 
-  const steps = stepsForPackage(state.packageId);
+  const steps = stepsFor(mode, state.packageId);
   const goNext = React.useCallback(
     (currentKey: StepKey) => {
       const idx = steps.findIndex((s) => s.key === currentKey);
@@ -147,12 +153,12 @@ export function WizardProvider({
     router.push("/portal");
   }, [putImmediate, router, state]);
 
-  const value: Ctx = { state, setState, patch, goNext, goPrev, saveAndExit, saving };
+  const value: Ctx = { state, mode, setState, patch, goNext, goPrev, saveAndExit, saving };
   return <WizardCtx.Provider value={value}>{children}</WizardCtx.Provider>;
 }
 
 export function useStepCompletion() {
-  const { state } = useWizard();
-  const steps = stepsForPackage(state.packageId);
+  const { state, mode } = useWizard();
+  const steps = stepsFor(mode, state.packageId);
   return steps.map((s) => ({ ...s, complete: isStepComplete(state, s.key) }));
 }
