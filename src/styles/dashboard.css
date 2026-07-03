@@ -82,10 +82,8 @@ p { margin: 0; }
   position: relative;
 }
 .gh-side-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 8px 22px;
+  display: block;
+  padding: 0 6px 12px;
   margin-bottom: 12px;
   border-bottom: 1px solid rgba(243,240,231,0.14);
   background: none;
@@ -96,29 +94,15 @@ p { margin: 0; }
   text-align: left;
   width: 100%;
 }
-.gh-side-brand-mark {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: rgba(243,240,231,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.gh-side-brand-name {
-  font-family: var(--font-serif);
-  font-size: 17px;
-  letter-spacing: -0.01em;
-  line-height: 1.05;
-  color: #ffffff;
-}
-.gh-side-brand-sub {
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(243,240,231,0.55);
-  margin-top: 2px;
+/* Eggshell-on-teal brand lockup. The SVG carries its own #0D3F48 background
+   that blends seamlessly into the teal sidebar, so it reads as a transparent
+   mark + wordmark. Width-capped; the lockup's built-in padding handles the
+   vertical breathing room. */
+.gh-side-brand-logo {
+  display: block;
+  width: 100%;
+  max-width: 192px;
+  height: auto;
 }
 .gh-nav { display: flex; flex-direction: column; gap: 2px; }
 .gh-nav a {
