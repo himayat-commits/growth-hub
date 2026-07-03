@@ -30,8 +30,9 @@ import {
   type ClientMode,
 } from "@/lib/birdeye/client";
 import { appendProvisioningLog } from "@/lib/wizard/state-store";
-import { updateProvisioning } from "@/lib/wizard/provisioning-store";
+import { loadOnboardingState, updateProvisioning } from "@/lib/wizard/provisioning-store";
 import { createNotification } from "@/lib/db/notifications";
+import { sendOpsHandoff } from "@/lib/ops/notify";
 import type { WizardState } from "@/lib/wizard/state";
 
 export type ProvisionResult = {
@@ -46,7 +47,6 @@ export type RunProvisionArgs = {
   userId: string;
   state: WizardState;
   mode: ClientMode;
-  origin: string;
   resellerId: string;
   apiHost: string;
   /** Who started this run — recorded as provisioning.lastRunBy. */
@@ -55,7 +55,7 @@ export type RunProvisionArgs = {
 };
 
 export async function runProvision(args: RunProvisionArgs): Promise<ProvisionResult> {
-  const { userId, state, mode, origin, resellerId, apiHost, send } = args;
+  const { userId, state, mode, resellerId, apiHost, send } = args;
   const runBy = args.runBy ?? "user";
   const onboardingId = state.onboardingId;
   const failedSteps: { kind: string; error: string }[] = [];
@@ -223,16 +223,7 @@ export async function runProvision(args: RunProvisionArgs): Promise<ProvisionRes
 
   // Step 7 — ops handoff (module entitlements, Webchat, Apple/FAQs/tags the
   // public API can't set). Non-fatal: the customer is already provisioned.
-  await notifyOps({
-    origin,
-    onboardingId,
-    state,
-    businessNumber,
-    invitedUsers,
-    mediaIds,
-    status,
-    escalated,
-  });
+  await notifyOps({ onboardingId, state, businessNumber, invitedUsers, mediaIds, status });
 
   // In-app notification. Escalated partials tell the user we've got it —
   // they've retried enough; ops now owns the remaining steps.
@@ -259,38 +250,35 @@ export async function runProvision(args: RunProvisionArgs): Promise<ProvisionRes
   return { status, businessNumber, invitedUsers, mediaIds };
 }
 
-/** POST the ops-handoff summary. Logs the attempt to provisioning_logs and
+/** Run the ops handoff (tracked tasks + webhook + email via lib/ops/notify).
+ *  Reads the just-persisted terminal state back from Neon so the handoff
+ *  carries THIS run's failedSteps/attempts/escalatedAt — the in-memory
+ *  `state` predates the run. Logs the attempt to provisioning_logs and
  *  never throws — provisioning has already succeeded against Birdeye. */
 async function notifyOps(args: {
-  origin: string;
   onboardingId: string;
   state: WizardState;
   businessNumber: string;
   invitedUsers: string[];
   mediaIds: string[];
   status: ProvisionResult["status"];
-  escalated?: boolean;
 }): Promise<void> {
-  const { origin, onboardingId, state, businessNumber, invitedUsers, mediaIds, status, escalated } =
-    args;
-  const opsPayload = {
-    state: { ...state, provisioning: { ...state.provisioning, businessNumber, invitedUsers, mediaIds } },
-    severity: status === "partial" ? "action_required" : "info",
-    escalated: Boolean(escalated),
-  };
+  const { onboardingId, state, businessNumber, invitedUsers, mediaIds, status } = args;
+  const severity = status === "partial" ? ("action_required" as const) : ("info" as const);
   try {
-    if (!origin) throw new Error("Missing origin header — can't reach /api/notify-ops");
-    const res = await fetch(`${origin}/api/notify-ops`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(opsPayload),
-    });
-    if (!res.ok) throw new Error(`notify-ops returned ${res.status}`);
+    const fresh =
+      (await loadOnboardingState(onboardingId)) ??
+      ({
+        ...state,
+        provisioning: { ...state.provisioning, businessNumber, invitedUsers, mediaIds },
+      } as WizardState);
+    const result = await sendOpsHandoff({ state: fresh, severity });
+    if (!result.ok) throw new Error(result.error ?? "ops handoff failed");
     await appendProvisioningLog(onboardingId, {
       step: 0,
       kind: "notify_ops",
-      payload: opsPayload,
-      response: { status: res.status },
+      payload: { severity, businessNumber },
+      response: { ok: true },
       ok: true,
     });
   } catch (e) {
@@ -299,7 +287,7 @@ async function notifyOps(args: {
     await appendProvisioningLog(onboardingId, {
       step: 0,
       kind: "notify_ops",
-      payload: opsPayload,
+      payload: { severity, businessNumber },
       response: null,
       ok: false,
       error: message,

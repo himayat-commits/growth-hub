@@ -117,7 +117,6 @@ export async function POST(req: Request) {
 
   // ── Resolve effective mode (deployment switch × allowlist) ───────────────
   const mode = resolveEffectiveMode(getProvisionMode(), isOpsEmail(user.email));
-  const origin = req.headers.get("origin") ?? "";
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -137,7 +136,6 @@ export async function POST(req: Request) {
           userId: user.id,
           state,
           mode,
-          origin,
           resellerId: RESELLER_ID,
           apiHost: API_HOST,
           runBy: "user",

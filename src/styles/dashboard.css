@@ -865,3 +865,11 @@ p { margin: 0; }
   .gh-frame { height: auto; overflow: visible; display: block; }
   .gh-content { overflow: visible; padding: 0; }
 }
+
+/* Provisioning console status chips (/ops/provisioning) */
+.gh-ops-status.status-provisioned, .gh-ops-status.status-done, .gh-ops-status.status-ok { background: var(--teal); color: var(--lime); }
+.gh-ops-status.status-partial { background: rgba(227,242,156,0.4); color: var(--teal); }
+.gh-ops-status.status-failed, .gh-ops-status.status-error { background: rgba(95,48,75,0.15); color: var(--plum); }
+.gh-ops-status.status-running { background: rgba(232,221,255,0.5); color: var(--plum); }
+.gh-ops-status.status-stalled, .gh-ops-status.status-open { background: rgba(95,48,75,0.1); color: var(--plum); }
+.gh-ops-status.status-draft { background: rgba(13,63,72,0.08); color: var(--ink-50); }
