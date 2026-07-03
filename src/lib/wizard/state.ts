@@ -302,6 +302,12 @@ export const wizardStateSchema = z.object({
       invitedUsers: z.array(z.string()).default([]),
       mediaIds: z.array(z.string()).default([]),
       completedAt: z.string().optional(),
+      /** Run-lease expiry (ISO). Acquired atomically before any run so a
+       *  user Resume, an ops re-run and the retry cron can never execute
+       *  concurrently. A crashed run's lease simply expires. */
+      lockedUntil: z.string().optional(),
+      /** Who started the most recent run — provenance for the ops timeline. */
+      lastRunBy: z.enum(["user", "ops", "cron"]).optional(),
     })
     .default({ invitedUsers: [], mediaIds: [] }),
 });

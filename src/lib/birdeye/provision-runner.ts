@@ -49,11 +49,14 @@ export type RunProvisionArgs = {
   origin: string;
   resellerId: string;
   apiHost: string;
+  /** Who started this run — recorded as provisioning.lastRunBy. */
+  runBy?: "user" | "ops" | "cron";
   send: (event: unknown) => void;
 };
 
 export async function runProvision(args: RunProvisionArgs): Promise<ProvisionResult> {
   const { userId, state, mode, origin, resellerId, apiHost, send } = args;
+  const runBy = args.runBy ?? "user";
   const onboardingId = state.onboardingId;
   const failedSteps: { kind: string; error: string }[] = [];
 
@@ -105,6 +108,7 @@ export async function runProvision(args: RunProvisionArgs): Promise<ProvisionRes
       externalReferenceId: onboardingId,
       attempts: (prev.attempts ?? 0) + 1,
       failedSteps: [],
+      lastRunBy: runBy,
     },
   }));
 
@@ -181,6 +185,14 @@ export async function runProvision(args: RunProvisionArgs): Promise<ProvisionRes
 
   const status: ProvisionResult["status"] = failedSteps.length ? "partial" : "provisioned";
   const completedAt = new Date().toISOString();
+
+  if (status === "partial") {
+    Sentry.captureMessage("birdeye provisioning partial", {
+      level: "warning",
+      tags: { area: "provision", mode },
+      extra: { onboardingId, failedSteps },
+    });
+  }
 
   // Persist the terminal state. status stays `provisioned` even on partial —
   // the account exists and is usable; runStatus/failedSteps carry the nuance.

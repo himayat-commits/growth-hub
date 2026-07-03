@@ -19,6 +19,7 @@ import { getDb } from '@/lib/db';
 import { onboardingStates } from '@/lib/db/schema';
 import { getSubscription, isActive } from '@/lib/subscription';
 import { createInitialState } from '@/lib/wizard/initial-state';
+import { parseWizardState } from '@/lib/wizard/parse-state';
 import type { WizardState, WizardMode } from '@/lib/wizard/state';
 import type { PackageId } from '@/lib/wizard/packages';
 import { WizardProvider } from '@/components/wizard/WizardContext';
@@ -49,13 +50,14 @@ export default async function OnboardingLayout({
     .where(eq(onboardingStates.userId, userId))
     .limit(1);
 
-  const initialState: WizardState =
-    (rows[0]?.state as WizardState | undefined) ??
-    createInitialState({
-      onboardingId: userId,
-      packageId,
-      email: user.email ?? '',
-    });
+  const fallback = {
+    onboardingId: userId,
+    packageId,
+    email: user.email ?? '',
+  };
+  const initialState: WizardState = rows[0]
+    ? parseWizardState(rows[0].state, fallback)
+    : createInitialState(fallback);
 
   return (
     <WizardProvider initialState={initialState} mode={mode}>

@@ -11,18 +11,97 @@ import "server-only";
 import { eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { onboardingStates } from "@/lib/db/schema";
+import { parseWizardState } from "@/lib/wizard/parse-state";
 import type { Provisioning, WizardState } from "@/lib/wizard/state";
 
-/** Read the authoritative wizard state for a user, or null if none. */
+/** How long a `runStatus: "running"` row is trusted before we assume the
+ *  serverless function died mid-run and allow a resume. Every runner step
+ *  bumps the row's updatedAt, so a live run never looks stale. */
+export const STALE_RUNNING_MS = 10 * 60_000;
+
+/** Run-lease TTL. Must comfortably exceed a full run (mock ≤ ~10s, live a
+ *  few minutes with retries) but stay ≤ the route's maxDuration so a crashed
+ *  invocation's lease expires soon after the function itself was killed. */
+const LOCK_TTL_MS = 6 * 60_000;
+
+const stateFallback = (userId: string) =>
+  ({ onboardingId: userId, packageId: "foundations", email: "" }) as const;
+
+/** Read the authoritative wizard state for a user, or null if none.
+ *  Heals drifted JSONB via parseWizardState — the healed shape is written
+ *  back on the next updateProvisioning call (deliberate self-repair). */
 export async function loadOnboardingState(
   userId: string,
 ): Promise<WizardState | null> {
+  const row = await loadOnboardingRow(userId);
+  return row?.state ?? null;
+}
+
+/** Like loadOnboardingState but also returns the row's updatedAt — the
+ *  staleness signal for crashed-run detection (every runner step bumps it). */
+export async function loadOnboardingRow(
+  userId: string,
+): Promise<{ state: WizardState; updatedAt: Date } | null> {
   const rows = await getDb()
     .select()
     .from(onboardingStates)
     .where(eq(onboardingStates.userId, userId))
     .limit(1);
-  return (rows[0]?.state as WizardState | undefined) ?? null;
+  if (!rows[0]) return null;
+  return {
+    state: parseWizardState(rows[0].state, stateFallback(userId)),
+    updatedAt: rows[0].updatedAt,
+  };
+}
+
+/** A `running` row whose updatedAt hasn't moved in STALE_RUNNING_MS is a
+ *  crashed run: safe to resume (create is skipped once businessNumber
+ *  exists; pre-create crashes are anchored by externalReferenceId). */
+export function isStaleRunning(
+  state: WizardState,
+  rowUpdatedAt: Date,
+  thresholdMs = STALE_RUNNING_MS,
+): boolean {
+  return (
+    state.provisioning.runStatus === "running" &&
+    rowUpdatedAt.getTime() < Date.now() - thresholdMs
+  );
+}
+
+/** Acquire the per-user run lease. A single atomic UPDATE (no
+ *  read-modify-write) so a user Resume, an ops re-run and the retry cron
+ *  are mutually exclusive under Postgres row-level atomicity. Returns true
+ *  when the lease was taken. */
+export async function acquireProvisionLock(
+  userId: string,
+  ttlMs = LOCK_TTL_MS,
+): Promise<boolean> {
+  const rows = await getDb().execute(sql`
+    UPDATE onboarding_states
+    SET state = jsonb_set(
+          state,
+          '{provisioning,lockedUntil}',
+          to_jsonb((now() + make_interval(secs => ${ttlMs / 1000}))::text)
+        ),
+        updated_at = now()
+    WHERE user_id = ${userId}
+      AND (
+        state->'provisioning'->>'lockedUntil' IS NULL
+        OR (state->'provisioning'->>'lockedUntil')::timestamptz < now()
+      )
+    RETURNING user_id
+  `);
+  return rows.rows.length > 0;
+}
+
+/** Release the run lease. Callers do this in a `finally` — but a missed
+ *  release only costs LOCK_TTL_MS of retry delay, never a stuck user. */
+export async function releaseProvisionLock(userId: string): Promise<void> {
+  await getDb().execute(sql`
+    UPDATE onboarding_states
+    SET state = state #- '{provisioning,lockedUntil}'
+    WHERE user_id = ${userId}
+  `);
 }
 
 /** Insert the row if it doesn't exist yet, without clobbering an existing
