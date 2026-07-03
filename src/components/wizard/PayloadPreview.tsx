@@ -3,18 +3,26 @@
 import * as React from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { CodeBlock } from "@/components/ui/code-block";
 
-// Lightweight syntax-highlighted JSON.
+// Lightweight syntax-highlighted JSON. Tailwind picks the class literals up
+// from this source file, so they resolve like any other utility usage.
 function highlight(value: unknown): string {
   const json = JSON.stringify(value, null, 2) ?? "undefined";
   return json
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"([^"\\]*(?:\\.[^"\\]*)*)"(\s*:)/g, '<span class="key">"$1"</span>$2')
-    .replace(/: "([^"\\]*(?:\\.[^"\\]*)*)"/g, ': <span class="str">"$1"</span>')
-    .replace(/: (true|false)/g, ': <span class="bool">$1</span>')
-    .replace(/: (-?\d+(?:\.\d+)?)/g, ': <span class="num">$1</span>');
+    .replace(
+      /"([^"\\]*(?:\\.[^"\\]*)*)"(\s*:)/g,
+      '<span class="text-plum">"$1"</span>$2'
+    )
+    .replace(
+      /: "([^"\\]*(?:\\.[^"\\]*)*)"/g,
+      ': <span class="text-teal">"$1"</span>'
+    )
+    .replace(/: (true|false)/g, ': <span class="text-gold font-medium">$1</span>')
+    .replace(/: (-?\d+(?:\.\d+)?)/g, ': <span class="text-gold font-medium">$1</span>');
 }
 
 export function PayloadPreview({
@@ -64,7 +72,7 @@ export function PayloadPreview({
             <h4 className="font-sans text-[11px] font-semibold text-ink-muted uppercase tracking-wider mb-1.5">
               Headers
             </h4>
-            <pre className="json text-xs">
+            <pre className="overflow-x-auto rounded-xl border border-line bg-eggshell-warm/60 p-4 font-mono text-xs leading-relaxed text-teal">
               {(headers
                 ? Object.entries(headers)
                     .map(([k, v]) => `${k}: ${v}`)
@@ -78,9 +86,9 @@ export function PayloadPreview({
               <h4 className="font-sans text-[11px] font-semibold text-ink-muted uppercase tracking-wider mb-1.5">
                 Body
               </h4>
-              <pre
-                className="json"
-                dangerouslySetInnerHTML={{ __html: highlight(body) }}
+              <CodeBlock
+                html={highlight(body)}
+                copyText={JSON.stringify(body, null, 2)}
               />
             </div>
           ) : null}

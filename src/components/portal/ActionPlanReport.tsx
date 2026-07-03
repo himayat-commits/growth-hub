@@ -18,17 +18,16 @@ import {
   SectionLabel,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/brand/Logo";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { cn } from "@/lib/cn";
 import { PACKAGES } from "@/lib/wizard/packages";
 import {
   ArrowRight,
-  CheckCircle2,
+  Check,
   Megaphone,
   MessageSquare,
   Printer,
-  Sparkles,
   Star,
-  XCircle,
 } from "lucide-react";
 
 export function ActionPlanReport() {
@@ -101,112 +100,108 @@ export function ActionPlanReport() {
   ];
 
   return (
-    <main className="min-h-screen">
-      <header className="bg-eggshell/85 border-b border-teal/10 backdrop-blur-md print:hidden">
-        <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
-          <Logo />
-          <Pill tone="lime">Free action plan</Pill>
-        </div>
-      </header>
-
-      <section className="max-w-4xl mx-auto px-6 py-12 md:py-16">
-        <SectionLabel>Your local growth plan</SectionLabel>
-        <h1 className="font-serif text-section text-teal mt-4 leading-[1.05]">
-          {biz}&apos;s{" "}
-          <em className="not-italic text-plum font-serif">action plan.</em>
-        </h1>
-        <p className="mt-5 text-ink-muted max-w-2xl text-lg leading-relaxed">
-          Built from your answers — here&apos;s where {biz} stands today and the
-          highest-impact moves to grow{city ? ` in ${city}` : ""}. Foundations can
-          set most of this up for you automatically.
-        </p>
-
-        <div className="mt-7 flex flex-wrap gap-3 print:hidden">
-          <Button variant="outline" size="lg" onClick={() => window.print()}>
-            <Printer className="h-4 w-4" />
-            Print / save as PDF
-          </Button>
-          <Link href="/services">
-            <Button variant="ghost" size="lg">
-              Back to Services
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-2 pb-12 md:px-6 md:pt-4">
+      <PageHeader
+        kicker="Your action plan"
+        title={`${biz}'s action plan`}
+        sub={`Built from your answers — here's where ${biz} stands today and the highest-impact moves to grow${
+          city ? ` in ${city}` : ""
+        }.`}
+        actions={
+          <div className="flex flex-wrap items-center gap-2 print:hidden">
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="h-4 w-4" />
+              Print / save PDF
             </Button>
-          </Link>
-        </div>
+            <Link href="/services">
+              <Button variant="ghost" size="sm">
+                Back to Services
+              </Button>
+            </Link>
+          </div>
+        }
+      />
 
-        {/* Snapshot */}
-        <Card className="mt-9">
-          <CardHeader>
-            <CardTitle className="font-serif text-2xl">Where customers find you today</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3">
-            {channels.map((c) => (
-              <div key={c.name} className="flex items-center gap-3">
-                {c.ok ? (
-                  <CheckCircle2 className="h-4 w-4 text-teal flex-shrink-0" />
-                ) : (
-                  <XCircle className="h-4 w-4 text-plum/70 flex-shrink-0" />
+      {/* Snapshot */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Where customers find you today</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-2">
+          {channels.map((c) => (
+            <div
+              key={c.name}
+              className="grid grid-cols-[24px_1fr_auto] items-center gap-3 border-t border-line py-3 first:border-0"
+            >
+              <span
+                className={cn(
+                  "flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1.5px]",
+                  c.ok
+                    ? "border-teal bg-teal text-white"
+                    : "border-plum/40 bg-white"
                 )}
-                <span className="font-sans text-sm text-teal">{c.name}</span>
-                <span className="font-sans text-xs text-ink-muted ml-auto">
-                  {c.ok ? "Linked" : "Not set up — opportunity"}
-                </span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              >
+                {c.ok ? <Check className="h-3 w-3" /> : null}
+              </span>
+              <span className="font-sans text-sm font-medium text-ink">{c.name}</span>
+              <span className="font-sans text-xs text-ink-muted">
+                {c.ok ? "Linked" : "Not set up — opportunity"}
+              </span>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
-        {/* Recommendations */}
-        <h2 className="mt-12 font-serif text-3xl text-teal flex items-center gap-2.5">
-          <Sparkles className="h-6 w-6 text-plum" />
-          Your priority moves
-        </h2>
-        <div className="mt-5 grid gap-4">
+      {/* Recommendations */}
+      <div>
+        <SectionLabel>Your priority moves</SectionLabel>
+        <div className="mt-4 grid gap-4">
           {recommendations.map((r, i) => (
             <Card key={i}>
               <CardContent className="pt-5 pb-5">
                 <div className="flex items-start gap-3">
                   <span className="mt-0.5">{r.icon}</span>
                   <div>
-                    <div className="flex items-center gap-2.5 flex-wrap">
+                    <div className="flex flex-wrap items-center gap-2.5">
                       <span className="font-sans text-sm font-semibold text-teal">{r.title}</span>
                       <Pill tone="teal">{r.tag}</Pill>
                     </div>
-                    <p className="mt-1.5 text-sm text-ink-muted leading-relaxed">{r.detail}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">{r.detail}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
+      </div>
 
-        {/* Upgrade CTA */}
-        <Card className="mt-12 border-teal/20 bg-lime/20">
-          <CardContent className="pt-7 pb-7">
-            <SectionLabel>Stop reading, start growing</SectionLabel>
-            <h2 className="mt-3 font-serif text-3xl text-teal leading-tight">
-              Want this set up for you{" "}
-              <em className="not-italic text-plum font-serif">automatically?</em>
-            </h2>
-            <p className="mt-3 text-ink-muted leading-relaxed max-w-2xl">
-              {foundations.name} provisions your Birdeye account and wires up listings,
-              messaging and review collection in about 15 minutes — no technical setup.
-              From A${foundations.pricePerMonth}/mo, no lock-in.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3 print:hidden">
-              <Link href="/plan">
-                <Button variant="lime" size="lg">
-                  Get {foundations.name} <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/plan">
-                <Button variant="ghost" size="lg">
-                  Compare plans
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-    </main>
+      {/* Upgrade CTA — house onboarding-hero treatment */}
+      <Card className="border-teal/25 bg-[radial-gradient(120%_140%_at_100%_0%,rgba(227,242,156,0.55)_0%,rgba(227,242,156,0)_55%),#fff]">
+        <CardContent className="pt-7 pb-7">
+          <span className="gh-onboard-kicker">Ready when you are</span>
+          <h2 className="mt-2 font-serif text-[28px] leading-tight text-teal">
+            Want this set up for you{" "}
+            <em className="font-serif not-italic text-plum">automatically?</em>
+          </h2>
+          <p className="mt-3 max-w-2xl leading-relaxed text-ink-muted">
+            {foundations.name} provisions your Birdeye account and wires up listings,
+            messaging and review collection in about 15 minutes — no technical setup.
+            From A${foundations.pricePerMonth}/mo, no lock-in.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3 print:hidden">
+            <Link href="/plan">
+              <Button variant="lime" size="lg">
+                Get {foundations.name} <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/plan">
+              <Button variant="ghost" size="lg">
+                Compare plans
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -23,9 +23,9 @@ export default function ConfirmStep() {
   return (
     <StepShell
       stepKey="confirm"
-      eyebrow="Step 01"
       title="Confirm package & primary contact"
       blurb="Quick check on what you bought and who's running the account. We'll use this email for the Birdeye admin invite."
+      framed={false}
       onContinue={() => goNext("confirm")}
       continueDisabled={!valid}
     >
@@ -51,165 +51,169 @@ export default function ConfirmStep() {
         </CardContent>
       </Card>
 
-      <h2 className="font-serif text-2xl text-teal mb-4">Admin user</h2>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Label required>
-          First name
-          <Input
-            value={u.firstName}
-            onChange={(e) =>
-              patch((s) => ({
-                ...s,
-                adminUser: { ...s.adminUser, firstName: e.target.value },
-              }))
-            }
-          />
-        </Label>
-        <Label required>
-          Last name
-          <Input
-            value={u.lastName}
-            onChange={(e) =>
-              patch((s) => ({
-                ...s,
-                adminUser: { ...s.adminUser, lastName: e.target.value },
-              }))
-            }
-          />
-        </Label>
-        <Label required>
-          Email
-          <Input
-            type="email"
-            value={u.email}
-            onChange={(e) =>
-              patch((s) => ({
-                ...s,
-                adminUser: { ...s.adminUser, email: e.target.value },
-              }))
-            }
-          />
-        </Label>
-        <Label required>
-          Phone
-          <Input
-            value={u.phone}
-            placeholder="04XX XXX XXX"
-            onChange={(e) =>
-              patch((s) => ({
-                ...s,
-                adminUser: { ...s.adminUser, phone: e.target.value },
-              }))
-            }
-          />
-        </Label>
-      </div>
-
-      <h3 className="mt-12 font-serif text-xl text-teal">
-        Add team members
-        <span className="font-serif italic text-base text-plum ml-2">— optional</span>
-      </h3>
-      <p className="text-sm text-ink-muted mt-1 mb-4">
-        Up to two extra people who should get a Birdeye login.
-      </p>
-
-      <ul className="space-y-3">
-        {state.additionalUsers.map((au, i) => (
-          <li key={i} className="grid gap-3 md:grid-cols-12 items-end">
-            <Label className="md:col-span-3">
-              First
+      <Card>
+        <CardContent className="pt-6 md:p-7">
+          <h2 className="font-serif text-2xl text-teal mb-4">Admin user</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Label required>
+              First name
               <Input
-                value={au.firstName}
+                value={u.firstName}
                 onChange={(e) =>
-                  patch((s) => {
-                    const next = [...s.additionalUsers];
-                    next[i] = { ...next[i], firstName: e.target.value };
-                    return { ...s, additionalUsers: next };
-                  })
+                  patch((s) => ({
+                    ...s,
+                    adminUser: { ...s.adminUser, firstName: e.target.value },
+                  }))
                 }
               />
             </Label>
-            <Label className="md:col-span-3">
-              Last
+            <Label required>
+              Last name
               <Input
-                value={au.lastName}
+                value={u.lastName}
                 onChange={(e) =>
-                  patch((s) => {
-                    const next = [...s.additionalUsers];
-                    next[i] = { ...next[i], lastName: e.target.value };
-                    return { ...s, additionalUsers: next };
-                  })
+                  patch((s) => ({
+                    ...s,
+                    adminUser: { ...s.adminUser, lastName: e.target.value },
+                  }))
                 }
               />
             </Label>
-            <Label className="md:col-span-3">
+            <Label required>
               Email
               <Input
                 type="email"
-                value={au.email}
+                value={u.email}
                 onChange={(e) =>
-                  patch((s) => {
-                    const next = [...s.additionalUsers];
-                    next[i] = { ...next[i], email: e.target.value };
-                    return { ...s, additionalUsers: next };
-                  })
+                  patch((s) => ({
+                    ...s,
+                    adminUser: { ...s.adminUser, email: e.target.value },
+                  }))
                 }
               />
             </Label>
-            <Label className="md:col-span-2">
-              Role
-              <Select
-                value={au.role}
+            <Label required>
+              Phone
+              <Input
+                value={u.phone}
+                placeholder="04XX XXX XXX"
                 onChange={(e) =>
-                  patch((s) => {
-                    const next = [...s.additionalUsers];
-                    next[i] = {
-                      ...next[i],
-                      role: e.target.value as WizardUser["role"],
-                    };
-                    return { ...s, additionalUsers: next };
-                  })
+                  patch((s) => ({
+                    ...s,
+                    adminUser: { ...s.adminUser, phone: e.target.value },
+                  }))
                 }
-              >
-                <option value="admin">admin</option>
-                <option value="owner">owner</option>
-              </Select>
+              />
             </Label>
+          </div>
+
+          <h3 className="mt-12 font-serif text-xl text-teal">
+            Add team members
+            <span className="font-serif italic text-base text-plum ml-2">— optional</span>
+          </h3>
+          <p className="text-sm text-ink-muted mt-1 mb-4">
+            Up to two extra people who should get a Birdeye login.
+          </p>
+
+          <ul className="space-y-3">
+            {state.additionalUsers.map((au, i) => (
+              <li key={i} className="grid gap-3 md:grid-cols-12 items-end">
+                <Label className="md:col-span-3">
+                  First
+                  <Input
+                    value={au.firstName}
+                    onChange={(e) =>
+                      patch((s) => {
+                        const next = [...s.additionalUsers];
+                        next[i] = { ...next[i], firstName: e.target.value };
+                        return { ...s, additionalUsers: next };
+                      })
+                    }
+                  />
+                </Label>
+                <Label className="md:col-span-3">
+                  Last
+                  <Input
+                    value={au.lastName}
+                    onChange={(e) =>
+                      patch((s) => {
+                        const next = [...s.additionalUsers];
+                        next[i] = { ...next[i], lastName: e.target.value };
+                        return { ...s, additionalUsers: next };
+                      })
+                    }
+                  />
+                </Label>
+                <Label className="md:col-span-3">
+                  Email
+                  <Input
+                    type="email"
+                    value={au.email}
+                    onChange={(e) =>
+                      patch((s) => {
+                        const next = [...s.additionalUsers];
+                        next[i] = { ...next[i], email: e.target.value };
+                        return { ...s, additionalUsers: next };
+                      })
+                    }
+                  />
+                </Label>
+                <Label className="md:col-span-2">
+                  Role
+                  <Select
+                    value={au.role}
+                    onChange={(e) =>
+                      patch((s) => {
+                        const next = [...s.additionalUsers];
+                        next[i] = {
+                          ...next[i],
+                          role: e.target.value as WizardUser["role"],
+                        };
+                        return { ...s, additionalUsers: next };
+                      })
+                    }
+                  >
+                    <option value="admin">admin</option>
+                    <option value="owner">owner</option>
+                  </Select>
+                </Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="md:col-span-1"
+                  onClick={() =>
+                    patch((s) => ({
+                      ...s,
+                      additionalUsers: s.additionalUsers.filter((_, j) => j !== i),
+                    }))
+                  }
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+
+          {state.additionalUsers.length < 2 ? (
             <Button
-              variant="ghost"
-              size="sm"
-              className="md:col-span-1"
+              variant="outline"
+              className="mt-3"
               onClick={() =>
                 patch((s) => ({
                   ...s,
-                  additionalUsers: s.additionalUsers.filter((_, j) => j !== i),
+                  additionalUsers: [
+                    ...s.additionalUsers,
+                    { firstName: "", lastName: "", email: "", phone: "", role: "admin" },
+                  ],
                 }))
               }
             >
-              <Trash2 className="h-4 w-4" />
+              <Plus className="h-4 w-4" />
+              Add team member
             </Button>
-          </li>
-        ))}
-      </ul>
-
-      {state.additionalUsers.length < 2 ? (
-        <Button
-          variant="outline"
-          className="mt-3"
-          onClick={() =>
-            patch((s) => ({
-              ...s,
-              additionalUsers: [
-                ...s.additionalUsers,
-                { firstName: "", lastName: "", email: "", phone: "", role: "admin" },
-              ],
-            }))
-          }
-        >
-          <Plus className="h-4 w-4" />
-          Add team member
-        </Button>
-      ) : null}
+          ) : null}
+        </CardContent>
+      </Card>
     </StepShell>
   );
 }

@@ -842,3 +842,26 @@ p { margin: 0; }
 .gh-msg-input { border: 1px solid var(--rule); background: var(--surface); border-radius: var(--r-md); padding: 10px 14px; font-size: 13.5px; font-family: inherit; color: var(--ink); outline: none; resize: vertical; line-height: 1.5; }
 .gh-msg-input:focus { border-color: var(--teal); }
 .gh-msg-composer-foot { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+
+/* ── Mobile (≤767px): hide sidebar, tighten shell ──────────────────────
+   Breakpoint pinned to Tailwind's `md` (768px) so component-level
+   `-mx-4 md:-mx-8` offsets (wizard StepShell footer) stay in sync with
+   .gh-content's 16/32px horizontal padding. */
+@media (max-width: 767.98px) {
+  .gh-side { display: none; }
+  .gh-top { padding: 0 16px; }
+  .gh-search { display: none; }
+  .gh-content { padding: 20px 16px 32px; }
+  .gh-row-2, .gh-row-3, .gh-grid-2, .gh-grid-3,
+  .gh-form-grid, .gh-suggest-grid { grid-template-columns: 1fr; }
+  .gh-pagehd { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .gh-pagehd-title { font-size: 28px; }
+  .gh-onboard { grid-template-columns: 1fr; min-height: 0; }
+}
+
+/* ── Print: content only (report/action-plan pages) ────────────────── */
+@media print {
+  .gh-side, .gh-top { display: none; }
+  .gh-frame { height: auto; overflow: visible; display: block; }
+  .gh-content { overflow: visible; padding: 0; }
+}

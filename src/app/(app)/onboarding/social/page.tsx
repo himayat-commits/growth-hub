@@ -19,16 +19,16 @@ const FIELDS: Array<[
 ];
 
 export default function SocialStep() {
-  const { state, patch, goNext } = useWizard();
+  const { state, patch, goNext, mode } = useWizard();
   const s = state.social;
 
   return (
     <StepShell
       stepKey="social"
-      eyebrow="Step 08"
       title="Social profiles"
       blurb="Existing pages we should link — leave blank what you don't have. We never create new social pages on your behalf."
       onContinue={() => goNext("social")}
+      continueLabel={mode === "report" ? "See my action plan" : "Continue"}
     >
       <div className="grid gap-4 md:grid-cols-2">
         {FIELDS.map(([key, label, placeholder]) => (

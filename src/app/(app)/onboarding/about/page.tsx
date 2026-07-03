@@ -25,7 +25,7 @@ const PROMPTS: Array<{
 ];
 
 export default function AboutStep() {
-  const { state, patch, goNext } = useWizard();
+  const { state, patch, goNext, mode } = useWizard();
   const a = state.about;
   const d = state.descriptions;
 
@@ -40,7 +40,6 @@ export default function AboutStep() {
   return (
     <StepShell
       stepKey="about"
-      eyebrow="Step 05"
       title="About your business"
       blurb="Tell us your story so we can write your listing descriptions for Google, Apple, Facebook and your microsite. The more specific you are, the better the copy."
       onContinue={() => goNext("about")}
@@ -70,7 +69,9 @@ export default function AboutStep() {
               </span>
             </h2>
             <p className="text-sm text-ink-muted mt-1">
-              Edit each one to taste — they go into the Birdeye payload as-is.
+              {mode === "report"
+                ? "Edit each one to taste — they go into your report as-is."
+                : "Edit each one to taste — they go into the Birdeye payload as-is."}
             </p>
           </div>
           <Button variant="outline" onClick={compose}>
@@ -80,7 +81,7 @@ export default function AboutStep() {
         </div>
         <div className="grid gap-4">
           <DescField
-            label="Birdeye / microsite (≤5000 chars)"
+            label={mode === "report" ? "Full description" : "Birdeye / microsite (≤5000 chars)"}
             value={d.birdeye}
             max={5000}
             onChange={(v) =>
@@ -89,7 +90,7 @@ export default function AboutStep() {
             required
           />
           <DescField
-            label="Google Business Profile (≤750 chars)"
+            label={mode === "report" ? "Short description (Google)" : "Google Business Profile (≤750 chars)"}
             value={d.google}
             max={750}
             onChange={(v) =>
@@ -97,7 +98,7 @@ export default function AboutStep() {
             }
           />
           <DescField
-            label="Facebook (≤255 chars)"
+            label={mode === "report" ? "One-liner (Facebook)" : "Facebook (≤255 chars)"}
             value={d.facebook}
             max={255}
             onChange={(v) =>

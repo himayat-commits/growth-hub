@@ -24,9 +24,9 @@ export default function FaqsStep() {
   return (
     <StepShell
       stepKey="faqs"
-      eyebrow="Step 09"
       title="FAQs"
       blurb="The questions customers ask before they buy. We'll answer them on your microsite and use them to seed Q&A on Google."
+      framed={false}
       onContinue={() => goNext("faqs")}
       continueDisabled={!valid}
     >

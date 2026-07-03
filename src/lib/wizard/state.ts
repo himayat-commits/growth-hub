@@ -444,3 +444,25 @@ export const stepsFor = (
   }
   return stepsForPackage(pkg);
 };
+
+/** Report-mode copy overrides. Free users share the paid step pages but never
+ *  hear about Birdeye or provisioning — their flow ends in an action plan,
+ *  not an account. StepShell resolves these over the page-supplied copy. */
+export const REPORT_COPY: Partial<
+  Record<StepKey, { title?: string; blurb?: string }>
+> = {
+  business: { blurb: "The basics we'll build your growth plan around." },
+  address: {
+    blurb:
+      "Where you are — or where you serve — so we can assess your local visibility.",
+  },
+  hours: {
+    blurb:
+      "Your opening hours are a ranking signal on Google and Apple Maps — tell us yours.",
+  },
+  about: { blurb: "Tell us your story — it shapes your personalised recommendations." },
+  taxonomy: { blurb: "How customers search for businesses like yours." },
+  social: {
+    blurb: "Where you already show up online — leave blank what you don't have.",
+  },
+};

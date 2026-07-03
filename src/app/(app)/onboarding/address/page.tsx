@@ -23,7 +23,6 @@ export default function AddressStep() {
   return (
     <StepShell
       stepKey="address"
-      eyebrow="Step 03"
       title="Address & contact"
       blurb="Where you are — or where you serve — and how customers reach you. This becomes your NAP (Name, Address, Phone) across every listing network."
       onContinue={() => goNext("address")}

@@ -12,7 +12,7 @@
 //      first page load — this lets the wizard skip field-filling and go
 //      straight to clicking Continue on every step.
 //   3. Walk each step by clicking Continue →, verifying the URL advances.
-//   4. On the review page, click "Provision my Birdeye account" and assert
+//   4. On the review page, click "Launch my Birdeye account" and assert
 //      that the stream completes and navigates to /onboarding/done.
 //
 // Why localStorage injection?
@@ -233,9 +233,15 @@ test.describe('Onboarding wizard (mock provisioning)', () => {
     await expect(page).toHaveURL(/\/onboarding\/review/, { timeout: 10_000 });
 
     // ── 13. Review & launch ──────────────────────────────────────────────────
-    const provisionBtn = page.getByRole('button', { name: /provision/i });
-    await expect(provisionBtn).toBeVisible();
-    await provisionBtn.click();
+    const launchBtn = page.getByRole('button', { name: /launch/i });
+    await expect(launchBtn).toBeVisible();
+    await launchBtn.click();
+
+    // The streaming checklist replaces the summary the moment Launch is
+    // clicked — first phase row should appear immediately.
+    await expect(page.getByText('Creating your Birdeye account')).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Mock provisioning takes ~400–1200 ms per step (5–6 steps = 2–7 s).
     // We give it 45 s to account for slow CI runners.

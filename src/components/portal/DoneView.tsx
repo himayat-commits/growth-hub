@@ -5,14 +5,17 @@ import Link from "next/link";
 import {
   Card,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
   Pill,
-  SectionLabel,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/brand/Logo";
-import { CheckCircle2, ExternalLink, Sparkles } from "lucide-react";
+import { InlineNotice } from "@/components/ui/notice";
+import { CodeBlock } from "@/components/ui/code-block";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { Check, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/cn";
 import { PACKAGES, type PackageId } from "@/lib/wizard/packages";
 import { buildWebchatEmbedSnippet } from "@/lib/birdeye/payloads";
 import type { WizardState } from "@/lib/wizard/state";
@@ -110,67 +113,61 @@ export function DoneView({
     : "/api/review-qr-pdf";
 
   return (
-    <main className="min-h-screen">
-      <header className="bg-eggshell/85 border-b border-teal/10 backdrop-blur-md">
-        <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
-          <Logo />
-          {isPartial ? (
-            <Pill tone="amber">Action needed</Pill>
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-2 pb-12 md:px-6 md:pt-4">
+      <PageHeader
+        kicker="You're live"
+        title={businessName ? `${businessName} is on Birdeye` : "Your Birdeye account is live"}
+        sub="Your account is provisioned. Here's what we set up, and what to do next."
+        actions={
+          isPartial ? (
+            <Pill tone="red">Action needed</Pill>
           ) : (
-            <Pill tone="lime">✓ Provisioned</Pill>
-          )}
-        </div>
-      </header>
+            <Pill tone="lime">Provisioned</Pill>
+          )
+        }
+      />
 
-      <section className="max-w-4xl mx-auto px-6 py-12 md:py-16">
-        <SectionLabel>Onboarding complete</SectionLabel>
-        <h1 className="font-serif text-section text-teal mt-4 leading-[1.05]">
-          You&apos;re{" "}
-          <em className="not-italic text-plum font-serif">live.</em>
-        </h1>
-        <p className="mt-5 text-ink-muted max-w-2xl text-lg leading-relaxed">
-          Your Birdeye sub-account is provisioned. Here&apos;s what we did, and
-          what to do next.
-        </p>
+      {isPartial ? (
+        <InlineNotice tone="warning" title="A few steps didn't finish.">
+          Your account is live, but the steps marked below need a retry. Head to{" "}
+          <Link href="/services" className="underline underline-offset-2">
+            Services
+          </Link>{" "}
+          and click <em className="not-italic font-semibold">Resume / retry</em>, or email{" "}
+          <a href="mailto:hello@himayat.com.au" className="underline underline-offset-2">
+            hello@himayat.com.au
+          </a>
+          .
+        </InlineNotice>
+      ) : null}
 
-        {isPartial ? (
-          <div className="mt-5 rounded-xl border border-plum/30 bg-plum/[0.04] px-4 py-3 text-sm text-plum leading-relaxed max-w-2xl">
-            <strong className="font-semibold">A few steps didn&apos;t finish.</strong>{" "}
-            Your account is live, but the steps marked below need a retry. Head to{" "}
-            <Link href="/services" className="underline underline-offset-2">
-              Services
-            </Link>{" "}
-            and click <em className="not-italic font-semibold">Resume / retry</em>, or email{" "}
-            <a href="mailto:hello@himayat.com.au" className="underline underline-offset-2">
-              hello@himayat.com.au
-            </a>
-            .
-          </div>
-        ) : null}
-
-        <Card className="mt-9">
+      <div className="grid gap-5 md:grid-cols-2">
+        <Card>
           <CardHeader>
-            <CardTitle className="font-serif text-2xl flex items-center gap-2.5">
-              <Sparkles className="h-5 w-5 text-plum" />
-              Provisioning checklist
-            </CardTitle>
+            <CardTitle className="text-base">Provisioning checklist</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-3.5">
+          <CardContent className="pt-2">
             {checklist.map((c) => (
-              <div key={c.label} className="flex items-start gap-3">
-                <CheckCircle2
-                  className={
+              <div
+                key={c.label}
+                className="grid grid-cols-[24px_1fr] items-start gap-3 border-t border-line py-3 first:border-0"
+              >
+                <span
+                  className={cn(
+                    "mt-0.5 flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1.5px]",
                     c.ok
-                      ? "h-4 w-4 mt-1 text-teal flex-shrink-0"
-                      : "h-4 w-4 mt-1 text-ink-muted/50 flex-shrink-0"
-                  }
-                />
+                      ? "border-teal bg-teal text-white"
+                      : "border-ink-muted/30 bg-white"
+                  )}
+                >
+                  {c.ok ? <Check className="h-3 w-3" /> : null}
+                </span>
                 <div>
-                  <div className="font-sans text-sm font-medium text-teal">
+                  <div className="font-sans text-sm font-medium text-ink">
                     {c.label}
                   </div>
                   {c.detail ? (
-                    <div className="font-sans text-xs text-ink-muted mt-0.5">
+                    <div className="mt-0.5 font-sans text-xs text-ink-muted">
                       {c.detail}
                     </div>
                   ) : null}
@@ -180,12 +177,12 @@ export function DoneView({
           </CardContent>
         </Card>
 
-        <Card className="mt-6">
+        <Card className="self-start">
           <CardHeader>
-            <CardTitle className="font-serif text-2xl">What to do next</CardTitle>
+            <CardTitle className="text-base">What to do next</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="space-y-3.5 text-base leading-relaxed">
+            <ol className="list-decimal space-y-3 pl-4 text-sm leading-relaxed">
               <li>
                 <strong>Check your email.</strong> We&apos;ve sent a Birdeye
                 admin invite to {adminEmail}. Click through to set your password.
@@ -193,7 +190,7 @@ export function DoneView({
               <li>
                 <strong>Open your Birdeye dashboard</strong> using the button
                 below. Your business number is{" "}
-                <code className="font-sans text-xs bg-eggshell-warm px-1.5 py-0.5 rounded text-teal">
+                <code className="rounded bg-eggshell-warm px-1.5 py-0.5 font-sans text-xs text-teal">
                   {businessNumber}
                 </code>
                 .
@@ -214,54 +211,48 @@ export function DoneView({
               <li>
                 <Link
                   href="/onboarding/update-later"
-                  className="text-plum hover:underline underline-offset-4"
+                  className="text-plum underline-offset-4 hover:underline"
                 >
                   Need to update something later?
                 </Link>
               </li>
             </ol>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link href={dashboardUrl} target="_blank">
-                <Button variant="lime" size="lg">
-                  <ExternalLink className="h-4 w-4" />
-                  Open Birdeye dashboard
-                </Button>
+          </CardContent>
+          <CardFooter className="flex-wrap pt-5">
+            <Link href={dashboardUrl} target="_blank">
+              <Button variant="lime">
+                <ExternalLink className="h-4 w-4" />
+                Open Birdeye dashboard
+              </Button>
+            </Link>
+            {pkg.id !== "foundations" ? (
+              <Link href={qrHref} target="_blank">
+                <Button variant="outline">Download review QR PDF</Button>
               </Link>
-              {pkg.id !== "foundations" ? (
-                <Link href={qrHref} target="_blank">
-                  <Button variant="outline" size="lg">
-                    Download review QR PDF
-                  </Button>
-                </Link>
-              ) : null}
-              <Link href="/portal">
-                <Button variant="ghost" size="lg">Back to portal</Button>
-              </Link>
-            </div>
+            ) : null}
+            <Link href="/dashboard">
+              <Button variant="ghost">Back to dashboard</Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+
+      {pkg.id === "accelerate" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Webchat embed snippet</CardTitle>
+            <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+              Add this to the <code className="font-sans text-xs">&lt;head&gt;</code> of
+              every page where the chat should appear. Your partner will activate
+              the Webchat AI module in billing — once that&apos;s done, this snippet
+              starts working automatically.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <CodeBlock>{buildWebchatEmbedSnippet(businessNumber)}</CodeBlock>
           </CardContent>
         </Card>
-
-        {pkg.id === "accelerate" ? (
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="font-serif text-2xl">
-                Webchat embed snippet
-              </CardTitle>
-              <p className="text-sm text-ink-muted mt-2 leading-relaxed">
-                Add this to the <code className="font-sans text-xs">&lt;head&gt;</code> of
-                every page where the chat should appear. Your partner will activate
-                the Webchat AI module in billing — once that&apos;s done, this snippet
-                starts working automatically.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <pre className="json text-xs whitespace-pre-wrap break-all">
-                {buildWebchatEmbedSnippet(businessNumber)}
-              </pre>
-            </CardContent>
-          </Card>
-        ) : null}
-      </section>
-    </main>
+      ) : null}
+    </div>
   );
 }

@@ -9,14 +9,13 @@ import { PAYMENT_OPTIONS } from "@/lib/wizard/state";
 import { Plus, Trash2 } from "lucide-react";
 
 export default function TaxonomyStep() {
-  const { state, patch, goNext } = useWizard();
+  const { state, patch, goNext, mode } = useWizard();
   const t = state.taxonomy;
   const valid = t.gmbPrimary.trim() && t.birdeyeCategory.trim();
 
   return (
     <StepShell
       stepKey="taxonomy"
-      eyebrow="Step 06"
       title="Categories, keywords & payment"
       blurb="How the listings networks classify and surface you. Pick a primary Google category that matches what most customers search for first."
       onContinue={() => goNext("taxonomy")}
@@ -34,7 +33,7 @@ export default function TaxonomyStep() {
           />
         </Label>
         <Label required>
-          Birdeye / microsite category
+          {mode === "report" ? "Industry category" : "Birdeye / microsite category"}
           <Input
             value={t.birdeyeCategory}
             onChange={(e) =>
@@ -43,7 +42,9 @@ export default function TaxonomyStep() {
           />
         </Label>
         <Label>
-          Birdeye sub-categories (up to 3, comma-separated)
+          {mode === "report"
+            ? "Industry sub-categories (up to 3, comma-separated)"
+            : "Birdeye sub-categories (up to 3, comma-separated)"}
           <Input
             value={t.birdeyeSubs.join(", ")}
             onChange={(e) =>

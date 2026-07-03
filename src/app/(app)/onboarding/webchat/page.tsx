@@ -22,9 +22,9 @@ export default function WebchatStep() {
   return (
     <StepShell
       stepKey="webchat"
-      eyebrow="Step 10 — Accelerate only"
       title="Webchat configuration"
       blurb="Your AI agent that captures leads on your website 24/7. We'll generate the embed snippet for you on the success screen."
+      badge="Accelerate only"
       onContinue={() => goNext("webchat")}
       continueDisabled={!valid}
     >

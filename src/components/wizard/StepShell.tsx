@@ -1,34 +1,54 @@
 "use client";
 
 import * as React from "react";
+import { ArrowLeft, ArrowRight, Check, Save } from "lucide-react";
 import { useWizard } from "@/components/wizard/WizardContext";
 import { Button } from "@/components/ui/button";
-import { SectionLabel } from "@/components/ui/card";
-import { Save } from "lucide-react";
+import { Card, CardContent, Pill } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { WizardProgress } from "@/components/wizard/WizardProgress";
+import { REPORT_COPY } from "@/lib/wizard/state";
 import type { StepKey } from "@/lib/wizard/state";
 
 export function StepShell({
   stepKey,
   title,
   blurb,
-  eyebrow,
+  badge,
+  framed = true,
   children,
   onContinue,
   continueDisabled,
   continueLabel = "Continue",
+  continueVariant = "primary",
+  locked = false,
 }: {
   stepKey: StepKey;
   title: string;
   blurb: string;
-  /** Optional small label above the title — defaults to step name */
-  eyebrow?: string;
+  /** Optional Pill next to the title — "Optional", "Accelerate only", package name. */
+  badge?: string;
+  /** Wrap the step content in a Card (default). Pages that compose their own
+   *  top-level white cards (confirm, faqs, assets) pass false to avoid
+   *  double-carding. */
+  framed?: boolean;
   children: React.ReactNode;
   onContinue?: () => void | Promise<void>;
   continueDisabled?: boolean;
   continueLabel?: string;
+  continueVariant?: "primary" | "lime";
+  /** Hide Back / Save & exit while a launch is in flight. */
+  locked?: boolean;
 }) {
-  const { goPrev, saveAndExit, saving } = useWizard();
+  const { mode, goPrev, saveAndExit, saving } = useWizard();
   const [busy, setBusy] = React.useState(false);
+
+  // Free users share these pages but never hear about Birdeye — report-mode
+  // copy overrides win over what the page passed.
+  const copy = mode === "report" ? REPORT_COPY[stepKey] : undefined;
+  const resolvedTitle = copy?.title ?? title;
+  const resolvedBlurb = copy?.blurb ?? blurb;
 
   const handleContinue = async () => {
     if (!onContinue) return;
@@ -41,38 +61,80 @@ export function StepShell({
   };
 
   // Rendered inside (app)/onboarding/layout.tsx → (app)/layout.tsx, so the
-  // outer Sidebar+Topbar already exist. We don't fight for full-viewport
-  // height anymore — the .gh-content scroll container handles overflow.
-  // Footer is `position: sticky; bottom: 0` so it pins to the bottom of
-  // that scroll viewport regardless of step length.
+  // outer Sidebar+Topbar already exist. The footer is `position: sticky;
+  // bottom: 0` so it pins to the bottom of the .gh-content scroll viewport
+  // regardless of step length; its negative margins counter .gh-content's
+  // 16/32px padding so the bar runs edge to edge like the Topbar.
   return (
     <div className="flex flex-col">
-      <div className="max-w-3xl mx-auto w-full px-6 md:px-10 pt-6 pb-12">
-        {eyebrow ? <SectionLabel>{eyebrow}</SectionLabel> : null}
-        <h1 className="font-serif text-4xl md:text-5xl font-normal text-teal mt-4 tracking-tight leading-[1.05]">
-          {title}
-        </h1>
-        <p className="mt-4 text-base md:text-lg text-ink-muted leading-relaxed max-w-2xl">
-          {blurb}
-        </p>
-        <div className="mt-10">{children}</div>
+      <div className="mx-auto w-full max-w-3xl px-4 pt-2 pb-12 md:px-6 md:pt-4">
+        <WizardProgress currentKey={stepKey} />
+        <div className="mt-7">
+          <PageHeader
+            kicker={mode === "report" ? "Your growth snapshot" : "Birdeye setup"}
+            title={resolvedTitle}
+            sub={resolvedBlurb}
+            actions={badge ? <Pill tone="teal">{badge}</Pill> : undefined}
+          />
+        </div>
+        <div className="mt-7">
+          {framed ? (
+            <Card>
+              <CardContent className="pt-6 md:p-7">{children}</CardContent>
+            </Card>
+          ) : (
+            children
+          )}
+        </div>
       </div>
 
-      <footer className="sticky bottom-0 -mx-8 px-8 bg-eggshell/95 backdrop-blur-md border-t border-line z-10">
-        <div className="max-w-3xl mx-auto w-full py-4 flex items-center justify-between gap-3">
-          <Button variant="ghost" onClick={() => goPrev(stepKey)}>
-            ← Back
-          </Button>
-          <div className="flex items-center gap-3">
-            <span className="font-sans text-xs text-ink-muted hidden sm:inline">
-              {saving ? "Saving…" : "Saved"}
-            </span>
-            <Button variant="outline" onClick={saveAndExit}>
-              <Save className="h-4 w-4" />
-              Save &amp; exit
+      <footer className="sticky bottom-0 z-10 -mx-4 border-t border-line bg-white/95 px-4 backdrop-blur md:-mx-8 md:px-8">
+        <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-2 py-3">
+          {!locked ? (
+            <Button variant="ghost" onClick={() => goPrev(stepKey)}>
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Back</span>
             </Button>
-            <Button onClick={handleContinue} disabled={continueDisabled || busy}>
-              {continueLabel} →
+          ) : (
+            <span />
+          )}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span
+              className="hidden items-center gap-1.5 font-sans text-xs text-ink-muted sm:flex"
+              aria-live="polite"
+            >
+              {saving ? (
+                <>
+                  <Spinner /> Saving…
+                </>
+              ) : (
+                <>
+                  <Check className="h-3.5 w-3.5 text-teal" /> Saved
+                </>
+              )}
+            </span>
+            {!locked ? (
+              <Button variant="outline" onClick={saveAndExit}>
+                <Save className="h-4 w-4" />
+                <span className="hidden sm:inline">Save &amp; exit</span>
+              </Button>
+            ) : null}
+            <Button
+              variant={continueVariant}
+              onClick={handleContinue}
+              disabled={continueDisabled || busy}
+            >
+              {busy ? (
+                <Spinner
+                  className={
+                    continueVariant === "primary"
+                      ? "border-eggshell/30 border-t-eggshell"
+                      : undefined
+                  }
+                />
+              ) : null}
+              {continueLabel}
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
