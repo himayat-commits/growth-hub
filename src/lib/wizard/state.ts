@@ -308,6 +308,10 @@ export const wizardStateSchema = z.object({
       lockedUntil: z.string().optional(),
       /** Who started the most recent run — provenance for the ops timeline. */
       lastRunBy: z.enum(["user", "ops", "cron"]).optional(),
+      /** Set when a run still has failedSteps after >=3 attempts: the retry
+       *  burden moves from the user to ops, and the UI flips from "retry"
+       *  to "we're on it". Never reset by further user retries. */
+      escalatedAt: z.string().optional(),
     })
     .default({ invitedUsers: [], mediaIds: [] }),
 });

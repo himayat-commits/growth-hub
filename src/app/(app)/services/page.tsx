@@ -1,17 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { eq } from 'drizzle-orm';
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { IcoCal, IcoArrow } from '@/components/dashboard/Icons';
-import { getDb } from '@/lib/db';
-import { onboardingStates } from '@/lib/db/schema';
 import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import { ADDONS, getAddOnPriceId, type AddOnId, type PlanTier } from '@/lib/plans';
-import type { WizardState } from '@/lib/wizard/state';
-import { stepsForPackage, stepsFor } from '@/lib/wizard/state';
-import { isStepComplete } from '@/lib/wizard/initial-state';
+import { wizardProgress } from '@/lib/wizard/initial-state';
+import { loadOnboardingRow, isStaleRunning } from '@/lib/wizard/provisioning-store';
+import type { PackageId } from '@/lib/wizard/packages';
 import { getBirdeyeDashboardUrl } from '@/lib/birdeye/dashboard-url';
 import PortalModuleGrid from '@/components/portal/PortalModuleGrid';
 import { getServices } from '@/lib/cms';
@@ -52,47 +49,42 @@ export default async function ServicesPage() {
   const activeAddOns = resolveActiveAddOns(sub?.addOnPriceIds ?? []);
 
   // Has the user completed the Birdeye provisioning wizard?
-  const obRows = await getDb()
-    .select()
-    .from(onboardingStates)
-    .where(eq(onboardingStates.userId, user.id))
-    .limit(1);
-  const wizardState = obRows[0]?.state as WizardState | undefined;
+  const obRow = await loadOnboardingRow(user.id);
+  const wizardState = obRow?.state;
   const businessNumber = wizardState?.provisioning?.businessNumber ?? null;
   const businessName = wizardState?.business?.name ?? null;
   const runStatus = wizardState?.provisioning?.runStatus ?? null;
+  const failedSteps = wizardState?.provisioning?.failedSteps ?? [];
+  const staleRunning =
+    wizardState && obRow ? isStaleRunning(wizardState, obRow.updatedAt) : false;
+  // A live run gets a "we're on it now" banner; a stale one (crashed
+  // serverless function) falls through to the resume/retry path instead.
+  const isRunning = runStatus === 'running' && !staleRunning;
   // A partial run still has a businessNumber (account exists) but some steps
-  // need a retry — surface a distinct "attention" banner for it.
+  // need a retry — surface a distinct "attention" banner for it. Once ops
+  // has been escalated (3+ failed retries) the retry burden is off the user.
   const isPartial = runStatus === 'partial';
-  const provisioned = !!businessNumber && !isPartial;
+  const isEscalated = isPartial && Boolean(wizardState?.provisioning?.escalatedAt);
+  const provisioned = !!businessNumber && !isPartial && runStatus !== 'running';
   const hasActivePaidSub = tier !== 'free';
   const dashboardUrl = getBirdeyeDashboardUrl(businessNumber);
 
   // Free-tier action-plan progress. Report mode reuses these wizard steps;
   // once they're all filled the banner switches from "Build" to "View".
-  const reportSteps = stepsFor('report', 'foundations').filter((s) => s.key !== 'action-plan');
-  const reportComplete = !!wizardState && reportSteps.every((s) => isStepComplete(wizardState, s.key));
+  const reportComplete = wizardProgress(wizardState, 'report', 'foundations').next === null;
 
   // For partially-completed wizards, deep-link to the first incomplete step.
   let setupHref = '/onboarding';
   let setupProgress: { done: number; total: number } | null = null;
   if (!provisioned && hasActivePaidSub) {
-    const wizardPkg = (wizardState?.packageId as 'foundations' | 'growth' | 'accelerate' | undefined)
-      ?? (tier as 'foundations' | 'growth' | 'accelerate');
-    const steps = stepsForPackage(wizardPkg);
-    const completed = wizardState
-      ? steps.filter((s) => isStepComplete(wizardState, s.key)).length
-      : 0;
-    setupProgress = { done: completed, total: steps.length };
-    const next = wizardState
-      ? steps.find((s) => s.key !== 'review' && !isStepComplete(wizardState, s.key))
-      : steps[0];
+    const progress = wizardProgress(wizardState, 'provision', tier as PackageId);
+    setupProgress = { done: progress.done, total: progress.total };
     // A prior failed attempt (or a fully-filled wizard) resumes at the launch
     // step so the user can retry; otherwise jump to the first gap.
     setupHref =
-      runStatus === 'failed' || wizardState?.provisioning?.attempts
+      runStatus === 'failed' || wizardState?.provisioning?.attempts || !progress.next
         ? '/onboarding/review'
-        : `/onboarding/${next?.key ?? 'review'}`;
+        : `/onboarding/${progress.next.key}`;
   }
 
   // Project Payload services into the lightweight shape the client tab needs.
@@ -154,6 +146,44 @@ export default async function ServicesPage() {
               className="btn btn-lime"
             >
               Open your Birdeye dashboard <IcoArrow />
+            </a>
+          </div>
+        </div>
+      ) : isRunning && hasActivePaidSub ? (
+        <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
+          <div className="portal-birdeye-banner-head">
+            <span className="portal-birdeye-pill">Setup in progress</span>
+            <h2 className="portal-birdeye-title">Setting up your account now…</h2>
+            <p className="portal-birdeye-sub">
+              We&apos;re creating your Birdeye account — this takes about a minute.
+            </p>
+          </div>
+          <div className="portal-birdeye-banner-cta">
+            <Link href="/onboarding/review" className="btn btn-primary">
+              See live progress <IcoArrow />
+            </Link>
+          </div>
+        </div>
+      ) : isEscalated && hasActivePaidSub ? (
+        <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
+          <div className="portal-birdeye-banner-head">
+            <span className="portal-birdeye-pill">We&apos;re on it</span>
+            <h2 className="portal-birdeye-title">
+              {businessName
+                ? `${businessName} is live — our team is finishing setup.`
+                : 'Your account is live — our team is finishing setup.'}
+            </h2>
+            <p className="portal-birdeye-sub">
+              Your account is live; our team is completing the last {failedSteps.length} setup
+              step{failedSteps.length === 1 ? '' : 's'}. We&apos;ll notify you when it&apos;s done.
+            </p>
+          </div>
+          <div className="portal-birdeye-banner-cta">
+            <a
+              href="mailto:hello@himayat.com.au?subject=Birdeye%20setup"
+              className="btn btn-primary"
+            >
+              Questions? Email us <IcoArrow />
             </a>
           </div>
         </div>
@@ -268,7 +298,15 @@ export default async function ServicesPage() {
       )}
 
       <ServicesTabs
-        modules={<PortalModuleGrid tier={tier} activeAddOns={activeAddOns} dashboardUrl={dashboardUrl} />}
+        modules={
+          <PortalModuleGrid
+            tier={tier}
+            activeAddOns={activeAddOns}
+            dashboardUrl={dashboardUrl}
+            provisioned={Boolean(businessNumber)}
+            setupHref={setupHref}
+          />
+        }
         services={<ServicesCatalog services={serviceItems} />}
       />
     </>

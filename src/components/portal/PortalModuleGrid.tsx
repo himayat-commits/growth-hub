@@ -353,9 +353,15 @@ interface Props {
    *  to the user's business dashboard when provisioned, else the generic
    *  login. Passed from /services via getBirdeyeDashboardUrl(). */
   dashboardUrl: string;
+  /** Whether the user's Birdeye account actually exists. When explicitly
+   *  false (and setupHref is set), module cards link to the wizard instead
+   *  of a platform login that would dead-end. Absent = legacy behavior. */
+  provisioned?: boolean;
+  /** Where "Finish setup first" sends a not-yet-provisioned user. */
+  setupHref?: string;
 }
 
-export default function PortalModuleGrid({ tier, activeAddOns, dashboardUrl }: Props) {
+export default function PortalModuleGrid({ tier, activeAddOns, dashboardUrl, provisioned, setupHref }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const activeModules = ALL_MODULES.filter((m) => isModuleActive(m, tier, activeAddOns));
@@ -405,14 +411,20 @@ export default function PortalModuleGrid({ tier, activeAddOns, dashboardUrl }: P
                     ))}
                   </ol>
                   <div className="portal-card-links">
-                    <a
-                      href={dashboardUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="portal-card-link primary"
-                    >
-                      Open in platform <IconArrow />
-                    </a>
+                    {provisioned === false && setupHref ? (
+                      <a href={setupHref} className="portal-card-link primary">
+                        Finish setup first <IconArrow />
+                      </a>
+                    ) : (
+                      <a
+                        href={dashboardUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="portal-card-link primary"
+                      >
+                        Open in platform <IconArrow />
+                      </a>
+                    )}
                     {mod.videoUrl && (
                       <a
                         href={mod.videoUrl}

@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { cn } from "@/lib/cn";
+import { track } from "@/lib/analytics";
 import { PACKAGES } from "@/lib/wizard/packages";
 import {
   ArrowRight,
@@ -32,6 +33,13 @@ import {
 
 export function ActionPlanReport() {
   const { state } = useWizard();
+
+  const viewFired = React.useRef(false);
+  React.useEffect(() => {
+    if (viewFired.current) return;
+    viewFired.current = true;
+    track("onboarding_action_plan_view");
+  }, []);
 
   const biz = state.business.name?.trim() || "Your business";
   const city = state.address.city?.trim();
@@ -189,12 +197,18 @@ export function ActionPlanReport() {
             From A${foundations.pricePerMonth}/mo, no lock-in.
           </p>
           <div className="mt-6 flex flex-wrap gap-3 print:hidden">
-            <Link href="/plan">
+            <Link
+              href="/plan"
+              onClick={() => track("action_plan_upgrade_click", { cta: "get_foundations" })}
+            >
               <Button variant="lime" size="lg">
                 Get {foundations.name} <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/plan">
+            <Link
+              href="/plan"
+              onClick={() => track("action_plan_upgrade_click", { cta: "compare_plans" })}
+            >
               <Button variant="ghost" size="lg">
                 Compare plans
               </Button>

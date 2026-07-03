@@ -60,7 +60,21 @@ export function WizardProvider({
       const raw = localStorage.getItem(lsKey);
       if (raw) {
         const parsed = JSON.parse(raw) as WizardState;
-        if (parsed.onboardingId === initialState.onboardingId) _setState(parsed);
+        // Adopt the local snapshot only when it's genuinely newer than what
+        // the server hydrated (stale tabs / other devices must not win), and
+        // NEVER let it override the provisioning block — the runner writes
+        // that server-side, and a stale local copy replayed through the next
+        // debounced PUT would clobber businessNumber/runStatus.
+        if (
+          parsed.onboardingId === initialState.onboardingId &&
+          Date.parse(parsed.updatedAt ?? "") > Date.parse(initialState.updatedAt ?? "")
+        ) {
+          _setState({
+            ...parsed,
+            status: initialState.status,
+            provisioning: initialState.provisioning,
+          });
+        }
       }
     } catch {
       /* ignore */
@@ -150,7 +164,7 @@ export function WizardProvider({
       saveTimer.current = null;
     }
     await putImmediate(state);
-    router.push("/portal");
+    router.push("/dashboard");
   }, [putImmediate, router, state]);
 
   const value: Ctx = { state, mode, setState, patch, goNext, goPrev, saveAndExit, saving };

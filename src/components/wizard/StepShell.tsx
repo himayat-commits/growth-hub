@@ -2,13 +2,14 @@
 
 import * as React from "react";
 import { ArrowLeft, ArrowRight, Check, Save } from "lucide-react";
-import { useWizard } from "@/components/wizard/WizardContext";
+import { useWizard, useStepCompletion } from "@/components/wizard/WizardContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, Pill } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { WizardProgress } from "@/components/wizard/WizardProgress";
 import { REPORT_COPY } from "@/lib/wizard/state";
+import { track } from "@/lib/analytics";
 import type { StepKey } from "@/lib/wizard/state";
 
 export function StepShell({
@@ -41,7 +42,8 @@ export function StepShell({
   /** Hide Back / Save & exit while a launch is in flight. */
   locked?: boolean;
 }) {
-  const { mode, goPrev, saveAndExit, saving } = useWizard();
+  const { state, mode, goPrev, saveAndExit, saving } = useWizard();
+  const completion = useStepCompletion();
   const [busy, setBusy] = React.useState(false);
 
   // Free users share these pages but never hear about Birdeye — report-mode
@@ -50,11 +52,35 @@ export function StepShell({
   const resolvedTitle = copy?.title ?? title;
   const resolvedBlurb = copy?.blurb ?? blurb;
 
+  const viewFired = React.useRef(false);
+  React.useEffect(() => {
+    if (viewFired.current) return;
+    viewFired.current = true;
+    const idx = completion.findIndex((s) => s.key === stepKey);
+    const completedCount = completion.filter((s) => s.complete).length;
+    track("onboarding_step_view", {
+      step: stepKey,
+      index: idx + 1,
+      mode,
+      package: state.packageId,
+    });
+    if (idx === 0 && completedCount === 0) {
+      track("onboarding_wizard_start", { mode, package: state.packageId });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleContinue = async () => {
     if (!onContinue) return;
     setBusy(true);
     try {
       await onContinue();
+      track("onboarding_step_complete", {
+        step: stepKey,
+        index: completion.findIndex((s) => s.key === stepKey) + 1,
+        mode,
+        package: state.packageId,
+      });
     } finally {
       setBusy(false);
     }

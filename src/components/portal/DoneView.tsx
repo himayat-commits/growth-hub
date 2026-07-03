@@ -60,6 +60,8 @@ export function DoneView({
   // On a partial run, mark the steps that actually failed as not-ok.
   const failedKinds = new Set((state?.provisioning.failedSteps ?? []).map((f) => f.kind));
   const isPartial = state?.provisioning.runStatus === "partial";
+  // Past the retry ceiling ops owns the remaining steps — no retry ask.
+  const isEscalated = isPartial && Boolean(state?.provisioning.escalatedAt);
 
   const checklist: { label: string; ok: boolean; detail?: string }[] = [
     {
@@ -119,7 +121,9 @@ export function DoneView({
         title={businessName ? `${businessName} is on Birdeye` : "Your Birdeye account is live"}
         sub="Your account is provisioned. Here's what we set up, and what to do next."
         actions={
-          isPartial ? (
+          isEscalated ? (
+            <Pill tone="teal">We&apos;re on it</Pill>
+          ) : isPartial ? (
             <Pill tone="red">Action needed</Pill>
           ) : (
             <Pill tone="lime">Provisioned</Pill>
@@ -127,7 +131,19 @@ export function DoneView({
         }
       />
 
-      {isPartial ? (
+      {isEscalated ? (
+        <InlineNotice tone="info" title="Our team is finishing your setup.">
+          Your account is live; we&apos;re completing the last{" "}
+          {state?.provisioning.failedSteps?.length ?? "few"} setup step
+          {(state?.provisioning.failedSteps?.length ?? 2) === 1 ? "" : "s"} for
+          you — no action needed. We&apos;ll notify you when it&apos;s done, or
+          email{" "}
+          <a href="mailto:hello@himayat.com.au" className="underline underline-offset-2">
+            hello@himayat.com.au
+          </a>{" "}
+          with questions.
+        </InlineNotice>
+      ) : isPartial ? (
         <InlineNotice tone="warning" title="A few steps didn't finish.">
           Your account is live, but the steps marked below need a retry. Head to{" "}
           <Link href="/services" className="underline underline-offset-2">

@@ -194,33 +194,59 @@ export async function runProvision(args: RunProvisionArgs): Promise<ProvisionRes
     });
   }
 
-  // Persist the terminal state. status stays `provisioned` even on partial —
-  // the account exists and is usable; runStatus/failedSteps carry the nuance.
-  await updateProvisioning(userId, () => ({
-    status: "provisioned",
-    provisioning: {
-      businessNumber,
-      invitedUsers,
-      mediaIds,
-      failedSteps,
-      runStatus: status,
-      lastStep: "done",
-      completedAt,
-    },
-  }));
+  // Escalation ceiling: after 3 attempts with steps still failing, the retry
+  // burden moves to ops — the UI flips from "retry" to "we're on it". A full
+  // success clears the flag; user retries past the ceiling never reset it.
+  let escalated = false;
+  await updateProvisioning(userId, (prev) => {
+    const escalatedAt =
+      status === "provisioned"
+        ? undefined
+        : prev.escalatedAt ?? ((prev.attempts ?? 0) >= 3 ? completedAt : undefined);
+    escalated = status === "partial" && Boolean(escalatedAt);
+    // Persist the terminal state. status stays `provisioned` even on partial —
+    // the account exists and is usable; runStatus/failedSteps carry the nuance.
+    return {
+      status: "provisioned",
+      provisioning: {
+        businessNumber,
+        invitedUsers,
+        mediaIds,
+        failedSteps,
+        runStatus: status,
+        lastStep: "done",
+        completedAt,
+        escalatedAt,
+      },
+    };
+  });
 
   // Step 7 — ops handoff (module entitlements, Webchat, Apple/FAQs/tags the
   // public API can't set). Non-fatal: the customer is already provisioned.
-  await notifyOps({ origin, onboardingId, state, businessNumber, invitedUsers, mediaIds, status });
+  await notifyOps({
+    origin,
+    onboardingId,
+    state,
+    businessNumber,
+    invitedUsers,
+    mediaIds,
+    status,
+    escalated,
+  });
 
-  // In-app notification.
+  // In-app notification. Escalated partials tell the user we've got it —
+  // they've retried enough; ops now owns the remaining steps.
   try {
     await createNotification({
       userId: onboardingId,
       kind: "birdeye_provisioned",
-      title: status === "partial" ? "Birdeye account ready (action needed)" : "Birdeye account ready",
-      body:
-        status === "partial"
+      title:
+        status === "partial" && !escalated
+          ? "Birdeye account ready (action needed)"
+          : "Birdeye account ready",
+      body: escalated
+        ? `Your business is live on Birdeye${businessNumber ? ` (#${businessNumber})` : ""}. Our team is finishing the last few setup steps — no action needed.`
+        : status === "partial"
           ? `Your business is live on Birdeye${businessNumber ? ` (#${businessNumber})` : ""}, but ${failedSteps.length} setup step(s) need a retry. Open /services to resume.`
           : `Your business is live on Birdeye${businessNumber ? ` (#${businessNumber})` : ""}. Open your dashboard from /services or the portal banner.`,
       href: "/services",
@@ -243,11 +269,14 @@ async function notifyOps(args: {
   invitedUsers: string[];
   mediaIds: string[];
   status: ProvisionResult["status"];
+  escalated?: boolean;
 }): Promise<void> {
-  const { origin, onboardingId, state, businessNumber, invitedUsers, mediaIds, status } = args;
+  const { origin, onboardingId, state, businessNumber, invitedUsers, mediaIds, status, escalated } =
+    args;
   const opsPayload = {
     state: { ...state, provisioning: { ...state.provisioning, businessNumber, invitedUsers, mediaIds } },
     severity: status === "partial" ? "action_required" : "info",
+    escalated: Boolean(escalated),
   };
   try {
     if (!origin) throw new Error("Missing origin header — can't reach /api/notify-ops");
