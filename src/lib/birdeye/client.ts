@@ -5,12 +5,74 @@
 import "server-only";
 import type { AssembledRequest } from "./payloads";
 
+/** What a single call actually does. */
 export type ClientMode = "mock" | "live";
 
-export const getMode = (): ClientMode =>
-  (process.env.NEXT_PUBLIC_PROVISION_MODE as ClientMode) === "live"
-    ? "live"
-    : "mock";
+/** The deployment-wide switch (server-only env `PROVISION_MODE`):
+ *  - `mock`           — nobody hits the real API (default; the kill switch).
+ *  - `live_allowlist` — only allowlisted users go live; everyone else mock.
+ *  - `live`           — every (paid) user goes live. */
+export type ProvisionMode = "mock" | "live_allowlist" | "live";
+
+/** Reads the deployment switch. Server-only: `PROVISION_MODE` is NOT
+ *  `NEXT_PUBLIC_` (it must not be inlined into the browser bundle, and it
+ *  must stay flippable at runtime so rollback to `mock` is instant). The
+ *  `NEXT_PUBLIC_PROVISION_MODE` fallback is transitional — drop it once the
+ *  Vercel env var has been renamed. */
+export const getProvisionMode = (): ProvisionMode => {
+  const raw = (
+    process.env.PROVISION_MODE ??
+    process.env.NEXT_PUBLIC_PROVISION_MODE ??
+    "mock"
+  ).toLowerCase();
+  if (raw === "live") return "live";
+  if (raw === "live_allowlist") return "live_allowlist";
+  return "mock";
+};
+
+/** Resolves the effective per-call mode. Live calls only happen when the
+ *  deployment switch allows it AND (for `live_allowlist`) the caller is
+ *  allowlisted. Anything else degrades safely to `mock`. */
+export const resolveEffectiveMode = (
+  deploymentMode: ProvisionMode,
+  isAllowlisted: boolean,
+): ClientMode => {
+  if (deploymentMode === "live") return "live";
+  if (deploymentMode === "live_allowlist") return isAllowlisted ? "live" : "mock";
+  return "mock";
+};
+
+/** Tolerant reader for the create-subaccount response. The mock returns
+ *  `{ businessId }`; the live API shape is unconfirmed (may nest under
+ *  `data`/`result`, or return `businessNumber`/`id`). Isolating the read
+ *  here means only this function changes once the real shape is known. */
+export function extractIdentifiers(response: unknown): {
+  businessId?: string;
+  businessNumber?: string;
+} {
+  const toStr = (v: unknown): string | undefined =>
+    typeof v === "string" && v
+      ? v
+      : typeof v === "number"
+        ? String(v)
+        : undefined;
+  const root = (response ?? {}) as Record<string, unknown>;
+  const nested =
+    (root.data as Record<string, unknown> | undefined) ??
+    (root.result as Record<string, unknown> | undefined) ??
+    root;
+  const businessId =
+    toStr(nested.businessId) ??
+    toStr((nested as Record<string, unknown>).business_id) ??
+    toStr(nested.id) ??
+    toStr(root.businessId);
+  const businessNumber =
+    toStr(nested.businessNumber) ??
+    toStr((nested as Record<string, unknown>).business_number) ??
+    toStr(root.businessNumber) ??
+    businessId;
+  return { businessId, businessNumber };
+}
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const jitter = (min: number, max: number) => min + Math.random() * (max - min);
@@ -124,4 +186,25 @@ export async function callBirdeye(
       error: err instanceof Error ? err.message : "Unknown network error",
     };
   }
+}
+
+/** Whether a failed result is worth retrying: network error (status 0),
+ *  rate limit (429), or a 5xx. 4xx (bad request, auth) are not retried. */
+const isTransient = (r: CallResult): boolean =>
+  r.status === 0 || r.status === 429 || r.status >= 500;
+
+/** callBirdeye with bounded exponential backoff on transient failures.
+ *  Mock mode never fails transiently, so this is a no-op cost there. */
+export async function callBirdeyeWithRetry(
+  req: AssembledRequest,
+  ctx: { onboardingId: string; mode: ClientMode },
+  opts: { retries?: number } = {},
+): Promise<CallResult> {
+  const retries = opts.retries ?? 2;
+  let result = await callBirdeye(req, ctx);
+  for (let attempt = 1; attempt <= retries && !result.ok && isTransient(result); attempt++) {
+    await sleep(jitter(400, 800) * attempt);
+    result = await callBirdeye(req, ctx);
+  }
+  return result;
 }

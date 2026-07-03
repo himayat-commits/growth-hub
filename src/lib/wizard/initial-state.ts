@@ -135,49 +135,53 @@ export function createInitialState(args: {
 }
 
 export function isStepComplete(state: WizardState, key: StepKey): boolean {
+  // Optional-chained throughout: onboarding_states rows are read and cast to
+  // WizardState WITHOUT re-validation, so a legacy/partial row may be missing
+  // nested objects. This must never throw — a throw here would crash any page
+  // that computes step progress (notably /services for paid users).
   switch (key) {
     case "confirm":
       return Boolean(
-        state.adminUser.firstName &&
-          state.adminUser.lastName &&
-          state.adminUser.email &&
-          state.adminUser.phone
+        state.adminUser?.firstName &&
+          state.adminUser?.lastName &&
+          state.adminUser?.email &&
+          state.adminUser?.phone
       );
     case "business":
-      return Boolean(state.business.name);
+      return Boolean(state.business?.name);
     case "address":
       return Boolean(
-        state.address.address1 &&
-          state.address.city &&
-          state.address.zip &&
-          state.address.phone &&
-          state.address.emailId &&
-          state.address.websiteUrl
+        state.address?.address1 &&
+          state.address?.city &&
+          state.address?.zip &&
+          state.address?.phone &&
+          state.address?.emailId &&
+          state.address?.websiteUrl
       );
     case "hours":
-      return state.hours.is24x7 || state.hours.weekly.some((d) => d.isOpen);
+      return Boolean(state.hours?.is24x7) || Boolean(state.hours?.weekly?.some((d) => d.isOpen));
     case "about":
       return Boolean(
-        state.about.vision &&
-          state.about.offerings &&
-          state.about.usp &&
-          state.about.idealCustomer &&
-          state.about.competitorEdge &&
-          state.about.benefits &&
-          state.about.cta &&
-          state.descriptions.birdeye
+        state.about?.vision &&
+          state.about?.offerings &&
+          state.about?.usp &&
+          state.about?.idealCustomer &&
+          state.about?.competitorEdge &&
+          state.about?.benefits &&
+          state.about?.cta &&
+          state.descriptions?.birdeye
       );
     case "taxonomy":
       return Boolean(
-        state.taxonomy.gmbPrimary && state.taxonomy.birdeyeCategory
+        state.taxonomy?.gmbPrimary && state.taxonomy?.birdeyeCategory
       );
     case "assets":
-      return Boolean(state.assets.logoUrl && state.assets.birdeyeCoverUrl);
+      return Boolean(state.assets?.logoUrl && state.assets?.birdeyeCoverUrl);
     case "social":
       return true;
     case "faqs":
       if (state.packageId === "foundations") return true;
-      return state.faqs.length >= 1;
+      return (state.faqs?.length ?? 0) >= 1;
     case "webchat":
       if (state.packageId !== "accelerate") return true;
       return Boolean(
@@ -187,5 +191,8 @@ export function isStepComplete(state: WizardState, key: StepKey): boolean {
       return true;
     case "review":
       return state.status === "submitted" || state.status === "provisioned";
+    case "action-plan":
+      // Terminal report view — always reachable once the user gets there.
+      return true;
   }
 }
