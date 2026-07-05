@@ -1,0 +1,16 @@
+/* Tailwind entry for the authenticated (app) surface.
+ *
+ * The app shell previously imported ONLY dashboard.css — Tailwind was never
+ * loaded on app.thegrowthhub.com.au, so every utility class in the wizard,
+ * billing dialogs and portal components silently rendered unstyled. This
+ * file (imported by src/app/(app)/layout.tsx BEFORE dashboard.css, so gh-*
+ * rules keep cascade priority) gives the app surface the same Tailwind layer
+ * the marketing surface gets from globals.css.
+ *
+ * @config points v4 at the v3-style tailwind.config.ts where the brand theme
+ * (teal/plum/lime/eggshell/ink, font-serif/script, soft shadows) lives —
+ * without it, Tailwind v4 ignores that file and brand utilities like
+ * text-teal don't exist.
+ */
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
