@@ -18,7 +18,11 @@
 // Returns the WorkOS user (with role) if allowed, null otherwise. Pages call
 // `await getOpsUser()` at the top and redirect if it returns null.
 
-import { withAuth } from '@workos-inc/authkit-nextjs';
+// The local wrapper, not @workos-inc/authkit-nextjs directly: identical in
+// production, but it honours the env-gated Playwright test session so the
+// ops console is reachable in E2E runs (the test user still needs to be on
+// OPS_EMAILS — the allowlist gate below is unchanged).
+import { withAuth } from '@/lib/auth/with-auth';
 
 export type OpsRole = 'admin' | 'support';
 
