@@ -1,10 +1,12 @@
-// Hourly auto-retry for stuck provisioning runs (Vercel cron — see
-// vercel.json). Candidates: runs that ended `partial`, or crashed mid-run
-// (`running` with a stale row), untouched for >1 hour, with fewer than 3
-// attempts. The attempts ceiling only caps AUTOMATION — a user's Resume
-// button stays uncapped. rerunProvisionForUser holds the same lock as user
-// and ops runs, so double-execution is impossible; on success the runner's
-// existing in-app notification tells the user.
+// Auto-retry for stuck provisioning runs (Vercel cron — see vercel.json).
+// Scheduled daily at 20:00 UTC (6am AEST): Vercel's Hobby plan caps crons at
+// once per day — tighten to hourly if the project moves to Pro. Candidates:
+// runs that ended `partial`, or crashed mid-run (`running` with a stale
+// row), untouched for >1 hour, with fewer than 3 attempts. The attempts
+// ceiling only caps AUTOMATION — a user's Resume button stays uncapped.
+// rerunProvisionForUser holds the same lock as user and ops runs, so
+// double-execution is impossible; on success the runner's existing in-app
+// notification tells the user.
 
 import * as Sentry from "@sentry/nextjs";
 import { sql } from "drizzle-orm";
