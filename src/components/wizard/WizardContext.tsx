@@ -7,7 +7,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { WizardState, StepKey, WizardMode } from "@/lib/wizard/state";
-import { stepsFor } from "@/lib/wizard/state";
+import { stepsFor, wizardStateSchema } from "@/lib/wizard/state";
 import { isStepComplete } from "@/lib/wizard/initial-state";
 
 type PatchOptions = {
@@ -40,6 +40,7 @@ export function useWizard() {
 export function WizardProvider({
   initialState,
   mode = "provision",
+  serverHasRow = true,
   children,
 }: {
   initialState: WizardState;
@@ -47,6 +48,11 @@ export function WizardProvider({
    *  focused subset ending at `action-plan`; `provision` (paid) is the full
    *  flow ending at `review`. */
   mode?: WizardMode;
+  /** Whether a persisted onboarding_states row backed `initialState`. When
+   *  false, `initialState` is a seconds-old blank and any localStorage
+   *  snapshot is the user's only data (e.g. the debounced PUT never landed)
+   *  — adopt it unconditionally. */
+  serverHasRow?: boolean;
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -59,8 +65,37 @@ export function WizardProvider({
     try {
       const raw = localStorage.getItem(lsKey);
       if (raw) {
-        const parsed = JSON.parse(raw) as WizardState;
-        if (parsed.onboardingId === initialState.onboardingId) _setState(parsed);
+        // Normalise through the schema: fills defaulted blocks a hand-rolled
+        // or legacy snapshot may lack (e.g. `provisioning`) and rejects
+        // shape-drifted snapshots outright instead of letting them crash a
+        // step page mid-render.
+        const result = wizardStateSchema.safeParse(JSON.parse(raw));
+        if (result.success) {
+          const parsed = result.data;
+          if (parsed.onboardingId === initialState.onboardingId) {
+            if (!serverHasRow) {
+              // No persisted row — the local snapshot is the only copy of
+              // the user's answers. Adopt it wholesale (it re-persists via
+              // the next debounced PUT).
+              _setState(parsed);
+            } else if (
+              Date.parse(parsed.updatedAt ?? "") >
+              Date.parse(initialState.updatedAt ?? "")
+            ) {
+              // Adopt the local snapshot only when it's genuinely newer than
+              // what the server hydrated (stale tabs / other devices must
+              // not win), and NEVER let it override the provisioning block —
+              // the runner writes that server-side, and a stale local copy
+              // replayed through the next debounced PUT would clobber
+              // businessNumber/runStatus.
+              _setState({
+                ...parsed,
+                status: initialState.status,
+                provisioning: initialState.provisioning,
+              });
+            }
+          }
+        }
       }
     } catch {
       /* ignore */
@@ -105,8 +140,12 @@ export function WizardProvider({
 
   const setState = React.useCallback(
     (next: WizardState) => {
-      _setState(next);
-      void persist(next);
+      // Stamp recency on every edit — the localStorage-vs-server adoption
+      // guard on mount compares state.updatedAt, so an unstamped write
+      // would make genuinely-newer local snapshots undetectable.
+      const stamped = { ...next, updatedAt: new Date().toISOString() };
+      _setState(stamped);
+      void persist(stamped);
     },
     [persist]
   );
@@ -117,7 +156,7 @@ export function WizardProvider({
       // that resolves once persist() completes. We then commit via _setState.
       let next: WizardState | null = null;
       _setState((curr) => {
-        next = mutate(curr);
+        next = { ...mutate(curr), updatedAt: new Date().toISOString() };
         return next;
       });
       if (next) return persist(next, options);
@@ -150,7 +189,7 @@ export function WizardProvider({
       saveTimer.current = null;
     }
     await putImmediate(state);
-    router.push("/portal");
+    router.push("/dashboard");
   }, [putImmediate, router, state]);
 
   const value: Ctx = { state, mode, setState, patch, goNext, goPrev, saveAndExit, saving };

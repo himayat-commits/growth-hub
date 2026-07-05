@@ -15,7 +15,6 @@ export default function HoursStep() {
   return (
     <StepShell
       stepKey="hours"
-      eyebrow="Step 04"
       title="Hours of operation"
       blurb="Your hours appear on Google, Apple Maps, Facebook and Bing. Get them right once here, and they update everywhere."
       onContinue={() => goNext("hours")}

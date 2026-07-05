@@ -123,7 +123,10 @@ export async function POST(req: NextRequest) {
       mode: 'subscription',
       customer: customerId,
       line_items: lineItems,
-      success_url: `${origin}/onboarding/confirm?checkout=success`,
+      // {CHECKOUT_SESSION_ID} is a literal Stripe placeholder — Stripe fills
+      // it in. The bridge page uses it to sync the subscription before first
+      // paint (kills the webhook race).
+      success_url: `${origin}/onboarding/upgraded?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
       allow_promotion_codes: true,
       billing_address_collection: 'auto',

@@ -7,16 +7,13 @@ import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import { PLANS } from '@/lib/plans';
 import { getFeaturedResources, getUpcomingEvents, getStrategistBySlug } from '@/lib/cms';
 import { getUserRsvpSet } from '@/lib/db/rsvps';
-import { getNotifications } from '@/lib/db/notifications';
+import { getNotifications, createNotification, hasRecentNotification } from '@/lib/db/notifications';
 import { getUnreadMessageCount, getThread } from '@/lib/db/messages';
 import { getActiveBookings, statusLabel } from '@/lib/db/bookings';
-import { eq } from 'drizzle-orm';
-import { getDb } from '@/lib/db';
-import { onboardingStates } from '@/lib/db/schema';
 import type { Notification } from '@/lib/db/schema';
-import type { WizardState } from '@/lib/wizard/state';
-import { stepsForPackage } from '@/lib/wizard/state';
-import { isStepComplete } from '@/lib/wizard/initial-state';
+import { wizardProgress } from '@/lib/wizard/initial-state';
+import { loadOnboardingRow, isStaleRunning } from '@/lib/wizard/provisioning-store';
+import { getBirdeyeDashboardUrl } from '@/lib/birdeye/dashboard-url';
 import type { PackageId } from '@/lib/wizard/packages';
 import {
   IcoBriefcase,
@@ -107,7 +104,7 @@ export default async function DashboardPage() {
     notifications,
     thread,
     unreadMsgCount,
-    obRows,
+    obRow,
     activeBookings,
   ] = await Promise.all([
     // Each source degrades to an empty/neutral fallback so one flaky query
@@ -120,15 +117,10 @@ export default async function DashboardPage() {
     getNotifications(user.id, 3).catch(() => []),
     getThread(user.id).catch(() => []),
     getUnreadMessageCount(user.id).catch(() => 0),
-    getDb()
-      .select()
-      .from(onboardingStates)
-      .where(eq(onboardingStates.userId, user.id))
-      .limit(1)
-      .catch(() => []),
+    loadOnboardingRow(user.id).catch(() => null),
     getActiveBookings(user.id).catch(() => []),
   ]);
-  const wizardState = obRows[0]?.state as WizardState | undefined;
+  const wizardState = obRow?.state;
   const tier = getEffectivePlan(sub);
   const plan = PLANS[tier];
 
@@ -200,41 +192,106 @@ export default async function DashboardPage() {
   ];
 
   // Paid users get an extra checklist item for the Birdeye provisioning
-  // wizard. State + meta reflect real wizard progress in Neon.
+  // wizard. State + meta reflect real wizard progress in Neon, including the
+  // provisioning run lifecycle (running / partial / escalated / provisioned).
   if (tier !== 'free') {
-    const provisioned = !!wizardState?.provisioning?.businessNumber;
-    const wizardPkg = (wizardState?.packageId as PackageId | undefined) ?? (tier as PackageId);
-    const steps = stepsForPackage(wizardPkg);
-    const completedSteps = wizardState
-      ? steps.filter((s) => isStepComplete(wizardState, s.key)).length
-      : 0;
-    const nextStep = wizardState
-      ? steps.find((s) => s.key !== 'review' && !isStepComplete(wizardState, s.key))
-      : steps[0];
-    const wizardHref = `/onboarding/${nextStep?.key ?? 'confirm'}`;
+    const prov = wizardState?.provisioning;
+    const businessNumber = prov?.businessNumber ?? null;
+    const runStatus = prov?.runStatus ?? null;
+    const staleRunning =
+      wizardState && obRow ? isStaleRunning(wizardState, obRow.updatedAt) : false;
+    const progress = wizardProgress(wizardState, 'provision', tier as PackageId);
 
     let state: 'done' | 'current' | 'todo';
     let meta: string;
+    let href: string | null;
     let action: string | undefined;
-    if (provisioned) {
+    if (
+      businessNumber &&
+      (runStatus === null || runStatus === 'idle' || runStatus === 'provisioned')
+    ) {
       state = 'done';
-      meta = `Birdeye business #${wizardState?.provisioning?.businessNumber ?? ''}`;
-    } else if (completedSteps > 0) {
+      meta = `Birdeye business #${businessNumber}`;
+      href = getBirdeyeDashboardUrl(businessNumber);
+      action = 'Open Birdeye';
+    } else if (runStatus === 'running' && !staleRunning) {
       state = 'current';
-      meta = `${completedSteps} of ${steps.length} wizard steps complete`;
+      meta = 'Setting up your account now…';
+      href = '/onboarding/review';
+      action = 'View progress';
+    } else if (runStatus === 'partial' && prov?.escalatedAt) {
+      state = 'done';
+      meta = 'Our team is finishing your setup';
+      href = null;
+    } else if (runStatus === 'partial' || runStatus === 'failed') {
+      state = 'current';
+      meta = 'Finish setup';
+      href = '/onboarding/review';
       action = 'Resume';
-    } else {
+    } else if (progress.next && progress.done > 0) {
+      state = 'current';
+      meta = `Step ${progress.nextIndex} of ${progress.steps.length} — ${progress.next.title}`;
+      href = `/onboarding/${progress.next.key}`;
+      action = 'Resume';
+    } else if (progress.next) {
       state = 'todo';
-      meta = `${steps.length}-step wizard · ~15 minutes`;
+      meta = `${progress.steps.length}-step wizard · ~15 minutes`;
+      href = `/onboarding/${progress.next.key}`;
       action = 'Start setup';
+    } else {
+      // All form steps filled but never launched (or a crashed run went
+      // stale) — send them to review to launch/resume.
+      state = 'current';
+      meta = 'Finish setup';
+      href = '/onboarding/review';
+      action = 'Resume';
     }
     checklist.splice(3, 0, {
       id: 'birdeye',
       name: 'Set up your Birdeye account',
       meta,
       state,
-      href: wizardHref,
+      href,
       action,
+    });
+
+    // Lazy re-engagement nudge (no cron): a paid user who started the wizard
+    // 3+ days ago and never provisioned gets at most one reminder a week,
+    // created on their next dashboard visit. Never blocks rendering.
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    // eslint-disable-next-line react-hooks/purity
+    const staleBefore = Date.now() - threeDaysMs;
+    if (wizardState && !businessNumber && obRow && obRow.updatedAt.getTime() < staleBefore) {
+      try {
+        const nudged = await hasRecentNotification(user.id, 'onboarding_incomplete', 7);
+        if (!nudged) {
+          await createNotification({
+            userId: user.id,
+            kind: 'onboarding_incomplete',
+            title: 'Pick up where you left off',
+            body: `Your Birdeye setup is ${progress.done} of ${progress.total} steps done — about ${progress.total - progress.done} short steps left.`,
+            href: `/onboarding/${progress.next?.key ?? 'review'}`,
+          });
+        }
+      } catch (e) {
+        console.error('[dashboard] onboarding nudge failed', e);
+      }
+    }
+  } else {
+    // Free members run the report-mode wizard — same pages, but the terminal
+    // step is a personalised action plan instead of a provisioned account.
+    const report = wizardProgress(wizardState, 'report', 'foundations');
+    checklist.splice(3, 0, {
+      id: 'action_plan',
+      name: 'Get your free Birdeye action plan',
+      meta: report.next
+        ? report.done > 0
+          ? `Step ${report.nextIndex} of ${report.steps.length} — ${report.next.title}`
+          : `${report.total} quick questions · free, no card needed`
+        : 'Your action plan is ready',
+      state: report.next ? (report.done > 0 ? 'current' : 'todo') : 'done',
+      href: report.next ? `/onboarding/${report.next.key}` : '/onboarding/action-plan',
+      action: report.next ? (report.done > 0 ? 'Resume' : 'Start') : 'View plan',
     });
   }
 

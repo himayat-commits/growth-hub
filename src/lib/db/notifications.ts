@@ -5,7 +5,7 @@
 // in the Notifications card.
 
 import 'server-only';
-import { and, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, sql } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { notifications, type Notification, type NewNotification } from '@/lib/db/schema';
 
@@ -13,6 +13,7 @@ export type NotificationKind =
   | 'welcome'
   | 'subscription_active'
   | 'birdeye_provisioned'
+  | 'onboarding_incomplete'
   | 'new_resource'
   | 'event_reminder'
   | 'referral_signed_up'
@@ -54,6 +55,29 @@ export async function getNotifications(userId: string, limit = 20): Promise<Noti
     .where(eq(notifications.userId, userId))
     .orderBy(desc(notifications.createdAt))
     .limit(limit);
+}
+
+/** Whether a notification of this kind was created for the user within the
+ *  last N days. Used to throttle lazily-created nudges (no cron) so a user
+ *  is never pinged about the same thing more than once per window. */
+export async function hasRecentNotification(
+  userId: string,
+  kind: NotificationKind,
+  days: number,
+): Promise<boolean> {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const rows = await getDb()
+    .select({ id: notifications.id })
+    .from(notifications)
+    .where(
+      and(
+        eq(notifications.userId, userId),
+        eq(notifications.kind, kind),
+        gte(notifications.createdAt, since),
+      ),
+    )
+    .limit(1);
+  return rows.length > 0;
 }
 
 /** Number of unread notifications. Used by the topbar bell. */

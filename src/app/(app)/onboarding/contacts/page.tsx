@@ -37,9 +37,9 @@ export default function ContactsStep() {
   return (
     <StepShell
       stepKey="contacts"
-      eyebrow="Step 11 — optional"
       title="Initial contacts"
       blurb="Want to start by collecting reviews from customers you've already served? Add up to 50 contacts here, or skip and bulk-import later."
+      badge="Optional"
       onContinue={() => goNext("contacts")}
     >
       <div className="overflow-x-auto rounded-2xl border border-line bg-white">

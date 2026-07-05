@@ -15,9 +15,9 @@ export default function AssetsStep() {
   return (
     <StepShell
       stepKey="assets"
-      eyebrow="Step 07"
       title="Brand assets"
       blurb="Your logo, covers and showcase media — sized for every network. We send the URL to Birdeye, never the file bytes."
+      framed={false}
       onContinue={() => goNext("assets")}
       continueDisabled={!valid}
     >

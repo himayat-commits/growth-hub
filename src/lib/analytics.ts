@@ -55,7 +55,16 @@ export type AnalyticsEvent =
   | 'case_study_open'            // viewed a /case-studies/[slug] page
   // Add-ons / referrals
   | 'referral_link_copy'         // copied referral link from /benefits
-  | 'referral_share_click';      // clicked a ShareButtons network link
+  | 'referral_share_click'       // clicked a ShareButtons network link
+  // Onboarding funnel (wizard + Birdeye provisioning)
+  | 'onboarding_wizard_start'    // first step viewed with zero completed steps (props: mode, package)
+  | 'onboarding_step_view'       // wizard step mounted (props: step, index, mode, package)
+  | 'onboarding_step_complete'   // Continue clicked on a step (props: step, index, mode, package)
+  | 'onboarding_launch_click'    // "Launch my Birdeye account" clicked (props: package, attempt)
+  | 'onboarding_provision_result'// terminal SSE outcome (props: status, failedSteps, package)
+  | 'onboarding_action_plan_view'// free-tier action plan rendered
+  | 'action_plan_upgrade_click'  // upgrade CTA clicked on the action plan
+  | 'checkout_success_return';   // landed on /onboarding/upgraded after Stripe checkout (props: tier)
 
 export function track(
   event: AnalyticsEvent,
@@ -134,6 +143,11 @@ const EVENT_MAP: Partial<Record<AnalyticsEvent, PlatformMap>> = {
   // Referrals
   referral_link_copy:   { ga4: 'share' },
   referral_share_click: { ga4: 'share' },
+
+  // Onboarding funnel — only the two acquisition-relevant moments fan out;
+  // the step-by-step wizard events are dashboard-only (PostHog).
+  action_plan_upgrade_click: { ga4: 'cta_click_upgrade', meta: 'Lead' },
+  checkout_success_return:   { ga4: 'checkout_success_return', meta: 'Subscribe' },
   // Plan-management events (plan_change_*, plan_cancel_*) intentionally
   // omitted — they're dashboard-only and don't belong in acquisition pixels.
 };

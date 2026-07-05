@@ -14,10 +14,14 @@ import { z } from "zod";
 import { withAuth } from "@/lib/auth/with-auth";
 import { isOpsEmail } from "@/lib/auth/ops";
 import { getSubscription, isActive } from "@/lib/subscription";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 import { wizardStateSchema } from "@/lib/wizard/state";
 import {
-  loadOnboardingState,
+  acquireProvisionLock,
   ensureOnboardingState,
+  isStaleRunning,
+  loadOnboardingRow,
+  releaseProvisionLock,
 } from "@/lib/wizard/provisioning-store";
 import { getProvisionMode, resolveEffectiveMode } from "@/lib/birdeye/client";
 import { runProvision } from "@/lib/birdeye/provision-runner";
@@ -52,6 +56,12 @@ export async function POST(req: Request) {
     return json({ error: "Forbidden" }, 403);
   }
 
+  // ── Rate limit ───────────────────────────────────────────────────────────
+  // Provisioning is idempotent, but each attempt burns Birdeye API calls and
+  // a 5-minute function slot. Keyed by user (post-auth), not IP.
+  const rl = rateLimit(`provision:${user.id}`, 3, 10 * 60_000);
+  if (!rl.ok) return tooManyRequests(rl.retryAfterSec);
+
   // ── Subscription gate (defense-in-depth) ─────────────────────────────────
   // Provisioning creates a billable Birdeye sub-account — strictly paid-only.
   // Free users use the action-plan path, which never calls this route.
@@ -61,8 +71,14 @@ export async function POST(req: Request) {
   }
 
   // ── Authoritative state + idempotency gate ───────────────────────────────
-  const dbState = await loadOnboardingState(user.id);
-  const state = dbState ?? parsed.data.state;
+  // When no row exists yet the posted body seeds it — with the provisioning
+  // block reset, so a crafted body can't smuggle in a foreign businessNumber
+  // (the runner would skip create and PUT against it).
+  const row = await loadOnboardingRow(user.id);
+  const state = row?.state ?? {
+    ...parsed.data.state,
+    provisioning: { invitedUsers: [], mediaIds: [] },
+  };
   await ensureOnboardingState(user.id, state);
 
   if (state.provisioning.businessNumber && state.provisioning.runStatus === "provisioned") {
@@ -73,23 +89,62 @@ export async function POST(req: Request) {
     });
   }
 
+  // ── Concurrent-run guard ─────────────────────────────────────────────────
+  // A fresh `running` row means another invocation is mid-flight (each
+  // runner step bumps updatedAt) — a second run would double Birdeye calls
+  // and could double-create the billable sub-account. A STALE `running`
+  // row is a crashed function; fall through and let the resume path run.
+  if (
+    row &&
+    state.provisioning.runStatus === "running" &&
+    !isStaleRunning(state, row.updatedAt)
+  ) {
+    return json(
+      {
+        alreadyRunning: true,
+        error: "A provisioning run is already in progress. This page will pick it up shortly.",
+      },
+      409,
+    );
+  }
+
+  // The lock is the authoritative mutual exclusion (the check above is a
+  // fast-path courtesy); user Resume, ops re-run and the retry cron all
+  // acquire it before touching Birdeye.
+  if (!(await acquireProvisionLock(user.id))) {
+    return json(
+      {
+        alreadyRunning: true,
+        error: "A provisioning run is already in progress. This page will pick it up shortly.",
+      },
+      409,
+    );
+  }
+
   // ── Resolve effective mode (deployment switch × allowlist) ───────────────
   const mode = resolveEffectiveMode(getProvisionMode(), isOpsEmail(user.email));
-  const origin = req.headers.get("origin") ?? "";
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enc = new TextEncoder();
-      const send = (event: unknown) =>
-        controller.enqueue(enc.encode(`data: ${JSON.stringify(event)}\n\n`));
+      // No-throw send: if the client closed the tab the stream is cancelled
+      // and enqueue throws — swallow it so the run continues server-side to
+      // a terminal runStatus instead of dying mid-sequence.
+      const send = (event: unknown) => {
+        try {
+          controller.enqueue(enc.encode(`data: ${JSON.stringify(event)}\n\n`));
+        } catch {
+          /* client gone — keep provisioning */
+        }
+      };
       try {
         await runProvision({
           userId: user.id,
           state,
           mode,
-          origin,
           resellerId: RESELLER_ID,
           apiHost: API_HOST,
+          runBy: "user",
           send,
         });
       } catch (err) {
@@ -98,7 +153,12 @@ export async function POST(req: Request) {
           error: err instanceof Error ? err.message : "Provisioning failed unexpectedly.",
         });
       } finally {
-        controller.close();
+        await releaseProvisionLock(user.id).catch(() => {});
+        try {
+          controller.close();
+        } catch {
+          /* already closed by a cancelled stream */
+        }
       }
     },
   });

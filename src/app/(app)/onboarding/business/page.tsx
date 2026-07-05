@@ -17,7 +17,6 @@ export default function BusinessStep() {
   return (
     <StepShell
       stepKey="business"
-      eyebrow="Step 02"
       title="Business identity"
       blurb="The name, ABN and timezone we'll use everywhere — Google, Apple, Facebook, your microsite, all of it."
       onContinue={() => goNext("business")}

@@ -6,6 +6,21 @@
 import * as Sentry from '@sentry/nextjs';
 
 export async function register() {
+  // Config-coherence warnings, once per server start. Import lazily — the
+  // check lib is server-only and irrelevant on the edge runtime.
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    try {
+      const { runProvisioningHealthChecks } = await import('@/lib/ops/config-health');
+      for (const check of runProvisioningHealthChecks()) {
+        if (check.level !== 'pass') {
+          console.warn(`[config-health] ${check.level.toUpperCase()} ${check.name}: ${check.detail}`);
+        }
+      }
+    } catch (e) {
+      console.warn('[config-health] checks failed to run', e);
+    }
+  }
+
   const dsn = process.env.SENTRY_DSN;
   if (!dsn) return;
 

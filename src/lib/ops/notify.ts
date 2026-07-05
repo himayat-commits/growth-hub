@@ -1,52 +1,79 @@
-// In-process ops notifier.
-//
-// Posts a JSON summary to the reseller ops inbox/webhook so they can activate
-// Birdeye modules that aren't enable-able via the public API (Webchat AI,
-// module-level entitlements). Falls back to logging when no webhook is set.
-//
-// Extracted from the /api/notify-ops route so the provisioning orchestrator
-// can call it directly (no internal HTTP round-trip, no origin-header
-// dependency). The HTTP route is now a thin, authenticated wrapper.
+// Ops handoff orchestration. Replaces the old open /api/notify-ops HTTP
+// endpoint (which had no auth and required an origin header the runner had
+// to self-fetch) with a direct server-side call:
+//   1. Persist the manual-step checklist to provisioning_tasks (durable).
+//   2. Fire the webhook (Slack etc.) if configured.
+//   3. Send the Resend email if configured.
+//   4. Console fallback so dev never loses the handoff.
+// Non-fatal by design: the customer is already provisioned when this runs.
 
-import 'server-only';
-import type { z } from 'zod';
-import { wizardStateSchema } from '@/lib/wizard/state';
-import { PACKAGES } from '@/lib/wizard/packages';
+import "server-only";
+import { Resend } from "resend";
+import type { WizardState } from "@/lib/wizard/state";
+import { buildHandoffSummary, buildHandoffTasks, type HandoffSeverity } from "@/lib/ops/handoff";
+import { renderOpsHandoffEmail } from "@/lib/ops/handoff-email";
+import { upsertHandoffTasks } from "@/lib/db/provisioning-tasks";
 
-type WizardState = z.infer<typeof wizardStateSchema>;
+const OPS_EMAIL = process.env.OPS_NOTIFICATION_EMAIL ?? "hello@himayat.com.au";
 
-export async function notifyOps(state: WizardState): Promise<void> {
-  const pkg = PACKAGES[state.packageId];
+export async function sendOpsHandoff(args: {
+  state: WizardState;
+  severity: HandoffSeverity;
+}): Promise<{ ok: boolean; error?: string }> {
+  const { state, severity } = args;
+  const summary = buildHandoffSummary(state, severity);
+  const tasks = buildHandoffTasks(state);
+  const failedSteps = state.provisioning.failedSteps ?? [];
 
-  const summary = {
-    onboardingId: state.onboardingId,
-    package: pkg.name,
-    modules: pkg.modules,
-    businessNumber: state.provisioning.businessNumber,
-    adminEmail: state.adminUser.email,
-    additionalUsers: state.additionalUsers.map((u) => u.email),
-    captureForPartner: {
-      appleDescription: state.descriptions.apple,
-      appleCategories: state.taxonomy.appleCategories,
-      faqs: state.faqs,
-      contactTags: state.contacts
-        .filter((c) => c.tags.length > 0)
-        .map((c) => ({ email: c.email, phone: c.phone, tags: c.tags })),
-    },
-    webchat: state.webchat ?? null,
-    timestamp: new Date().toISOString(),
-  };
+  // 1. Durable checklist first — even if every notification channel is down,
+  //    the ops console still shows the work. A fully-clean run closes any
+  //    open retry task from earlier partials.
+  await upsertHandoffTasks(state.onboardingId, tasks, {
+    resolveRetry: failedSteps.length === 0,
+  });
 
+  let ok = false;
+  let lastError: string | undefined;
+
+  // 2. Webhook (Slack etc.), if configured.
   const hook = process.env.OPS_NOTIFY_WEBHOOK;
   if (hook) {
-    await fetch(hook, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(summary),
-    }).catch(() => {
-      /* don't fail provisioning over the webhook */
-    });
-  } else {
-    console.log('[notify-ops]', JSON.stringify(summary));
+    try {
+      const res = await fetch(hook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(summary),
+      });
+      if (!res.ok) throw new Error(`webhook returned ${res.status}`);
+      ok = true;
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : "webhook failed";
+    }
   }
+
+  // 3. Email via Resend, if configured. Client instantiated lazily so a
+  //    missing key in dev doesn't throw at import time.
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const { subject, html } = renderOpsHandoffEmail({ state, summary, tasks, severity });
+      await resend.emails.send({
+        from: "Growth Hub <noreply@himayat.com.au>",
+        to: OPS_EMAIL,
+        subject,
+        html,
+      });
+      ok = true;
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : "ops email failed";
+    }
+  }
+
+  // 4. Console fallback so dev never loses the handoff.
+  if (!hook && !process.env.RESEND_API_KEY) {
+    console.log("[ops-handoff]", JSON.stringify(summary));
+    ok = true;
+  }
+
+  return ok ? { ok } : { ok: false, error: lastError ?? "no ops channel succeeded" };
 }

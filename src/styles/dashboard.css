@@ -82,10 +82,8 @@ p { margin: 0; }
   position: relative;
 }
 .gh-side-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 8px 22px;
+  display: block;
+  padding: 0 6px 12px;
   margin-bottom: 12px;
   border-bottom: 1px solid rgba(243,240,231,0.14);
   background: none;
@@ -96,29 +94,15 @@ p { margin: 0; }
   text-align: left;
   width: 100%;
 }
-.gh-side-brand-mark {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: rgba(243,240,231,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.gh-side-brand-name {
-  font-family: var(--font-serif);
-  font-size: 17px;
-  letter-spacing: -0.01em;
-  line-height: 1.05;
-  color: #ffffff;
-}
-.gh-side-brand-sub {
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(243,240,231,0.55);
-  margin-top: 2px;
+/* Eggshell-on-teal brand lockup. The SVG carries its own #0D3F48 background
+   that blends seamlessly into the teal sidebar, so it reads as a transparent
+   mark + wordmark. Width-capped; the lockup's built-in padding handles the
+   vertical breathing room. */
+.gh-side-brand-logo {
+  display: block;
+  width: 100%;
+  max-width: 192px;
+  height: auto;
 }
 .gh-nav { display: flex; flex-direction: column; gap: 2px; }
 .gh-nav a {
@@ -945,3 +929,34 @@ p { margin: 0; }
   text-decoration-thickness: 2px;
   text-underline-offset: 5px;
 }
+
+/* ── Mobile (≤767px): hide sidebar, tighten shell ──────────────────────
+   Breakpoint pinned to Tailwind's `md` (768px) so component-level
+   `-mx-4 md:-mx-8` offsets (wizard StepShell footer) stay in sync with
+   .gh-content's 16/32px horizontal padding. */
+@media (max-width: 767.98px) {
+  .gh-side { display: none; }
+  .gh-top { padding: 0 16px; }
+  .gh-search { display: none; }
+  .gh-content { padding: 20px 16px 32px; }
+  .gh-row-2, .gh-row-3, .gh-grid-2, .gh-grid-3,
+  .gh-form-grid, .gh-suggest-grid { grid-template-columns: 1fr; }
+  .gh-pagehd { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .gh-pagehd-title { font-size: 28px; }
+  .gh-onboard { grid-template-columns: 1fr; min-height: 0; }
+}
+
+/* ── Print: content only (report/action-plan pages) ────────────────── */
+@media print {
+  .gh-side, .gh-top { display: none; }
+  .gh-frame { height: auto; overflow: visible; display: block; }
+  .gh-content { overflow: visible; padding: 0; }
+}
+
+/* Provisioning console status chips (/ops/provisioning) */
+.gh-ops-status.status-provisioned, .gh-ops-status.status-done, .gh-ops-status.status-ok { background: var(--teal); color: var(--lime); }
+.gh-ops-status.status-partial { background: rgba(227,242,156,0.4); color: var(--teal); }
+.gh-ops-status.status-failed, .gh-ops-status.status-error { background: rgba(95,48,75,0.15); color: var(--plum); }
+.gh-ops-status.status-running { background: rgba(232,221,255,0.5); color: var(--plum); }
+.gh-ops-status.status-stalled, .gh-ops-status.status-open { background: rgba(95,48,75,0.1); color: var(--plum); }
+.gh-ops-status.status-draft { background: rgba(13,63,72,0.08); color: var(--ink-50); }

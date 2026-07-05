@@ -51,9 +51,31 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
       { status: 400 }
     );
   }
-  const state = parsed.data;
 
+  // The `provisioning` block is SERVER-OWNED: the runner persists
+  // businessNumber / runStatus / lockedUntil / escalatedAt here, and a
+  // client auto-save must never overwrite them — a stale tab's debounced
+  // PUT replaying pre-run provisioning would erase the run lease and the
+  // businessNumber (→ duplicate billable sub-account on the next launch).
+  // Same for the coarse lifecycle `status` once it reached `provisioned`.
+  // On first insert the block is reset too, so a crafted POST body can't
+  // smuggle a foreign businessNumber in before the row exists.
   const db = getDb();
+  const existing = await db
+    .select()
+    .from(onboardingStates)
+    .where(eq(onboardingStates.userId, id))
+    .limit(1);
+  const serverState = existing[0]?.state as WizardState | undefined;
+
+  const state: WizardState = {
+    ...parsed.data,
+    status:
+      serverState?.status === "provisioned" ? "provisioned" : parsed.data.status,
+    provisioning:
+      serverState?.provisioning ?? { invitedUsers: [], mediaIds: [] },
+  };
+
   await db
     .insert(onboardingStates)
     .values({ userId: id, state, updatedAt: new Date() })

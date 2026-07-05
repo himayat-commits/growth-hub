@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -41,20 +40,16 @@ export function Sidebar() {
         href={MARKETING_SITE_URL}
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="The Growth Hub by Himayat — open the main site"
       >
-        <div className="gh-side-brand-mark">
-          <Image
-            src="/images/himayat-logo.png"
-            alt="Himayat logomark"
-            width={30}
-            height={30}
-            style={{ objectFit: 'contain' }}
-          />
-        </div>
-        <div>
-          <div className="gh-side-brand-name">The Growth Hub</div>
-          <div className="gh-side-brand-sub">By Himayat</div>
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="gh-side-brand-logo"
+          src="/brand/growth-hub-lockup.svg"
+          alt="The Growth Hub by Himayat"
+          width={810}
+          height={239}
+        />
       </a>
 
       <nav className="gh-nav">

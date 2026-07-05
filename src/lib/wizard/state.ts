@@ -302,6 +302,16 @@ export const wizardStateSchema = z.object({
       invitedUsers: z.array(z.string()).default([]),
       mediaIds: z.array(z.string()).default([]),
       completedAt: z.string().optional(),
+      /** Run-lease expiry (ISO). Acquired atomically before any run so a
+       *  user Resume, an ops re-run and the retry cron can never execute
+       *  concurrently. A crashed run's lease simply expires. */
+      lockedUntil: z.string().optional(),
+      /** Who started the most recent run — provenance for the ops timeline. */
+      lastRunBy: z.enum(["user", "ops", "cron"]).optional(),
+      /** Set when a run still has failedSteps after >=3 attempts: the retry
+       *  burden moves from the user to ops, and the UI flips from "retry"
+       *  to "we're on it". Never reset by further user retries. */
+      escalatedAt: z.string().optional(),
     })
     .default({ invitedUsers: [], mediaIds: [] }),
 });
@@ -443,4 +453,26 @@ export const stepsFor = (
     ];
   }
   return stepsForPackage(pkg);
+};
+
+/** Report-mode copy overrides. Free users share the paid step pages but never
+ *  hear about Birdeye or provisioning — their flow ends in an action plan,
+ *  not an account. StepShell resolves these over the page-supplied copy. */
+export const REPORT_COPY: Partial<
+  Record<StepKey, { title?: string; blurb?: string }>
+> = {
+  business: { blurb: "The basics we'll build your growth plan around." },
+  address: {
+    blurb:
+      "Where you are — or where you serve — so we can assess your local visibility.",
+  },
+  hours: {
+    blurb:
+      "Your opening hours are a ranking signal on Google and Apple Maps — tell us yours.",
+  },
+  about: { blurb: "Tell us your story — it shapes your personalised recommendations." },
+  taxonomy: { blurb: "How customers search for businesses like yours." },
+  social: {
+    blurb: "Where you already show up online — leave blank what you don't have.",
+  },
 };

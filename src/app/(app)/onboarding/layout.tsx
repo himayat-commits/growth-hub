@@ -13,15 +13,17 @@
 // working without conditional hiding.
 
 import { redirect } from 'next/navigation';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { withAuth } from '@/lib/auth/with-auth';
 import { getDb } from '@/lib/db';
 import { onboardingStates } from '@/lib/db/schema';
 import { getSubscription, isActive } from '@/lib/subscription';
-import { createInitialState } from '@/lib/wizard/initial-state';
+import { createInitialState, defaultWebchat } from '@/lib/wizard/initial-state';
+import { parseWizardState } from '@/lib/wizard/parse-state';
 import type { WizardState, WizardMode } from '@/lib/wizard/state';
-import type { PackageId } from '@/lib/wizard/packages';
+import { PACKAGES, type PackageId } from '@/lib/wizard/packages';
 import { WizardProvider } from '@/components/wizard/WizardContext';
+import { PostProvisionNotice } from '@/components/wizard/PostProvisionNotice';
 
 export default async function OnboardingLayout({
   children,
@@ -48,52 +50,53 @@ export default async function OnboardingLayout({
     .where(eq(onboardingStates.userId, userId))
     .limit(1);
 
-  const initialState: WizardState =
-    (rows[0]?.state as WizardState | undefined) ??
-    createInitialState({
-      onboardingId: userId,
-      packageId,
-      email: user.email ?? '',
-    });
+  const fallback = {
+    onboardingId: userId,
+    packageId,
+    email: user.email ?? '',
+  };
+  let initialState: WizardState = rows[0]
+    ? parseWizardState(rows[0].state, fallback)
+    : createInitialState(fallback);
+
+  // Reconcile packageId with the live subscription. A free user who filled
+  // the report flow and then bought growth/accelerate keeps their row, but
+  // its stale packageId would mis-gate the webchat step, the FAQ requirement
+  // and every "Step N of M" count. Also covers paid tier changes.
+  if (
+    rows[0] &&
+    mode === 'provision' &&
+    sub?.planTier &&
+    sub.planTier in PACKAGES &&
+    initialState.packageId !== sub.planTier
+  ) {
+    initialState = {
+      ...initialState,
+      packageId: sub.planTier as PackageId,
+      // An accelerate upgrade needs the webchat block the old package never
+      // collected — seed defaults so the step renders pre-filled.
+      webchat:
+        sub.planTier === 'accelerate' && !initialState.webchat
+          ? defaultWebchat()
+          : initialState.webchat,
+      updatedAt: new Date().toISOString(),
+    };
+    await getDb()
+      .update(onboardingStates)
+      .set({ state: initialState, updatedAt: sql`now()` })
+      .where(eq(onboardingStates.userId, userId));
+  }
 
   return (
-    <WizardProvider initialState={initialState} mode={mode}>
+    <WizardProvider
+      initialState={initialState}
+      mode={mode}
+      serverHasRow={Boolean(rows[0])}
+    >
       {mode === 'provision' && initialState.status === 'provisioned' ? (
-        <PostProvisionBanner />
+        <PostProvisionNotice />
       ) : null}
       {children}
     </WizardProvider>
-  );
-}
-
-// Shown above every wizard step when the user has already provisioned their
-// Birdeye account. Edits made here are persisted to Neon but do NOT
-// auto-sync back to Birdeye. Honest banner pointing at the support email.
-function PostProvisionBanner() {
-  return (
-    <div style={{ maxWidth: 880, margin: '0 auto 16px', padding: '0 32px' }}>
-      <div
-        style={{
-          borderRadius: 14,
-          border: '1px solid rgba(95,48,75,0.2)',
-          background: 'rgba(95,48,75,0.04)',
-          padding: '14px 18px',
-          fontSize: 13.5,
-          color: 'var(--plum)',
-          lineHeight: 1.55,
-        }}
-      >
-        <strong style={{ fontWeight: 600 }}>You&apos;re already provisioned.</strong>{' '}
-        Your Birdeye account is live, so changes you make here won&apos;t auto-sync. To
-        update your business info in Birdeye, email{' '}
-        <a
-          href="mailto:hello@himayat.com.au"
-          style={{ color: 'var(--plum)', textDecoration: 'underline' }}
-        >
-          hello@himayat.com.au
-        </a>{' '}
-        or update directly in your Birdeye dashboard.
-      </div>
-    </div>
   );
 }

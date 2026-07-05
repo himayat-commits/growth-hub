@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, varchar, boolean, jsonb, serial, integer, index, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, varchar, boolean, jsonb, serial, integer, index, uniqueIndex, primaryKey } from 'drizzle-orm/pg-core';
 
 /**
  * Mirrors the canonical state of a user's Stripe subscription.
@@ -86,6 +86,44 @@ export const provisioningLogs = pgTable(
 
 export type ProvisioningLog = typeof provisioningLogs.$inferSelect;
 export type NewProvisioningLog = typeof provisioningLogs.$inferInsert;
+
+/**
+ * Tracked manual-handoff checklist for the post-provision steps the public
+ * Birdeye API can't do (module entitlements, Webchat config, Apple
+ * description/categories, FAQs, contact tags) plus a retry marker for
+ * partial runs. Written at handoff time (lib/ops/notify.ts) so ops work is
+ * durable state, not a fire-and-forget email; the /ops/provisioning console
+ * toggles rows done.
+ *
+ * One row per (user, kind). Re-runs refresh an OPEN row's snapshot/label; a
+ * DONE row stays done — except 'retry_failed_steps', which reopens whenever
+ * a new run ends partial and auto-closes on a fully-provisioned run.
+ */
+export const provisioningTasks = pgTable(
+  'provisioning_tasks',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    taskKind: varchar('task_kind', { length: 30 }).notNull(),
+    // 'modules' | 'webchat' | 'apple_description' | 'apple_categories'
+    // | 'faqs' | 'contact_tags' | 'retry_failed_steps'
+    status: varchar('status', { length: 10 }).default('open').notNull(), // 'open' | 'done'
+    // Human line, identical to what the ops email prints (single source).
+    label: text('label').notNull(),
+    // The data ops needs to perform the task (webchat config, FAQ list, …).
+    snapshot: jsonb('snapshot').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    doneAt: timestamp('done_at', { withTimezone: true }),
+    doneBy: text('done_by'),
+  },
+  (t) => ({
+    userKindUq: uniqueIndex('provisioning_tasks_user_kind_uq').on(t.userId, t.taskKind),
+    statusIdx: index('provisioning_tasks_status_idx').on(t.status, t.createdAt),
+  })
+);
+
+export type ProvisioningTask = typeof provisioningTasks.$inferSelect;
+export type NewProvisioningTask = typeof provisioningTasks.$inferInsert;
 
 /**
  * Extra profile fields collected by the dashboard /profile page.

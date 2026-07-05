@@ -57,6 +57,8 @@ Until 1–3 are confirmed, keep `PROVISION_MODE=mock` in production.
 | `OPS_NOTIFICATION_EMAIL` | ops inbox (defaults to `hello@himayat.com.au`) |
 | `OPS_NOTIFY_WEBHOOK` | optional Slack/webhook URL |
 | `OPS_EMAILS` | already `waheed@himayat.com.au`; this is the live allowlist |
+| `CRON_SECRET` | required — auths the hourly `/api/cron/provision-retry` auto-retry |
+| `HEALTH_SECRET` | optional — headless access to `/api/health/provisioning` |
 
 Then **remove** `NEXT_PUBLIC_PROVISION_MODE` from Vercel (it's now only a
 transitional fallback in code; delete the fallback in a later cleanup).
@@ -100,14 +102,39 @@ Confirm by counting `create_subaccount` rows in `provisioning_logs` for that use
 
 ## Observability & rollback
 
+- **Ops console:** `/ops/provisioning` — every run with status chips
+  (running/stalled/partial/failed/provisioned), per-user step timeline from
+  `provisioning_logs`, the tracked manual-step checklist
+  (`provisioning_tasks` — module entitlements, Webchat, Apple, FAQs, tags,
+  retries), one-click **Re-run provisioning** and **Resend handoff**.
+- **Config health:** `GET /api/health/provisioning` (ops session or
+  `?secret=HEALTH_SECRET`) — fails when live mode is missing credentials or
+  Stripe price IDs are absent; the same checks warn at boot via
+  instrumentation.
+- **Auto-retry:** hourly Vercel cron `/api/cron/provision-retry` re-runs
+  `partial`/crashed runs older than 1h with `attempts < 3` (user Resume is
+  uncapped; only automation respects the ceiling). Mutual exclusion with
+  user/ops runs via the `lockedUntil` lease.
 - **Monitor:** `provisioning_logs` (failures: `WHERE ok = false`; cost: count of
-  distinct `create_subaccount` rows; ops gaps: `kind='notify_ops' AND ok=false`).
+  distinct `create_subaccount` rows; ops gaps: `kind='notify_ops' AND ok=false`
+  — also surfaced as a banner on the ops detail page).
   Sentry tags `area:provision` with `step` + `mode` — set an alert on the first
-  `level:error`.
+  `level:error`; partial terminal runs emit a `level:warning`.
 - **Partial runs:** surface as the "Setup needs attention" banner on `/services`
-  and an `action_required` ops email; the user can retry safely (resume skips create).
+  and an `action_required` ops email; the user can retry safely (resume skips
+  create). After 3 failed attempts the run **escalates** (`escalatedAt`): user
+  surfaces flip to "We're on it" and ops owns the tail.
 - **Rollback:** set `PROVISION_MODE=mock` in Vercel. Next request returns
   deterministic mock responses with zero real API calls.
+
+### Ops handoff (changed)
+
+The old open `POST /api/notify-ops` endpoint is **gone** (it was
+unauthenticated). The runner now calls `sendOpsHandoff()`
+(`src/lib/ops/notify.ts`) directly: it writes the durable
+`provisioning_tasks` checklist first, then webhook + Resend email (single
+source of truth for both — `src/lib/ops/handoff.ts`), with a console
+fallback in dev.
 
 ---
 

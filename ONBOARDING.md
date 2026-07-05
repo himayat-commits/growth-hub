@@ -93,7 +93,7 @@ The pain: messages are currently a single "Growth Hub Team" thread per user. No 
 | `HUBSPOT_REGION` | this session | `ap1` — APAC. NOT NA1 (default would 404) |
 | (legacy) `RESEND_API_KEY`, `STRIPE_*`, `WORKOS_*`, `BIRDEYE_*`, `DATABASE_URL`, `PAYLOAD_SECRET`, etc. | previously | Unchanged |
 
-`RESEND_AUDIENCE_ID` is NOT set — newsletter now uses HubSpot, not Resend. Resend is still used by other routes (Stripe payment-failed email, `/api/notify-ops`, `/api/contact`).
+`RESEND_AUDIENCE_ID` is NOT set — newsletter now uses HubSpot, not Resend. Resend is still used elsewhere (Stripe payment-failed email, the ops provisioning handoff in `src/lib/ops/notify.ts` — the old `/api/notify-ops` route was removed as unauthenticated — and `/api/contact`).
 
 ---
 
