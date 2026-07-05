@@ -57,7 +57,7 @@ Until 1–3 are confirmed, keep `PROVISION_MODE=mock` in production.
 | `OPS_NOTIFICATION_EMAIL` | ops inbox (defaults to `hello@himayat.com.au`) |
 | `OPS_NOTIFY_WEBHOOK` | optional Slack/webhook URL |
 | `OPS_EMAILS` | already `waheed@himayat.com.au`; this is the live allowlist |
-| `CRON_SECRET` | required — auths the hourly `/api/cron/provision-retry` auto-retry |
+| `CRON_SECRET` | required — auths the daily `/api/cron/provision-retry` auto-retry |
 | `HEALTH_SECRET` | optional — headless access to `/api/health/provisioning` |
 
 Then **remove** `NEXT_PUBLIC_PROVISION_MODE` from Vercel (it's now only a
@@ -111,7 +111,7 @@ Confirm by counting `create_subaccount` rows in `provisioning_logs` for that use
   `?secret=HEALTH_SECRET`) — fails when live mode is missing credentials or
   Stripe price IDs are absent; the same checks warn at boot via
   instrumentation.
-- **Auto-retry:** hourly Vercel cron `/api/cron/provision-retry` re-runs
+- **Auto-retry:** daily Vercel cron `/api/cron/provision-retry` (20:00 UTC — Hobby-plan crons are capped at once/day; tighten to hourly on Pro) re-runs
   `partial`/crashed runs older than 1h with `attempts < 3` (user Resume is
   uncapped; only automation respects the ceiling). Mutual exclusion with
   user/ops runs via the `lockedUntil` lease.
