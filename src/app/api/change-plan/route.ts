@@ -164,17 +164,22 @@ export async function POST(req: NextRequest) {
 
   // action === 'commit'
   try {
-    await stripe.subscriptions.update(sub.stripeSubscriptionId, {
-      items: [{ id: planItem.id, price: newPriceId }],
-      proration_behavior: direction.prorationBehavior,
-      metadata: {
-        ...(stripeSub.metadata ?? {}),
-        userId: user.id,
-        planTier: tier,
-        billingInterval: interval,
-        lastChangeAt: new Date().toISOString(),
+    await stripe.subscriptions.update(
+      sub.stripeSubscriptionId,
+      {
+        items: [{ id: planItem.id, price: newPriceId }],
+        proration_behavior: direction.prorationBehavior,
+        metadata: {
+          ...(stripeSub.metadata ?? {}),
+          userId: user.id,
+          planTier: tier,
+          billingInterval: interval,
+          lastChangeAt: new Date().toISOString(),
+        },
       },
-    });
+      // Dedupe double-submit of the same transition (current → target price).
+      { idempotencyKey: `gh-changeplan-${sub.stripeSubscriptionId}-${planItem.price.id}-to-${newPriceId}` },
+    );
     // Webhook will sync the DB row. Return immediately so the client
     // can show the success state.
     return NextResponse.json({

@@ -25,6 +25,10 @@ type Params = Promise<{ id: string }>;
 export async function PATCH(req: NextRequest, { params }: { params: Params }) {
   const opsUser = await getOpsUser();
   if (!opsUser) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  // Referral credit/status changes move money — admin only.
+  if (opsUser.role !== 'admin') {
+    return NextResponse.json({ error: 'Admins only' }, { status: 403 });
+  }
 
   const { id: idParam } = await params;
   const id = Number.parseInt(idParam, 10);

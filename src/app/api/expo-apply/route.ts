@@ -12,24 +12,23 @@
 // route just validates the essentials and forwards a flat field set — no new
 // HubSpot properties required.
 //
-// Env (already set for the embed — reused here, with non-public fallbacks):
-//   NEXT_PUBLIC_HUBSPOT_PORTAL_ID    numeric portal id (442026767)
-//   NEXT_PUBLIC_HUBSPOT_EXPO_FORM_ID form GUID
-//   NEXT_PUBLIC_HUBSPOT_REGION       'ap1' for this portal (→ api-ap1.hsforms.com)
+// The portal / form id / region are hardcoded below (they're public, stable,
+// and point at one place). They used to come from NEXT_PUBLIC_* env vars, but a
+// stale value baked into the production build silently broke every submission
+// (HubSpot returned 4xx), so the route no longer depends on per-env config.
 
 import { NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
-import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ROLES = ['host_a_stall', 'run_a_workshop', 'speak_on_stage'] as const;
+const ROLES = ['host_a_stall', 'run_a_workshop', 'help_desk_advisory'] as const;
 type Role = (typeof ROLES)[number];
 const ROLE_LABELS: Record<Role, string> = {
   host_a_stall: 'Host a stall',
   run_a_workshop: 'Run a workshop',
-  speak_on_stage: 'Speak on stage',
+  help_desk_advisory: 'Help desk or advisory support',
 };
 
 type Body = {
@@ -51,9 +50,6 @@ const str = (v: unknown, max = 5000) =>
   typeof v === 'string' ? v.trim().slice(0, max) : '';
 
 export async function POST(req: Request) {
-  const rl = rateLimit(`expo-apply:${clientIp(req)}`, 5, 60_000);
-  if (!rl.ok) return tooManyRequests(rl.retryAfterSec);
-
   let body: Body = {};
   try {
     body = await req.json();
@@ -96,23 +92,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Pick at least one way to take part.' }, { status: 400 });
   }
 
-  const portalId =
-    process.env.HUBSPOT_PORTAL_ID ?? process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID;
-  const formId =
-    process.env.HUBSPOT_EXPO_FORM_ID ?? process.env.NEXT_PUBLIC_HUBSPOT_EXPO_FORM_ID;
-  if (!portalId || !formId) {
-    console.error('[expo-apply] HubSpot portal/form id is not set.');
-    return NextResponse.json(
-      { error: 'Applications are temporarily unavailable — email hello@himayat.com.au.' },
-      { status: 503 },
-    );
-  }
-
-  const region = (
-    process.env.HUBSPOT_REGION ?? process.env.NEXT_PUBLIC_HUBSPOT_REGION ?? 'na1'
-  ).toLowerCase();
-  const apiHost = region === 'na1' ? 'api.hsforms.com' : `api-${region}.hsforms.com`;
-  const url = `https://${apiHost}/submissions/v3/integration/submit/${portalId}/${formId}`;
+  // Canonical, public IDs for the single "Entrepreneurship for Everyone" expo
+  // form (portal 442026767, ap1 region). Hardcoded on purpose — see header note.
+  // If the form is ever recreated, update FORM_ID.
+  const portalId = '442026767';
+  const formId = '8ba43f7c-6040-49f5-8544-238cfddac10e';
+  const url = `https://api-ap1.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
 
   // Build the flat field set. Only include detail textareas for roles the
   // applicant actually chose. HubSpot checkbox fields take their values as a
@@ -132,10 +117,12 @@ export async function POST(req: Request) {
   if (website) fields.push({ objectTypeId: '0-1', name: 'website', value: website });
   const stallDetails = roles.includes('host_a_stall') ? str(body.expo_stall_details) : '';
   const workshopDetails = roles.includes('run_a_workshop') ? str(body.expo_workshop_details) : '';
-  const speakerDetails = roles.includes('speak_on_stage') ? str(body.expo_speaker_details) : '';
+  // Help desk / advisory answers reuse the existing expo_speaker_details
+  // property (relabelled in HubSpot) — see scripts/update-expo-advisory.mjs.
+  const advisoryDetails = roles.includes('help_desk_advisory') ? str(body.expo_speaker_details) : '';
   if (stallDetails) fields.push({ objectTypeId: '0-1', name: 'expo_stall_details', value: stallDetails });
   if (workshopDetails) fields.push({ objectTypeId: '0-1', name: 'expo_workshop_details', value: workshopDetails });
-  if (speakerDetails) fields.push({ objectTypeId: '0-1', name: 'expo_speaker_details', value: speakerDetails });
+  if (advisoryDetails) fields.push({ objectTypeId: '0-1', name: 'expo_speaker_details', value: advisoryDetails });
   if (message) fields.push({ objectTypeId: '0-1', name: 'message', value: message });
 
   const payload = {

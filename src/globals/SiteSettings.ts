@@ -40,6 +40,21 @@ export const SiteSettings: GlobalConfig = {
         { name: 'twitter', type: 'text' },
       ],
     },
+    {
+      name: 'communityLinks',
+      label: 'Community group links',
+      type: 'group',
+      admin: {
+        description:
+          'Invite links to the member community groups. Each link, once set, is surfaced on the member Benefits page (and members are nudged here when their profile is complete). Leave blank to hide.',
+      },
+      fields: [
+        { name: 'slack', type: 'text', admin: { description: 'Slack workspace invite URL' } },
+        { name: 'facebook', type: 'text', admin: { description: 'Facebook group URL' } },
+        { name: 'whatsapp', type: 'text', admin: { description: 'WhatsApp group invite URL' } },
+        { name: 'forum', type: 'text', admin: { description: 'Other community / forum URL (optional)' } },
+      ],
+    },
   ],
   hooks: {
     afterChange: [async () => { await revalidate('site-settings'); }],

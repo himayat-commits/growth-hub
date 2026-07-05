@@ -89,38 +89,32 @@ export async function syncSubscription(subscriptionId: string) {
   // Idempotent via the upsert helper; safe to re-fire.
   if (userId) {
     const nowCancelAtPeriodEnd = sub.cancel_at_period_end ?? false;
+    // These audit writes are idempotent (upsert keyed on stripeSubscriptionId),
+    // so we let failures propagate to the top-level catch → Stripe retries the
+    // webhook rather than silently losing the cancellation record.
     if (!priorCancelAtPeriodEnd && nowCancelAtPeriodEnd) {
-      try {
-        const meta = (sub.metadata ?? {}) as Record<string, string | undefined>;
-        await upsertCancellation({
-          userId,
-          stripeSubscriptionId: sub.id,
-          planTier: planInfo?.tier ?? null,
-          reason: meta.cancellationReason ?? '',
-          comment: meta.cancellationComment ?? '',
-          cancelAt: periodEnd,
-        });
-      } catch (e) {
-        console.error('[stripe.webhook] cancellation log upsert failed', e);
-        Sentry.captureException(e, { tags: { area: 'stripe.webhook', phase: 'cancellation_log' } });
-      }
+      const meta = (sub.metadata ?? {}) as Record<string, string | undefined>;
+      await upsertCancellation({
+        userId,
+        stripeSubscriptionId: sub.id,
+        planTier: planInfo?.tier ?? null,
+        reason: meta.cancellationReason ?? '',
+        comment: meta.cancellationComment ?? '',
+        cancelAt: periodEnd,
+      });
     } else if (priorCancelAtPeriodEnd && !nowCancelAtPeriodEnd) {
-      try {
-        await markCancellationRestored(sub.id);
-      } catch (e) {
-        console.error('[stripe.webhook] cancellation restore mark failed', e);
-        Sentry.captureException(e, { tags: { area: 'stripe.webhook', phase: 'cancellation_restore' } });
-      }
+      await markCancellationRestored(sub.id);
     }
   }
 
-  // Emit subscription_active notification on the active/trialing
-  // transition. Wrapped in a try so a notification failure never breaks
-  // webhook idempotency.
+  const isActiveNow = sub.status === 'active' || sub.status === 'trialing';
   const newlyActive =
-    (sub.status === 'active' || sub.status === 'trialing') &&
-    priorStatus !== 'active' &&
-    priorStatus !== 'trialing';
+    isActiveNow && priorStatus !== 'active' && priorStatus !== 'trialing';
+
+  // subscription_active notification fires only on the activation transition.
+  // Best-effort: a failed notification must never break webhook idempotency,
+  // so it stays swallowed (and won't re-fire on a retry, since priorStatus is
+  // already active by then).
   if (newlyActive && userId && planInfo) {
     try {
       const planName = PLANS[planInfo.tier].name;
@@ -141,18 +135,17 @@ export async function syncSubscription(subscriptionId: string) {
       console.error('[stripe.webhook] subscription_active notification failed', e);
       Sentry.captureException(e, { tags: { area: 'stripe.webhook', phase: 'notification' } });
     }
+  }
 
-    // Try to issue any pending referral credit. This walks both directions:
-    //   - if this user was REFERRED by someone, that referral is credited
-    //     (their credit lands on this customer's Stripe customer balance)
-    //   - if this user IS a referrer and any of their qualified referrals
-    //     have just had their referred user upgrade, those credits process
-    // tryIssueReferralCredit handles both. Failures are logged + swallowed.
-    try {
-      await tryIssueReferralCredit(userId);
-    } catch (e) {
-      console.error('[stripe.webhook] referral credit issuance failed', e);
-      Sentry.captureException(e, { tags: { area: 'stripe.webhook', phase: 'referral_credit' } });
-    }
+  // Settle any pending referral credit. This walks both directions:
+  //   - if this user was REFERRED by someone, that referral is credited
+  //   - if this user IS a referrer and their referred user has now upgraded
+  // Run on EVERY active/trialing sync (not just the activation transition) so
+  // the "other side pays later" case is retried, and so a Stripe webhook retry
+  // actually re-attempts it. tryIssueReferralCredit is idempotent (only flips
+  // 'qualified' rows; the Stripe balance credits carry idempotency keys), so we
+  // let failures propagate to the top-level catch → Stripe retries.
+  if (isActiveNow && userId) {
+    await tryIssueReferralCredit(userId);
   }
 }

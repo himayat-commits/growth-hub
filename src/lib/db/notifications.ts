@@ -17,7 +17,8 @@ export type NotificationKind =
   | 'new_resource'
   | 'event_reminder'
   | 'referral_signed_up'
-  | 'message_received';
+  | 'message_received'
+  | 'community';
 
 export interface NotificationInsert {
   userId: string;

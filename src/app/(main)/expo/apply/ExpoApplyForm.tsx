@@ -8,12 +8,12 @@ import { useId, useMemo, useRef, useState, type ReactNode } from 'react';
 // to /api/expo-apply, which forwards into the same HubSpot form + contact
 // properties. See that route + scripts/create-expo-hubspot-form.mjs.
 //
-// The signature moment is the role picker (step 1): three tactile cards you
-// toggle on, each of which unfolds its own tailored question set in step 3.
-// Rich answers are composed into the three existing expo_*_details textarea
-// properties, so no new HubSpot schema is needed.
+// The signature moment is the role picker (step 1): tactile cards you toggle
+// on, each of which then gets its own tailored question page in the Details
+// step. Rich answers are composed into the three existing expo_*_details
+// textarea properties, so no new HubSpot schema is needed.
 
-type RoleId = 'host_a_stall' | 'run_a_workshop' | 'speak_on_stage';
+type RoleId = 'host_a_stall' | 'run_a_workshop' | 'help_desk_advisory';
 
 const ROLES: {
   id: RoleId;
@@ -43,15 +43,17 @@ const ROLES: {
     ),
   },
   {
-    id: 'speak_on_stage',
-    title: 'Speak on stage',
-    blurb: 'Share your story with a full house of owners.',
+    id: 'help_desk_advisory',
+    title: 'Help desk or advisory support',
+    blurb: 'Staff a one-to-one help desk — planning, getting online, advice.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-        <line x1="12" y1="19" x2="12" y2="23" />
-        <line x1="8" y1="23" x2="16" y2="23" />
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="12" cy="12" r="3.5" />
+        <line x1="5.6" y1="5.6" x2="9.5" y2="9.5" />
+        <line x1="14.5" y1="14.5" x2="18.4" y2="18.4" />
+        <line x1="14.5" y1="9.5" x2="18.4" y2="5.6" />
+        <line x1="9.5" y1="14.5" x2="5.6" y2="18.4" />
       </svg>
     ),
   },
@@ -64,7 +66,20 @@ const STALL_SIZE = ['Standard table', 'Double space', 'Just a banner & me'];
 const WORKSHOP_FORMAT = ['Hands-on', 'Talk + Q&A', 'Panel', 'Live demo'];
 const WORKSHOP_LENGTH = ['20 min', '30 min', '45 min', '60 min'];
 const WORKSHOP_AUDIENCE = ['Thinking of starting', 'Just started', 'Established'];
-const TALK_LENGTH = ['Lightning · 5 min', 'Short · 15 min', 'Keynote · 25 min'];
+const ADVISORY_AREA = ['Getting online', 'Business planning', 'Marketing & branding', 'Finance & funding', 'General advice'];
+const ADVISORY_FORMAT = ['One-to-one help desk', 'Group clinic', 'Either'];
+
+// One detail page per selected role — its heading + intro line.
+const DETAIL_TITLE: Record<RoleId, string> = {
+  host_a_stall: 'Your stall',
+  run_a_workshop: 'Your workshop',
+  help_desk_advisory: 'Your help desk',
+};
+const DETAIL_LEDE: Record<RoleId, string> = {
+  host_a_stall: 'What you’ll bring to the expo hall.',
+  run_a_workshop: 'What you’d teach, and who it’s for.',
+  help_desk_advisory: 'The one-to-one help you can offer on the day.',
+};
 
 type FormState = {
   firstname: string;
@@ -85,18 +100,18 @@ type FormState = {
   wsLength: string;
   wsAudience: string;
   wsTakeaway: string;
-  // speaker
-  spTopic: string;
-  spLength: string;
-  spBackground: string;
-  spLink: string;
+  // help desk / advisory
+  adOffer: string;
+  adArea: string;
+  adFormat: string;
+  adBackground: string;
 };
 
 const EMPTY: FormState = {
   firstname: '', lastname: '', email: '', phone: '', company: '', website: '', message: '',
   stallShowcase: '', stallSize: '', stallPower: false, stallSelling: false,
   wsTopic: '', wsFormat: '', wsLength: '', wsAudience: '', wsTakeaway: '',
-  spTopic: '', spLength: '', spBackground: '', spLink: '',
+  adOffer: '', adArea: '', adFormat: '', adBackground: '',
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -120,12 +135,12 @@ function buildWorkshopDetails(f: FormState) {
     f.wsTakeaway && `People will leave able to: ${f.wsTakeaway}`,
   ].filter(Boolean).join('\n');
 }
-function buildSpeakerDetails(f: FormState) {
+function buildAdvisoryDetails(f: FormState) {
   return [
-    f.spTopic && `Talk: ${f.spTopic}`,
-    f.spLength && `Length: ${f.spLength}`,
-    f.spBackground && `Speaking background: ${f.spBackground}`,
-    f.spLink && `Past talk: ${f.spLink}`,
+    f.adOffer && `Can help with: ${f.adOffer}`,
+    f.adArea && `Main area: ${f.adArea}`,
+    f.adFormat && `Format: ${f.adFormat}`,
+    f.adBackground && `Background: ${f.adBackground}`,
   ].filter(Boolean).join('\n');
 }
 
@@ -155,6 +170,22 @@ export default function ExpoApplyForm() {
     [roles],
   );
 
+  // The flow is dynamic: Role → You → one Details page per selected role → Send.
+  // The four-dot rail stays fixed (Role / You / Details / Send); the Details dot
+  // spans every per-role page, which paginate "n of N".
+  const steps = useMemo(
+    () => [
+      { kind: 'role' as const },
+      { kind: 'you' as const },
+      ...selectedRoles.map((r) => ({ kind: 'detail' as const, role: r })),
+      { kind: 'send' as const },
+    ],
+    [selectedRoles],
+  );
+  const current = steps[Math.min(step, steps.length - 1)];
+  const phase =
+    current.kind === 'role' ? 0 : current.kind === 'you' ? 1 : current.kind === 'send' ? 3 : 2;
+
   const focusTop = () => {
     // Move focus + scroll to the form heading so each step starts at the top
     // and screen-reader users land on the new step's title.
@@ -163,22 +194,23 @@ export default function ExpoApplyForm() {
 
   const validateStep = (s: number): boolean => {
     const e: Record<string, string> = {};
-    if (s === 0 && roles.length === 0) {
+    const st = steps[s];
+    if (st?.kind === 'role' && roles.length === 0) {
       e.roles = 'Pick at least one — you can choose more than one.';
     }
-    if (s === 1) {
+    if (st?.kind === 'you') {
       if (!f.firstname.trim()) e.firstname = 'Required';
       if (!f.lastname.trim()) e.lastname = 'Required';
       if (!f.email.trim() || !EMAIL_RE.test(f.email.trim())) e.email = 'Enter a valid email';
       if (!f.company.trim()) e.company = 'Required';
     }
-    if (s === 2) {
-      if (roles.includes('host_a_stall') && !f.stallShowcase.trim())
+    if (st?.kind === 'detail') {
+      if (st.role.id === 'host_a_stall' && !f.stallShowcase.trim())
         e.stallShowcase = 'Tell us what you’d showcase';
-      if (roles.includes('run_a_workshop') && !f.wsTopic.trim())
+      if (st.role.id === 'run_a_workshop' && !f.wsTopic.trim())
         e.wsTopic = 'Give your workshop a topic';
-      if (roles.includes('speak_on_stage') && !f.spTopic.trim())
-        e.spTopic = 'What would you talk about?';
+      if (st.role.id === 'help_desk_advisory' && !f.adOffer.trim())
+        e.adOffer = 'Tell us what you can help with';
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -186,7 +218,7 @@ export default function ExpoApplyForm() {
 
   const next = () => {
     if (!validateStep(step)) return;
-    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    setStep((s) => Math.min(s + 1, steps.length - 1));
     focusTop();
   };
   const back = () => {
@@ -196,10 +228,13 @@ export default function ExpoApplyForm() {
   };
 
   const submit = async () => {
-    if (!validateStep(2)) {
-      setStep(2);
-      focusTop();
-      return;
+    // Re-validate every detail page; jump back to the first with a gap.
+    for (let i = 2; i < steps.length - 1; i++) {
+      if (!validateStep(i)) {
+        setStep(i);
+        focusTop();
+        return;
+      }
     }
     setStatus('sending');
     setSubmitError('');
@@ -218,7 +253,7 @@ export default function ExpoApplyForm() {
           roles,
           expo_stall_details: roles.includes('host_a_stall') ? buildStallDetails(f) : '',
           expo_workshop_details: roles.includes('run_a_workshop') ? buildWorkshopDetails(f) : '',
-          expo_speaker_details: roles.includes('speak_on_stage') ? buildSpeakerDetails(f) : '',
+          expo_speaker_details: roles.includes('help_desk_advisory') ? buildAdvisoryDetails(f) : '',
           hp: hp.current,
         }),
       });
@@ -274,11 +309,11 @@ export default function ExpoApplyForm() {
       {STEPS.map((label, i) => (
         <li
           key={label}
-          className={`xa-rail-step${i === step ? ' is-current' : ''}${i < step ? ' is-done' : ''}`}
-          aria-current={i === step ? 'step' : undefined}
+          className={`xa-rail-step${i === phase ? ' is-current' : ''}${i < phase ? ' is-done' : ''}`}
+          aria-current={i === phase ? 'step' : undefined}
         >
           <span className="xa-rail-dot" aria-hidden="true">
-            {i < step ? (
+            {i < phase ? (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
             ) : (
               i + 1
@@ -382,24 +417,19 @@ export default function ExpoApplyForm() {
           </div>
         )}
 
-        {/* STEP 3 — Tailored, per-role questions */}
-        {step === 2 && (
-          <div className="xa-step" key="details">
-            <p className="xa-eyebrow">Step 3 · The good stuff</p>
-            <h2 className="xa-title">
-              {selectedRoles.length > 1 ? 'Tell us about each one.' : 'Tell us more.'}
-            </h2>
-            <p className="xa-lede">
-              Tailored to what you picked. A sentence or two per box is plenty.
+        {/* STEP 3 — one tailored page per selected role */}
+        {current.kind === 'detail' && (
+          <div className="xa-step" key={`detail-${current.role.id}`}>
+            <p className="xa-eyebrow">
+              Step 3 · The good stuff
+              {selectedRoles.length > 1 ? ` · ${step - 1} of ${selectedRoles.length}` : ''}
             </p>
+            <h2 className="xa-title">{DETAIL_TITLE[current.role.id]}</h2>
+            <p className="xa-lede">{DETAIL_LEDE[current.role.id]}</p>
 
-            <div className="xa-panels">
-              {roles.includes('host_a_stall') && (
-                <section className="xa-panel">
-                  <header className="xa-panel-head">
-                    <span className="xa-panel-icon" aria-hidden="true">{ROLES[0].icon}</span>
-                    <h3 className="xa-panel-title">Your stall</h3>
-                  </header>
+            <div className="xa-fields">
+              {current.role.id === 'host_a_stall' && (
+                <>
                   <Field id={`${uid}-st1`} label="What would you showcase?" required error={errors.stallShowcase}>
                     <textarea id={`${uid}-st1`} className="xa-input xa-textarea" rows={3} value={f.stallShowcase}
                       placeholder="Your product or service, and what visitors will see at your table."
@@ -413,15 +443,11 @@ export default function ExpoApplyForm() {
                     <Toggle label="I’d like to sell on the day" checked={f.stallSelling}
                       onChange={(v) => set('stallSelling', v)} />
                   </div>
-                </section>
+                </>
               )}
 
-              {roles.includes('run_a_workshop') && (
-                <section className="xa-panel">
-                  <header className="xa-panel-head">
-                    <span className="xa-panel-icon" aria-hidden="true">{ROLES[1].icon}</span>
-                    <h3 className="xa-panel-title">Your workshop</h3>
-                  </header>
+              {current.role.id === 'run_a_workshop' && (
+                <>
                   <Field id={`${uid}-ws1`} label="Workshop topic or title" required error={errors.wsTopic}>
                     <input id={`${uid}-ws1`} className="xa-input" value={f.wsTopic}
                       placeholder="e.g. “Pricing your first product without the fear”"
@@ -438,39 +464,33 @@ export default function ExpoApplyForm() {
                       placeholder="The one practical thing they’ll walk away with."
                       onChange={(e) => set('wsTakeaway', e.target.value)} />
                   </Field>
-                </section>
+                </>
               )}
 
-              {roles.includes('speak_on_stage') && (
-                <section className="xa-panel">
-                  <header className="xa-panel-head">
-                    <span className="xa-panel-icon" aria-hidden="true">{ROLES[2].icon}</span>
-                    <h3 className="xa-panel-title">Your talk</h3>
-                  </header>
-                  <Field id={`${uid}-sp1`} label="What would you talk about?" required error={errors.spTopic}>
-                    <input id={`${uid}-sp1`} className="xa-input" value={f.spTopic}
-                      placeholder="Your topic, or the story you’d tell."
-                      onChange={(e) => set('spTopic', e.target.value)} />
+              {current.role.id === 'help_desk_advisory' && (
+                <>
+                  <Field id={`${uid}-ad1`} label="What can you help people with?" required error={errors.adOffer}>
+                    <textarea id={`${uid}-ad1`} className="xa-input xa-textarea" rows={2} value={f.adOffer}
+                      placeholder="The kind of one-to-one help you can offer at a help desk."
+                      onChange={(e) => set('adOffer', e.target.value)} />
                   </Field>
-                  <Chips label="Talk length" options={TALK_LENGTH} value={f.spLength}
-                    onPick={(v) => set('spLength', v)} />
-                  <Field id={`${uid}-sp2`} label="Your speaking background" hint="optional">
-                    <textarea id={`${uid}-sp2`} className="xa-input xa-textarea" rows={2} value={f.spBackground}
-                      placeholder="Any past talks, panels or stages — or “first-timer, keen to try”."
-                      onChange={(e) => set('spBackground', e.target.value)} />
+                  <Chips label="Main area" options={ADVISORY_AREA} value={f.adArea}
+                    onPick={(v) => set('adArea', v)} />
+                  <Chips label="How you’d help" options={ADVISORY_FORMAT} value={f.adFormat}
+                    onPick={(v) => set('adFormat', v)} />
+                  <Field id={`${uid}-ad2`} label="Your advisory background" hint="optional">
+                    <textarea id={`${uid}-ad2`} className="xa-input xa-textarea" rows={2} value={f.adBackground}
+                      placeholder="How you’ve helped small businesses before — or “first-timer, keen to help”."
+                      onChange={(e) => set('adBackground', e.target.value)} />
                   </Field>
-                  <Field id={`${uid}-sp3`} label="Link to a past talk" hint="optional">
-                    <input id={`${uid}-sp3`} className="xa-input" value={f.spLink} placeholder="YouTube, LinkedIn, anywhere"
-                      onChange={(e) => set('spLink', e.target.value)} />
-                  </Field>
-                </section>
+                </>
               )}
             </div>
           </div>
         )}
 
         {/* STEP 4 — Review & send */}
-        {step === 3 && (
+        {current.kind === 'send' && (
           <div className="xa-step" key="review">
             <p className="xa-eyebrow">Step 4 · One last look</p>
             <h2 className="xa-title">Ready to send?</h2>
@@ -512,7 +532,7 @@ export default function ExpoApplyForm() {
           <span />
         )}
 
-        {step < STEPS.length - 1 ? (
+        {step < steps.length - 1 ? (
           <button type="button" className="xa-btn xa-btn--primary" onClick={next}>
             Continue →
           </button>

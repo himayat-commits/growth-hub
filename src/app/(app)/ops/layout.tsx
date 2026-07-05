@@ -31,12 +31,13 @@ export default async function OpsLayout({ children }: { children: React.ReactNod
             <Link href="/ops/cancellations">Cancellations</Link>
             <Link href="/ops/signups">Signups</Link>
             <Link href="/ops/provisioning">Provisioning</Link>
+            <Link href="/ops/events">Events</Link>
             <Link href="/ops/inbox">Inbox</Link>
           </nav>
         </div>
         <div className="gh-ops-head-r">
           <span className="gh-ops-user">
-            Signed in as <strong>{opsUser.email}</strong>
+            Signed in as <strong>{opsUser.email}</strong> · {opsUser.role}
           </span>
           <Link href="/dashboard" className="gh-btn ghost">
             ← Back to dashboard

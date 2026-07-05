@@ -18,6 +18,6 @@ export const TestimonialsBlock: Block = {
       defaultValue: 'grid',
     },
     { name: 'ctaLabel', type: 'text', defaultValue: 'Sign Up Now' },
-    { name: 'ctaHref', type: 'text', defaultValue: '#contact' },
+    { name: 'ctaHref', type: 'text', defaultValue: '/sign-up?redirect_url=%2Fportal' },
   ],
 };

@@ -444,7 +444,7 @@ async function seed() {
           {
             blockType: 'testimonials',
             ctaLabel: 'Sign Up Now',
-            ctaHref: '#contact',
+            ctaHref: '/sign-up?redirect_url=%2Fportal',
             layout: 'carousel',
           },
           // 8. About
@@ -482,7 +482,7 @@ async function seed() {
             ctaLabel: 'Contact Us',
             ctaHref: 'mailto:hello@himayat.com.au?subject=Growth%20Hub%20Enquiry',
             secondaryCtaLabel: 'Sign Up Now',
-            secondaryCtaHref: '#contact',
+            secondaryCtaHref: '/sign-up?redirect_url=%2Fportal',
             variant: 'teal',
           },
           // Note: Contact section is always rendered in code — no block needed

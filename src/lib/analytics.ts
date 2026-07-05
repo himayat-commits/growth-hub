@@ -28,6 +28,9 @@ declare global {
 export type AnalyticsEvent =
   // Signup funnel
   | 'cta_click_signup'           // any "Sign Up Now" / "Join free" CTA
+  | 'cta_click_portal'           // signed-in navbar "My Growth Hub" CTA — not a signup;
+                                 // deliberately absent from EVENT_MAP so it never fires
+                                 // ad-pixel conversions
   | 'cta_click_upgrade'          // pricing tier "Start with X" buttons
   | 'free_tier_join'             // the dedicated Free banner CTA
   | 'pricing_interval_toggle'    // monthly/annual toggle on /pricing
@@ -44,6 +47,7 @@ export type AnalyticsEvent =
   | 'event_add_to_calendar'      // clicked Add to Calendar (.ics download)
   | 'summit_register_intent'     // attendee clicked the Eventbrite "Register" CTA for the summit
   | 'summit_apply_click'         // contributor clicked "Apply" (stallholder/speaker/sponsor) for the summit
+  | 'summit_plan_expand'         // attendee expanded a "plan your day" panel row on the summit hero
   | 'partner_card_click'         // clicked a partner-directory card
   | 'partner_need_click'         // clicked a need-based discovery chip in /partners directory
   | 'partner_recruit_click'      // clicked the inline "Could you be here?" recruitment card

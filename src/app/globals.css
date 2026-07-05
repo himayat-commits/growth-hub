@@ -93,6 +93,9 @@ footer.foot :focus-visible {
 .nav-links a { position: relative; }
 .nav-links a:hover::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: var(--teal); }
 .btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 999px; font-size: 16px; font-weight: 500; transition: transform .2s, background .2s, color .2s; white-space: nowrap; }
+/* Long labels ("Become a stallholder, speaker or sponsor") exceed a phone's
+   width as a single line and force page-level horizontal scroll. */
+@media (max-width: 480px) { .btn { white-space: normal; text-align: left; } }
 .btn-primary { background: var(--teal); color: var(--eggshell); }
 .btn-primary:hover { background: var(--teal-deep); transform: translateY(-1px); }
 .btn-secondary { background: transparent; color: var(--teal); border: 1px solid rgba(13, 63, 72, 0.35); }
@@ -119,7 +122,28 @@ footer.foot :focus-visible {
 .hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px; border: 1px solid rgba(13, 63, 72, 0.25); border-radius: 999px; font-size: 14px; color: var(--teal); background: rgba(243, 240, 231, 0.5); }
 .hero-eyebrow .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--teal); }
 .hero-h1 { font-weight: 400; font-size: clamp(48px, 6.8vw, 88px); line-height: 1.05; letter-spacing: -0.025em; color: var(--teal); margin: 28px 0 0; max-width: 16ch; text-wrap: pretty; }
+/* The summit title's single word "Entrepreneurship" needs ~388px at the 48px
+   clamp floor — wider than a small phone. A lower floor for event heroes only.
+   max-width is lifted so the non-wrapping "for <word>" line is never squeezed
+   into an extra row (see .hero-line1 / .hero-roll-line below). */
+.event-hero .hero-h1 { font-size: clamp(38px, 6.8vw, 88px); max-width: none; }
+/* Always exactly two lines: "Entrepreneurship" / "for <rolling word>". The
+   second line stays on one row no matter which audience is showing. */
+.hero-line1 { display: block; }
+.hero-roll-line { display: block; white-space: nowrap; }
 .hero-h1 .grow { display: inline-block; position: relative; }
+/* Roll-call headline: the variable line cycles through the real audiences and
+   settles on "Everyone", over a hand-drawn lime underline. */
+.hero-roll { display: inline-block; position: relative; color: var(--teal); white-space: nowrap; }
+.hero-roll-word { display: inline-block; animation: hero-roll-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.hero-roll-underline { position: absolute; left: -0.04em; right: -0.04em; bottom: -0.04em; width: auto; height: 0.22em; overflow: visible; }
+.hero-roll-underline path { stroke: var(--lime); }
+@keyframes hero-roll-in { from { opacity: 0; transform: translateY(0.16em); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .hero-roll-word { animation: none; } }
+/* Keep every rolling audience on a single line at all widths — no spill onto a
+   second line. On narrow screens we shrink the event-hero headline (rather than
+   wrapping the word) so even the longest audience still fits on one line. */
+@media (max-width: 600px) { .event-hero .hero-h1 { font-size: clamp(23px, 7.2vw, 40px); } }
 .hero-handnote { position: relative; display: inline-block; margin-top: 24px; }
 .hero-handnote .txt { font-size: clamp(28px, 3vw, 44px); color: var(--plum); line-height: 1; }
 .hero-sub { max-width: 620px; font-size: clamp(18px, 1.5vw, 22px); color: var(--teal); opacity: 0.85; margin: 36px 0 0; line-height: 1.5; }
@@ -632,12 +656,13 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .signup-features li { position: relative; padding-left: 28px; font-size: 16px; }
 .signup-features li::before { content: '✓'; position: absolute; left: 0; color: var(--plum); font-weight: 600; }
 .signup-pricecard.featured .signup-features li::before { color: var(--lime); }
+.signup-freetag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal); background: var(--lime); border-radius: 99px; padding: 6px 13px; margin-bottom: 18px; }
+.signup-pricecard-name { font-size: 21px; line-height: 1.25; margin: 0 0 4px; color: inherit; }
+.signup-pricecard-tagline { font-size: 15px; font-style: italic; margin: 0; opacity: 0.78; }
 .signup-trust { display: flex; flex-direction: column; gap: 14px; }
 .signup-trust-item { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--muted); }
 .signup-trust-item svg { color: var(--plum); flex-shrink: 0; }
 .signup-formwrap { background: #fff; border: 1px solid var(--line); border-radius: 28px; padding: 40px; }
-.signup-back { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--plum); margin-bottom: 32px; letter-spacing: 0.01em; }
-.signup-back:hover { color: var(--teal); }
 .signup-terms { font-size: 13px; color: rgba(243,240,231,0.65); margin-top: 8px; }
 .signup-desc { font-size: 17px; line-height: 1.55; margin: 20px 0 0; }
 .signup-divider { height: 1px; background: rgba(243,240,231,0.18); margin: 20px 0; border: none; }
@@ -647,144 +672,6 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .signup-form-title { font-size: clamp(26px,2.8vw,34px); font-weight: 400; line-height: 1.15; letter-spacing: -0.01em; color: var(--teal); margin: 0 0 8px; }
 .signup-form-sub { font-size: 16px; line-height: 1.55; color: rgba(13,63,72,0.72); margin: 0 0 28px; }
 @media (max-width: 960px) { .signup-grid { grid-template-columns: 1fr; } .signup-summary { position: static; } }
-
-/* ---- Expo apply: numbered role cards in the signup-style left column ---- */
-.expo-roles { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
-.expo-role { display: flex; align-items: flex-start; gap: 14px; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
-.expo-role-num { width: 26px; height: 26px; border-radius: 8px; background: var(--teal); color: var(--eggshell); font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-.expo-role-title { font-size: 15px; font-weight: 600; color: var(--teal); margin: 0 0 2px; }
-.expo-role-desc { font-size: 14px; line-height: 1.5; color: var(--muted); margin: 0; }
-
-/* ===================================================================
-   Expo apply — multi-step application form (ExpoApplyForm.tsx).
-   All selectors are namespaced .xa-* so nothing collides with the
-   site's section/cta rules. A utility sans is used for labels, chips,
-   buttons and the progress rail; titles inherit the page serif.
-   =================================================================== */
-.signup-formwrap--steps { padding: 32px; }
-.xa { --xa-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-
-/* Progress rail */
-.xa-rail { list-style: none; display: flex; align-items: flex-start; gap: 0; margin: 0 0 32px; padding: 0; counter-reset: xa; }
-.xa-rail-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; font-family: var(--xa-sans); }
-/* connector line between dots */
-.xa-rail-step::before { content: ""; position: absolute; top: 14px; left: -50%; width: 100%; height: 2px; background: var(--line); z-index: 0; }
-.xa-rail-step:first-child::before { display: none; }
-.xa-rail-step.is-done::before, .xa-rail-step.is-current::before { background: var(--teal); }
-.xa-rail-dot { position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; background: #fff; border: 2px solid var(--line); color: var(--fg-subtle); transition: background .25s, border-color .25s, color .25s; }
-.xa-rail-dot svg { width: 14px; height: 14px; }
-.xa-rail-step.is-current .xa-rail-dot { border-color: var(--teal); color: var(--teal); box-shadow: 0 0 0 4px rgba(13,63,72,0.08); }
-.xa-rail-step.is-done .xa-rail-dot { background: var(--teal); border-color: var(--teal); color: var(--eggshell); }
-.xa-rail-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; color: var(--fg-subtle); }
-.xa-rail-step.is-current .xa-rail-label { color: var(--teal); }
-.xa-rail-step.is-done .xa-rail-label { color: var(--muted); }
-
-/* Step container + intro type */
-.xa-stepwrap { outline: none; }
-.xa-step { animation: xa-in .35s cubic-bezier(.2,.7,.3,1); }
-.xa-eyebrow { font-family: var(--xa-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); margin: 0 0 10px; }
-.xa-title { font-size: clamp(26px,2.8vw,34px); font-weight: 400; line-height: 1.12; letter-spacing: -0.01em; color: var(--teal); margin: 0 0 8px; }
-.xa-lede { font-size: 16px; line-height: 1.55; color: rgba(13,63,72,0.72); margin: 0 0 26px; }
-
-/* Role picker — the signature element */
-.xa-rolegrid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.xa-rolecard { position: relative; display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; column-gap: 14px; row-gap: 2px; text-align: left; padding: 18px 20px; border-radius: 18px; border: 1.5px solid var(--line); background: #fff; transition: border-color .2s, background .2s, transform .12s, box-shadow .2s; }
-.xa-rolecard:hover { border-color: rgba(13,63,72,0.35); transform: translateY(-1px); }
-.xa-rolecard.is-on { border-color: var(--teal); background: linear-gradient(180deg, rgba(227,242,156,0.32), rgba(227,242,156,0.12)); box-shadow: 0 10px 24px -16px rgba(13,63,72,0.5); }
-.xa-rolecard-icon { grid-row: 1 / span 2; align-self: start; width: 44px; height: 44px; border-radius: 12px; background: var(--eggshell-warm); color: var(--teal); display: flex; align-items: center; justify-content: center; transition: background .2s, color .2s; }
-.xa-rolecard-icon svg { width: 22px; height: 22px; }
-.xa-rolecard.is-on .xa-rolecard-icon { background: var(--teal); color: var(--lime); }
-.xa-rolecard-title { font-size: 18px; font-weight: 600; color: var(--teal); }
-.xa-rolecard-blurb { font-size: 14px; line-height: 1.45; color: var(--muted); }
-.xa-rolecard-tick { position: absolute; top: 14px; right: 14px; width: 24px; height: 24px; border-radius: 50%; background: var(--teal); color: var(--eggshell); display: flex; align-items: center; justify-content: center; transform: scale(0); transition: transform .22s cubic-bezier(.2,1.5,.4,1); }
-.xa-rolecard-tick svg { width: 13px; height: 13px; }
-.xa-rolecard.is-on .xa-rolecard-tick { transform: scale(1); }
-
-/* Fields */
-.xa-fields { display: flex; flex-direction: column; gap: 22px; }
-.xa-row { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-.xa-field { display: flex; flex-direction: column; }
-.xa-label { font-family: var(--xa-sans); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(13,63,72,0.6); font-weight: 700; margin-bottom: 8px; }
-.xa-req { color: var(--plum); }
-.xa-hint { font-weight: 500; letter-spacing: 0.06em; color: var(--fg-subtle); text-transform: none; }
-.xa-input { width: 100%; font-family: var(--font-serif, Georgia, serif); font-size: 18px; color: var(--teal); background: transparent; border: none; border-bottom: 1.5px solid rgba(13,63,72,0.2); border-radius: 0; padding: 6px 0 9px; outline: none; transition: border-color .2s; }
-.xa-input:focus { border-bottom-color: var(--plum); }
-.xa-input::placeholder { color: rgba(13,63,72,0.32); font-style: italic; }
-.xa-textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
-.xa-field.has-error .xa-input { border-bottom-color: #A8423E; }
-.xa-error { font-family: var(--xa-sans); font-size: 12.5px; color: #A8423E; margin-top: 6px; }
-.xa-error--block { margin-top: 14px; }
-
-/* Choice chips */
-.xa-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.xa-chip { font-family: var(--xa-sans); font-size: 13.5px; font-weight: 500; padding: 8px 15px; border-radius: 99px; border: 1.5px solid rgba(13,63,72,0.18); color: var(--muted); background: #fff; transition: background .15s, border-color .15s, color .15s; }
-.xa-chip:hover { border-color: rgba(13,63,72,0.4); color: var(--teal); }
-.xa-chip.is-on { background: var(--teal); border-color: var(--teal); color: var(--eggshell); }
-
-/* Toggles */
-.xa-toggles { display: flex; flex-direction: column; gap: 12px; }
-.xa-toggle { display: inline-flex; align-items: center; gap: 12px; text-align: left; }
-.xa-toggle-track { position: relative; width: 44px; height: 26px; border-radius: 99px; background: rgba(13,63,72,0.16); flex: none; transition: background .2s; }
-.xa-toggle-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform .2s cubic-bezier(.2,.9,.3,1.2); }
-.xa-toggle.is-on .xa-toggle-track { background: var(--teal); }
-.xa-toggle.is-on .xa-toggle-thumb { transform: translateX(18px); }
-.xa-toggle-label { font-size: 16px; color: var(--teal); }
-
-/* Per-role panels (step 3) */
-.xa-panels { display: flex; flex-direction: column; gap: 18px; }
-.xa-panel { border: 1px solid var(--line); border-radius: 18px; padding: 22px; background: linear-gradient(180deg, rgba(243,240,231,0.5), rgba(243,240,231,0)); display: flex; flex-direction: column; gap: 18px; }
-.xa-panel-head { display: flex; align-items: center; gap: 12px; margin: -2px 0 2px; }
-.xa-panel-icon { width: 34px; height: 34px; border-radius: 10px; background: var(--teal); color: var(--lime); display: flex; align-items: center; justify-content: center; flex: none; }
-.xa-panel-icon svg { width: 18px; height: 18px; }
-.xa-panel-title { font-size: 19px; font-weight: 500; color: var(--teal); margin: 0; }
-
-/* Review */
-.xa-review { border: 1px solid var(--line); border-radius: 16px; margin: 0 0 22px; overflow: hidden; }
-.xa-review-row { display: grid; grid-template-columns: 130px 1fr; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
-.xa-review-row:last-child { border-bottom: none; }
-.xa-review-row dt { font-family: var(--xa-sans); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; color: var(--fg-subtle); align-self: center; }
-.xa-review-row dd { margin: 0; font-size: 16px; color: var(--teal); }
-.xa-consent { font-size: 13px; line-height: 1.5; color: rgba(13,63,72,0.6); margin: 16px 0 0; }
-
-/* Footer controls */
-.xa-controls { display: flex; align-items: center; justify-content: space-between; margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line); }
-.xa-btn { font-family: var(--xa-sans); font-weight: 600; font-size: 15px; border-radius: 99px; transition: background .2s, transform .12s, color .2s, opacity .2s; }
-.xa-btn--primary { display: inline-flex; align-items: center; gap: 8px; background: var(--teal); color: var(--eggshell); padding: 14px 26px; box-shadow: 0 8px 20px -10px rgba(13,63,72,0.5); }
-.xa-btn--primary:hover { background: var(--plum); transform: translateY(-1px); }
-.xa-btn--primary:disabled { opacity: 0.6; cursor: progress; transform: none; }
-.xa-btn--ghost { color: var(--plum); padding: 14px 6px; }
-.xa-btn--ghost:hover { color: var(--teal); }
-.xa-btn--ghost:disabled { opacity: 0.4; }
-
-/* Success state */
-.xa-done { animation: xa-in .4s cubic-bezier(.2,.7,.3,1); text-align: center; padding: 12px 0 8px; outline: none; }
-.xa-done-mark { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 22px; background: var(--lime); color: var(--teal); display: flex; align-items: center; justify-content: center; animation: xa-pop .45s cubic-bezier(.2,1.4,.4,1) .08s both; }
-.xa-done-mark svg { width: 30px; height: 30px; }
-.xa-done-eyebrow { font-family: var(--xa-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--plum); margin: 0 0 8px; }
-.xa-done-title { font-size: clamp(24px,2.6vw,32px); font-weight: 400; line-height: 1.15; color: var(--teal); margin: 0 0 12px; }
-.xa-done-sub { font-size: 16px; line-height: 1.6; color: rgba(13,63,72,0.75); margin: 0 auto; max-width: 42ch; }
-.xa-done-sub b { color: var(--teal); }
-.xa-done-roles { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0; margin: 24px 0 0; }
-.xa-done-roles li { display: inline-flex; align-items: center; gap: 8px; font-family: var(--xa-sans); font-size: 13.5px; font-weight: 600; color: var(--teal); background: var(--eggshell-warm); border-radius: 99px; padding: 8px 15px 8px 10px; }
-.xa-done-roleicon { width: 24px; height: 24px; border-radius: 7px; background: var(--teal); color: var(--lime); display: flex; align-items: center; justify-content: center; }
-.xa-done-roleicon svg { width: 13px; height: 13px; }
-
-/* Honeypot — kept in the DOM for bots but out of sight + tab order */
-.xa-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-
-@keyframes xa-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-@keyframes xa-pop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
-
-@media (max-width: 600px) {
-  .signup-formwrap--steps { padding: 24px 20px; }
-  .xa-row { grid-template-columns: 1fr; }
-  .xa-rail-label { font-size: 10px; }
-  .xa-btn--primary { padding: 13px 22px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .xa-step, .xa-done, .xa-done-mark { animation: none; }
-  .xa-rolecard, .xa-rolecard-tick, .xa-toggle-thumb, .xa-btn--primary { transition: none; }
-}
 
 /* ---- Onboarding steps panel ---- */
 .ob-banner { display: flex; align-items: center; gap: 12px; background: var(--lime); color: var(--teal); border-radius: 14px; padding: 14px 20px; margin-bottom: 36px; font-size: 15px; font-weight: 500; }
@@ -1124,17 +1011,24 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 /* Navbar account dropdown — visible only when the visitor is signed in.
    Sits to the right of the primary CTA ("My Growth Hub"). */
 .nav-account { position: relative; display: flex; align-items: center; gap: 10px; }
+/* Demoted to a plain avatar + caret (no pill/border) so it reads as a
+   secondary control next to the "My Growth Hub" CTA rather than a second
+   competing button. */
 .nav-account-toggle {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 8px 4px 4px;
-  border: 1px solid rgba(13, 63, 72, 0.18);
-  background: white;
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 4px 3px 3px;
+  border: 0;
+  background: transparent;
   border-radius: 999px;
   cursor: pointer;
   color: var(--teal);
   transition: background-color 120ms ease;
 }
-.nav-account-toggle:hover { background: rgba(227, 242, 156, 0.45); }
+.nav-account-toggle:hover { background: rgba(13, 63, 72, 0.06); }
+/* The portal link inside the menu is redundant while the CTA pill is shown
+   (>900px). It only surfaces in the 720–900px band where .nav-cta is hidden. */
+.nav-account-portal-link { display: none; }
+@media (max-width: 900px) { .nav-account-portal-link { display: block; } }
 .nav-account-avatar {
   display: inline-flex; align-items: center; justify-content: center;
   width: 26px; height: 26px;
@@ -1497,11 +1391,68 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
    ============================================================ */
 
 .event-hero .draft-tag { display: inline-block; vertical-align: middle; margin-left: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(95,48,75,0.12); color: var(--plum); font-size: 12px; letter-spacing: 0.05em; font-family: var(--font-script); }
-.event-keyfacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-top: 56px; border-top: 1px solid var(--line); padding-top: 32px; }
-.event-keyfact { display: flex; flex-direction: column; gap: 6px; }
-.event-keyfact .lbl { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.event-keyfact .val { font-size: 16px; color: var(--teal); }
+/* Editorial kicker (replaces the generic pill); the leading rule echoes
+   .section-label so the page's labels share one motif. */
+.event-eyebrow { display: inline-flex; align-items: center; gap: 12px; margin: 0 0 4px; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 13px; letter-spacing: 0.02em; color: var(--muted); }
+.event-eyebrow .rule { width: 28px; height: 1px; background: var(--plum); flex: none; }
+/* Register free leads the hero now that the CTAs sit above the support row. */
+.event-hero .hero-ctas .btn-primary { padding: 16px 30px; font-size: 16.5px; }
+/* "At a glance" facts now live as a calm card in the left of the hero support
+   row — the single canonical home for the logistics (deduped from the panel). */
+.event-hero-facts { background: var(--eggshell-warm); border: 1px solid var(--eggshell-line); border-radius: 22px; padding: 24px 28px 12px; align-self: start; }
+.event-hero-facts .section-label { margin-bottom: 14px; }
+.event-keyfacts { display: flex; flex-direction: column; margin: 0; }
+.event-keyfact { display: flex; flex-direction: row; align-items: baseline; justify-content: space-between; gap: 18px; padding: 13px 0; border-bottom: 1px dashed rgba(13,63,72,0.14); }
+.event-keyfact:last-child { border-bottom: 0; }
+.event-keyfact .lbl { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); flex: none; }
+.event-keyfact .val { font-size: 16px; color: var(--teal); text-align: right; }
 .event-keyfact .val em { font-style: italic; color: var(--plum); }
+
+/* Hero detail row: supporting copy + CTAs on the left, an interactive
+   "plan your day" panel on the right. Collapses to a single column on
+   tablet / mobile. The rolling headline above stays full-width. */
+.event-hero-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(28px, 4vw, 52px); align-items: start; margin-top: 48px; }
+.event-hero-main { min-width: 0; }
+.event-hero-main .hero-sub { margin-top: 0; }
+.event-hero-side { min-width: 0; }
+@media (max-width: 980px) {
+  .event-hero-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+
+/* "Plan your day" concierge panel (right hero column) */
+.plan-panel { background: var(--eggshell); border: 1px solid var(--eggshell-line); border-radius: 22px; overflow: hidden; box-shadow: 0 24px 54px -36px rgba(13,63,72,0.55); }
+.plan-panel-head { background: var(--teal); color: var(--eggshell); padding: 22px 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.plan-head-text { min-width: 0; }
+.plan-eyebrow { display: block; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lime); }
+.plan-lede { margin: 8px 0 0; font-size: 15px; line-height: 1.45; color: rgba(243,240,231,0.85); }
+.plan-chip { flex: none; margin-top: 2px; padding: 6px 12px; border-radius: 999px; background: var(--lime); color: var(--teal); font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; }
+.plan-acc { padding: 4px 6px; }
+.plan-row { border-bottom: 1px solid var(--eggshell-line); }
+.plan-row:last-child { border-bottom: 0; }
+.plan-q { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border-radius: 12px; text-align: left; font-size: 17px; color: var(--teal); transition: color .2s, background .2s; }
+.plan-q:hover { color: var(--plum); background: rgba(13,63,72,0.045); }
+.plan-row.is-open > .plan-q { color: var(--plum); }
+.plan-q .chev { color: var(--plum); flex: none; transition: transform .25s ease; }
+.plan-row.is-open .plan-q .chev { transform: rotate(90deg); }
+.plan-a-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s ease; }
+.plan-row.is-open .plan-a-wrap { grid-template-rows: 1fr; }
+.plan-a { overflow: hidden; min-height: 0; }
+.plan-a-inner { padding: 0 16px 18px; }
+@media (prefers-reduced-motion: reduce) { .plan-a-wrap, .plan-q .chev { transition: none; } }
+
+.plan-prog { list-style: none; margin: 0; padding: 0; }
+.plan-prog li { display: flex; gap: 12px; align-items: baseline; padding: 7px 0; border-bottom: 1px dashed rgba(13,63,72,0.12); }
+.plan-prog li:last-child { border-bottom: 0; }
+.plan-prog .t { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; color: var(--plum); font-size: 13px; font-weight: 600; letter-spacing: 0.01em; min-width: 76px; flex: none; }
+.plan-prog .n { color: var(--teal); font-size: 14.5px; line-height: 1.4; }
+.plan-jump { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--plum); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.plan-jump:hover { color: var(--teal); }
+
+.plan-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.plan-list li { position: relative; padding-left: 18px; color: var(--teal); font-size: 14.5px; line-height: 1.45; }
+.plan-list li::before { content: ''; position: absolute; left: 2px; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 2px rgba(227,242,156,0.4); }
+.plan-where { margin: 0; color: var(--teal); font-size: 15px; line-height: 1.5; }
+.plan-note { margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
 
 /* Naming concepts */
 .naming { background: var(--eggshell-warm); }
@@ -1522,14 +1473,33 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .name-suggest input { flex: 1; min-width: 240px; padding: 14px 18px; border: 1px solid var(--line); border-radius: 999px; background: var(--eggshell); font-size: 16px; font-family: inherit; color: var(--teal); }
 .name-suggest input:focus { outline: none; border-color: var(--teal); }
 
-/* Schedule */
-.schedule { padding-top: clamp(80px, 10vw, 140px); }
+/* Schedule — on a subtly warmer ground so the day reads as its own "moment". */
+.schedule { padding: clamp(80px, 10vw, 140px) 0 clamp(56px, 7vw, 96px); background: var(--eggshell-warm); }
 .schedule-head { max-width: 720px; }
 .schedule-head .draft-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: rgba(95,48,75,0.08); color: var(--plum); font-size: 13px; margin-top: 16px; }
-.schedule-list { margin-top: 48px; display: flex; flex-direction: column; }
+.schedule-list { margin-top: 20px; display: flex; flex-direction: column; }
+/* The day splits at lunch; a labelled hairline turns one long timeline into two acts. */
+.schedule-part { display: flex; align-items: center; gap: 16px; padding: 30px 0 12px; }
+.schedule-part:first-child { padding-top: 0; }
+.schedule-part::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.schedule-part-label { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); }
+/* The day runs across three spaces — a room heading labels each. */
+.schedule-room { font-family: var(--font-serif, Georgia, serif); font-weight: 400; font-size: clamp(20px, 1.8vw, 24px); color: var(--teal); letter-spacing: -0.01em; margin: 0 0 16px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.schedule-room.is-lead { font-size: clamp(22px, 2.4vw, 30px); margin: 44px 0 0; }
+.schedule-room .room-sub { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); }
+.schedule-rooms { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 44px; }
+.room-card { background: var(--eggshell); border: 1px solid var(--line); border-radius: 18px; padding: 26px 28px; }
+.room-time { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 600; color: var(--teal); margin: 0; }
+.room-note { color: var(--muted); font-size: 14.5px; line-height: 1.55; margin: 8px 0 0; }
+.room-lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.room-lines li { color: var(--teal); font-size: 15px; display: flex; gap: 12px; align-items: baseline; }
+.room-lines .t { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; font-weight: 600; color: var(--plum); min-width: 104px; flex: none; }
+@media (max-width: 760px) { .schedule-rooms { grid-template-columns: 1fr; } }
 .slot { display: grid; grid-template-columns: 140px 24px 1fr; gap: 24px; padding: 22px 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
-.slot-time { font-family: var(--font-script); color: var(--plum); font-size: 22px; line-height: 1; display: flex; flex-direction: column; gap: 4px; }
-.slot-time .end { font-size: 13px; color: var(--muted); font-family: var(--font-serif, serif); }
+/* Times are data you scan down a column — set them in the clean face with
+   tabular figures, not the decorative script. */
+.slot-time { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; color: var(--teal); font-size: 16px; font-weight: 600; line-height: 1.2; letter-spacing: 0.01em; display: flex; flex-direction: column; gap: 4px; }
+.slot-time .end { font-size: 12.5px; font-weight: 400; color: var(--muted); font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; }
 .slot-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--teal); margin-top: 6px; }
 .slot.is-pin .slot-dot { background: var(--lime); border: 1.5px solid var(--teal); }
 .slot.is-break .slot-dot { background: var(--lavender); }
@@ -1546,11 +1516,15 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .session-pres { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
 .session-pres .pres-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--plum); }
 .session-pres .tbc { font-style: italic; }
+/* A presenter still being confirmed shouldn't pull weight from the locked-in
+   sessions: dim the line and hollow out its dot. The session title stays full. */
+.session.is-tbc .session-pres { color: var(--fg-subtle); }
+.session.is-tbc .session-pres .pres-dot { background: transparent; border: 1px solid var(--fg-subtle); }
 .proposed-tag { padding: 1px 6px; border-radius: 4px; background: rgba(95,48,75,0.12); color: var(--plum); font-size: 10px; letter-spacing: 0.05em; }
 @media (max-width: 760px) {
   .slot { grid-template-columns: 1fr; gap: 8px; }
   .slot-time { display: none; }
-  .slot-mobile-time { display: block; font-family: var(--font-script); color: var(--plum); font-size: 18px; margin-bottom: 6px; }
+  .slot-mobile-time { display: block; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; color: var(--teal); font-weight: 600; font-size: 14px; letter-spacing: 0.02em; margin-bottom: 6px; }
   .slot-dot { display: none; }
   .sessions { grid-template-columns: 1fr; }
 }
@@ -1560,14 +1534,16 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .involved-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
 .inv-card { background: var(--eggshell); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 10px; transition: transform .2s; }
 .inv-card:hover { transform: translateY(-2px); }
-.inv-num { font-family: var(--font-script); color: var(--plum); font-size: 18px; }
 .inv-card h3 { font-size: 20px; color: var(--teal); letter-spacing: -0.01em; font-weight: 400; margin: 0; }
 .inv-card p { color: var(--muted); font-size: 14.5px; line-height: 1.55; }
-.inv-tag { align-self: flex-start; margin-top: auto; padding: 4px 10px; border-radius: 999px; background: rgba(13,63,72,0.06); color: var(--teal); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.inv-tag { align-self: flex-start; padding: 5px 11px; border-radius: 999px; background: rgba(95,48,75,0.08); color: var(--plum); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.inv-card { min-height: 184px; }
 
 /* Stakeholders */
 .stakes { background: var(--eggshell-warm); }
 .stakes-head { display: flex; justify-content: space-between; gap: 28px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 36px; }
+.stakes-groups { display: flex; flex-direction: column; gap: 32px; }
+.stake-group-label { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); margin: 0 0 14px; }
 .stakes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
 .stake-cell { background: var(--eggshell); padding: 22px; display: flex; flex-direction: column; gap: 4px; }
 .stake-cell.is-host { background: var(--teal); color: var(--eggshell); }
@@ -1588,7 +1564,7 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .feedback-side ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
 .feedback-side li { font-size: 14px; color: rgba(243,240,231,0.78); padding-left: 18px; position: relative; }
 .feedback-side li::before { content: '·'; position: absolute; left: 4px; color: var(--lime); font-size: 22px; line-height: 0.6; }
-@media (max-width: 800px) { .feedback-cta .feedback-card { grid-template-columns: 1fr; } }
+@media (max-width: 800px) { .feedback-cta .feedback-card { grid-template-columns: minmax(0, 1fr); } }
 
 /* Generic event detail page (driven by /events/[slug]) */
 .event-detail .ed-back { display: inline-flex; align-items: center; gap: 8px; color: var(--plum); font-size: 14px; margin-bottom: 24px; }
@@ -1646,4 +1622,131 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .posts-empty { max-width: 640px; background: var(--eggshell-warm); border: 1px solid var(--line); border-radius: 18px; padding: 32px 36px; }
 .posts-empty h2 { font-weight: 400; font-size: 26px; color: var(--teal); margin: 0 0 10px; letter-spacing: -0.015em; }
 .posts-empty p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
+
+/* ===================================================================
+   Expo apply — multi-step application form (ExpoApplyForm.tsx).
+   All selectors are namespaced .xa-* so nothing collides with the
+   site's section/cta rules. A utility sans is used for labels, chips,
+   buttons and the progress rail; titles inherit the page serif.
+   =================================================================== */
+.signup-formwrap--steps { padding: 32px; box-shadow: 0 40px 80px -52px rgba(13,63,72,0.42); }
+.xa { --xa-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+/* Progress rail */
+.xa-rail { list-style: none; display: flex; align-items: flex-start; gap: 0; margin: 0 0 32px; padding: 0; counter-reset: xa; }
+.xa-rail-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; font-family: var(--xa-sans); }
+/* connector line between dots */
+.xa-rail-step::before { content: ""; position: absolute; top: 14px; left: -50%; width: 100%; height: 2px; background: var(--line); z-index: 0; }
+.xa-rail-step:first-child::before { display: none; }
+.xa-rail-step.is-done::before, .xa-rail-step.is-current::before { background: var(--teal); }
+.xa-rail-dot { position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; background: #fff; border: 2px solid var(--line); color: var(--fg-subtle); transition: background .25s, border-color .25s, color .25s; }
+.xa-rail-dot svg { width: 14px; height: 14px; }
+.xa-rail-step.is-current .xa-rail-dot { border-color: var(--teal); color: var(--teal); box-shadow: 0 0 0 4px rgba(13,63,72,0.08); }
+.xa-rail-step.is-done .xa-rail-dot { background: var(--teal); border-color: var(--teal); color: var(--eggshell); }
+.xa-rail-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; color: var(--fg-subtle); }
+.xa-rail-step.is-current .xa-rail-label { color: var(--teal); }
+.xa-rail-step.is-done .xa-rail-label { color: var(--muted); }
+
+/* Step container + intro type */
+.xa-stepwrap { outline: none; }
+.xa-step { animation: xa-in .35s cubic-bezier(.2,.7,.3,1); }
+.xa-eyebrow { font-family: var(--xa-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); margin: 0 0 10px; }
+.xa-title { font-size: clamp(26px,2.8vw,34px); font-weight: 400; line-height: 1.12; letter-spacing: -0.01em; color: var(--teal); margin: 0 0 8px; }
+.xa-lede { font-size: 16px; line-height: 1.55; color: rgba(13,63,72,0.72); margin: 0 0 26px; }
+
+/* Role picker — the signature element */
+.xa-rolegrid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.xa-rolecard { position: relative; display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; column-gap: 14px; row-gap: 2px; text-align: left; padding: 20px 22px; border-radius: 18px; border: 1.5px solid var(--line); background: rgba(243,240,231,0.45); transition: border-color .2s, background .2s, transform .12s, box-shadow .2s; }
+.xa-rolecard:hover { border-color: rgba(13,63,72,0.35); transform: translateY(-1px); }
+.xa-rolecard.is-on { border-color: var(--teal); background: linear-gradient(180deg, rgba(227,242,156,0.32), rgba(227,242,156,0.12)); box-shadow: 0 10px 24px -16px rgba(13,63,72,0.5); }
+.xa-rolecard-icon { grid-row: 1 / span 2; align-self: start; width: 44px; height: 44px; border-radius: 12px; background: var(--eggshell-warm); color: var(--teal); display: flex; align-items: center; justify-content: center; transition: background .2s, color .2s; }
+.xa-rolecard-icon svg { width: 22px; height: 22px; }
+.xa-rolecard.is-on .xa-rolecard-icon { background: var(--teal); color: var(--lime); }
+.xa-rolecard-title { font-size: 18px; font-weight: 600; color: var(--teal); }
+.xa-rolecard-blurb { font-size: 14px; line-height: 1.45; color: var(--muted); }
+/* Always-visible selection affordance: an empty ring at rest that fills with a
+   teal check when picked — signals these are multi-select toggles, not links. */
+.xa-rolecard-tick { position: absolute; top: 50%; right: 18px; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 1.6px solid rgba(13,63,72,0.22); color: transparent; display: flex; align-items: center; justify-content: center; transition: background .2s, border-color .2s, color .2s; }
+.xa-rolecard-tick svg { width: 13px; height: 13px; opacity: 0; transition: opacity .18s; }
+.xa-rolecard:hover .xa-rolecard-tick { border-color: rgba(13,63,72,0.45); }
+.xa-rolecard.is-on .xa-rolecard-tick { background: var(--teal); border-color: var(--teal); color: var(--eggshell); }
+.xa-rolecard.is-on .xa-rolecard-tick svg { opacity: 1; }
+
+/* Fields */
+.xa-fields { display: flex; flex-direction: column; gap: 22px; }
+.xa-row { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.xa-field { display: flex; flex-direction: column; }
+.xa-label { font-family: var(--xa-sans); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(13,63,72,0.6); font-weight: 700; margin-bottom: 8px; }
+.xa-req { color: var(--plum); }
+.xa-hint { font-weight: 500; letter-spacing: 0.06em; color: var(--fg-subtle); text-transform: none; }
+.xa-input { width: 100%; font-family: var(--font-serif, Georgia, serif); font-size: 18px; color: var(--teal); background: transparent; border: none; border-bottom: 1.5px solid rgba(13,63,72,0.2); border-radius: 0; padding: 6px 0 9px; outline: none; transition: border-color .2s; }
+.xa-input:focus { border-bottom-color: var(--plum); }
+.xa-input::placeholder { color: rgba(13,63,72,0.32); font-style: italic; }
+.xa-textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+.xa-field.has-error .xa-input { border-bottom-color: #A8423E; }
+.xa-error { font-family: var(--xa-sans); font-size: 12.5px; color: #A8423E; margin-top: 6px; }
+.xa-error--block { margin-top: 14px; }
+
+/* Choice chips */
+.xa-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.xa-chip { font-family: var(--xa-sans); font-size: 13.5px; font-weight: 500; padding: 8px 15px; border-radius: 99px; border: 1.5px solid rgba(13,63,72,0.18); color: var(--muted); background: #fff; transition: background .15s, border-color .15s, color .15s; }
+.xa-chip:hover { border-color: rgba(13,63,72,0.4); color: var(--teal); }
+.xa-chip.is-on { background: var(--teal); border-color: var(--teal); color: var(--eggshell); }
+
+/* Toggles */
+.xa-toggles { display: flex; flex-direction: column; gap: 12px; }
+.xa-toggle { display: inline-flex; align-items: center; gap: 12px; text-align: left; }
+.xa-toggle-track { position: relative; width: 44px; height: 26px; border-radius: 99px; background: rgba(13,63,72,0.16); flex: none; transition: background .2s; }
+.xa-toggle-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform .2s cubic-bezier(.2,.9,.3,1.2); }
+.xa-toggle.is-on .xa-toggle-track { background: var(--teal); }
+.xa-toggle.is-on .xa-toggle-thumb { transform: translateX(18px); }
+.xa-toggle-label { font-size: 16px; color: var(--teal); }
+
+/* Review */
+.xa-review { border: 1px solid var(--line); border-radius: 16px; margin: 0 0 22px; overflow: hidden; }
+.xa-review-row { display: grid; grid-template-columns: 130px 1fr; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.xa-review-row:last-child { border-bottom: none; }
+.xa-review-row dt { font-family: var(--xa-sans); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; color: var(--fg-subtle); align-self: center; }
+.xa-review-row dd { margin: 0; font-size: 16px; color: var(--teal); }
+.xa-consent { font-size: 13px; line-height: 1.5; color: rgba(13,63,72,0.6); margin: 16px 0 0; }
+
+/* Footer controls */
+.xa-controls { display: flex; align-items: center; justify-content: space-between; margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line); }
+.xa-btn { font-family: var(--xa-sans); font-weight: 600; font-size: 15px; border-radius: 99px; transition: background .2s, transform .12s, color .2s, opacity .2s; }
+.xa-btn--primary { display: inline-flex; align-items: center; gap: 8px; background: var(--teal); color: var(--eggshell); padding: 14px 26px; box-shadow: 0 8px 20px -10px rgba(13,63,72,0.5); }
+.xa-btn--primary:hover { background: var(--plum); transform: translateY(-1px); }
+.xa-btn--primary:disabled { opacity: 0.6; cursor: progress; transform: none; }
+.xa-btn--ghost { color: var(--plum); padding: 14px 6px; }
+.xa-btn--ghost:hover { color: var(--teal); }
+.xa-btn--ghost:disabled { opacity: 0.4; }
+
+/* Success state */
+.xa-done { animation: xa-in .4s cubic-bezier(.2,.7,.3,1); text-align: center; padding: 12px 0 8px; outline: none; }
+.xa-done-mark { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 22px; background: var(--lime); color: var(--teal); display: flex; align-items: center; justify-content: center; animation: xa-pop .45s cubic-bezier(.2,1.4,.4,1) .08s both; }
+.xa-done-mark svg { width: 30px; height: 30px; }
+.xa-done-eyebrow { font-family: var(--xa-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--plum); margin: 0 0 8px; }
+.xa-done-title { font-size: clamp(24px,2.6vw,32px); font-weight: 400; line-height: 1.15; color: var(--teal); margin: 0 0 12px; }
+.xa-done-sub { font-size: 16px; line-height: 1.6; color: rgba(13,63,72,0.75); margin: 0 auto; max-width: 42ch; }
+.xa-done-sub b { color: var(--teal); }
+.xa-done-roles { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0; margin: 24px 0 0; }
+.xa-done-roles li { display: inline-flex; align-items: center; gap: 8px; font-family: var(--xa-sans); font-size: 13.5px; font-weight: 600; color: var(--teal); background: var(--eggshell-warm); border-radius: 99px; padding: 8px 15px 8px 10px; }
+.xa-done-roleicon { width: 24px; height: 24px; border-radius: 7px; background: var(--teal); color: var(--lime); display: flex; align-items: center; justify-content: center; }
+.xa-done-roleicon svg { width: 13px; height: 13px; }
+
+/* Honeypot — kept in the DOM for bots but out of sight + tab order */
+.xa-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+@keyframes xa-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes xa-pop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+
+@media (max-width: 600px) {
+  .signup-formwrap--steps { padding: 24px 20px; }
+  .xa-row { grid-template-columns: 1fr; }
+  .xa-rail-label { font-size: 10px; }
+  .xa-btn--primary { padding: 13px 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .xa-step, .xa-done, .xa-done-mark { animation: none; }
+  .xa-rolecard, .xa-rolecard-tick, .xa-toggle-thumb, .xa-btn--primary { transition: none; }
+}
 

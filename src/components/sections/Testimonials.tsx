@@ -55,7 +55,7 @@ export default function Testimonials({ testimonials, ctaLabel, ctaHref }: Testim
         </div>
       </div>
       <div className="ttg-cta">
-        <Link className="btn btn-primary" href={ctaHref ?? "#contact"}>
+        <Link className="btn btn-primary" href={ctaHref ?? "/sign-up?redirect_url=%2Fportal"}>
           {ctaLabel ?? "Sign Up Now"}
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
             <path d="M3 7h8M7 3l4 4-4 4" />

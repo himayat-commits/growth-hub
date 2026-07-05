@@ -13,6 +13,7 @@ import { Resend } from 'resend';
 import * as Sentry from '@sentry/nextjs';
 import { eq } from 'drizzle-orm';
 import { getOpsUser } from '@/lib/auth/ops';
+import { canAccessMemberThread } from '@/lib/auth/ops-inbox';
 import { getDb } from '@/lib/db';
 import { userProfiles, subscriptions } from '@/lib/db/schema';
 import { sendTeamMessage } from '@/lib/db/messages';
@@ -35,6 +36,11 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
 
   const { userId } = await params;
   if (!userId) return NextResponse.json({ error: 'Invalid userId' }, { status: 400 });
+
+  // Strategists may only reply in threads for members assigned to them.
+  if (!(await canAccessMemberThread(opsUser, userId))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   let body: { body?: string };
   try {

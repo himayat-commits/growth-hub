@@ -1,12 +1,14 @@
 /**
- * One-off: add Record Time as a partner.
+ * One-off: add Record TIME as a partner. Ran against prod on 3 Jul 2026
+ * (originally as "Record Time"; the row was renamed to the brand styling
+ * "Record TIME" afterwards) — committed for the record.
  *
  *   node --env-file=<prod env> --import tsx/esm scripts/add-recordtime-partner.ts
  *
  * Idempotent. Does three things:
- *   1. Uploads the Record Time logo SVG to the media collection (Vercel Blob
+ *   1. Uploads the Record TIME logo SVG to the media collection (Vercel Blob
  *      when BLOB_READ_WRITE_TOKEN is set).
- *   2. Creates the "Record Time" partner (featured, published) — or backfills
+ *   2. Creates the "Record TIME" partner (featured, published) — or backfills
  *      the logo if the partner already exists.
  *   3. Appends the partner to the home page's logo-strip block so it shows in
  *      the front-page marquee.
@@ -15,7 +17,7 @@ import { getPayload } from 'payload';
 import config from '../src/payload.config';
 
 const LOGO_PATH = 'C:/Users/WaheedJayhoon/Downloads/RecordTime_stacked_positive.svg';
-const PARTNER_NAME = 'Record Time';
+const PARTNER_NAME = 'Record TIME';
 
 async function run() {
   const payload = await getPayload({ config });
@@ -35,7 +37,7 @@ async function run() {
   } else {
     const media = await payload.create({
       collection: 'media',
-      data: { alt: 'Record Time logo' },
+      data: { alt: 'Record TIME logo' },
       filePath: LOGO_PATH,
     });
     mediaId = media.id;

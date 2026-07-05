@@ -28,12 +28,16 @@
 
 import { NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
+import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req: Request) {
+  const rl = rateLimit(`newsletter:${clientIp(req)}`, 5, 60_000);
+  if (!rl.ok) return tooManyRequests(rl.retryAfterSec);
+
   let body: { email?: unknown; source?: unknown; hp?: unknown } = {};
   try {
     body = await req.json();

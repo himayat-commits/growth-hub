@@ -2,6 +2,13 @@ import type { CollectionConfig } from 'payload';
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  access: {
+    // Uploads back public site content (partner logos, page imagery). The
+    // Vercel Blob plugin serves files through /api/media/file/* with this
+    // collection's read access applied — without a public read rule, Payload's
+    // default (authenticated-only) 403s every asset for site visitors.
+    read: () => true,
+  },
   upload: {
     // Local fallback when BLOB_READ_WRITE_TOKEN is not set (development).
     // Vercel Blob plugin overrides the storage destination in production.
