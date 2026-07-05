@@ -18,6 +18,10 @@ import { Topbar } from '@/components/dashboard/Topbar'
 import type { TopbarUser } from '@/components/dashboard/Topbar'
 import PostHogProvider from '@/components/PostHogProvider'
 import PostHogIdentify from '@/components/PostHogIdentify'
+// Tailwind first so dashboard.css keeps cascade priority over utilities.
+// The app shell previously never loaded Tailwind at all — every utility
+// class on this surface rendered unstyled (see src/styles/tailwind.css).
+import '@/styles/tailwind.css'
 import '@/styles/dashboard.css'
 
 function makeInitials(name: string | null | undefined, email: string | null | undefined) {

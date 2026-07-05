@@ -1,4 +1,8 @@
 @import "tailwindcss";
+/* v4 ignores the v3-style tailwind.config.ts unless pointed at it — without
+ * this the brand utilities (text-teal, bg-lime, font-serif, shadow-soft…)
+ * don't exist and silently render unstyled. */
+@config "../../tailwind.config.ts";
 
 /* ---- Brand tokens ---- */
 :root {
