@@ -15,31 +15,42 @@ instant — no code change, no rebuild.
 ## Phase 0 — Get credentials + validate the contract (blocking)
 
 ### Credentials to obtain from Birdeye reseller account management
-- `BIRDEYE_API_KEY` — reseller-scoped API key (currently a placeholder).
-- `BIRDEYE_RESELLER_ID` — reseller id (placeholder; route falls back to `demo-reseller`).
-- Confirm `BIRDEYE_API_HOST` (we assume `https://api.birdeye.com/resources`).
-- The canonical customer dashboard deep-link, ideally with a `{businessNumber}`
-  slot (for `BIRDEYE_DASHBOARD_URL_TEMPLATE`).
-- Whether a **sandbox / deletable test sub-accounts** exist, and whether each
+Validated read-only against the live API on 2026-07-05 (GET business +
+GET child/all; no create calls made):
+- ✅ `BIRDEYE_API_KEY` — real key set in Vercel Production; returns 200.
+- ✅ `BIRDEYE_RESELLER_ID` — the account's business id; accepted as `pid` by
+  `GET /v1/business/child/all`, which listed the account's existing child
+  businesses (reseller scope confirmed). Set in Vercel Production.
+- ✅ `BIRDEYE_API_HOST` — `https://api.birdeye.com/resources` confirmed.
+- ✅ Auth mechanism — BOTH the `x-api-key` header (what `client.ts` sends)
+  and `?api_key=` query param return 200. No client change needed.
+- Bonus: `GET /v1/business/child/all?pid={resellerId}` works — usable for
+  orphan recovery (find a created-but-unpersisted sub-account by name/date).
+- Still to confirm with Birdeye: the canonical customer dashboard deep-link
+  (`BIRDEYE_DASHBOARD_URL_TEMPLATE` with a `{businessNumber}` slot), and
+  whether **sandbox / deletable test sub-accounts** exist and whether each
   `create_subaccount` is billable.
 
 ### Contract assumptions to validate against real docs/sandbox
 The payload builders in [`payloads.ts`](../src/lib/birdeye/payloads.ts) are
-blueprint-derived. The code cannot self-verify these — confirm before live:
+blueprint-derived. The remaining unknowns all involve WRITE calls — they can
+only be confirmed by the Phase-5 smoke test (one disposable account) or by
+Birdeye support answering directly:
 1. **Create response shape** — does `POST /v1/signup/reseller/subaccount` return
    `businessId`, `businessNumber`, both, or nested? Adjust
-   [`extractIdentifiers()`](../src/lib/birdeye/client.ts) to match.
+   [`extractIdentifiers()`](../src/lib/birdeye/client.ts) to match. (The GET
+   business response uses a numeric `businessId`; child rows use `id`.)
 2. **businessId vs businessNumber** — which value goes in the `PUT /v1/business/{id}`
    path, the `x-business-number` header, and `businessIds[]`. The code currently
    threads one value for all three.
-3. **Idempotency** — does create honour `externalReferenceId` (we send it)? Is
-   there a GET to look up a sub-account by external ref / email (orphan recovery)?
-4. Exact endpoints / required fields / API versions for all six calls; the auth
-   header (`x-api-key` vs token); the error envelope (the `code` numbers mapped in
-   `ERROR_HINTS`); whether media accepts remote URLs; the `userRole` enum;
-   field formats (hours day index, `HH:MM`, special-hours `MM/DD/YYYY`).
+3. **Idempotency** — does create honour `externalReferenceId` (we send it)?
+   (Orphan recovery fallback exists regardless: child/all listing.)
+4. Required fields / API versions for the five write calls; the error envelope
+   (the `code` numbers mapped in `ERROR_HINTS`); whether media accepts remote
+   URLs; the `userRole` enum; field formats (hours day index, `HH:MM`,
+   special-hours `MM/DD/YYYY`). (Auth header: ✅ confirmed above.)
 5. Confirm module **entitlement** + **Webchat** truly can't be set via the public
-   API (today they're routed to ops — see Phase 3 / notify-ops).
+   API (today they're routed to ops — see Phase 3 / the ops handoff).
 
 Until 1–3 are confirmed, keep `PROVISION_MODE=mock` in production.
 
@@ -57,7 +68,7 @@ Until 1–3 are confirmed, keep `PROVISION_MODE=mock` in production.
 | `OPS_NOTIFICATION_EMAIL` | ops inbox (defaults to `hello@himayat.com.au`) |
 | `OPS_NOTIFY_WEBHOOK` | optional Slack/webhook URL |
 | `OPS_EMAILS` | already `waheed@himayat.com.au`; this is the live allowlist |
-| `CRON_SECRET` | required — auths the hourly `/api/cron/provision-retry` auto-retry |
+| `CRON_SECRET` | required — auths the daily `/api/cron/provision-retry` auto-retry |
 | `HEALTH_SECRET` | optional — headless access to `/api/health/provisioning` |
 
 Then **remove** `NEXT_PUBLIC_PROVISION_MODE` from Vercel (it's now only a
@@ -111,7 +122,7 @@ Confirm by counting `create_subaccount` rows in `provisioning_logs` for that use
   `?secret=HEALTH_SECRET`) — fails when live mode is missing credentials or
   Stripe price IDs are absent; the same checks warn at boot via
   instrumentation.
-- **Auto-retry:** hourly Vercel cron `/api/cron/provision-retry` re-runs
+- **Auto-retry:** daily Vercel cron `/api/cron/provision-retry` (20:00 UTC — Hobby-plan crons are capped at once/day; tighten to hourly on Pro) re-runs
   `partial`/crashed runs older than 1h with `attempts < 3` (user Resume is
   uncapped; only automation respects the ceiling). Mutual exclusion with
   user/ops runs via the `lockedUntil` lease.
