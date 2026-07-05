@@ -39,8 +39,17 @@ export async function GET(req: Request) {
     LIMIT ${BATCH_LIMIT}
   `);
 
+  // Serial on purpose (each live run is many Birdeye calls), with a time
+  // budget well inside maxDuration so we never get killed mid-run — leftover
+  // candidates simply wait for the next hourly tick.
+  const TIME_BUDGET_MS = 180_000;
+  const startedAt = Date.now();
   const results: Array<{ userId: string; outcome: string }> = [];
   for (const { userId } of candidates.rows) {
+    if (Date.now() - startedAt > TIME_BUDGET_MS) {
+      results.push({ userId, outcome: "deferred_time_budget" });
+      continue;
+    }
     try {
       const outcome = await rerunProvisionForUser(userId, "cron");
       results.push({

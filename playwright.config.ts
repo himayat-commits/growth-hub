@@ -3,8 +3,9 @@ import * as dotenv from "dotenv";
 import * as path from "path";
 
 // Load .env.local for local dev runs so DATABASE_URL and PLAYWRIGHT_TEST_TOKEN
-// are available without having to export them manually.
-dotenv.config({ path: path.resolve(__dirname, ".env.local") });
+// are available without having to export them manually. (process.cwd() rather
+// than __dirname — the config is loaded as ESM where __dirname doesn't exist.)
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 
 // Playwright config for Growth Hub smoke tests + E2E wizard flow.
 //

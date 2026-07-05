@@ -258,12 +258,9 @@ export default async function DashboardPage() {
     // 3+ days ago and never provisioned gets at most one reminder a week,
     // created on their next dashboard visit. Never blocks rendering.
     const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-    if (
-      wizardState &&
-      !businessNumber &&
-      obRow &&
-      obRow.updatedAt.getTime() < Date.now() - threeDaysMs
-    ) {
+    // eslint-disable-next-line react-hooks/purity
+    const staleBefore = Date.now() - threeDaysMs;
+    if (wizardState && !businessNumber && obRow && obRow.updatedAt.getTime() < staleBefore) {
       try {
         const nudged = await hasRecentNotification(user.id, 'onboarding_incomplete', 7);
         if (!nudged) {

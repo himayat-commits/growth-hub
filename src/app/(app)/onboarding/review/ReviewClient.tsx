@@ -49,10 +49,15 @@ type RunState = "idle" | "running" | "polling" | "success" | "already" | "error"
 
 export function ReviewClient({
   serverProvisioning,
+  serverStale = false,
 }: {
   /** Authoritative provisioning block from Neon — the client context's copy
    *  can lag behind (localStorage mirror). Re-entry states key off this. */
   serverProvisioning: Provisioning | null;
+  /** True when a `running` row hasn't moved past the staleness threshold —
+   *  i.e. the run crashed. Skip the watcher and offer retry immediately
+   *  (the POST falls through the stale guard to the resume path). */
+  serverStale?: boolean;
 }) {
   const { state, patch } = useWizard();
   const router = useRouter();
@@ -63,7 +68,9 @@ export function ReviewClient({
     ) {
       return "already";
     }
-    if (serverProvisioning?.runStatus === "running") return "polling";
+    if (serverProvisioning?.runStatus === "running" && !serverStale) {
+      return "polling";
+    }
     return "idle";
   });
   const [events, setEvents] = React.useState<ProvisionEvent[]>([]);
@@ -143,6 +150,25 @@ export function ReviewClient({
     setRunState("running");
     setEvents([]);
     setErrorMessage(null);
+    try {
+      await runStream();
+    } catch (err) {
+      // Network drop mid-stream (or before it opened). The run may well be
+      // continuing server-side — the retry POST resumes/409s safely either
+      // way, so never leave the page locked in "running".
+      setRunState("error");
+      setErrorMessage(
+        err instanceof Error && err.message
+          ? `Connection lost: ${err.message}.`
+          : "Connection lost while provisioning."
+      );
+    }
+  };
+
+  const runStream = async () => {
+    // Mirrors the `events` state for same-tick reads — the state variable is
+    // a stale closure inside this function.
+    const received: ProvisionEvent[] = [];
     // Stateless API on Vercel — send the full wizard state in the body.
     const res = await fetch("/api/provision", {
       method: "POST",
@@ -202,9 +228,11 @@ export function ReviewClient({
               status: ev.status ?? "provisioned",
               package: state.packageId,
             });
-            // Persist result with immediate=true so the PUT lands BEFORE
-            // we navigate. /done and /portal then read businessNumber
-            // server-side from Neon on the next request.
+            // Update the CLIENT mirror (context + localStorage) so the UI
+            // reflects the result instantly. The server already persisted
+            // the terminal state before emitting "done", and the PUT
+            // endpoint keeps its own provisioning block regardless of what
+            // this patch sends — server truth is never client-written.
             await patch(
               (s) => ({
                 ...s,
@@ -236,6 +264,7 @@ export function ReviewClient({
             );
             return;
           }
+          received.push(ev as ProvisionEvent);
           setEvents((curr) => [...curr, ev as ProvisionEvent]);
         } catch {
           /* malformed line — ignore */
@@ -250,7 +279,7 @@ export function ReviewClient({
       });
       setRunState("error");
       // Surface the most recent step's error if we have one.
-      const lastError = events.findLast?.((e) => e.status === "error");
+      const lastError = received.findLast?.((e) => e.status === "error");
       setErrorMessage(
         lastError?.error ??
           "Provisioning didn't complete. Your existing answers are saved — please retry."

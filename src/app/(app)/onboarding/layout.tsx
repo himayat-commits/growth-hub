@@ -88,7 +88,11 @@ export default async function OnboardingLayout({
   }
 
   return (
-    <WizardProvider initialState={initialState} mode={mode}>
+    <WizardProvider
+      initialState={initialState}
+      mode={mode}
+      serverHasRow={Boolean(rows[0])}
+    >
       {mode === 'provision' && initialState.status === 'provisioned' ? (
         <PostProvisionNotice />
       ) : null}

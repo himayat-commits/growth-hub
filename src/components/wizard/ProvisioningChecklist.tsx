@@ -48,7 +48,8 @@ export function ProvisioningChecklist({
   const phases = expectedPhases(state);
   // On a resume the runner skips create_subaccount entirely (the account
   // already exists), so no events of that kind ever arrive — show it done.
-  const resuming = Boolean(state.provisioning.businessNumber);
+  // (Optional-chained: a legacy client snapshot may lack the block.)
+  const resuming = Boolean(state.provisioning?.businessNumber);
 
   return (
     <Card>

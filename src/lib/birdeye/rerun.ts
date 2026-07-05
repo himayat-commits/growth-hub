@@ -5,6 +5,7 @@
 
 import "server-only";
 import { isOpsEmail } from "@/lib/auth/ops";
+import { getSubscription, isActive } from "@/lib/subscription";
 import {
   acquireProvisionLock,
   isStaleRunning,
@@ -21,7 +22,12 @@ export type RerunOutcome =
   | { ok: true; result: ProvisionResult }
   | {
       ok: false;
-      reason: "no_state" | "already_provisioned" | "in_progress" | "locked";
+      reason:
+        | "no_state"
+        | "already_provisioned"
+        | "in_progress"
+        | "locked"
+        | "inactive_subscription";
     };
 
 export async function rerunProvisionForUser(
@@ -37,6 +43,15 @@ export async function rerunProvisionForUser(
     state.provisioning.runStatus === "provisioned"
   ) {
     return { ok: false, reason: "already_provisioned" };
+  }
+
+  // Same paid-only gate the user route enforces. Matters most for a `failed`
+  // run (no sub-account yet) after a cancellation — automation must never
+  // CREATE a billable seat for an inactive customer. Ops can judge edge
+  // cases, but through a resubscribe, not a silent override.
+  const sub = await getSubscription(userId);
+  if (!isActive(sub)) {
+    return { ok: false, reason: "inactive_subscription" };
   }
   if (state.provisioning.runStatus === "running" && !isStaleRunning(state, row.updatedAt)) {
     return { ok: false, reason: "in_progress" };

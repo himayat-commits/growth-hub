@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { withAuth } from "@/lib/auth/with-auth";
-import { loadOnboardingState } from "@/lib/wizard/provisioning-store";
+import { isStaleRunning, loadOnboardingRow } from "@/lib/wizard/provisioning-store";
 import { ReviewClient } from "./ReviewClient";
 
 // Server wrapper: reads the authoritative provisioning block from Neon so
@@ -12,6 +12,11 @@ export default async function ReviewPage() {
     redirect("/sign-in?redirect_url=" + encodeURIComponent("/onboarding/review"));
   }
 
-  const serverState = await loadOnboardingState(user.id);
-  return <ReviewClient serverProvisioning={serverState?.provisioning ?? null} />;
+  const row = await loadOnboardingRow(user.id);
+  return (
+    <ReviewClient
+      serverProvisioning={row?.state.provisioning ?? null}
+      serverStale={row ? isStaleRunning(row.state, row.updatedAt) : false}
+    />
+  );
 }

@@ -110,7 +110,9 @@ const FILLED_STATE = {
     gmbPrimary:       'Software Testing Company',
     gmbAdditional:    [],
     birdeyeCategory:  'Software',
-    birdeyeSubs:      '',
+    // Array per taxonomySchema — a bare string here crashes the taxonomy
+    // page's birdeyeSubs.join() once the seeded state is adopted.
+    birdeyeSubs:      [],
     appleCategories:  [],
     fbCategories:     [],
     services:         '',

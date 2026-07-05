@@ -16,6 +16,8 @@ export default async function globalTeardown() {
 
   // Remove all test data in dependency order.
   await sql`DELETE FROM onboarding_states    WHERE user_id = ${TEST_USER_ID}`;
+  await sql`DELETE FROM provisioning_logs    WHERE user_id = ${TEST_USER_ID}`;
+  await sql`DELETE FROM provisioning_tasks   WHERE user_id = ${TEST_USER_ID}`;
   await sql`DELETE FROM messages             WHERE user_id = ${TEST_USER_ID}`;
   await sql`DELETE FROM notifications        WHERE user_id = ${TEST_USER_ID}`;
   await sql`DELETE FROM user_profiles        WHERE user_id = ${TEST_USER_ID}`;

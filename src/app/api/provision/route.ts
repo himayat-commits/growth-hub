@@ -71,8 +71,14 @@ export async function POST(req: Request) {
   }
 
   // ── Authoritative state + idempotency gate ───────────────────────────────
+  // When no row exists yet the posted body seeds it — with the provisioning
+  // block reset, so a crafted body can't smuggle in a foreign businessNumber
+  // (the runner would skip create and PUT against it).
   const row = await loadOnboardingRow(user.id);
-  const state = row?.state ?? parsed.data.state;
+  const state = row?.state ?? {
+    ...parsed.data.state,
+    provisioning: { invitedUsers: [], mediaIds: [] },
+  };
   await ensureOnboardingState(user.id, state);
 
   if (state.provisioning.businessNumber && state.provisioning.runStatus === "provisioned") {
