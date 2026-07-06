@@ -106,7 +106,8 @@ export default async function PartnerProfilePage({ params }: { params: Params })
                 width: 64,
                 height: 64,
                 borderRadius: 16,
-                background: logoUrl ? '#fff' : 'rgba(243,240,231,0.08)',
+                background: logoUrl ? '#fff' : 'rgba(13,63,72,0.05)',
+                border: logoUrl ? '1px solid var(--line)' : 'none',
                 padding: logoUrl ? 8 : 0,
                 boxSizing: 'border-box',
                 alignItems: 'center',
@@ -121,7 +122,7 @@ export default async function PartnerProfilePage({ params }: { params: Params })
                   style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
                 />
               ) : (
-                <PartnerMark shape={shape} />
+                <PartnerMark shape={shape} size={34} />
               )}
             </span>
             <h1 className="hero-h1" style={{ margin: 0 }}>{name}</h1>

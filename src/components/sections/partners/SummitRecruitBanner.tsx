@@ -35,8 +35,8 @@ export default function SummitRecruitBanner() {
         >
           <div style={{ maxWidth: 620 }}>
             <span
-              className="section-label"
-              style={{ color: 'var(--lime)', display: 'inline-block', marginBottom: 12 }}
+              className="section-label section-label--lime"
+              style={{ marginBottom: 12 }}
             >
               {SUMMIT.dateLong.replace('Thursday ', '')} · {SUMMIT.venue} · free
             </span>

@@ -29,7 +29,7 @@ export default function FinalCTA({
   return (
     <section className="final">
       <div className="wrap">
-        <span className="section-label" style={{ color: "var(--lime)" }}>
+        <span className="section-label section-label--lime">
           Let&apos;s talk
         </span>
         <div className="final-grid" style={{ marginTop: 16 }}>

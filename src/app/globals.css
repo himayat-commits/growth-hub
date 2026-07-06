@@ -238,6 +238,9 @@ footer.foot :focus-visible {
 section { padding: clamp(72px, 9vw, 140px) 0; position: relative; }
 .section-label { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--plum); margin-bottom: 20px; }
 .section-label::before { content: ''; width: 28px; height: 1px; background: var(--plum); }
+/* On dark (teal/plum) sections the plum label reads as mud — recolor text AND dash. */
+.section-label--lime { color: var(--lime); }
+.section-label--lime::before { background: var(--lime); }
 .section-h2 { font-weight: 400; font-size: clamp(32px, 4vw, 56px); line-height: 1.1; letter-spacing: -0.02em; color: var(--teal); margin: 0 0 24px; text-wrap: balance; }
 .section-lead { max-width: 640px; font-size: clamp(17px, 1.25vw, 20px); color: rgba(13, 63, 72, 0.78); line-height: 1.55; }
 
@@ -721,7 +724,7 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 @media (max-width: 1000px) { .hero.hero-dark .hero-art { right: auto; top: auto; width: 70%; } }
 
 /* Partners-page hero padding override */
-.hero.hero-partners { padding-bottom: clamp(60px, 7vw, 100px); }
+.hero.p-hero { padding-bottom: clamp(60px, 7vw, 100px); }
 
 /* ===== Featured Wall ===== */
 .featured-wall { padding: clamp(48px, 6vw, 80px) 0; border-top: 1px solid rgba(13,63,72,0.08); }
@@ -1577,7 +1580,7 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .event-detail .ed-cta { display: flex; gap: 14px; margin-top: 40px; flex-wrap: wrap; }
 
 /* Partner profile deep pages — /partners/[slug] */
-.partner-profile-hero .ed-back { display: inline-flex; align-items: center; gap: 8px; color: var(--lime); font-size: 14px; margin-bottom: 24px; }
+.partner-profile-hero .ed-back { display: flex; width: fit-content; align-items: center; gap: 8px; color: var(--plum); font-size: 14px; margin-bottom: 24px; }
 .partner-profile-hero .ed-back:hover { text-decoration: underline; text-underline-offset: 3px; }
 .partner-profile-detail { padding: clamp(64px, 8vw, 96px) 0; background: var(--eggshell-warm); }
 .partner-profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
