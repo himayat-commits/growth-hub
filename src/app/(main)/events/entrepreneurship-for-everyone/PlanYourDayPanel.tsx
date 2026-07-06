@@ -111,7 +111,8 @@ export default function PlanYourDayPanel({ blocks }: { blocks: ProgramBlock[] })
             <li>First-time and early-stage founders</li>
             <li>Tradies and sole traders</li>
             <li>Side-hustlers thinking about going full-time</li>
-            <li>NDIS, aged-care &amp; community-service operators</li>
+            <li>NDIS &amp; aged-care operators</li>
+            <li>Community services</li>
             <li>Anyone curious about starting something</li>
           </ul>,
         )}

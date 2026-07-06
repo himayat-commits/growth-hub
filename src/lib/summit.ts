@@ -1,5 +1,6 @@
 // Single source of truth for the flagship "Entrepreneurship for Everyone"
-// summit (9 July 2026, CBR Innovation Network). Change a date / venue / link
+// summit (9 July 2026, Ann Harding Conference Centre, UC Bruce). Change a
+// date / venue / link
 // here once and every surface updates together — the landing page, its OG
 // image + JSON-LD, the homepage announcement band, the events hub featured
 // card, and the partners recruitment banner all import from here.
@@ -43,11 +44,11 @@ export const SUMMIT: SummitInfo = {
   tagline: 'Start. Build. Grow — together.',
   dateLong: 'Thursday 9 July 2026',
   dateIso: '2026-07-09',
-  startIso: '2026-07-09T09:00:00+10:00',
+  startIso: '2026-07-09T09:30:00+10:00',
   endIso: '2026-07-09T18:30:00+10:00',
-  time: '9:00am – 6:30pm',
-  venue: 'CBR Innovation Network, Canberra',
-  venueFull: 'CBR Innovation Network · Level 5, 1 Moore Street, Canberra ACT 2601',
+  time: '9:30am – 6:30pm',
+  venue: 'Ann Harding Conference Centre, UC Bruce',
+  venueFull: 'Ann Harding Conference Centre · 24 University Drive South, Bruce ACT 2617',
   cost: 'Free · all welcome',
   eventbriteUrl: 'https://www.eventbrite.com.au/e/entrepreneurship-for-everyone-tickets-1990920554974',
   applyPath: '/expo/apply',

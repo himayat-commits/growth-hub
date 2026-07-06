@@ -44,9 +44,9 @@ export default function SummitRecruitBanner() {
               We&apos;re co-hosting {SUMMIT.name}.
             </h2>
             <p style={{ color: 'var(--eggshell)', opacity: 0.9, margin: 0 }}>
-              A free, full-day small-business summit at CBR Innovation Network — and we
-              build it with partners. Run a workshop, host a stall, speak, or sponsor a
-              part of the day.
+              A free, full-day small-business summit at the Ann Harding Conference Centre,
+              UC Bruce — and we build it with partners. Run a workshop, host a stall,
+              speak, or sponsor a part of the day.
             </p>
           </div>
           <div className="hero-ctas" style={{ flexShrink: 0 }}>
