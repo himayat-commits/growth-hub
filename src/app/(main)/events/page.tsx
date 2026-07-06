@@ -70,10 +70,12 @@ function PartnerGlyph({ shape }: { shape: string }) {
   );
 }
 
-// Orgs involved in the 9 July 2026 "Entrepreneurship for Everyone" summit at CBRIN.
+// Orgs involved in the 9 July 2026 "Entrepreneurship for Everyone" summit at
+// the Ann Harding Conference Centre, UC Bruce.
 const EVENT_PARTNERS: Array<{ name: string; shape: string; role: string }> = [
   { name: 'Himayat', shape: 'leaf', role: 'Co-host & community' },
-  { name: 'CBRIN', shape: 'hex', role: 'Venue & ecosystem' },
+  { name: 'CBRIN', shape: 'hex', role: 'Co-host & ecosystem' },
+  { name: 'PadNova', shape: 'diamond', role: 'Positioning & offers' },
   { name: 'What Works', shape: 'cross', role: 'Tradie support' },
   { name: 'Small Business Digital', shape: 'circle', role: 'Digital programs' },
   { name: 'The Mill House Ventures', shape: 'arc', role: 'Social enterprise' },

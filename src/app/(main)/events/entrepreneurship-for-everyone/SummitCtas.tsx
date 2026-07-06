@@ -7,8 +7,9 @@
 //   3. "Add to calendar" → a self-contained .ics built from the SUMMIT
 //      constants (no CMS round-trip, so the date is always correct).
 //
-// The .ics uses explicit UTC instants for 9am–5pm AEST (UTC+10, no winter DST
-// in the ACT) so every calendar client lands on the right wall-clock time.
+// The .ics uses explicit UTC instants for 9:30am–6:30pm AEST (UTC+10, no
+// winter DST in the ACT) so every calendar client lands on the right
+// wall-clock time.
 
 import Link from 'next/link';
 import { track } from '@/lib/analytics';
@@ -25,8 +26,8 @@ const ICS = [
   'BEGIN:VEVENT',
   `UID:${SUMMIT.slug}-2026@thegrowthhub.com.au`,
   'DTSTAMP:20260601T000000Z',
-  // 9:00am AEST (UTC+10) = 23:00 UTC the day before.
-  'DTSTART:20260708T230000Z',
+  // 9:30am AEST (UTC+10) = 23:30 UTC the day before.
+  'DTSTART:20260708T233000Z',
   // 6:30pm AEST = 08:30 UTC same day.
   'DTEND:20260709T083000Z',
   `SUMMARY:${SUMMIT.name}`,

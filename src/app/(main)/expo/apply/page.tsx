@@ -9,13 +9,13 @@ import ExpoApplyForm from './ExpoApplyForm';
 // in the form's first step, so they aren't repeated in the left column.
 
 const OG_DESC =
-  'Apply to take part in Entrepreneurship for Everyone — a free, all-day small-business summit on 9 July 2026 at CBR Innovation Network, Canberra.';
+  'Apply to take part in Entrepreneurship for Everyone — a free, all-day small-business summit on 9 July 2026 at the Ann Harding Conference Centre, University of Canberra.';
 
 export const metadata: Metadata = {
   title:
     'Call for stallholders, facilitators & speakers — Entrepreneurship for Everyone | Growth Hub by Himayat',
   description:
-    'Apply to host a stall, run a workshop, or speak at Entrepreneurship for Everyone — a free, all-day small-business summit on 9 July 2026 at CBR Innovation Network, Canberra.',
+    'Apply to host a stall, run a workshop, or speak at Entrepreneurship for Everyone — a free, all-day small-business summit on 9 July 2026 at the Ann Harding Conference Centre, University of Canberra.',
   alternates: { canonical: '/expo/apply' },
   openGraph: {
     title: 'Call for stallholders, facilitators & speakers — Entrepreneurship for Everyone',

@@ -15,7 +15,7 @@ import PlanYourDayPanel from './PlanYourDayPanel';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
 
 const OG_DESC =
-  'A free full-day summit for Canberra small business — talks, workshops and help-desks on 9 July 2026 at CBR Innovation Network. Tracks for diverse founders, tradies and community-service operators.';
+  'A free full-day summit for Canberra small business — talks, workshops and help-desks on 9 July 2026 at the Ann Harding Conference Centre, University of Canberra. Tracks for diverse founders, tradies and community-service operators.';
 
 export const metadata: Metadata = {
   title: `${SUMMIT.name} — a free small-business summit | Growth Hub by Himayat`,
@@ -48,14 +48,15 @@ interface ProgramSlot {
 }
 
 const PROGRAM: ProgramSlot[] = [
-  { time: '9:00am', end: '9:30am', type: 'pin', title: 'Welcome + housekeeping', blurb: 'A warm welcome, housekeeping, and a quick overview of the day.' },
-  { time: '9:30am', end: '10:30am', title: 'How to Position Your Business', blurb: 'Presented by What Works.' },
-  { time: '10:30am', end: '11:30am', title: 'Networking & Pitching', blurb: 'Presented by CBRIN.' },
-  { time: '11:30am', end: '12:30pm', title: 'Digital & Social Media Marketing', blurb: 'Presented by RD Consulting.' },
-  { time: '12:30pm', end: '1:30pm', type: 'pin', title: 'Lunch', blurb: 'Catered lunch with space to keep talking.' },
-  { time: '1:30pm', end: '2:30pm', title: 'LinkedIn Masterclass', blurb: 'Presented by RD Consulting.' },
-  { time: '2:30pm', end: '3:00pm', title: 'Safe AI', blurb: 'Presented by CyberWardens.' },
-  { time: '3:00pm', end: '4:00pm', title: 'Intro to Getting Your Business Online', blurb: 'Presented by Small Business Digital.' },
+  { time: '9:30am', end: '10:00am', type: 'pin', title: 'Welcome + housekeeping', blurb: 'A warm welcome and a quick overview of the day.' },
+  { time: '10:00am', end: '11:00am', title: 'How to Position Your Business', blurb: 'Presented by What Works.' },
+  { time: '11:00am', end: '11:30am', title: 'The Niche and The Offer', blurb: 'Presented by PadNova.' },
+  { time: '11:30am', end: '12:30pm', title: 'Networking & Pitching', blurb: 'Presented by CBRIN.' },
+  { time: '12:30pm', end: '1:30pm', title: 'Digital & Social Media Marketing', blurb: 'Presented by RD Consulting.' },
+  { time: '1:30pm', end: '2:30pm', type: 'pin', title: 'Lunch', blurb: 'Catered lunch, with space to keep talking.' },
+  { time: '2:30pm', end: '3:30pm', title: 'LinkedIn Masterclass', blurb: 'Presented by RD Consulting.' },
+  { time: '3:30pm', end: '4:00pm', title: 'Safe AI', blurb: 'Presented by CyberWardens.' },
+  { time: '4:00pm', end: '5:00pm', title: 'Intro to Getting Your Business Online', blurb: 'Presented by Small Business Digital.' },
 ];
 
 const WAYS_TO_HELP = [
@@ -80,11 +81,11 @@ interface Stakeholder {
 // the first group.
 const STAKEHOLDER_GROUPS: Array<{ label: string; members: Stakeholder[] }> = [
   {
-    label: 'Hosts & venue',
+    label: 'Hosts',
     members: [
       { name: 'The Growth Hub', role: 'Host & convenor', host: true },
       { name: 'Himayat', role: 'Co-host & community' },
-      { name: 'CBRIN', role: 'Venue & ecosystem' },
+      { name: 'CBRIN', role: 'Co-host & ecosystem' },
     ],
   },
   {
@@ -120,6 +121,7 @@ const STAKEHOLDER_GROUPS: Array<{ label: string; members: Stakeholder[] }> = [
       { name: 'RD Consulting', role: 'Marketing & LinkedIn' },
       { name: 'Normtech', role: 'IT & cyber security' },
       { name: 'Allara Creative', role: 'Creative & branding' },
+      { name: 'PadNova', role: 'Positioning & offers' },
     ],
   },
   {
@@ -149,13 +151,13 @@ const eventJsonLd: Record<string, unknown> = {
   organizer: { '@type': 'Organization', name: 'Growth Hub by Himayat', url: SITE_URL },
   location: {
     '@type': 'Place',
-    name: 'CBR Innovation Network',
+    name: 'Ann Harding Conference Centre, University of Canberra',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Level 5, 1 Moore Street',
-      addressLocality: 'Canberra',
+      streetAddress: '24 University Drive South',
+      addressLocality: 'Bruce',
       addressRegion: 'ACT',
-      postalCode: '2601',
+      postalCode: '2617',
       addressCountry: 'AU',
     },
   },
@@ -235,9 +237,9 @@ export default async function EntrepreneurshipForEveryonePage() {
             <span className="section-label">Program</span>
             <h2 className="section-h2">A full day of practical help, start to finish.</h2>
             <p className="naming-lead">
-              Three things run side by side: hands-on workshops in The Lab, drop-in one-to-one
-              advisors in the Events Room all day, and an afternoon of stalls and a panel up on
-              Level 4. We&apos;re still finalising a few sessions and timings.
+              Three things run side by side: hands-on workshops in the Seminar Rooms, drop-in
+              one-to-one advisors in the Glass Foyer Reception all day, and an afternoon of
+              stalls, networking and a candid evening panel in the Conference Room.
             </p>
             <span className="draft-pill">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="7" cy="7" r="5" /><path d="M7 4v3l2 1.5" /></svg>
@@ -245,7 +247,7 @@ export default async function EntrepreneurshipForEveryonePage() {
             </span>
           </div>
 
-          <h3 className="schedule-room is-lead">The Lab <span className="room-sub">workshops</span></h3>
+          <h3 className="schedule-room is-lead">Seminar Rooms <span className="room-sub">workshops</span></h3>
           <div className="schedule-list">
             {PROGRAM.map((slot, i) => {
               const isLunch = slot.title.toLowerCase().startsWith('lunch');
@@ -296,19 +298,25 @@ export default async function EntrepreneurshipForEveryonePage() {
 
           <div className="schedule-rooms">
             <div className="room-card">
-              <h3 className="schedule-room">The Events Room <span className="room-sub">drop-in advisory</span></h3>
+              <h3 className="schedule-room">Glass Foyer Reception <span className="room-sub">drop-in advisory</span></h3>
               <p className="room-time">10:00am – 4:00pm</p>
               <p className="room-note">
-                One-to-one help desks with advisors and mentors — drop in any time across the
-                day, no booking needed.
+                One-to-one help desks with advisors and mentors — getting online, business
+                planning, or general advice. Drop in any time, no booking needed.
               </p>
             </div>
             <div className="room-card">
-              <h3 className="schedule-room">Level 4 <span className="room-sub">stalls &amp; panel</span></h3>
+              <h3 className="schedule-room">Conference Room <span className="room-sub">stalls &amp; panel</span></h3>
               <ul className="room-lines">
                 <li><span className="t">4:30 – 6:30pm</span> Stalls &amp; networking</li>
                 <li><span className="t">5:00 – 6:00pm</span> Panel discussion</li>
               </ul>
+              <p className="room-note">
+                Hear four award-winning founders — Vanessa Brettell (Stepping Stone), Usman
+                Iftikhar (Catalysr), Tendayi Ganga (Born to Shine) and Shooby Kandel (What
+                Works) — moderated by Waheed Jayhoon (Himayat), on what it really takes to
+                start, build and grow.
+              </p>
             </div>
           </div>
         </div>
