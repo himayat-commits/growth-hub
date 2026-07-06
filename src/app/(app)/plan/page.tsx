@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { withAuth } from '@workos-inc/authkit-nextjs';
+import { withAuth } from '@/lib/auth/with-auth';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import { PLANS, type PlanTier, type PaidPlanTier } from '@/lib/plans';

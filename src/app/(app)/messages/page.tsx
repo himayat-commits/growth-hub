@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { withAuth } from '@workos-inc/authkit-nextjs';
+import { withAuth } from '@/lib/auth/with-auth';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { IcoCog } from '@/components/dashboard/Icons';
 import { getThread, markThreadRead, TEAM_AUTHOR_NAME, getUnreadMessageCount } from '@/lib/db/messages';

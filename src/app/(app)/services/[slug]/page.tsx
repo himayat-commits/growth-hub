@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { withAuth } from '@workos-inc/authkit-nextjs';
+import { withAuth } from '@/lib/auth/with-auth';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { getServiceBySlug } from '@/lib/cms';
 import { hasOpenBookingFor } from '@/lib/db/bookings';

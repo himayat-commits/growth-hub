@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { withAuth } from '@workos-inc/authkit-nextjs';
+import { withAuth } from '@/lib/auth/with-auth';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { IcoCal, IcoPlay } from '@/components/dashboard/Icons';
 import { getUpcomingEvents, getPastRecordings } from '@/lib/cms';
