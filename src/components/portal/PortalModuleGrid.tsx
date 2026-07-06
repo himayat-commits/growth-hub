@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/cn";
+import { Pill, SectionLabel } from "@/components/ui/card";
 import type { PlanTier, AddOnId } from "@/lib/plans";
 
 // ── Module definitions ────────────────────────────────────────────────────────
@@ -370,49 +372,69 @@ export default function PortalModuleGrid({ tier, activeAddOns, dashboardUrl, pro
   const toggle = (id: string) => setOpenId((prev) => (prev === id ? null : id));
 
   return (
-    <div className="portal-modules">
+    <div>
       {/* Active modules */}
-      <p className="portal-section-label">
-        Your {activeModules.length} active module{activeModules.length !== 1 ? "s" : ""}
-        <span className="portal-section-hint"> — click any card to see setup steps</span>
-      </p>
-      <div className="portal-grid">
+      <div className="flex flex-wrap items-baseline gap-x-2">
+        <SectionLabel>
+          Your {activeModules.length} active module{activeModules.length !== 1 ? "s" : ""}
+        </SectionLabel>
+        <span className="font-sans text-xs text-ink-muted">
+          — click any card to see setup steps
+        </span>
+      </div>
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
         {activeModules.map((mod) => {
           const isOpen = openId === mod.id;
           return (
             <div
               key={mod.id}
-              className={`portal-card${isOpen ? " is-open" : ""}`}
+              className={cn(
+                "cursor-pointer self-start rounded-2xl border bg-white p-5 shadow-soft transition-colors",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-teal/40",
+                isOpen ? "border-teal/40" : "border-line hover:border-teal/30"
+              )}
               onClick={() => toggle(mod.id)}
               role="button"
               tabIndex={0}
               aria-expanded={isOpen}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(mod.id); } }}
             >
-              <div className="portal-card-top">
-                <span className="portal-card-icon">{mod.icon}</span>
-                <div className="portal-card-info">
-                  <p className="portal-card-name">{mod.name}</p>
-                  <p className="portal-card-tagline">{mod.tagline}</p>
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-teal/10 text-teal">
+                  {mod.icon}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-sans text-sm font-semibold text-teal">{mod.name}</p>
+                  <p className="font-sans text-xs text-ink-muted">{mod.tagline}</p>
                 </div>
-                <span className="portal-card-chevron"><IconChevron open={isOpen} /></span>
+                <span className="flex-shrink-0 text-ink-muted"><IconChevron open={isOpen} /></span>
               </div>
-              <p className="portal-card-desc">{mod.desc}</p>
+              <p className="mt-3 font-sans text-sm leading-relaxed text-ink-muted">{mod.desc}</p>
 
               {isOpen && (
-                <div className="portal-card-steps" onClick={(e) => e.stopPropagation()}>
-                  <p className="portal-steps-heading">Getting started</p>
-                  <ol className="portal-step-list">
+                <div
+                  className="mt-4 cursor-auto border-t border-line pt-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                    Getting started
+                  </p>
+                  <ol className="mt-3 grid gap-2.5">
                     {mod.steps.map((s, i) => (
-                      <li key={i} className="portal-step-item">
-                        <span className="portal-step-num">{i + 1}</span>
-                        <span>{s.text}</span>
+                      <li key={i} className="grid grid-cols-[24px_1fr] items-start gap-3">
+                        <span className="mt-0.5 flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1.5px] border-teal/25 bg-white font-sans text-[11px] font-semibold text-teal">
+                          {i + 1}
+                        </span>
+                        <span className="font-sans text-sm leading-relaxed text-ink">{s.text}</span>
                       </li>
                     ))}
                   </ol>
-                  <div className="portal-card-links">
+                  <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
                     {provisioned === false && setupHref ? (
-                      <a href={setupHref} className="portal-card-link primary">
+                      <a
+                        href={setupHref}
+                        className="inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-teal underline-offset-4 hover:underline"
+                      >
                         Finish setup first <IconArrow />
                       </a>
                     ) : (
@@ -420,7 +442,7 @@ export default function PortalModuleGrid({ tier, activeAddOns, dashboardUrl, pro
                         href={dashboardUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="portal-card-link primary"
+                        className="inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-teal underline-offset-4 hover:underline"
                       >
                         Open in platform <IconArrow />
                       </a>
@@ -430,7 +452,7 @@ export default function PortalModuleGrid({ tier, activeAddOns, dashboardUrl, pro
                         href={mod.videoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="portal-card-link secondary"
+                        className="font-sans text-sm text-ink-muted underline-offset-4 hover:text-teal hover:underline"
                       >
                         Watch walkthrough
                       </a>
@@ -446,22 +468,32 @@ export default function PortalModuleGrid({ tier, activeAddOns, dashboardUrl, pro
       {/* Locked modules */}
       {lockedModules.length > 0 && (
         <>
-          <p className="portal-section-label portal-section-label--locked">
-            {lockedModules.length} more module{lockedModules.length !== 1 ? "s" : ""} available on higher tiers
-          </p>
-          <div className="portal-grid portal-grid--locked">
+          <div className="mt-10">
+            <SectionLabel>
+              {lockedModules.length} more module{lockedModules.length !== 1 ? "s" : ""} available on higher tiers
+            </SectionLabel>
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
             {lockedModules.map((mod) => (
-              <div key={mod.id} className="portal-card locked" aria-disabled="true">
-                <div className="portal-card-top">
-                  <span className="portal-card-icon">{mod.icon}</span>
-                  <div className="portal-card-info">
-                    <p className="portal-card-name">{mod.name}</p>
-                    <p className="portal-card-tagline">{mod.tagline}</p>
+              <div
+                key={mod.id}
+                className="self-start rounded-2xl border border-dashed border-line bg-white/60 p-5"
+                aria-disabled="true"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-eggshell-warm text-ink-muted">
+                    {mod.icon}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-sans text-sm font-semibold text-ink/70">{mod.name}</p>
+                    <p className="font-sans text-xs text-ink-muted">{mod.tagline}</p>
                   </div>
-                  <span className="portal-lock-icon"><IconLock /></span>
+                  <span className="flex-shrink-0 text-ink-muted/60"><IconLock /></span>
                 </div>
-                <p className="portal-card-desc">{mod.desc}</p>
-                <span className="portal-upgrade-badge">{lockLabel(mod)}</span>
+                <p className="mt-3 font-sans text-sm leading-relaxed text-ink-muted">{mod.desc}</p>
+                <div className="mt-3">
+                  <Pill tone="plum">{lockLabel(mod)}</Pill>
+                </div>
               </div>
             ))}
           </div>

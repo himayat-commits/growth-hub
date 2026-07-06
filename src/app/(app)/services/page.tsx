@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { withAuth } from '@workos-inc/authkit-nextjs';
+import { withAuth } from '@/lib/auth/with-auth';
 import { PageHeader } from '@/components/dashboard/PageHeader';
-import { IcoCal, IcoArrow } from '@/components/dashboard/Icons';
+import { IcoCal } from '@/components/dashboard/Icons';
 import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import { ADDONS, getAddOnPriceId, type AddOnId, type PlanTier } from '@/lib/plans';
 import { wizardProgress } from '@/lib/wizard/initial-state';
@@ -11,6 +11,10 @@ import { loadOnboardingRow, isStaleRunning } from '@/lib/wizard/provisioning-sto
 import type { PackageId } from '@/lib/wizard/packages';
 import { getBirdeyeDashboardUrl } from '@/lib/birdeye/dashboard-url';
 import PortalModuleGrid from '@/components/portal/PortalModuleGrid';
+import {
+  BirdeyeStatusBanner,
+  type BirdeyeBannerState,
+} from '@/components/portal/BirdeyeStatusBanner';
 import { getServices } from '@/lib/cms';
 import { getActiveBookings, statusLabel } from '@/lib/db/bookings';
 import ServicesTabs from './ServicesTabs';
@@ -127,147 +131,42 @@ export default async function ServicesPage() {
 
       {/* Provisioning banner — only relevant on the modules side, but
           rendered above the tabs so paid users see it on first paint. */}
-      {provisioned ? (
-        <div className="portal-birdeye-banner portal-birdeye-banner--ready" style={{ marginBottom: 24 }}>
-          <div className="portal-birdeye-banner-head">
-            <span className="portal-birdeye-pill">✓ Birdeye account ready</span>
-            <h2 className="portal-birdeye-title">
-              {businessName ? `${businessName} is live on Birdeye.` : 'Your Birdeye account is ready.'}
-            </h2>
-            <p className="portal-birdeye-sub">
-              Business number <code>{businessNumber}</code>
-            </p>
-          </div>
-          <div className="portal-birdeye-banner-cta">
-            <a
-              href={dashboardUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-lime"
-            >
-              Open your Birdeye dashboard <IcoArrow />
-            </a>
-          </div>
-        </div>
-      ) : isRunning && hasActivePaidSub ? (
-        <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
-          <div className="portal-birdeye-banner-head">
-            <span className="portal-birdeye-pill">Setup in progress</span>
-            <h2 className="portal-birdeye-title">Setting up your account now…</h2>
-            <p className="portal-birdeye-sub">
-              We&apos;re creating your Birdeye account — this takes about a minute.
-            </p>
-          </div>
-          <div className="portal-birdeye-banner-cta">
-            <Link href="/onboarding/review" className="btn btn-primary">
-              See live progress <IcoArrow />
-            </Link>
-          </div>
-        </div>
-      ) : isEscalated && hasActivePaidSub ? (
-        <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
-          <div className="portal-birdeye-banner-head">
-            <span className="portal-birdeye-pill">We&apos;re on it</span>
-            <h2 className="portal-birdeye-title">
-              {businessName
-                ? `${businessName} is live — our team is finishing setup.`
-                : 'Your account is live — our team is finishing setup.'}
-            </h2>
-            <p className="portal-birdeye-sub">
-              Your account is live; our team is completing the last {failedSteps.length} setup
-              step{failedSteps.length === 1 ? '' : 's'}. We&apos;ll notify you when it&apos;s done.
-            </p>
-          </div>
-          <div className="portal-birdeye-banner-cta">
-            <a
-              href="mailto:hello@himayat.com.au?subject=Birdeye%20setup"
-              className="btn btn-primary"
-            >
-              Questions? Email us <IcoArrow />
-            </a>
-          </div>
-        </div>
-      ) : isPartial && hasActivePaidSub ? (
-        <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
-          <div className="portal-birdeye-banner-head">
-            <span className="portal-birdeye-pill portal-birdeye-pill--amber">Setup needs attention</span>
-            <h2 className="portal-birdeye-title">
-              {businessName
-                ? `${businessName} is live, but setup didn't fully finish.`
-                : "Your Birdeye account needs attention."}
-            </h2>
-            <p className="portal-birdeye-sub">
-              Business number <code>{businessNumber}</code> ·{' '}
-              {wizardState?.provisioning?.failedSteps?.length ?? 0} step(s) need a retry.
-            </p>
-          </div>
-          <div className="portal-birdeye-banner-cta">
-            <Link href="/onboarding/review" className="btn btn-primary">
-              Resume / retry <IcoArrow />
-            </Link>
-          </div>
-        </div>
-      ) : hasActivePaidSub ? (
-        <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
-          <div className="portal-birdeye-banner-head">
-            <span className="portal-birdeye-pill portal-birdeye-pill--amber">
-              {runStatus === 'failed'
-                ? "Setup didn't finish"
-                : setupProgress && setupProgress.done > 0
-                  ? 'Setup in progress'
-                  : 'Setup pending'}
-            </span>
-            <h2 className="portal-birdeye-title">
-              {runStatus === 'failed'
-                ? "Let's finish setting up your Birdeye account."
-                : setupProgress && setupProgress.done > 0
-                  ? 'Pick up where you left off.'
-                  : 'Set up your Birdeye account.'}
-            </h2>
-            <p className="portal-birdeye-sub">
-              {runStatus === 'failed'
-                ? "Your last attempt didn't complete — your answers are saved. Pick up and retry."
-                : setupProgress && setupProgress.done > 0
-                  ? `${setupProgress.done} of ${setupProgress.total} steps complete · we'll resume right where you left off.`
-                  : "15-minute wizard. Save and resume any time — we'll pick up right where you left off."}
-            </p>
-          </div>
-          <div className="portal-birdeye-banner-cta">
-            <Link href={setupHref} className="btn btn-primary">
-              {runStatus === 'failed'
-                ? 'Retry setup'
-                : setupProgress && setupProgress.done > 0
-                  ? 'Resume setup'
-                  : 'Start setup'}{' '}
-              <IcoArrow />
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div className="portal-birdeye-banner portal-birdeye-banner--setup" style={{ marginBottom: 24 }}>
-          <div className="portal-birdeye-banner-head">
-            <span className="portal-birdeye-pill portal-birdeye-pill--amber">Free action plan</span>
-            <h2 className="portal-birdeye-title">
-              {reportComplete
-                ? 'Your Birdeye action plan is ready.'
-                : 'Get your free Birdeye action plan.'}
-            </h2>
-            <p className="portal-birdeye-sub">
-              {reportComplete
-                ? 'A personalised local-growth plan built from your answers — plus what Foundations automates for you.'
-                : "Answer a few questions about your business and we'll build a personalised local-growth plan — free, no card needed."}
-            </p>
-          </div>
-          <div className="portal-birdeye-banner-cta">
-            <Link
-              href={reportComplete ? '/onboarding/action-plan' : '/onboarding'}
-              className="btn btn-primary"
-            >
-              {reportComplete ? 'View your action plan' : 'Build your action plan'} <IcoArrow />
-            </Link>
-          </div>
-        </div>
-      )}
+      <div style={{ marginBottom: 24 }}>
+        <BirdeyeStatusBanner
+          state={((): BirdeyeBannerState => {
+            if (provisioned) {
+              return { kind: 'ready', businessName, businessNumber: businessNumber!, dashboardUrl };
+            }
+            if (isRunning && hasActivePaidSub) return { kind: 'running' };
+            if (isEscalated && hasActivePaidSub) {
+              return { kind: 'escalated', businessName, failedCount: failedSteps.length };
+            }
+            if (isPartial && hasActivePaidSub) {
+              return {
+                kind: 'partial',
+                businessName,
+                businessNumber: businessNumber ?? '—',
+                failedCount: failedSteps.length,
+              };
+            }
+            if (hasActivePaidSub) {
+              return {
+                kind: 'setup',
+                phase:
+                  runStatus === 'failed'
+                    ? 'failed'
+                    : setupProgress && setupProgress.done > 0
+                      ? 'resume'
+                      : 'start',
+                done: setupProgress?.done ?? 0,
+                total: setupProgress?.total ?? 0,
+                setupHref,
+              };
+            }
+            return { kind: 'free', reportComplete };
+          })()}
+        />
+      </div>
 
       {activeBookings.length > 0 && (
         <div className="gh-card" style={{ marginBottom: 24 }}>
