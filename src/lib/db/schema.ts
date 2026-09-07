@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, varchar, boolean, jsonb, serial, integer, index, uniqueIndex, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, varchar, boolean, jsonb, serial, integer, index, uniqueIndex, primaryKey, check } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 /**
  * Mirrors the canonical state of a user's Stripe subscription.
@@ -395,3 +396,110 @@ export const subscriptionCancellations = pgTable(
 
 export type SubscriptionCancellation = typeof subscriptionCancellations.$inferSelect;
 export type NewSubscriptionCancellation = typeof subscriptionCancellations.$inferInsert;
+
+// ─── Shop ─────────────────────────────────────────────────────────────────────
+//
+// Merch e-commerce. The catalogue (names, images, prices, variants) lives in
+// Payload (`payload.products`); the transactional state lives here. The join
+// key between the two schemas is the SKU string (variants) / product slug —
+// loose references, no cross-schema FKs, same pattern as service_bookings.
+
+/**
+ * Stock per SKU. Decremented atomically by the Stripe webhook when an order
+ * is paid; adjusted by staff in /ops/inventory. CHECK (stock >= 0) is the
+ * oversell guard — see src/lib/db/inventory.ts.
+ */
+export const inventory = pgTable(
+  'inventory',
+  {
+    sku: text('sku').primaryKey(),
+    productSlug: text('product_slug').notNull(), // loose ref → payload.products.slug
+    stock: integer('stock').default(0).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    productIdx: index('inventory_product_slug_idx').on(t.productSlug),
+    stockNonNegative: check('inventory_stock_non_negative', sql`${t.stock} >= 0`),
+  }),
+);
+
+export type InventoryRow = typeof inventory.$inferSelect;
+export type NewInventoryRow = typeof inventory.$inferInsert;
+
+/**
+ * One row per checkout attempt. Created `pending` BEFORE the Stripe Checkout
+ * Session so the webhook and the success page can both find it by id; the
+ * transition pending → paid is an idempotent conditional UPDATE so exactly
+ * one of them wins. Amounts are integer AUD cents, GST-inclusive.
+ */
+export const orders = pgTable(
+  'orders',
+  {
+    id: serial('id').primaryKey(),
+    orderNumber: text('order_number').generatedAlwaysAs(sql`'GH-' || lpad(id::text, 5, '0')`),
+    userId: text('user_id'), // WorkOS id; null for guest checkout
+    email: text('email').notNull(),
+    status: varchar('status', { length: 20 }).default('pending').notNull(),
+      // 'pending' | 'paid' | 'shipped' | 'cancelled' | 'refunded'
+    fulfilmentFlag: varchar('fulfilment_flag', { length: 20 }),
+      // null | 'oversold' — paid but stock could not be decremented
+    stripeCheckoutSessionId: text('stripe_checkout_session_id').unique(),
+    stripePaymentIntentId: text('stripe_payment_intent_id').unique(),
+    stripeCustomerId: text('stripe_customer_id'),
+    currency: varchar('currency', { length: 3 }).default('aud').notNull(),
+    subtotalCents: integer('subtotal_cents').notNull(), // list prices × qty, pre-discount
+    discountCents: integer('discount_cents').default(0).notNull(),
+    shippingCents: integer('shipping_cents').default(0).notNull(),
+    totalCents: integer('total_cents').notNull(),
+    memberDiscountApplied: boolean('member_discount_applied').default(false).notNull(),
+    shippingName: text('shipping_name'),
+    shippingPhone: text('shipping_phone'),
+    shippingAddress: jsonb('shipping_address'), // Stripe Address object, verbatim
+    shippingRateId: text('shipping_rate_id'),
+    shippingRateLabel: text('shipping_rate_label'),
+    carrier: text('carrier'),
+    trackingNumber: text('tracking_number'),
+    trackingUrl: text('tracking_url'),
+    notes: text('notes'),
+    paidAt: timestamp('paid_at', { withTimezone: true }),
+    shippedAt: timestamp('shipped_at', { withTimezone: true }),
+    refundedAt: timestamp('refunded_at', { withTimezone: true }),
+    confirmationEmailSentAt: timestamp('confirmation_email_sent_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    userCreatedIdx: index('orders_user_created_idx').on(t.userId, t.createdAt),
+    emailIdx: index('orders_email_idx').on(t.email),
+    statusCreatedIdx: index('orders_status_created_idx').on(t.status, t.createdAt),
+  }),
+);
+
+export type Order = typeof orders.$inferSelect;
+export type NewOrder = typeof orders.$inferInsert;
+
+/** Line items, snapshotted at purchase time so later catalogue edits never
+ *  rewrite what a customer actually bought. */
+export const orderItems = pgTable(
+  'order_items',
+  {
+    id: serial('id').primaryKey(),
+    orderId: integer('order_id')
+      .notNull()
+      .references(() => orders.id, { onDelete: 'cascade' }),
+    productSlug: text('product_slug').notNull(),
+    sku: text('sku').notNull(),
+    nameSnapshot: text('name_snapshot').notNull(),
+    variantLabelSnapshot: text('variant_label_snapshot'), // "M · Teal"
+    imageUrlSnapshot: text('image_url_snapshot'),
+    listUnitCents: integer('list_unit_cents').notNull(), // before member discount
+    unitCents: integer('unit_cents').notNull(), // actually charged
+    qty: integer('qty').notNull(),
+  },
+  (t) => ({
+    orderIdx: index('order_items_order_idx').on(t.orderId),
+  }),
+);
+
+export type OrderItem = typeof orderItems.$inferSelect;
+export type NewOrderItem = typeof orderItems.$inferInsert;

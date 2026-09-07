@@ -960,3 +960,21 @@ p { margin: 0; }
 .gh-ops-status.status-running { background: rgba(232,221,255,0.5); color: var(--plum); }
 .gh-ops-status.status-stalled, .gh-ops-status.status-open { background: rgba(95,48,75,0.1); color: var(--plum); }
 .gh-ops-status.status-draft { background: rgba(13,63,72,0.08); color: var(--ink-50); }
+
+/* ---- Shop orders (ops + member) ---- */
+.gh-ops-status.status-paid { background: rgba(232,221,255,0.5); color: var(--plum); }
+.gh-ops-status.status-shipped { background: var(--teal); color: var(--lime); }
+.gh-ops-status.status-refunded { background: rgba(13,63,72,0.08); color: var(--ink-50); }
+.gh-ops-select, .gh-ops-input { font: inherit; font-size: 12px; padding: 5px 8px; border: 1px solid var(--rule-strong); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.gh-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.gh-table th { text-align: left; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-50); padding: 8px 12px; border-bottom: 1px solid var(--rule); }
+.gh-table td { padding: 12px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+.gh-table tr:last-child td { border-bottom: 0; }
+.gh-link { color: var(--teal); text-decoration: underline; text-underline-offset: 3px; }
+.gh-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.gh-list { list-style: none; margin: 0; padding: 0; }
+.gh-list-row { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 14px; }
+.gh-list-row:last-child { border-bottom: 0; }
+.gh-muted { color: var(--ink-70); font-size: 13px; }
+.gh-totals { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; margin: 12px 0 8px; font-size: 14px; }
+.gh-totals dt { color: var(--ink-70); } .gh-totals dd { margin: 0; text-align: right; }

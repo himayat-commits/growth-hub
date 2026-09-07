@@ -10,6 +10,7 @@ import {
   subscriptions,
   userProfiles,
   subscriptionCancellations,
+  orders,
 } from '@/lib/db/schema';
 
 export const dynamic = 'force-dynamic';
@@ -30,6 +31,8 @@ export default async function OpsOverviewPage() {
     profilesRecent,
     cancellationsRecent,
     cancellationsTopReason,
+    ordersToShip,
+    ordersShipped30,
   ] = await Promise.all([
     db.select({ c: count() }).from(serviceBookings).where(eq(serviceBookings.status, 'requested')),
     db.select({ c: count() }).from(serviceBookings).where(eq(serviceBookings.status, 'scheduled')),
@@ -63,6 +66,11 @@ export default async function OpsOverviewPage() {
     .groupBy(subscriptionCancellations.reason)
     .orderBy(sql`count(*) DESC`)
     .limit(1),
+    // Shop: paid orders waiting to be shipped, and shipped in the last 30 days.
+    db.select({ c: count() }).from(orders).where(eq(orders.status, 'paid')),
+    db.select({ c: count() }).from(orders).where(
+      sql`${orders.status} = 'shipped' AND ${orders.shippedAt} > NOW() - INTERVAL '30 days'`,
+    ),
   ]);
 
   const tiles: Array<{
@@ -96,6 +104,14 @@ export default async function OpsOverviewPage() {
       href: '/ops/signups',
       cta: 'See',
       tone: 'good',
+    },
+    {
+      label: 'Orders to ship',
+      num: ordersToShip[0]?.c ?? 0,
+      sub: `${ordersShipped30[0]?.c ?? 0} shipped in the last 30 days`,
+      href: '/ops/orders',
+      cta: 'Fulfil',
+      tone: (ordersToShip[0]?.c ?? 0) > 0 ? 'attention' : undefined,
     },
     {
       label: 'Cancellations (30 days)',
@@ -133,6 +149,7 @@ export default async function OpsOverviewPage() {
           <li><strong>Bookings</strong> — service requests from /services. Triage to scheduled, in-progress, completed.</li>
           <li><strong>Referrals</strong> — qualified referrals waiting for credit approval. One-click to mark as credited (no Stripe round-trip — the existing referral-credit job picks them up on the next subscription event).</li>
           <li><strong>Signups</strong> — recent user_profiles rows with their subscription state.</li>
+          <li><strong>Orders</strong> — paid shop orders waiting to ship. Add a tracking number and the buyer is emailed. <strong>Inventory</strong> holds stock per SKU.</li>
         </ul>
       </section>
     </>
