@@ -35,6 +35,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
     return NextResponse.json({ ok: true, sku, stock });
   } catch (err) {
     if (err instanceof OversoldError) return NextResponse.json({ error: err.message }, { status: 409 });
+    if (err instanceof Error && err.message.startsWith('No inventory row')) {
+      return NextResponse.json({ error: `Unknown SKU ${sku}` }, { status: 404 });
+    }
     console.error('[ops.inventory] update failed', err);
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Update failed' }, { status: 500 });
   }
