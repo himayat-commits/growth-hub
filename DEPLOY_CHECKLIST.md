@@ -47,3 +47,13 @@ steps are the gate.
 - [ ] Add the `support`/`admin` teammates to `OPS_EMAILS`.
 - [ ] Fill the community group links in Payload admin.
 - [ ] Have the `/privacy` policy reviewed by someone qualified.
+
+## 6. Shop (merch) release — `feat/shop`
+Docs: `docs/SHOP.md`.
+- [ ] **Stripe (test AND live):** create two Shipping Rates (AUD, tax behaviour *inclusive*): Standard + Express; create a Tax Rate "GST" 10% *inclusive*, AU. Note the `shr_…` / `txr_…` ids.
+- [ ] **Stripe webhook:** add `checkout.session.async_payment_succeeded`, `checkout.session.expired`, `charge.refunded` to the existing endpoint.
+- [ ] **Vercel env (Production + Preview, test ids on Preview):** `STRIPE_SHIPPING_RATE_STANDARD`, `STRIPE_SHIPPING_RATE_EXPRESS`, `STRIPE_TAX_RATE_GST_INCLUSIVE`, `SHOP_ABN`. Optional `STRIPE_SHIPPING_RATE_FREE` + `SHOP_FREE_SHIPPING_THRESHOLD_CENTS`.
+- [ ] **Payload migration — MANUAL, before deploy:** run the SQL in `src/migrations/20260907_add_products.ts` (`up`) against prod in the Neon SQL editor. Idempotent (`IF NOT EXISTS` guards).
+- [ ] Merge → prod build runs Drizzle `0015_shop_orders_inventory` automatically (`inventory`, `orders`, `order_items`).
+- [ ] Post-deploy: create a product in `/admin` (Shop → Products), set stock in `/ops/inventory`, add a "Shop" row to Navigation in Payload admin, place a live A$1 test order → `/shop/success`, check `/ops/orders` shows it `paid`, stock decremented, confirmation email received; mark shipped → shipped email; refund in Stripe → `refunded`.
+- [ ] Rollback: redeploy previous build. Drizzle `0015` and Payload `20260907_add_products` both have `down()`; tables are additive so leaving them in place is harmless.

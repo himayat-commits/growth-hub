@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import SignOutButton from "./SignOutButton";
 import { track } from "@/lib/analytics";
+import NavCartButton from "@/components/shop/NavCartButton";
 
 export interface NavItem {
   label: string;
@@ -26,6 +27,7 @@ const DEFAULT_NAV_ITEMS: NavItem[] = [
   { label: "Packages", href: "/#packages" },
   { label: "Events", href: "/events" },
   { label: "Partners", href: "/partners" },
+  { label: "Shop", href: "/shop" },
   { label: "About", href: "/#why" },
   { label: "FAQ", href: "/pricing#faq" },
   { label: "Contact", href: "/#contact" },
@@ -100,6 +102,8 @@ export default function NavbarClient({
           )}
         </nav>
 
+        <NavCartButton />
+
         {isSignedIn ? (
           <div className="nav-account" ref={menuRef}>
             <Link
@@ -147,6 +151,9 @@ export default function NavbarClient({
                 </Link>
                 <Link role="menuitem" href="/plan" onClick={() => setMenuOpen(false)}>
                   Plan &amp; billing
+                </Link>
+                <Link role="menuitem" href="/orders" onClick={() => setMenuOpen(false)}>
+                  My orders
                 </Link>
                 <div className="nav-account-divider" />
                 <SignOutButton className="nav-account-signout" />
@@ -196,6 +203,9 @@ export default function NavbarClient({
               </Link>
               <Link href="/plan" onClick={() => setOpen(false)}>
                 Plan &amp; billing
+              </Link>
+              <Link href="/orders" onClick={() => setOpen(false)}>
+                My orders
               </Link>
               <SignOutButton className="nav-drawer-signout" />
             </>

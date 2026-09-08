@@ -164,6 +164,10 @@ Save. Now `/api/billing-portal` will return a working URL.
 
 **Resend.** The webhook fires a `payment_failed` email via Resend from `hello@himayat.com.au` — make sure that domain is verified in your Resend account.
 
+## Shop (one-time payments)
+
+The merch shop reuses this Stripe account with `mode: 'payment'` Checkout Sessions, inline `price_data`, Shipping Rates and an inclusive GST Tax Rate. See `docs/SHOP.md`.
+
 ## Optional extensions
 
 - **HubSpot sync.** You're already using HubSpot for signup forms. On `customer.subscription.created`, push the new subscriber into HubSpot as a contact with `lifecycle_stage = customer` and a `subscription_tier` property.

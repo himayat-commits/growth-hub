@@ -38,6 +38,7 @@ export default function Footer() {
               <li><Link href="/events">Events</Link></li>
               <li><Link href="/events/entrepreneurship-for-everyone">Entrepreneurship for Everyone</Link></li>
               <li><Link href="/partners">Partners</Link></li>
+              <li><Link href="/shop">Shop</Link></li>
               <li><Link href="/#community">Community</Link></li>
               <li><Link href="/pricing#faq">FAQ</Link></li>
               <li><Link href="/#why">About us</Link></li>

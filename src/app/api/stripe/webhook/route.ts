@@ -5,6 +5,8 @@ import * as Sentry from '@sentry/nextjs';
 import { getStripe } from '@/lib/stripe';
 import { syncSubscription } from '@/lib/stripe/sync-subscription';
 import { sendServerConversion } from '@/lib/analytics/server-conversions';
+import { fulfilOrderFromSession, isShopSession } from '@/lib/shop/fulfil-order';
+import { cancelPendingBySession, markRefunded } from '@/lib/db/orders';
 
 // Webhook needs the Node.js runtime so we can read the raw request body
 // for signature verification. Edge runtime parses bodies eagerly.
@@ -15,6 +17,10 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 
 const RELEVANT_EVENTS = new Set<Stripe.Event['type']>([
   'checkout.session.completed',
+  // Shop (one-time payments) — see src/lib/shop/fulfil-order.ts
+  'checkout.session.async_payment_succeeded',
+  'checkout.session.expired',
+  'charge.refunded',
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
@@ -56,8 +62,18 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
-      case 'checkout.session.completed': {
+      case 'checkout.session.completed':
+      case 'checkout.session.async_payment_succeeded': {
         const session = event.data.object as Stripe.Checkout.Session;
+
+        // Shop orders (mode: 'payment'). Idempotent; fires its own Purchase
+        // conversion + confirmation email. Subscription path below untouched.
+        if (isShopSession(session)) {
+          await fulfilOrderFromSession(session, { stripeEventId: event.id });
+          break;
+        }
+        if (event.type !== 'checkout.session.completed') break;
+
         if (session.mode === 'subscription' && session.subscription) {
           const subId =
             typeof session.subscription === 'string'
@@ -88,6 +104,27 @@ export async function POST(req: NextRequest) {
           // session.metadata if we threaded them through at checkout-
           // creation time. Wire in /api/checkout when ready.
         });
+        break;
+      }
+
+      case 'checkout.session.expired': {
+        // Abandoned shop checkout — tidy the pending order row.
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (isShopSession(session)) await cancelPendingBySession(session.id);
+        break;
+      }
+
+      case 'charge.refunded': {
+        // PaymentIntent metadata propagates to the charge, so shop refunds are
+        // recognisable without a lookup. Full refund → status 'refunded';
+        // partial → noted. Stock is NOT restocked automatically (ops decides).
+        const charge = event.data.object as Stripe.Charge;
+        if (charge.metadata?.kind === 'shop_order') {
+          const pi = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id;
+          if (pi) {
+            await markRefunded(pi, { full: charge.refunded === true, amountCents: charge.amount_refunded });
+          }
+        }
         break;
       }
 

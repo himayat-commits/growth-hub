@@ -12,6 +12,7 @@ import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import Pixels from "@/components/analytics/Pixels";
 import ConsentGate from "@/components/analytics/ConsentGate";
 import ConsentBanner from "@/components/analytics/ConsentBanner";
+import { CartProvider } from "@/components/shop/CartProvider";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegrowthhub.com.au";
@@ -69,16 +70,18 @@ export default function MainLayout({
       <body>
         <AuthKitProvider>
           <PostHogProvider>
-            <ConsentGate>
-              <Pixels />
-            </ConsentGate>
-            <OrganizationJsonLd />
-            <SummitAnnouncementBar />
-            <Navbar />
-            {children}
-            <Footer />
-            <RevealOnScroll />
-            <ConsentBanner />
+            <CartProvider>
+              <ConsentGate>
+                <Pixels />
+              </ConsentGate>
+              <OrganizationJsonLd />
+              <SummitAnnouncementBar />
+              <Navbar />
+              {children}
+              <Footer />
+              <RevealOnScroll />
+              <ConsentBanner />
+            </CartProvider>
           </PostHogProvider>
         </AuthKitProvider>
       </body>

@@ -4,6 +4,7 @@ import {
   getPartners,
   getCaseStudies,
   getPosts,
+  getProductSlugs,
 } from '@/lib/cms';
 
 // Canonical production host. The Vercel deployment URL and any preview
@@ -27,11 +28,12 @@ function entry(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [events, partners, caseStudies, posts] = await Promise.all([
+  const [events, partners, caseStudies, posts, productSlugs] = await Promise.all([
     getPublicEvents(100).catch(() => [] as Doc[]),
     getPartners().catch(() => null),
     getCaseStudies().catch(() => null),
     getPosts(100, 1).catch(() => null),
+    getProductSlugs().catch(() => [] as Array<{ slug: string; updatedAt: string }>),
   ]);
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -43,6 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/case-studies', null, 'weekly', 0.7),
     entry('/insights', null, 'weekly', 0.7),
     entry('/pricing', null, 'monthly', 0.8),
+    entry('/shop', null, 'weekly', 0.8),
     entry('/signup/foundations', null, 'monthly', 0.8),
     entry('/signup/growth', null, 'monthly', 0.8),
     entry('/signup/accelerate', null, 'monthly', 0.8),
@@ -77,11 +80,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((p): p is Doc & { slug: string } => Boolean(p.slug))
     .map((p) => entry(`/insights/${p.slug}`, p.updatedAt, 'monthly', 0.5));
 
+  const productEntries: MetadataRoute.Sitemap = productSlugs.map((p) =>
+    entry(`/shop/${p.slug}`, p.updatedAt, 'weekly', 0.7),
+  );
+
   return [
     ...staticPages,
     ...eventEntries,
     ...partnerEntries,
     ...caseStudyEntries,
     ...postEntries,
+    ...productEntries,
   ];
 }

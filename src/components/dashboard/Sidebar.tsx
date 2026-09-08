@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   IcoHome, IcoPlanNav, IcoServicesNav, IcoResourcesNav,
-  IcoEventsNav, IcoMsgNav, IcoBenefitsNav, IcoProfileNav,
+  IcoEventsNav, IcoMsgNav, IcoBenefitsNav, IcoProfileNav, IcoOrdersNav,
 } from './Icons'
 
 const MARKETING_SITE_URL =
@@ -18,6 +18,7 @@ const NAV = [
   { id: 'events',    href: '/my-events', label: 'Events & Webinars', Icon: IcoEventsNav },
   { id: 'messages',  href: '/messages',  label: 'Messages',         Icon: IcoMsgNav },
   { id: 'benefits',  href: '/benefits',  label: 'Member Benefits',  Icon: IcoBenefitsNav },
+  { id: 'orders',    href: '/orders',    label: 'My Orders',        Icon: IcoOrdersNav },
   { id: 'profile',   href: '/profile',   label: 'Profile & Settings', Icon: IcoProfileNav },
 ]
 

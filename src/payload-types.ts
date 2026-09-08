@@ -81,6 +81,7 @@ export interface Config {
     resources: Resource;
     services: Service;
     strategists: Strategist;
+    products: Product;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -102,6 +103,7 @@ export interface Config {
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     strategists: StrategistsSelect<false> | StrategistsSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1033,6 +1035,83 @@ export interface Strategist {
   createdAt: string;
 }
 /**
+ * Merch sold on /shop. Stock is managed in the Ops console (/ops/inventory), not here. Prices are in cents, GST-inclusive.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  name: string;
+  /**
+   * URL: /shop/[slug]. Auto-generated from the name if left blank.
+   */
+  slug?: string | null;
+  /**
+   * Only Published products appear on /shop and can be bought.
+   */
+  status: 'draft' | 'published' | 'archived';
+  category?: ('apparel' | 'accessories' | 'stationery' | 'other') | null;
+  /**
+   * One or two lines. Renders on the product card and as the meta description.
+   */
+  shortDescription?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * First image is the card / hero image.
+   */
+  images: (number | Media)[];
+  /**
+   * AUD, GST-inclusive, in cents. 3500 = A$35.00. Variants may override.
+   */
+  priceCents: number;
+  /**
+   * Discount for members with an active paid plan. 0 = no member price.
+   */
+  memberDiscountPct?: number | null;
+  /**
+   * One row per sellable SKU. A product with no size/colour still needs exactly one variant. Do NOT rename a SKU after it has sold.
+   */
+  variants: {
+    /**
+     * Stable key for stock + orders, e.g. GH-TEE-M-TEAL.
+     */
+    sku: string;
+    size?: string | null;
+    colour?: string | null;
+    /**
+     * Leave blank to use the product price.
+     */
+    priceCentsOverride?: number | null;
+    /**
+     * Optional — for future carrier integration.
+     */
+    weightGrams?: number | null;
+    id?: string | null;
+  }[];
+  featured?: boolean | null;
+  /**
+   * Lower numbers appear first on /shop.
+   */
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1111,6 +1190,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'strategists';
         value: number | Strategist;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: number | Product;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1693,6 +1776,35 @@ export interface StrategistsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  status?: T;
+  category?: T;
+  shortDescription?: T;
+  description?: T;
+  images?: T;
+  priceCents?: T;
+  memberDiscountPct?: T;
+  variants?:
+    | T
+    | {
+        sku?: T;
+        size?: T;
+        colour?: T;
+        priceCentsOverride?: T;
+        weightGrams?: T;
+        id?: T;
+      };
+  featured?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1753,6 +1865,27 @@ export interface SiteSetting {
     instagram?: string | null;
     linkedin?: string | null;
     twitter?: string | null;
+  };
+  /**
+   * Invite links to the member community groups. Each link, once set, is surfaced on the member Benefits page (and members are nudged here when their profile is complete). Leave blank to hide.
+   */
+  communityLinks?: {
+    /**
+     * Slack workspace invite URL
+     */
+    slack?: string | null;
+    /**
+     * Facebook group URL
+     */
+    facebook?: string | null;
+    /**
+     * WhatsApp group invite URL
+     */
+    whatsapp?: string | null;
+    /**
+     * Other community / forum URL (optional)
+     */
+    forum?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -2063,6 +2196,14 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         instagram?: T;
         linkedin?: T;
         twitter?: T;
+      };
+  communityLinks?:
+    | T
+    | {
+        slack?: T;
+        facebook?: T;
+        whatsapp?: T;
+        forum?: T;
       };
   updatedAt?: T;
   createdAt?: T;

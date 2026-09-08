@@ -64,7 +64,13 @@ export type AnalyticsEvent =
   | 'onboarding_provision_result'// terminal SSE outcome (props: status, failedSteps, package)
   | 'onboarding_action_plan_view'// free-tier action plan rendered
   | 'action_plan_upgrade_click'  // upgrade CTA clicked on the action plan
-  | 'checkout_success_return';   // landed on /onboarding/upgraded after Stripe checkout (props: tier)
+  | 'checkout_success_return'    // landed on /onboarding/upgraded after Stripe checkout (props: tier)
+  // Shop (merch)
+  | 'shop_product_view'          // /shop/[slug] rendered (props: product)
+  | 'shop_add_to_cart'           // Add to cart clicked (props: sku, product, qty, member)
+  | 'shop_cart_view'             // /shop/cart rendered (props: lines)
+  | 'shop_checkout_start'        // Checkout clicked -> POST /api/shop/checkout (props: lines, subtotal, member)
+  | 'shop_purchase';             // landed on /shop/success (props: orderId, value)
 
 export function track(
   event: AnalyticsEvent,
@@ -109,7 +115,7 @@ interface GaMap {
 interface MetaMap {
   /** Standard Meta event name. Custom events skipped — they don't feed
    *  Meta's optimisation models. */
-  meta: 'Lead' | 'Subscribe' | 'Contact' | 'CompleteRegistration' | 'Schedule' | 'ViewContent';
+  meta: 'Lead' | 'Subscribe' | 'Contact' | 'CompleteRegistration' | 'Schedule' | 'ViewContent' | 'AddToCart' | 'InitiateCheckout' | 'Purchase';
 }
 interface LinkedInMap {
   /** Env var name suffix — full var is `NEXT_PUBLIC_LINKEDIN_CONV_${key}`.
@@ -148,6 +154,13 @@ const EVENT_MAP: Partial<Record<AnalyticsEvent, PlatformMap>> = {
   // the step-by-step wizard events are dashboard-only (PostHog).
   action_plan_upgrade_click: { ga4: 'cta_click_upgrade', meta: 'Lead' },
   checkout_success_return:   { ga4: 'checkout_success_return', meta: 'Subscribe' },
+
+  // Shop - standard e-commerce events on both platforms.
+  shop_product_view:   { ga4: 'view_item', meta: 'ViewContent' },
+  shop_add_to_cart:    { ga4: 'add_to_cart', meta: 'AddToCart' },
+  shop_cart_view:      { ga4: 'view_cart' },
+  shop_checkout_start: { ga4: 'begin_checkout', meta: 'InitiateCheckout' },
+  shop_purchase:       { ga4: 'purchase', meta: 'Purchase' },
   // Plan-management events (plan_change_*, plan_cancel_*) intentionally
   // omitted — they're dashboard-only and don't belong in acquisition pixels.
 };

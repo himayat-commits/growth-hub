@@ -816,3 +816,75 @@ export const getStrategistBySlug = unstable_cache(
   ['strategist-by-slug'],
   { tags: ['strategists'], revalidate: 3600 },
 );
+
+// ── Products (shop) ───────────────────────────────────────────────────────────
+//
+// Catalogue only. Stock lives in public.inventory (src/lib/db/inventory.ts)
+// and is read separately so the cached catalogue never goes stale on stock.
+// Auth / member status must be resolved OUTSIDE these cached functions.
+
+export const getProducts = unstable_cache(
+  async () => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'products',
+        where: { status: { equals: 'published' } },
+        sort: ['sortOrder', 'name'],
+        limit: 200,
+        depth: 1,
+      });
+      return docs;
+    } catch (err) {
+      warn('getProducts', err);
+      return [];
+    }
+  },
+  ['products-list'],
+  { tags: ['products'], revalidate: 3600 },
+);
+
+export const getProductBySlug = unstable_cache(
+  async (slug: string) => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'products',
+        where: {
+          and: [{ slug: { equals: slug } }, { status: { equals: 'published' } }],
+        },
+        limit: 1,
+        depth: 1,
+      });
+      return docs[0] ?? null;
+    } catch (err) {
+      warn('getProductBySlug', err);
+      return null;
+    }
+  },
+  ['product-by-slug'],
+  { tags: ['products'], revalidate: 3600 },
+);
+
+export const getProductSlugs = unstable_cache(
+  async () => {
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
+        collection: 'products',
+        where: { status: { equals: 'published' } },
+        limit: 500,
+        depth: 0,
+        select: { slug: true, updatedAt: true },
+      });
+      return docs
+        .map((d) => ({ slug: d.slug ?? null, updatedAt: d.updatedAt }))
+        .filter((d): d is { slug: string; updatedAt: string } => Boolean(d.slug));
+    } catch (err) {
+      warn('getProductSlugs', err);
+      return [];
+    }
+  },
+  ['product-slugs'],
+  { tags: ['products'], revalidate: 3600 },
+);

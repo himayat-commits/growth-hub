@@ -35,6 +35,7 @@ const APP_PATHS = [
   '/resources',
   '/messages',
   '/benefits',
+  '/orders',   // shop order history (the public /shop stays on the apex)
   '/onboarding',
   '/ops',  // internal staff console (gated by OPS_EMAILS allowlist)
 ];

@@ -46,5 +46,6 @@ export const IcoResourcesNav = () => <Icon><path d="M4 19V5a2 2 0 0 1 2-2h11v18H
 export const IcoEventsNav   = () => <Icon><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></Icon>
 export const IcoMsgNav      = () => <Icon><path d="M21 12a8 8 0 1 1-3.6-6.7L21 4l-1.3 3.6A8 8 0 0 1 21 12z" /></Icon>
 export const IcoBenefitsNav = () => <Icon><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.8 7.1 17.2 8 11.7 4 7.8l5.5-.8z" /></Icon>
+export const IcoOrdersNav   = () => <Icon><path d="M6 8h12l-1 12H7L6 8z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /></Icon>
 export const IcoProfileNav  = () => <Icon><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></Icon>
 export const IcoPlanNav     = () => <Icon><path d="M5 4h11l3 3v13H5z" /><path d="M9 9h6M9 13h6M9 17h4" /></Icon>

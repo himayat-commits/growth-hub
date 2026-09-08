@@ -33,6 +33,8 @@ export default async function OpsLayout({ children }: { children: React.ReactNod
             <Link href="/ops/provisioning">Provisioning</Link>
             <Link href="/ops/events">Events</Link>
             <Link href="/ops/inbox">Inbox</Link>
+            <Link href="/ops/orders">Orders</Link>
+            <Link href="/ops/inventory">Inventory</Link>
           </nav>
         </div>
         <div className="gh-ops-head-r">
