@@ -43,6 +43,8 @@ export default function Footer() {
               <li><Link href="/pricing#faq">FAQ</Link></li>
               <li><Link href="/#why">About us</Link></li>
               <li><Link href="/#contact">Contact</Link></li>
+              <li><Link href="/community-guidelines">Community guidelines</Link></li>
+              <li><Link href="/privacy">Privacy</Link></li>
             </ul>
           </div>
 

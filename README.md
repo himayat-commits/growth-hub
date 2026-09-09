@@ -43,6 +43,13 @@ npm run test:e2e:smoke:prod  # public-surface smoke against https://thegrowthhub
 1. Push to GitHub — Vercel builds `master` to production. `vercel-build` runs the pending
    **Drizzle** migrations first (`scripts/prod-migrate.mjs`), then `next build`. Payload
    migrations are applied by hand (see `DEPLOY_CHECKLIST.md`).
+
+   `scripts/prod-migrate.mjs` is the **only** path that migrates the production
+   database — there is no GitHub Action for it (the former `db-migrate.yml` raced the
+   Vercel build and was retired). It only acts when `VERCEL_ENV=production`; preview
+   builds skip it, and a failed migrate fails the build. To run a migration manually
+   against a Neon branch (rehearsal, backfilling a snapshot):
+   `DATABASE_URL='<neon-branch-connection-string>' npx drizzle-kit migrate`.
 2. Set the production variables listed in `.env.example` in Vercel → Environment Variables.
 3. `vercel.json` sets region to `syd1` (Sydney) for lowest Canberra latency.
 

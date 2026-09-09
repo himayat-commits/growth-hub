@@ -18,67 +18,45 @@ export interface PartnerProofProps {
   quotes?: ProofQuote[] | null;
 }
 
-const DEFAULT_STATS: ProofStat[] = [
-  {
-    tag: "Community",
-    num: "400+",
-    unit: "people",
-    heading: "People supported across our programs.",
-    body: "Employment pathways, digital training, and wraparound support for people facing real barriers.",
-  },
-  {
-    tag: "Impact",
-    num: "50+",
-    unit: "events",
-    heading: "Community events delivered.",
-    body: "Workshops, networking meetups, and in-person training sessions across Canberra.",
-  },
-  {
-    tag: "Economy",
-    num: "$400K",
-    unit: "in wages",
-    heading: "Direct wages to underemployed community members.",
-    body: "Every Growth Hub subscription contributes to real employment outcomes in the local community.",
-  },
-];
-
-const DEFAULT_QUOTES: ProofQuote[] = [
-  {
-    text: "Partnering with Himayat has been one of the most rewarding decisions we've made. They genuinely care about the people they work with.",
-    attribution: "A Canberra Community Partner",
-  },
-  {
-    text: "Growth Hub brought us closer to the local business community. The network effect has been real — we've seen referrals we wouldn't have had otherwise.",
-    attribution: "A Technology Partner",
-  },
-];
-
+// Renders ONLY what the CMS (PartnersPage global → proofStats / proofQuotes)
+// supplies. There used to be hardcoded fallback stats ("400+ people", "50+
+// events", "$400K in wages") and two anonymous testimonials here; they had no
+// source behind them, so they were removed (Sep 2026) rather than risk
+// publishing impact claims we can't stand behind. When the CMS has neither
+// stats nor quotes the whole section disappears and the page flows from
+// Benefits straight into the Become-a-partner CTA.
 export default function PartnerProof({ heading, lead, stats, quotes }: PartnerProofProps = {}) {
-  const resolvedStats = stats && stats.length > 0 ? stats : DEFAULT_STATS;
-  const resolvedQuotes = quotes && quotes.length > 0 ? quotes : DEFAULT_QUOTES;
+  const resolvedStats = stats && stats.length > 0 ? stats : [];
+  const resolvedQuotes = quotes && quotes.length > 0 ? quotes : [];
+
+  if (resolvedStats.length === 0 && resolvedQuotes.length === 0) return null;
+
+  const defaultHeading = resolvedStats.length > 0 ? "Impact by the numbers." : "What our partners say.";
 
   return (
     <section className="proof section-pad" id="proof">
       <div className="wrap">
         <div className="proof-head">
           <span className="section-label">Impact</span>
-          <h2 className="section-h2">{heading ?? "Impact by the numbers."}</h2>
+          <h2 className="section-h2">{heading ?? defaultHeading}</h2>
           {lead && <p style={{ color: "rgba(243,240,231,0.82)", marginTop: "12px", fontSize: "clamp(17px,1.25vw,20px)" }}>{lead}</p>}
         </div>
 
-        <div className="proof-grid">
-          {resolvedStats.map((s, i) => (
-            <div className="proof-card reveal" key={i}>
-              {s.tag && <span className="proof-tag">{s.tag}</span>}
-              <div className="proof-stat">
-                <span className="num">{s.num}</span>
-                {s.unit && <span className="unit">{s.unit}</span>}
+        {resolvedStats.length > 0 && (
+          <div className="proof-grid">
+            {resolvedStats.map((s, i) => (
+              <div className="proof-card reveal" key={i}>
+                {s.tag && <span className="proof-tag">{s.tag}</span>}
+                <div className="proof-stat">
+                  <span className="num">{s.num}</span>
+                  {s.unit && <span className="unit">{s.unit}</span>}
+                </div>
+                <h3>{s.heading}</h3>
+                {s.body && <p>{s.body}</p>}
               </div>
-              <h3>{s.heading}</h3>
-              {s.body && <p>{s.body}</p>}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {resolvedQuotes.length > 0 && (
           <div className="proof-quotes">
