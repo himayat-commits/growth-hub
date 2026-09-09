@@ -7,6 +7,7 @@
 // We DON'T use ensureSignedIn: true here because that helper writes a PKCE
 // cookie, which Server Components can't do — same pattern as /portal today.
 
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { withAuth } from '@/lib/auth/with-auth'
 import { getSubscription, getEffectivePlan } from '@/lib/subscription'
@@ -32,6 +33,9 @@ function makeInitials(name: string | null | undefined, email: string | null | un
   }
   return (email?.[0] ?? '?').toUpperCase()
 }
+
+// Every page under the app shell is per-member and sign-in gated — never index.
+export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { user } = await withAuth()

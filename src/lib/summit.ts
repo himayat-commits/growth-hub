@@ -56,6 +56,13 @@ export const SUMMIT: SummitInfo = {
 
 /** True once the Eventbrite attendee link has been set. Drives whether the
  *  attendee "Register" CTA renders or the "get notified" fallback shows. */
+/** True once the summit's end time has passed. Every summit surface switches
+ * to a "that's a wrap" state — no Register CTA, no calendar file, no ticket
+ * offer in structured data. */
+export function isSummitPast(now: Date = new Date()): boolean {
+  return now.getTime() > Date.parse(SUMMIT.endIso);
+}
+
 export function isSummitRegistrationOpen(): boolean {
-  return SUMMIT.eventbriteUrl.trim().length > 0;
+  return !isSummitPast() && SUMMIT.eventbriteUrl.trim().length > 0;
 }

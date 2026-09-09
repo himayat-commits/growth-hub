@@ -41,7 +41,9 @@ export const metadata: Metadata = {
   description:
     "Run and grow your local business from one platform — work management, AI-powered marketing, and community support. Every subscription helps fund local jobs in Canberra.",
   metadataBase: new URL(SITE_URL),
-  alternates: { canonical: "/" },
+  // No `alternates.canonical` here: a layout-level canonical is inherited by
+  // every child page that doesn't set its own, which pointed /pricing,
+  // /case-studies/*, /signup/* at the homepage. The home page sets its own.
   openGraph: {
     title: "Growth Hub by Himayat",
     description:
@@ -50,13 +52,13 @@ export const metadata: Metadata = {
     siteName: "Growth Hub by Himayat",
     locale: "en_AU",
     type: "website",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    // OG image comes from src/app/(main)/opengraph-image.tsx (file convention);
+    // /og-image.png never existed in public/.
   },
   twitter: {
     card: "summary_large_image",
     title: "Growth Hub by Himayat",
     description: "Run and grow your local business from one platform — work management, AI marketing, and a community that has your back.",
-    images: ["/og-image.png"],
   },
 };
 

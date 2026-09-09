@@ -36,6 +36,15 @@ function buildStartEnd(dateIso: string, timeStr: string | null | undefined): { s
   return { start: start.toISOString(), end: end.toISOString() };
 }
 
+/** True when the event's calendar day is more than a day behind us. Kept
+ * outside the component so the React Compiler lint doesn't see an impure
+ * clock read during render. */
+function isPastDate(dateIso: string): boolean {
+  if (!dateIso) return false;
+  const t = new Date(dateIso).getTime();
+  return Number.isFinite(t) && t < Date.now() - 24 * 60 * 60 * 1000;
+}
+
 export function EventJsonLd({ ev }: { ev: PayloadEvent }) {
   const slug = String(ev.slug ?? '');
   if (!slug) return null;
@@ -93,14 +102,19 @@ export function EventJsonLd({ ev }: { ev: PayloadEvent }) {
     };
   }
 
-  data.offers = {
-    '@type': 'Offer',
-    url,
-    price: looksFree ? '0' : cost,
-    priceCurrency: 'AUD',
-    availability: 'https://schema.org/InStock',
-    validFrom: new Date().toISOString(),
-  };
+  // Only advertise an offer for events still ahead of us; a past event with
+  // an "InStock" free ticket is a rich-result error.
+  const hasEnded = isPastDate(dateIso);
+  if (!hasEnded) {
+    data.offers = {
+      '@type': 'Offer',
+      url,
+      price: looksFree ? '0' : cost,
+      priceCurrency: 'AUD',
+      availability: 'https://schema.org/InStock',
+      validFrom: new Date().toISOString(),
+    };
+  }
 
   return <JsonLd data={data} />;
 }
