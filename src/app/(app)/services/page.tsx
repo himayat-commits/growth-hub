@@ -118,13 +118,10 @@ export default async function ServicesPage() {
                 Compare plans
               </button>
             </Link>
-            <a
-              href="mailto:hello@himayat.com.au?subject=Book%20Growth%20Call"
-              className="gh-btn"
-            >
+            <Link href="/services/growth-call" className="gh-btn">
               <IcoCal />
               Book Growth Call
-            </a>
+            </Link>
           </>
         }
       />
