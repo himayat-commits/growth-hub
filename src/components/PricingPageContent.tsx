@@ -156,7 +156,12 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tier, interval }),
       });
-      const data = (await res.json()) as { url?: string; error?: string };
+      const data = (await res.json()) as { url?: string; error?: string; redirect?: string };
+      if (res.status === 409 && data.redirect) {
+        // Already subscribed — plan changes happen on /plan with a prorated preview.
+        router.push(data.redirect);
+        return;
+      }
       if (!res.ok || !data.url) throw new Error(data.error ?? 'Checkout failed');
       window.location.href = data.url;
     } catch (err) {

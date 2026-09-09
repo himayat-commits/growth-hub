@@ -27,7 +27,11 @@ export default function PlanCheckoutButton({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tier, interval }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as { url?: string; error?: string; redirect?: string };
+      if (res.status === 409 && data.redirect) {
+        window.location.href = data.redirect;
+        return;
+      }
       if (!res.ok || !data.url) {
         throw new Error(data.error ?? 'Could not start checkout');
       }
