@@ -2,6 +2,7 @@
   "framework": "nextjs",
   "regions": ["syd1"],
   "crons": [
-    { "path": "/api/cron/provision-retry", "schedule": "0 20 * * *" }
+    { "path": "/api/cron/provision-retry", "schedule": "0 20 * * *" },
+    { "path": "/api/cron/event-reminders", "schedule": "0 21 * * *" }
   ]
 }

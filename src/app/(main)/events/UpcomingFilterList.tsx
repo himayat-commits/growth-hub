@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { PublicEvent, EventCategory } from '@/lib/events-data';
 
 const CATEGORIES: Array<'All' | EventCategory> = [
-  'All', 'Summit', 'Workshop', 'Mixer', 'Clinic', 'Community',
+  'All', 'Summit', 'Webinar', 'Workshop', 'Mixer', 'Clinic', 'Community',
 ];
 
 function ClockIcon() {

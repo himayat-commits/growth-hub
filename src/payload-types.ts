@@ -843,6 +843,10 @@ export interface Event {
    */
   registerUrl?: string | null;
   /**
+   * Zoom/Meet link. Shown to signed-in members who have RSVP'd, never on the public page; not emitted in the .ics
+   */
+  meetingUrl?: string | null;
+  /**
    * For past events — surfaces in the recordings grid once uploaded.
    */
   recording?: (number | null) | Media;
@@ -1707,6 +1711,7 @@ export interface EventsSelect<T extends boolean = true> {
   location?: T;
   seats?: T;
   registerUrl?: T;
+  meetingUrl?: T;
   recording?: T;
   featured?: T;
   category?: T;

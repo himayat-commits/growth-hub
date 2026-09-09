@@ -8,9 +8,7 @@
 // Member RSVPs only — public `mailto:` RSVPs bypass the DB and aren't tracked.
 
 import type { Metadata } from 'next';
-import { desc, eq } from 'drizzle-orm';
-import { getDb } from '@/lib/db';
-import { eventRsvps, userProfiles, subscriptions } from '@/lib/db/schema';
+import { getRoster } from '@/lib/db/rsvps';
 import { getPublicEvents } from '@/lib/cms';
 
 export const dynamic = 'force-dynamic';
@@ -37,26 +35,9 @@ function fmtDate(d: Date | string | null): string {
 }
 
 export default async function OpsEventsPage() {
-  const db = getDb();
-  const [rsvps, events] = await Promise.all([
-    db
-      .select({
-        eventId: eventRsvps.eventId,
-        userId: eventRsvps.userId,
-        createdAt: eventRsvps.createdAt,
-        source: eventRsvps.source,
-        utmCampaign: eventRsvps.utmCampaign,
-        ref: eventRsvps.ref,
-        businessName: userProfiles.businessName,
-        email: subscriptions.email,
-        planTier: subscriptions.planTier,
-      })
-      .from(eventRsvps)
-      .leftJoin(userProfiles, eq(userProfiles.userId, eventRsvps.userId))
-      .leftJoin(subscriptions, eq(subscriptions.userId, eventRsvps.userId))
-      .orderBy(desc(eventRsvps.createdAt)),
-    getPublicEvents(),
-  ]);
+  // getRoster prefers the email captured at RSVP time (event_rsvps.email) and
+  // falls back to subscriptions.email for rows that pre-date it (F3.6).
+  const [rsvps, events] = await Promise.all([getRoster(), getPublicEvents()]);
 
   // Event id → title/date, for labelling each roster group. getPublicEvents
   // returns Payload's typed Event[], so we read fields directly.
@@ -117,7 +98,10 @@ export default async function OpsEventsPage() {
       ) : (
         groups.map((g) => (
           <div key={g.eventId} style={{ marginBottom: 28 }}>
-            <div className="gh-ops-head-inner" style={{ marginBottom: 8 }}>
+            <div
+              className="gh-ops-head-inner"
+              style={{ marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
+            >
               <h2 style={{ fontSize: 16 }}>
                 {g.title}
                 <span className="gh-ops-meta" style={{ marginLeft: 10, fontWeight: 400 }}>
@@ -125,6 +109,13 @@ export default async function OpsEventsPage() {
                   {g.attendees.length === 1 ? '' : 's'}
                 </span>
               </h2>
+              <a
+                href={`/api/ops/events/${g.eventId}/roster.csv`}
+                className="gh-btn ghost"
+                style={{ fontSize: 12, whiteSpace: 'nowrap' }}
+              >
+                Download CSV
+              </a>
             </div>
             <div className="gh-ops-table-wrap">
               <table className="gh-ops-table">

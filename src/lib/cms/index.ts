@@ -551,6 +551,30 @@ export async function getEventById(id: string | number) {
   }
 }
 
+/** Events whose `date` instant falls in [fromIso, toIso). Uncached — used by
+ *  the reminder cron, which must see edits made minutes earlier. */
+export async function getEventsInWindow(fromIso: string, toIso: string) {
+  try {
+    const payload = await getPayloadClient();
+    const { docs } = await payload.find({
+      collection: 'events',
+      where: {
+        and: [
+          { date: { greater_than_equal: fromIso } },
+          { date: { less_than: toIso } },
+        ],
+      },
+      sort: 'date',
+      limit: 100,
+      depth: 0,
+    });
+    return docs;
+  } catch (err) {
+    warn('getEventsInWindow', err);
+    return [];
+  }
+}
+
 /** Every event, including past — for the public /events hub. */
 export const getPublicEvents = cachedSafe(
   async (limit: number = 100) => {

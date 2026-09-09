@@ -95,11 +95,12 @@ export default async function EventsPage() {
               {featured.seats && <><span>·</span><span>{featured.seats}</span></>}
             </div>
           </div>
-          <div className="gh-event-actions">
+          <div className="gh-event-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <RsvpButton
               eventId={Number(featured.id)}
               initialRsvped={rsvpSet.has(Number(featured.id))}
-              registerUrl={featured.registerUrl as string | undefined}
+              registerUrl={featured.registerUrl}
+              meetingUrl={rsvpSet.has(Number(featured.id)) ? featured.meetingUrl : null}
             />
           </div>
         </div>
@@ -152,11 +153,13 @@ export default async function EventsPage() {
                     {e.seats ? ` · ${e.seats}` : ''}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <RsvpButton
                     eventId={Number(e.id)}
                     initialRsvped={rsvpSet.has(Number(e.id))}
-                    registerUrl={e.registerUrl as string | undefined}
+                    registerUrl={e.registerUrl}
+                    // Join link is member-only: only ship it to the client once RSVP'd.
+                    meetingUrl={rsvpSet.has(Number(e.id)) ? e.meetingUrl : null}
                   />
                 </div>
               </div>

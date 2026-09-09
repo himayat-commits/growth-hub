@@ -2,13 +2,18 @@
 //
 // Idempotent: if the user already has an RSVP for this event, the response
 // includes `rsvped: true` and `created: false`. New RSVPs return
-// `created: true`. DELETE removes the RSVP.
+// `created: true` and trigger a confirmation email (best-effort, with the
+// .ics attached). DELETE removes the RSVP.
+//
+// Past events (Canberra calendar date before today) are rejected with 409.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { withAuth } from '@/lib/auth/with-auth';
 import { rsvpToEvent, cancelRsvp, type RsvpAttribution } from '@/lib/db/rsvps';
 import { getEventById } from '@/lib/cms';
+import { sendRsvpConfirmationEmail } from '@/lib/events-emails';
+import { canberraDateKey } from '@/lib/events-time';
 
 export const runtime = 'nodejs';
 
@@ -59,10 +64,22 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
     return NextResponse.json({ error: 'Event not found' }, { status: 404 });
   }
 
-  const attribution = await readAttributionCookie(
-    (event as { slug?: string }).slug ?? undefined,
-  );
-  const created = await rsvpToEvent(user.id, eventId, attribution);
+  // F3.10: no RSVPs to events that have already run. Compared on the Canberra
+  // calendar date so a 12:30 pm session is still open on the morning of.
+  const eventDate = new Date(String(event.date ?? ''));
+  if (!Number.isNaN(eventDate.getTime()) && canberraDateKey(eventDate) < canberraDateKey(new Date())) {
+    return NextResponse.json({ error: 'This event has already run' }, { status: 409 });
+  }
+
+  const attribution = await readAttributionCookie(event.slug ?? undefined);
+  const created = await rsvpToEvent(user.id, eventId, attribution, user.email);
+
+  // Confirmation only on a NEW row (re-POSTs are idempotent and silent).
+  // Best-effort: sendRsvpConfirmationEmail never throws.
+  if (created && user.email) {
+    await sendRsvpConfirmationEmail(event, user.email);
+  }
+
   return NextResponse.json({ rsvped: true, created });
 }
 
