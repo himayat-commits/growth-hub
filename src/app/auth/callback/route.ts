@@ -35,6 +35,36 @@ export const GET = handleAuth({
       });
 
       if (created) {
+        // Referral attribution FIRST, in its own try: it must not be skipped
+        // because welcome seeding threw (`created` is true exactly once, so a
+        // missed attribution is lost forever). Reads the gh_ref cookie set by
+        // the proxy when the visitor first landed with ?ref=GROW-…
+        try {
+          const jar = await cookies();
+          const refCode = jar.get('gh_ref')?.value;
+          if (refCode) {
+            const referral = await attributeReferral({
+              referredUserId: user.id,
+              referCode: refCode,
+            });
+            // Notify the referrer so they can see the new lead immediately.
+            if (referral) {
+              await createNotification({
+                userId: referral.referrerUserId,
+                kind: 'referral_signed_up',
+                title: `${user.firstName ?? 'A new member'} joined via your link`,
+                body: 'When they book their first Growth Call you both get A$50 in service credit.',
+                href: '/benefits',
+              });
+            }
+            // Clear the cookie either way (consumed or invalid).
+            jar.delete('gh_ref');
+          }
+        } catch (err) {
+          console.error('[auth.callback] referral attribution failed', err);
+          Sentry.captureException(err, { tags: { area: 'auth.callback', phase: 'referral' } });
+        }
+
         // First sign-in: seed the welcome content. Both calls swallow
         // their own errors so a flaky DB doesn't block sign-in.
         const greet = user.firstName ?? 'there';
@@ -104,34 +134,6 @@ export const GET = handleAuth({
             console.error('[auth.callback] welcome email failed', err);
             Sentry.captureException(err, { tags: { area: 'auth.callback', phase: 'welcome_email' } });
           }
-        }
-
-        // Referral attribution. Reads the gh_ref cookie set by middleware
-        // when the visitor first landed with ?ref=GROW-…
-        try {
-          const jar = await cookies();
-          const refCode = jar.get('gh_ref')?.value;
-          if (refCode) {
-            const referral = await attributeReferral({
-              referredUserId: user.id,
-              referCode: refCode,
-            });
-            // Notify the referrer so they can see the new lead immediately.
-            if (referral) {
-              await createNotification({
-                userId: referral.referrerUserId,
-                kind: 'referral_signed_up',
-                title: `${user.firstName ?? 'A new member'} joined via your link`,
-                body: 'When they book their first Growth Call you both get A$50 in service credit.',
-                href: '/benefits',
-              });
-            }
-            // Clear the cookie either way (consumed or invalid).
-            jar.delete('gh_ref');
-          }
-        } catch (err) {
-          console.error('[auth.callback] referral attribution failed', err);
-          Sentry.captureException(err, { tags: { area: 'auth.callback', phase: 'referral' } });
         }
       }
     } catch (err) {

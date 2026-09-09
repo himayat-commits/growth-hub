@@ -4,6 +4,7 @@ import {
   handleAuthkitProxy,
 } from '@workos-inc/authkit-nextjs';
 import { NextRequest, NextResponse, type NextFetchEvent } from 'next/server';
+import { REF_CODE_PATTERN } from '@/lib/referral-code';
 
 /**
  * Two hostname split:
@@ -54,7 +55,6 @@ const authkit = authkitMiddleware({
  *  consumed once by /auth/callback on the user's first sign-in. */
 const REF_COOKIE_NAME = 'gh_ref';
 const REF_COOKIE_MAX_AGE = 90 * 24 * 60 * 60; // 90 days
-const REF_CODE_PATTERN = /^[A-Z0-9-]{4,32}$/i;
 
 /** Append a Set-Cookie header to any response we return when the URL has
  *  a valid ?ref= query parameter. Safe to call on redirects — the cookie

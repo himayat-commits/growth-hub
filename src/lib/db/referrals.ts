@@ -18,6 +18,7 @@ import 'server-only';
 import { and, eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { referrals, userProfiles, type Referral } from '@/lib/db/schema';
+import { isValidReferCode } from '@/lib/referral-code';
 
 /** A$50 in cents — the per-side credit. */
 export const REFERRAL_CREDIT_CENTS = 5000;
@@ -41,6 +42,10 @@ export async function attributeReferral(input: {
   referredUserId: string;
   referCode: string;
 }): Promise<Referral | null> {
+  // The proxy validates ?ref= before setting the cookie, but the cookie can
+  // be set by anything on the origin (ShareButtons used to write a random
+  // anon id into the same cookie name). Validate again here.
+  if (!isValidReferCode(input.referCode)) return null;
   const referrer = await findReferrerByCode(input.referCode);
   if (!referrer) return null;
   if (referrer.userId === input.referredUserId) return null; // self-referral
