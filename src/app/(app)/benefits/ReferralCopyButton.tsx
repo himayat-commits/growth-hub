@@ -5,6 +5,7 @@
 // access is denied (some embedded browsers block it).
 
 import { useState } from 'react';
+import { track } from '@/lib/analytics';
 
 export default function ReferralCopyButton({
   link,
@@ -18,6 +19,7 @@ export default function ReferralCopyButton({
     try {
       await navigator.clipboard.writeText(link);
       setCopied(true);
+      track('referral_link_copy');
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       /* clipboard unavailable */

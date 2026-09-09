@@ -47,7 +47,7 @@ export const GET = handleAuth({
                 userId: referral.referrerUserId,
                 kind: 'referral_signed_up',
                 title: `${user.firstName ?? 'A new member'} joined via your link`,
-                body: 'When they book their first Growth Call you both get A$50 in service credit.',
+                body: "When they complete their first Growth Call you both get A$50 — applied to your next invoice, or held until you're on a paid plan.",
                 href: '/benefits',
               });
             }

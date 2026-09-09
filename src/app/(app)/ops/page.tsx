@@ -147,7 +147,7 @@ export default async function OpsOverviewPage() {
         <h2>What this console covers</h2>
         <ul>
           <li><strong>Bookings</strong> — service requests from /services. Triage to scheduled, in-progress, completed.</li>
-          <li><strong>Referrals</strong> — qualified referrals waiting for credit approval. One-click to mark as credited (no Stripe round-trip — the existing referral-credit job picks them up on the next subscription event).</li>
+          <li><strong>Referrals</strong> — qualified referrals (Growth Call completed) waiting for credit. &ldquo;Issue A$50 credits&rdquo; posts a Stripe balance credit to each paying side and holds it for Free members until they subscribe.</li>
           <li><strong>Signups</strong> — recent user_profiles rows with their subscription state.</li>
           <li><strong>Orders</strong> — paid shop orders waiting to ship. Add a tracking number and the buyer is emailed. <strong>Inventory</strong> holds stock per SKU.</li>
         </ul>

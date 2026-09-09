@@ -120,6 +120,13 @@
       "when": 1788930000000,
       "tag": "0016_event_rsvps_email",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789020000000,
+      "tag": "0017_pending_referral_credit",
+      "breakpoints": true
     }
   ]
 }

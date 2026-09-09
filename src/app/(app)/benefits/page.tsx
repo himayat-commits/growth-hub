@@ -30,6 +30,20 @@ export const metadata: Metadata = {
   title: 'Member benefits — Growth Hub',
 };
 
+// Trust-rules disclaimer shown under the refer and community cards. Growth Hub
+// introduces members and partners to each other; it does not vet what they
+// sell one another. See /community-guidelines for the full position.
+const TrustNote = () => (
+  <p className="gh-benefit-p" style={{ margin: '-8px 4px 16px', fontSize: 13 }}>
+    Growth Hub connects members and partners but doesn&rsquo;t vet or endorse services they
+    provide to each other — do your own checks before you buy. See our{' '}
+    <Link href="/community-guidelines" style={{ textDecoration: 'underline', color: 'inherit' }}>
+      community guidelines
+    </Link>
+    .
+  </p>
+);
+
 // Site URL is used to build the referral invite link. Lives on apex (where
 // "Join free" / "Choose a plan" live) — clicks resolve to /sign-up?ref=…
 function getSiteUrl(): string {
@@ -77,11 +91,12 @@ export default async function BenefitsPage() {
 
   const referCode = profile.referCode ?? `GROW-${user.id.slice(-6).toUpperCase()}-${new Date().getFullYear()}`;
   const totalCreditDollars = (referralStats.totalCreditCents / 100).toFixed(0);
+  const heldCreditDollars = (profile.pendingCreditCents / 100).toFixed(0);
   const hasReferrals = referralStats.total > 0;
   const inviteLink = `${getSiteUrl()}/sign-up?ref=${encodeURIComponent(referCode)}`;
   const emailSubject = encodeURIComponent('Thought you might like The Growth Hub');
   const emailBody = encodeURIComponent(
-    `Hi — I've been using The Growth Hub by Himayat. Free to join, and they give us both a $50 credit if you sign up through this link:\n\n${inviteLink}\n\nNo pressure — just thought it might be useful.`,
+    `Hi — I've been using The Growth Hub by Himayat. Free to join, and they give us both a $50 credit once you sign up through this link and do your free Growth Call:\n\n${inviteLink}\n\nNo pressure — just thought it might be useful.`,
   );
 
   const benefits: Array<{
@@ -100,7 +115,6 @@ export default async function BenefitsPage() {
       p: 'A complimentary 30-minute 1:1 with a Strategist. Use it whenever you\'re stuck.',
       tag: 'Available now',
       href: '/services',
-      paidOnly: true,
     },
     {
       tone: '',
@@ -130,7 +144,7 @@ export default async function BenefitsPage() {
       tone: 'lime',
       Icon: IcoGift,
       title: 'Refer & earn',
-      p: 'Each friend who joins and books a Growth Call earns you both A$50 in service credit.',
+      p: "Each friend who joins and completes their first Growth Call earns you both A$50. It's applied to your next invoice — or held for you until you're on a paid plan.",
       tag: `Your code: ${referCode}`,
       href: '#refer',
     },
@@ -196,7 +210,7 @@ export default async function BenefitsPage() {
               )}
               {referralStats.qualified > 0 && (
                 <span>
-                  <strong>{referralStats.qualified}</strong> qualified — credit issues on next paid plan
+                  <strong>{referralStats.qualified}</strong> qualified — credit on its way
                 </span>
               )}
               {referralStats.credited > 0 && (
@@ -206,9 +220,16 @@ export default async function BenefitsPage() {
               )}
             </div>
           )}
+          {profile.pendingCreditCents > 0 && (
+            <p className="gh-refer-p" style={{ marginTop: 6 }}>
+              <strong>A${heldCreditDollars} held for you</strong> — it&rsquo;s applied to your first
+              invoice as soon as you&rsquo;re on a paid plan.
+            </p>
+          )}
           <p className="gh-refer-p" style={{ marginTop: 6 }}>
-            Share your code with a friend who runs a small business. When they sign up and book
-            their Growth Call, the credit lands in both accounts. No cap.
+            Share your code with a friend who runs a small business. When they sign up and complete
+            their first Growth Call, the credit lands in both accounts. Credits are applied as Stripe
+            account credit against Growth Hub invoices.
           </p>
           <div className="gh-refer-code" style={{ marginTop: 14 }}>
             Your code <code>{referCode}</code>
@@ -225,6 +246,7 @@ export default async function BenefitsPage() {
           </a>
         </div>
       </div>
+      <TrustNote />
 
       {hasCommunity && (
         <div id="community" className="gh-card" style={{ padding: 28 }}>
@@ -248,6 +270,7 @@ export default async function BenefitsPage() {
           </div>
         </div>
       )}
+      {hasCommunity && <TrustNote />}
 
       <div className="gh-grid-3">
         {benefits.map((b) => {
