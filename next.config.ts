@@ -5,14 +5,22 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
-    localPatterns: [{ pathname: "/images/**" }],
+    localPatterns: [
+      { pathname: "/images/**" },
+      // Payload media served through the app (Vercel Blob behind access control).
+      { pathname: "/api/media/**" },
+    ],
     remotePatterns: [
       {
         // Vercel Blob storage — required for <Image> to optimize blob-served media.
-        // Replace with your actual Vercel Blob hostname once the store is created.
         protocol: "https",
         hostname: "*.public.blob.vercel-storage.com",
       },
+      // Payload media URLs are made absolute (Stripe needs absolute image URLs)
+      // and then fed to <Image>; the optimizer must trust our own hosts.
+      { protocol: "https", hostname: "thegrowthhub.com.au", pathname: "/api/media/**" },
+      { protocol: "https", hostname: "app.thegrowthhub.com.au", pathname: "/api/media/**" },
+      { protocol: "https", hostname: "*.vercel.app", pathname: "/api/media/**" },
     ],
   },
 
