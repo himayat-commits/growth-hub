@@ -1,18 +1,12 @@
 import { cookies } from 'next/headers';
 import { handleAuth } from '@workos-inc/authkit-nextjs';
-import { Resend } from 'resend';
 import * as Sentry from '@sentry/nextjs';
 import { ensureUserRecordWithStatus } from '@/lib/auth/ensure-user-record';
 import { createNotification } from '@/lib/db/notifications';
 import { sendTeamMessage } from '@/lib/db/messages';
 import { attributeReferral } from '@/lib/db/referrals';
 import { getStrategistBySlug } from '@/lib/cms';
-
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-
-function escapeHtml(s: string) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
+import { escapeHtml, sendEmail } from '@/lib/email/send';
 
 // Exchanges the WorkOS authorization code for a session cookie.
 // Configure this URL as a Redirect URI in dashboard.workos.com → Redirects.
@@ -96,15 +90,17 @@ export const GET = handleAuth({
 
         // Best-effort welcome email. Mirrors the in-app team message so the
         // user sees the same intro whether they open the email or land in
-        // /dashboard first. Failures are logged but never block sign-in.
-        if (resend && user.email) {
+        // /dashboard first. Failures are logged but never block sign-in
+        // (sendEmail never throws; no provider → ok=false, logged once).
+        if (user.email) {
           try {
             const strategistEmail = (strategist as { email?: string | null } | null)?.email ?? undefined;
-            await resend.emails.send({
+            const result = await sendEmail({
               from: `${strategistName} via Growth Hub <noreply@himayat.com.au>`,
               to: user.email,
               replyTo: strategistEmail,
               subject: 'Welcome to The Growth Hub',
+              text: welcomeMessage,
               html: `
                 <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6;max-width:600px;color:#1a2e2e;">
                   <h2 style="font-family:Georgia,serif;color:#0D3F48;margin:0 0 12px;">Hi ${escapeHtml(greet)},</h2>
@@ -130,6 +126,7 @@ export const GET = handleAuth({
                 </div>
               `,
             });
+            if (!result.ok) console.error('[auth.callback] welcome email not sent', result.error);
           } catch (err) {
             console.error('[auth.callback] welcome email failed', err);
             Sentry.captureException(err, { tags: { area: 'auth.callback', phase: 'welcome_email' } });

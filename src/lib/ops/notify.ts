@@ -3,22 +3,20 @@
 // to self-fetch) with a direct server-side call:
 //   1. Persist the manual-step checklist to provisioning_tasks (durable).
 //   2. Fire the webhook (Slack etc.) if configured.
-//   3. Send the Resend email if configured.
+//   3. Send the email via sendEmail() (HubSpot or Resend) if a provider is configured.
 //   4. Console fallback so dev never loses the handoff.
 // Non-fatal by design (the runner logs the outcome to provisioning_logs and
 // the ops console surfaces failures) — but it must be HONEST about failure:
-// Resend reports errors as `{ error }` rather than throwing, so that is
-// checked explicitly. A silently-swallowed 403 (unverified domain, revoked
-// key) once recorded as ok=true, hiding a paid customer from ops entirely.
+// `ok` is only true when a channel actually accepted the message. A
+// silently-swallowed 403 (unverified domain, revoked key) once recorded as
+// ok=true, hiding a paid customer from ops entirely.
 
 import "server-only";
-import { Resend } from "resend";
 import type { WizardState } from "@/lib/wizard/state";
 import { buildHandoffSummary, buildHandoffTasks, type HandoffSeverity } from "@/lib/ops/handoff";
 import { renderOpsHandoffEmail } from "@/lib/ops/handoff-email";
 import { upsertHandoffTasks } from "@/lib/db/provisioning-tasks";
-
-const OPS_EMAIL = process.env.OPS_NOTIFICATION_EMAIL ?? "hello@himayat.com.au";
+import { DEFAULT_FROM, OPS_EMAIL, resolveEmailProvider, sendEmail } from "@/lib/email/send";
 
 export async function sendOpsHandoff(args: {
   state: WizardState;
@@ -57,29 +55,21 @@ export async function sendOpsHandoff(args: {
     }
   }
 
-  // 3. Email via Resend, if configured. Client instantiated lazily so a
-  //    missing key in dev doesn't throw at import time.
-  if (process.env.RESEND_API_KEY) {
-    try {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const { subject, html } = renderOpsHandoffEmail({ state, summary, tasks, severity });
-      const { error } = await resend.emails.send({
-        from: "Growth Hub <noreply@himayat.com.au>",
-        to: OPS_EMAIL,
-        subject,
-        html,
-      });
-      if (error) {
-        throw new Error(`Resend ${error.name}: ${error.message}`);
-      }
+  // 3. Email, if a provider is configured. sendEmail() never throws and
+  //    reports provider-side rejections as ok=false.
+  const emailConfigured = resolveEmailProvider().provider !== "none";
+  if (emailConfigured) {
+    const { subject, html } = renderOpsHandoffEmail({ state, summary, tasks, severity });
+    const result = await sendEmail({ from: DEFAULT_FROM, to: OPS_EMAIL, subject, html });
+    if (result.ok) {
       ok = true;
-    } catch (e) {
-      lastError = e instanceof Error ? e.message : "ops email failed";
+    } else {
+      lastError = result.error;
     }
   }
 
   // 4. Console fallback so dev never loses the handoff.
-  if (!hook && !process.env.RESEND_API_KEY) {
+  if (!hook && !emailConfigured) {
     console.log("[ops-handoff]", JSON.stringify(summary));
     ok = true;
   }
