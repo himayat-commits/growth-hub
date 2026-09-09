@@ -23,6 +23,11 @@ get a real, separate Postgres for staging.
    `DATABASE_URL`.
 3. (Both Payload's `payload` schema and Drizzle's `public` schema live in this
    one database, so a single branch covers both.)
+4. Point your local `.env.local` `DATABASE_URL` at the branch too. The one-off
+   scripts (`npm run seed*`, `partners:*`, `event:*`, `shop:seed-demo`) and the
+   Playwright test-user seed **refuse to run** while `DATABASE_URL` is the
+   production endpoint; set `ALLOW_PROD=1` only when you mean to hit prod
+   (`scripts/_guard.mjs`).
 
 ## 2. Create the Vercel "staging" environment
 
@@ -56,24 +61,33 @@ In Vercel → **Settings → Environment Variables**, set these for the
 
 ## 4. Make migrations run on staging
 
-`scripts/prod-migrate.mjs` runs **both** Drizzle and Payload migrations, but
-only when `VERCEL_ENV === 'production'`. To migrate the staging DB on deploy,
-broaden that gate so it also fires on the staging branch, e.g.:
+`scripts/prod-migrate.mjs` runs the **Drizzle** migrations only (`npx drizzle-kit
+migrate`), and only when `VERCEL_ENV === 'production'`. Payload (CMS) migrations
+are deliberately **not** run by it: `payload migrate` is interactive on this
+project (the `payload_migrations` table was never populated because the Payload
+schema was applied out-of-band), so it prompts and hangs the build — that is
+what stalled the 23 June 2026 deploy. Payload schema changes are applied as raw
+SQL in the Neon SQL editor instead (see the script header and
+`DEPLOY_CHECKLIST.md`). **Never add `npx payload migrate` to the build.**
+
+To migrate the staging DB on deploy, broaden the gate so it also fires on the
+staging branch, e.g.:
 
 ```js
 const env = process.env.VERCEL_ENV ?? '(unset)';
-// Run migrations on production AND on the staging branch.
+// Run Drizzle migrations on production AND on the staging branch.
 const isStaging = process.env.VERCEL_GIT_COMMIT_REF === 'staging';
 if (env === 'production' || (env === 'preview' && isStaging)) {
   execSync('npx drizzle-kit migrate', { stdio: 'inherit' });
-  execSync('npx payload migrate', { stdio: 'inherit' });
 }
 ```
 
-This runs the Drizzle migrations (incl. `0013_add_event_rsvps_pk` with its
-dedupe `DELETE`) and the Payload migrations (incl. the new
-`20260623_site_settings_community_links` that adds the `community_links_*`
-columns to `site_settings`). Both are tracked/idempotent.
+This applies the pending Drizzle migrations (e.g. `0013_add_event_rsvps_pk`
+with its dedupe `DELETE`); they are journaled and idempotent. Payload
+migrations such as `20260623_site_settings_community_links` (the
+`community_links_*` columns on `site_settings`) still have to be applied by
+hand — run the `up` SQL from `src/migrations/<name>.ts` against the staging
+branch.
 
 > ⚠️ Because today Preview shares the prod `DATABASE_URL`, do **not** broaden the
 > migrate gate until step 3 has repointed staging at the Neon branch — otherwise
@@ -97,9 +111,3 @@ Once staging is live with its own DB:
 - **Billing idempotency:** use the Stripe CLI against the test keys
   (`stripe listen` + `stripe trigger`) to replay duplicate webhooks and confirm a
   single referral credit.
-
-## 6. Add a privacy policy page
-
-The consent banner links to `/privacy`, which doesn't exist yet. Add a
-`/(main)/privacy/page.tsx` (or a CMS page with slug `privacy`) before relying on
-the banner in production.

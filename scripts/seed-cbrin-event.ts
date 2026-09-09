@@ -18,8 +18,12 @@
  *   /events/entrepreneurship-for-everyone   (hand-built static landing page)
  * and surface on /partners/cbr-innovation-network under "Upcoming with us".
  */
+import { assertSafeDatabaseTarget } from './_guard.mjs';
 import { getPayload } from 'payload';
 import config from '../src/payload.config';
+
+// Refuse to run against the production DB unless ALLOW_PROD=1 (see scripts/_guard.mjs).
+assertSafeDatabaseTarget('scripts/seed-cbrin-event.ts');
 
 const EVENT_SLUG = 'entrepreneurship-for-everyone';
 const CBRIN_NAME = 'CBR Innovation Network';

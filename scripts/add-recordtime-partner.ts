@@ -13,8 +13,12 @@
  *   3. Appends the partner to the home page's logo-strip block so it shows in
  *      the front-page marquee.
  */
+import { assertSafeDatabaseTarget } from './_guard.mjs';
 import { getPayload } from 'payload';
 import config from '../src/payload.config';
+
+// Refuse to run against the production DB unless ALLOW_PROD=1 (see scripts/_guard.mjs).
+assertSafeDatabaseTarget('scripts/add-recordtime-partner.ts');
 
 const LOGO_PATH = 'C:/Users/WaheedJayhoon/Downloads/RecordTime_stacked_positive.svg';
 const PARTNER_NAME = 'Record TIME';

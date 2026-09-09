@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { withAuth } from '@workos-inc/authkit-nextjs';
+import { withAuth } from '@/lib/auth/with-auth';
 import { rsvpToEvent, cancelRsvp, type RsvpAttribution } from '@/lib/db/rsvps';
 import { getEventById } from '@/lib/cms';
 

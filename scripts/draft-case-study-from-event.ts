@@ -24,8 +24,12 @@
  * existing scripts/ pattern (event:seed-cbrin, partners:add-missing) and
  * delivers the same outcome — editor opens admin to a populated draft.
  */
+import { assertSafeDatabaseTarget } from './_guard.mjs';
 import { getPayload } from 'payload';
 import config from '../src/payload.config';
+
+// Refuse to run against the production DB unless ALLOW_PROD=1 (see scripts/_guard.mjs).
+assertSafeDatabaseTarget('scripts/draft-case-study-from-event.ts');
 
 interface LexicalParagraph {
   type: 'paragraph';

@@ -3,6 +3,7 @@
 
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import { assertSafeDatabaseTarget } from '../../scripts/_guard.mjs';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -10,6 +11,9 @@ export const TEST_USER_ID = 'user_playwright_001';
 
 export default async function globalTeardown() {
   if (!process.env.DATABASE_URL) return; // skip silently if not configured
+
+  // Same guard as global-setup: never delete rows from production by accident.
+  assertSafeDatabaseTarget('tests/setup/global-teardown.ts (Playwright test-user cleanup)');
 
   const { neon } = await import('@neondatabase/serverless');
   const sql = neon(process.env.DATABASE_URL);

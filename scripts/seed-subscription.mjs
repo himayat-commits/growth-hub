@@ -1,6 +1,10 @@
 // One-off: seed a fake subscription row for testing the portal/dashboard as a
 // subscribed user. Run with: node --env-file=.env.local scripts/seed-subscription.mjs
+import { assertSafeDatabaseTarget } from './_guard.mjs';
 import { neon } from '@neondatabase/serverless';
+
+// Refuse to run against the production DB unless ALLOW_PROD=1 (see scripts/_guard.mjs).
+assertSafeDatabaseTarget('scripts/seed-subscription.mjs');
 
 const USER_ID = process.env.SEED_USER_ID ?? 'user_01KRQTPFAY0Q9VJHFAD084MCHK';
 const EMAIL = process.env.SEED_EMAIL ?? 'waheed@himayat.com.au';

@@ -1,6 +1,6 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`CREATE SCHEMA IF NOT EXISTS payload`);
   await db.execute(sql`
    CREATE TYPE "payload"."enum_pages_blocks_hero_variant" AS ENUM('centered', 'left-aligned', 'split');
@@ -952,7 +952,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "navigation_nav_items_parent_id_idx" ON "payload"."navigation_nav_items" USING btree ("_parent_id");`)
 }
 
-export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
    DROP TABLE "payload"."users_sessions" CASCADE;
   DROP TABLE "payload"."users" CASCADE;

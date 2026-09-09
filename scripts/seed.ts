@@ -6,8 +6,12 @@
  * Requires DATABASE_URL, PAYLOAD_SECRET, and optionally PAYLOAD_SEED_EMAIL /
  * PAYLOAD_SEED_PASSWORD in your .env.local.
  */
+import { assertSafeDatabaseTarget } from './_guard.mjs';
 import { getPayload } from 'payload';
 import config from '../src/payload.config';
+
+// Refuse to run against the production DB unless ALLOW_PROD=1 (see scripts/_guard.mjs).
+assertSafeDatabaseTarget('scripts/seed.ts');
 
 const SEED_EMAIL = process.env.PAYLOAD_SEED_EMAIL ?? 'admin@himayat.com.au';
 const SEED_PASSWORD = process.env.PAYLOAD_SEED_PASSWORD ?? 'changeme-replace-me!';

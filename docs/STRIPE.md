@@ -1,3 +1,7 @@
+> **Historical design doc (Clerk era) — not the shipped implementation.** The app uses
+> **WorkOS AuthKit** for auth (not Clerk) and the middleware lives in `src/proxy.ts`; the
+> eight `STRIPE_PRICE_*` env names referenced below are listed in `.env.example` / `src/lib/plans.ts`.
+
 # Stripe + Clerk + Neon subscription setup for growth-hub
 
 A complete subscription billing system for Himayat tailored to your stack: **Next.js 16 (App Router) + TypeScript + Tailwind v4 + Vercel + Resend**, with **Clerk** for auth and **Neon + Drizzle** for the database.

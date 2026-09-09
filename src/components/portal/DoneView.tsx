@@ -21,6 +21,38 @@ import { buildWebchatEmbedSnippet } from "@/lib/birdeye/payloads";
 import { isLiveRun } from "@/lib/birdeye/provisioned";
 import type { WizardState } from "@/lib/wizard/state";
 
+// ─── localStorage fallback ───────────────────────────────────────────────────
+// The wizard's localStorage snapshot is read as an external store so the
+// server render (no snapshot) and the client render (snapshot) stay
+// hydration-safe without a setState-in-effect. The parsed value is cached by
+// raw string so getSnapshot returns a stable reference between renders.
+let lsCache: { key: string; raw: string | null; value: WizardState | null } | null = null;
+
+function readLocalWizardState(onboardingId: string): WizardState | null {
+  const key = `gh_wizard_${onboardingId}`;
+  let raw: string | null = null;
+  try {
+    raw = localStorage.getItem(key);
+  } catch {
+    raw = null;
+  }
+  if (lsCache && lsCache.key === key && lsCache.raw === raw) return lsCache.value;
+  let value: WizardState | null = null;
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as WizardState;
+      if (parsed.onboardingId === onboardingId) value = parsed;
+    } catch {
+      /* ignore */
+    }
+  }
+  lsCache = { key, raw, value };
+  return value;
+}
+
+const subscribeNoop = () => () => {};
+const getServerSnapshot = (): WizardState | null => null;
+
 export function DoneView({
   onboardingId,
   packageId,
@@ -35,22 +67,13 @@ export function DoneView({
   /** Resolved Birdeye dashboard deep-link. */
   dashboardUrl?: string;
 }) {
-  const [state, setState] = React.useState<WizardState | null>(serverState ?? null);
-  React.useEffect(() => {
-    if (serverState) return; // server data wins — skip localStorage
-    try {
-      const raw = localStorage.getItem(`gh_wizard_${onboardingId}`);
-      if (raw) {
-        const parsed = JSON.parse(raw) as WizardState;
-        // localStorage is only readable after mount (SSR'd client component),
-        // so this one-off hydration from an external store has to live here.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        if (parsed.onboardingId === onboardingId) setState(parsed);
-      }
-    } catch {
-      /* ignore */
-    }
-  }, [onboardingId, serverState]);
+  const localState = React.useSyncExternalStore<WizardState | null>(
+    subscribeNoop,
+    // server data wins — skip localStorage entirely when it is present
+    () => (serverState ? null : readLocalWizardState(onboardingId)),
+    getServerSnapshot,
+  );
+  const state = serverState ?? localState;
 
   const pkg = PACKAGES[packageId];
   const businessNumber = state?.provisioning.businessNumber ?? "—";

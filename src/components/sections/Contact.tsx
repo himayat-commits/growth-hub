@@ -54,7 +54,8 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
   const toggleInterest = (i: string) => {
     setInterests((prev) => {
       const next = new Set(prev);
-      next.has(i) ? next.delete(i) : next.add(i);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
       return next;
     });
   };
@@ -88,7 +89,7 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
             </span>
             <h2 className="contact-h2">
               Write us a line.<br />
-              <em className="contact-h2-em">We'll write one back.</em>
+              <em className="contact-h2-em">We&apos;ll write one back.</em>
             </h2>
           </div>
           <div className="contact-letter">
@@ -99,7 +100,7 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
                 </svg>
               </div>
               <h3>Your message is on its way.</h3>
-              <p>We'll reply to <strong>{watch("email")}</strong> within 48 hours — usually sooner.</p>
+              <p>We&apos;ll reply to <strong>{watch("email")}</strong> within 48 hours — usually sooner.</p>
             </div>
           </div>
           <ContactStrip email={supportEmail} phone={phone} address={address} />
@@ -117,11 +118,11 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
           </span>
           <h2 className="contact-h2">
             Write us a line.<br />
-            <em className="contact-h2-em">We'll write one back.</em>
+            <em className="contact-h2-em">We&apos;ll write one back.</em>
           </h2>
           <p className="contact-lede">
-            Not a form funnel. Not a "discovery call". Just a real message to a
-            real person in Canberra who'll read it, think about it, and reply.
+            Not a form funnel. Not a &quot;discovery call&quot;. Just a real message to a
+            real person in Canberra who&apos;ll read it, think about it, and reply.
           </p>
         </div>
 
@@ -191,7 +192,7 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
 
             <div className="cf2-row">
               <div className="cf2-interest">
-                <span className="cf2-lbl">I'm interested in</span>
+                <span className="cf2-lbl">I&apos;m interested in</span>
                 <div className="cf2-chips">
                   {INTERESTS.map((i) => (
                     <button

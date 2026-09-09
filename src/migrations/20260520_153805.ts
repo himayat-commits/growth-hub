@@ -1,6 +1,6 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    CREATE TYPE "payload"."enum_partners_shape" AS ENUM('circle', 'diamond', 'triangle', 'leaf', 'hex', 'arc', 'bars', 'cross');
   ALTER TYPE "payload"."enum_partners_type" RENAME TO "enum_partners_category";
@@ -20,7 +20,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "payload"."partners" ADD COLUMN "how_we_work" varchar;`)
 }
 
-export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
    ALTER TYPE "payload"."enum_partners_category" RENAME TO "enum_partners_type";
   ALTER TABLE "payload"."partners" RENAME COLUMN "category" TO "type";

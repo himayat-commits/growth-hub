@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Props {
   serviceSlug: string;
@@ -70,12 +71,12 @@ export default function BookingForm({
           You&apos;ll see this engagement in your dashboard once it&apos;s scheduled.
         </p>
         <div style={{ display: 'flex', gap: 8 }}>
-          <a className="gh-btn ghost" href="/services">
+          <Link className="gh-btn ghost" href="/services">
             Back to services
-          </a>
-          <a className="gh-btn" href="/messages">
+          </Link>
+          <Link className="gh-btn" href="/messages">
             Open inbox
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -124,9 +125,9 @@ export default function BookingForm({
         </div>
       )}
       <div className="gh-form-foot">
-        <a className="gh-btn ghost" href="/services">
+        <Link className="gh-btn ghost" href="/services">
           Cancel
-        </a>
+        </Link>
         <button type="submit" className="gh-btn" disabled={submitting}>
           {submitting ? 'Sending…' : 'Send request'}
         </button>

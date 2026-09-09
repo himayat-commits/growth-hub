@@ -5,8 +5,12 @@
  *   node --env-file=.env.local --import tsx/esm scripts/create-payload-admin.ts \
  *     "nash@whatworks.com.au" "Nash Khanal" "<password>"
  */
+import { assertSafeDatabaseTarget } from './_guard.mjs';
 import { getPayload } from 'payload';
 import config from '../src/payload.config';
+
+// Refuse to run against the production DB unless ALLOW_PROD=1 (see scripts/_guard.mjs).
+assertSafeDatabaseTarget('scripts/create-payload-admin.ts');
 
 const [, , email, name, password] = process.argv;
 

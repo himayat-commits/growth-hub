@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 // ── Icon components ──────────────────────────────────────────────────────────
 
@@ -65,7 +66,7 @@ const TABS = [
           <div className="comm-event">
             <span className="comm-event-title">A full calendar — workshops, mixers, clinics and an annual summit.</span>
             <span className="comm-event-loc">Canberra · Mostly free · always inclusive</span>
-            <a
+            <Link
               href="/events"
               className="btn btn-secondary"
               style={{ alignSelf: "flex-start", marginTop: 14 }}
@@ -74,7 +75,7 @@ const TABS = [
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
                 <path d="M3 7h8M7 3l4 4-4 4" />
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

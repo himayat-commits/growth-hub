@@ -107,8 +107,9 @@ test("/services/[slug] redirects unauthenticated visitor to sign-in", async ({ p
   await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
 });
 
-test("/events redirects unauthenticated visitor to sign-in", async ({ page }) => {
-  await page.goto("/events");
+// /events is public (marketing listing); the auth-gated one is /my-events.
+test("/my-events redirects unauthenticated visitor to sign-in", async ({ page }) => {
+  await page.goto("/my-events");
   await page.waitForURL(/sign-in|workos|authkit/i, { timeout: 10_000 });
 });
 

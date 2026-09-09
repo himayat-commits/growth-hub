@@ -341,7 +341,7 @@ export default function PricingSection({ heading, subheading }: PricingSectionPr
                       {t.cta} <ArrowIcon />
                     </Link>
                   ) : (
-                    <a
+                    <Link
                       className={`btn ${t.featured ? "btn-lime" : "btn-primary"}`}
                       href="/#contact"
                       onClick={() =>
@@ -353,7 +353,7 @@ export default function PricingSection({ heading, subheading }: PricingSectionPr
                       }
                     >
                       {t.cta} <ArrowIcon />
-                    </a>
+                    </Link>
                   )}
                 </div>
               </div>

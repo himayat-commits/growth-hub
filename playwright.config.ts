@@ -14,6 +14,15 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 // Locally you can also point at http://localhost:3000 and run with
 // `npm run dev` in another terminal.
 //
+// Setting BASE_URL: there is no cross-env in this repo, so set it per shell —
+//   PowerShell : $env:BASE_URL="https://<preview>.vercel.app"; npm run test:e2e
+//   bash/zsh   : BASE_URL=https://<preview>.vercel.app npm run test:e2e
+// Do NOT point this config at production: global-setup seeds a test user into
+// DATABASE_URL (scripts/_guard.mjs refuses when that is prod) and the
+// wizard/shop specs need /api/test/auth, which is 404 in production. For the
+// public-surface smoke suite against prod use `npm run test:e2e:smoke:prod`
+// (playwright.smoke.config.ts — no DB seed, defaults to thegrowthhub.com.au).
+//
 // The wizard.spec.ts test requires:
 //   • PLAYWRIGHT_TEST_TOKEN — must match the env var on the running server
 //   • DATABASE_URL          — used by global-setup to seed test user rows

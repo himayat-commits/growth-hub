@@ -5,8 +5,12 @@
  * list to the same 8 names (as real partner references, which also makes
  * them link to their /partners/{slug} pages) + Record Time at the end.
  */
+import { assertSafeDatabaseTarget } from './_guard.mjs';
 import { getPayload } from 'payload';
 import config from '../src/payload.config';
+
+// Refuse to run against the production DB unless ALLOW_PROD=1 (see scripts/_guard.mjs).
+assertSafeDatabaseTarget('scripts/fix-logo-strip-partners.ts');
 
 const MARQUEE_ORDER = [
   'Small Business Digital',
