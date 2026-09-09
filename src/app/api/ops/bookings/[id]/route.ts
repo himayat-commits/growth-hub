@@ -19,6 +19,7 @@
 //                           + email "Your <service> is scheduled|complete"
 //   completed + growth-call → qualify the pending referral (the A$50 credit
 //                           unlocks on a *held* call, not a request)
+//   completed             → HubSpot note with outcome + next step (F4.4)
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -40,6 +41,7 @@ import { getProfile } from '@/lib/db/profile';
 // referral branch (pending-credit rework) lands — same call site, new name.
 import { qualifyReferral } from '@/lib/db/referrals';
 import { DEFAULT_FROM, escapeHtml, sendEmail } from '@/lib/email/send';
+import { syncNote } from '@/lib/hubspot/crm';
 
 export const runtime = 'nodejs';
 
@@ -166,6 +168,23 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
         tags: { area: 'ops.bookings', phase: 'referral' },
         extra: { bookingId: id, userId: booking.userId },
       });
+    }
+  }
+
+  if (nextStatus === 'completed') {
+    // Fire-and-forget CRM note so the outcome is visible in HubSpot before
+    // the next conversation (crm.ts handles its own errors + Sentry).
+    const contact = await getMemberContact(booking.userId);
+    if (contact) {
+      void syncNote(
+        contact.email,
+        [
+          `Completed ${booking.serviceTitle} (gh_booking_id=#${booking.id})`,
+          `by=${opsUser.email}`,
+          `outcome=${body.outcome ?? booking.outcome ?? '—'}`,
+          `next_step=${body.nextStep ?? booking.nextStep ?? '—'}`,
+        ].join('\n'),
+      );
     }
   }
 

@@ -6,7 +6,8 @@
 //   2. Drop an in-app notification on the customer's feed
 //   3. Email ops (CC the assigned strategist) with a link to the member 360
 //   4. Email the member a confirmation
-// Steps 2–4 are best-effort — they never block a successful response.
+//   5. HubSpot: upsert the contact + "Booked <service>" timeline note (F4.4)
+// Steps 2–5 are best-effort — they never block a successful response.
 //
 // Referral qualification does NOT happen here any more: a referral becomes
 // qualified when ops marks the Growth Call *completed* (PATCH
@@ -35,6 +36,8 @@ import { getServiceBySlug, getStrategistBySlug } from '@/lib/cms';
 >>>>>>> 02e0828 (feat(advisory): triage intake, adviser 360, status workflow, specialties routing (F4.1–F4.3, F4.5–F4.10))
 import { rateLimit, tooManyRequests } from '@/lib/rate-limit';
 import { DEFAULT_FROM, OPS_EMAIL, escapeHtml, sendEmail } from '@/lib/email/send';
+import { getEffectivePlan, getSubscription } from '@/lib/subscription';
+import { syncContact } from '@/lib/hubspot/crm';
 import {
   MAX_PREFERRED_SLOTS,
   NEEDS,
@@ -181,6 +184,34 @@ export async function POST(req: NextRequest) {
   const memberUrl = `${APP_URL}/ops/members/${encodeURIComponent(user.id)}`;
   const strategistEmail = strategist?.email ?? null;
 >>>>>>> 02e0828 (feat(advisory): triage intake, adviser 360, status workflow, specialties routing (F4.1–F4.3, F4.5–F4.10))
+
+  // HubSpot CRM — fire-and-forget (never awaited; crm.ts swallows + Sentry's
+  // its own errors). The note carries the booking id so a replay is
+  // recognisable, and the contact picks up the latest plan/profile signals.
+  if (user.email) {
+    const sub = await getSubscription(user.id).catch(() => null);
+    void syncContact(
+      {
+        email: user.email,
+        firstname: user.firstName,
+        lastname: user.lastName,
+        company: profile?.businessName,
+        gh_plan_tier: getEffectivePlan(sub),
+        gh_stage: profile?.stage,
+        gh_industry: profile?.industry,
+        gh_help_areas: Array.from(new Set([...(profile?.helpAreas ?? []), body.need])),
+        gh_strategist: strategistSlug,
+        gh_workos_id: user.id,
+      },
+      [
+        `Booked ${service.title} (gh_booking_id=#${booking.id})`,
+        `need=${needLabel(body.need)}`,
+        `slots=${slotsText || 'none given'}`,
+        `strategist=${strategist?.name ?? strategistSlug ?? 'unassigned'}`,
+        `notes=${notes ?? '—'}`,
+      ].join('\n'),
+    );
+  }
 
   // Ops email — CC the routed strategist so they learn about the booking
   // without reading hello@ (F4.2). No replyTo=member: replies should go

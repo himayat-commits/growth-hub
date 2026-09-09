@@ -7,6 +7,7 @@ import { sendTeamMessage } from '@/lib/db/messages';
 import { attributeReferral } from '@/lib/db/referrals';
 import { getStrategistBySlug } from '@/lib/cms';
 import { escapeHtml, sendEmail } from '@/lib/email/send';
+import { syncContact } from '@/lib/hubspot/crm';
 
 // Exchanges the WorkOS authorization code for a session cookie.
 // Configure this URL as a Redirect URI in dashboard.workos.com → Redirects.
@@ -75,6 +76,20 @@ export const GET = handleAuth({
           ? await getStrategistBySlug(profile.assignedStrategistId).catch(() => null)
           : null;
         const strategistName = strategist?.name ?? 'The Growth Hub Team';
+
+        // HubSpot CRM: create the contact on first sign-in so the member is
+        // visible to the team before they ever book (F4.4). Fire-and-forget;
+        // crm.ts swallows its own errors and no-ops without a token.
+        if (user.email) {
+          void syncContact({
+            email: user.email,
+            firstname: user.firstName,
+            lastname: user.lastName,
+            gh_plan_tier: 'free',
+            gh_strategist: profile.assignedStrategistId,
+            gh_workos_id: user.id,
+          });
+        }
 
         await createNotification({
           userId: user.id,
