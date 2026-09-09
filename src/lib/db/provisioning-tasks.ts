@@ -16,7 +16,8 @@ export type TaskKind =
   | "apple_categories"
   | "faqs"
   | "contact_tags"
-  | "retry_failed_steps";
+  | "retry_failed_steps"
+  | "create_failed";
 
 export type HandoffTask = {
   kind: TaskKind;
@@ -32,11 +33,12 @@ export type HandoffTask = {
  *  - done row → stays done, EXCEPT retry_failed_steps which reopens with the
  *    fresh failures.
  *  `resolveRetry` (a fully-provisioned run) closes retry_failed_steps as
- *  done-by-system instead. */
+ *  done-by-system instead; `resolveCreateFailed` (an account now exists)
+ *  closes an open create_failed task the same way. */
 export async function upsertHandoffTasks(
   userId: string,
   tasks: HandoffTask[],
-  opts?: { resolveRetry?: boolean },
+  opts?: { resolveRetry?: boolean; resolveCreateFailed?: boolean },
 ): Promise<void> {
   const db = getDb();
   try {
@@ -69,14 +71,17 @@ export async function upsertHandoffTasks(
               },
         });
     }
-    if (opts?.resolveRetry) {
+    const autoClose: TaskKind[] = [];
+    if (opts?.resolveRetry) autoClose.push("retry_failed_steps");
+    if (opts?.resolveCreateFailed) autoClose.push("create_failed");
+    if (autoClose.length) {
       await db
         .update(provisioningTasks)
         .set({ status: "done", doneAt: sql`now()`, doneBy: "system" })
         .where(
           and(
             eq(provisioningTasks.userId, userId),
-            eq(provisioningTasks.taskKind, "retry_failed_steps"),
+            inArray(provisioningTasks.taskKind, autoClose),
             eq(provisioningTasks.status, "open"),
           ),
         );

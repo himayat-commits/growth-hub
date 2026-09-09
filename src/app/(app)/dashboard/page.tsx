@@ -14,6 +14,7 @@ import type { Notification } from '@/lib/db/schema';
 import { wizardProgress } from '@/lib/wizard/initial-state';
 import { loadOnboardingRow, isStaleRunning } from '@/lib/wizard/provisioning-store';
 import { getBirdeyeDashboardUrl } from '@/lib/birdeye/dashboard-url';
+import { isLiveRun } from '@/lib/birdeye/provisioned';
 import type { PackageId } from '@/lib/wizard/packages';
 import {
   IcoBriefcase,
@@ -207,6 +208,17 @@ export default async function DashboardPage() {
     let href: string | null;
     let action: string | undefined;
     if (
+      businessNumber &&
+      (runStatus === null || runStatus === 'idle' || runStatus === 'provisioned') &&
+      !isLiveRun(prov)
+    ) {
+      // Mock run: the wizard is done but the number is synthetic and no
+      // Birdeye account exists yet — a strategist finishes it by hand.
+      state = 'done';
+      meta = 'Our team is setting up your Birdeye account';
+      href = '/messages';
+      action = 'Message us';
+    } else if (
       businessNumber &&
       (runStatus === null || runStatus === 'idle' || runStatus === 'provisioned')
     ) {

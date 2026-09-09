@@ -1,16 +1,21 @@
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink, MessageCircle } from "lucide-react";
 import { Card, CardContent, Pill } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
-// The Birdeye lifecycle banner on /services. One card, six states, all in
+// The Birdeye lifecycle banner on /services. One card, seven states, all in
 // the house language (Card + Pill + Button) — replaces the old
 // .portal-birdeye-* markup whose styles lived in the marketing stylesheet
 // and never loaded on the app surface.
+//
+// `manual` = the run executed in mock mode: the wizard is complete but no
+// Birdeye account exists; a Growth Strategist sets it up by hand. It must
+// never show a business number or a dashboard link.
 export type BirdeyeBannerState =
   | { kind: "ready"; businessName: string | null; businessNumber: string; dashboardUrl: string }
+  | { kind: "manual"; businessName: string | null }
   | { kind: "running" }
   | { kind: "escalated"; businessName: string | null; failedCount: number }
   | {
@@ -60,6 +65,8 @@ function BannerPill({ state }: { state: BirdeyeBannerState }) {
   switch (state.kind) {
     case "ready":
       return <Pill tone="lime">Birdeye account ready</Pill>;
+    case "manual":
+      return <Pill tone="teal">Setup with our team</Pill>;
     case "running":
       return (
         <Pill tone="teal">
@@ -91,6 +98,8 @@ function BannerTitle({ state }: { state: BirdeyeBannerState }) {
       return state.businessName
         ? `${state.businessName} is live on Birdeye.`
         : "Your Birdeye account is ready.";
+    case "manual":
+      return "Your setup is with our team";
     case "running":
       return "Setting up your account now…";
     case "escalated":
@@ -123,6 +132,14 @@ function BannerSub({ state }: { state: BirdeyeBannerState }) {
           <code className="rounded bg-eggshell-warm px-1.5 py-0.5 font-sans text-xs text-teal">
             {state.businessNumber}
           </code>
+        </>
+      );
+    case "manual":
+      return (
+        <>
+          We&apos;ve received everything we need. A Growth Strategist is setting up your
+          Birdeye account and will email your login details — usually within two business
+          days. Nothing more to do here.
         </>
       );
     case "running":
@@ -179,6 +196,14 @@ function BannerCta({ state }: { state: BirdeyeBannerState }) {
             Open your Birdeye dashboard <ExternalLink className="h-4 w-4" />
           </Button>
         </a>
+      );
+    case "manual":
+      return (
+        <Link href="/messages">
+          <Button variant="outline">
+            <MessageCircle className="h-4 w-4" /> Message your strategist
+          </Button>
+        </Link>
       );
     case "running":
       return (

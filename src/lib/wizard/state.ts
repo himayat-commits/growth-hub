@@ -312,6 +312,28 @@ export const wizardStateSchema = z.object({
        *  burden moves from the user to ops, and the UI flips from "retry"
        *  to "we're on it". Never reset by further user retries. */
       escalatedAt: z.string().optional(),
+      /** Which client mode the most recent run executed under. `mock` runs
+       *  record a synthetic businessNumber and NO real account exists — a
+       *  later live run must treat them as not-provisioned (see
+       *  lib/birdeye/provisioned.ts). Rows written before this field
+       *  existed count as mock: production has only ever run mock. */
+      mode: z.enum(["mock", "live"]).optional(),
+      /** Set when create_subaccount ended with an UNKNOWN outcome (transient
+       *  status, or 2xx with no extractable id, or a prior ok=true create log
+       *  with no persisted id). While present the runner refuses to create
+       *  again — a second create is a second billable account. Only ops
+       *  clears it, after confirming in Birdeye that no account exists. */
+      unresolvedCreate: z
+        .object({
+          at: z.string(),
+          status: z.number().int(),
+          reason: z.string().optional(),
+          response: z.unknown().optional(),
+        })
+        .optional(),
+      /** Audit trail for the last explicit ops clear of unresolvedCreate.
+       *  The pre-create log guard ignores create rows older than `at`. */
+      unresolvedCleared: z.object({ by: z.string(), at: z.string() }).optional(),
     })
     .default({ invitedUsers: [], mediaIds: [] }),
 });

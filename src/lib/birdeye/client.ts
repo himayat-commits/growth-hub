@@ -17,14 +17,11 @@ export type ProvisionMode = "mock" | "live_allowlist" | "live";
 /** Reads the deployment switch. Server-only: `PROVISION_MODE` is NOT
  *  `NEXT_PUBLIC_` (it must not be inlined into the browser bundle, and it
  *  must stay flippable at runtime so rollback to `mock` is instant). The
- *  `NEXT_PUBLIC_PROVISION_MODE` fallback is transitional — drop it once the
- *  Vercel env var has been renamed. */
+ *  legacy `NEXT_PUBLIC_PROVISION_MODE` is deliberately NOT consulted: a
+ *  stale public var must never be able to flip real provisioning on
+ *  (config-health fails when it is still set). Unset = mock. */
 export const getProvisionMode = (): ProvisionMode => {
-  const raw = (
-    process.env.PROVISION_MODE ??
-    process.env.NEXT_PUBLIC_PROVISION_MODE ??
-    "mock"
-  ).toLowerCase();
+  const raw = (process.env.PROVISION_MODE ?? "mock").toLowerCase();
   if (raw === "live") return "live";
   if (raw === "live_allowlist") return "live_allowlist";
   return "mock";

@@ -4,7 +4,8 @@
 //   • PLAYWRIGHT_TEST_TOKEN must be set in the environment / .env.local
 //   • DATABASE_URL must be set so global-setup can seed the test user rows
 //   • The dev server must be running (BASE_URL=http://localhost:3000 by default)
-//   • NEXT_PUBLIC_PROVISION_MODE defaults to mock, so no real Birdeye calls happen
+//   • PROVISION_MODE defaults to mock (server-only; the old NEXT_PUBLIC_ var is
+//     ignored), so no real Birdeye calls happen
 //
 // Strategy:
 //   1. POST /api/test/auth to set the __gh_test_uid session cookie.
@@ -176,9 +177,31 @@ async function clickContinue(page: Page) {
   await btn.click();
 }
 
-// ─── The test ─────────────────────────────────────────────────────────────────
+/** Neon client for direct DB assertions/cleanup — same driver + env that
+ *  tests/setup/global-setup.ts uses (playwright.config loads .env.local). */
+async function neonSql() {
+  if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
+  const { neon } = await import('@neondatabase/serverless');
+  return neon(process.env.DATABASE_URL);
+}
+
+/** Wipe the test user's provisioning footprint so a test starts from "never
+ *  launched". global-teardown removes the same rows at the very end. */
+async function resetProvisioningRows() {
+  const sql = await neonSql();
+  await sql`DELETE FROM provisioning_logs  WHERE user_id = ${TEST_USER_ID}`;
+  await sql`DELETE FROM provisioning_tasks WHERE user_id = ${TEST_USER_ID}`;
+  await sql`DELETE FROM onboarding_states  WHERE user_id = ${TEST_USER_ID}`;
+}
+
+// ─── The tests ────────────────────────────────────────────────────────────────
 
 test.describe('Onboarding wizard (mock provisioning)', () => {
+  // Both provisioning tests act on the SAME seeded user (one onboarding row,
+  // one rate-limit bucket), so they cannot overlap — the double-launch test
+  // resets the row it needs and the wizard walk expects an un-launched user.
+  test.describe.configure({ mode: 'serial' });
+
   test('walks all steps and completes provisioning', async ({ page }) => {
     // ── 1. Establish session ─────────────────────────────────────────────────
     await loginAsTestUser(page);
@@ -248,6 +271,79 @@ test.describe('Onboarding wizard (mock provisioning)', () => {
     // Mock provisioning takes ~400–1200 ms per step (5–6 steps = 2–7 s).
     // We give it 45 s to account for slow CI runners.
     await expect(page).toHaveURL(/\/onboarding\/done/, { timeout: 45_000 });
+  });
+
+  test('concurrent double-launch creates exactly one sub-account', async ({ page }) => {
+    // A mock run is ~0.4–1.2 s per step; two racing POSTs + a third + DB
+    // round-trips comfortably fit, with slack for slow CI.
+    test.setTimeout(90_000);
+
+    // ── Fresh slate: no onboarding row, no logs for this user ─────────────
+    await resetProvisioningRows();
+
+    // ── Session cookie (shared by page.request) ──────────────────────────
+    await loginAsTestUser(page);
+
+    // ── Two simultaneous launches with the same seeded state ─────────────
+    // /api/provision seeds the onboarding row from the body when none exists
+    // (provisioning block reset server-side), then races for the run lease.
+    // Exactly one may win: it streams SSE; the other must 409 alreadyRunning
+    // (either from the fresh-`running` fast path or the lease itself).
+    const launch = () =>
+      page.request.post('/api/provision', {
+        data: { state: FILLED_STATE },
+        // The winner's response is a stream that only ends when the run does.
+        timeout: 60_000,
+      });
+    const [a, b] = await Promise.all([launch(), launch()]);
+
+    const isStream = (r: typeof a) =>
+      r.status() === 200 && (r.headers()['content-type'] ?? '').includes('text/event-stream');
+    const streams = [a, b].filter(isStream);
+    const rejected = [a, b].filter((r) => !isStream(r));
+    expect(streams, 'exactly one launch should stream').toHaveLength(1);
+    expect(rejected, 'exactly one launch should be turned away').toHaveLength(1);
+
+    expect(rejected[0].status()).toBe(409);
+    const rejectedBody = (await rejected[0].json()) as { alreadyRunning?: boolean };
+    expect(rejectedBody.alreadyRunning).toBe(true);
+
+    // The winner's stream must have reached the terminal "done" event.
+    const streamText = await streams[0].text();
+    expect(streamText).toContain('"type":"done"');
+    expect(streamText).toContain('"mode":"mock"');
+
+    // ── Third launch: idempotent short-circuit, no stream, no new run ────
+    // Under PROVISION_MODE=mock the mock-provisioned row IS provisioned for
+    // this caller (the test user is never on PROVISION_ALLOWLIST).
+    const c = await page.request.post('/api/provision', { data: { state: FILLED_STATE } });
+    expect(c.status()).toBe(200);
+    expect(c.headers()['content-type'] ?? '').toContain('application/json');
+    const third = (await c.json()) as { alreadyProvisioned?: boolean; businessNumber?: string };
+    expect(third.alreadyProvisioned).toBe(true);
+    expect(third.businessNumber).toBeTruthy();
+
+    // ── The billable step ran exactly once ───────────────────────────────
+    const sql = await neonSql();
+    const rows = (await sql`
+      SELECT count(*)::int AS c
+      FROM provisioning_logs
+      WHERE user_id = ${TEST_USER_ID} AND kind = 'create_subaccount'
+    `) as Array<{ c: number }>;
+    expect(rows[0]?.c, 'create_subaccount must be logged exactly once').toBe(1);
+
+    // ── The persisted run is tagged with the mode it executed under ──────
+    const state = (await sql`
+      SELECT state->'provisioning'->>'mode'      AS mode,
+             state->'provisioning'->>'runStatus' AS run_status
+      FROM onboarding_states
+      WHERE user_id = ${TEST_USER_ID}
+    `) as Array<{ mode: string | null; run_status: string | null }>;
+    expect(state[0]?.run_status).toBe('provisioned');
+    expect(state[0]?.mode).toBe('mock');
+
+    // Leave the user un-launched again for whichever test runs next.
+    await resetProvisioningRows();
   });
 
   test('/api/test/auth returns 403 for wrong token', async ({ request }) => {

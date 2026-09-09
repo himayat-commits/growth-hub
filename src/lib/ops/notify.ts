@@ -5,7 +5,11 @@
 //   2. Fire the webhook (Slack etc.) if configured.
 //   3. Send the Resend email if configured.
 //   4. Console fallback so dev never loses the handoff.
-// Non-fatal by design: the customer is already provisioned when this runs.
+// Non-fatal by design (the runner logs the outcome to provisioning_logs and
+// the ops console surfaces failures) — but it must be HONEST about failure:
+// Resend reports errors as `{ error }` rather than throwing, so that is
+// checked explicitly. A silently-swallowed 403 (unverified domain, revoked
+// key) once recorded as ok=true, hiding a paid customer from ops entirely.
 
 import "server-only";
 import { Resend } from "resend";
@@ -30,6 +34,8 @@ export async function sendOpsHandoff(args: {
   //    open retry task from earlier partials.
   await upsertHandoffTasks(state.onboardingId, tasks, {
     resolveRetry: failedSteps.length === 0,
+    // An account now exists — any earlier "create failed" task is moot.
+    resolveCreateFailed: Boolean(state.provisioning.businessNumber),
   });
 
   let ok = false;
@@ -57,12 +63,15 @@ export async function sendOpsHandoff(args: {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const { subject, html } = renderOpsHandoffEmail({ state, summary, tasks, severity });
-      await resend.emails.send({
+      const { error } = await resend.emails.send({
         from: "Growth Hub <noreply@himayat.com.au>",
         to: OPS_EMAIL,
         subject,
         html,
       });
+      if (error) {
+        throw new Error(`Resend ${error.name}: ${error.message}`);
+      }
       ok = true;
     } catch (e) {
       lastError = e instanceof Error ? e.message : "ops email failed";

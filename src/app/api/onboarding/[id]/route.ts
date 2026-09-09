@@ -7,7 +7,7 @@
 // cannot read/write someone else's wizard state.
 
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { withAuth } from "@/lib/auth/with-auth";
 import { getDb } from "@/lib/db";
 import { onboardingStates } from "@/lib/db/schema";
@@ -58,30 +58,46 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
   // PUT replaying pre-run provisioning would erase the run lease and the
   // businessNumber (→ duplicate billable sub-account on the next launch).
   // Same for the coarse lifecycle `status` once it reached `provisioned`.
-  // On first insert the block is reset too, so a crafted POST body can't
-  // smuggle a foreign businessNumber in before the row exists.
-  const db = getDb();
-  const existing = await db
-    .select()
-    .from(onboardingStates)
-    .where(eq(onboardingStates.userId, id))
-    .limit(1);
-  const serverState = existing[0]?.state as WizardState | undefined;
-
+  //
+  // This must hold under concurrency too. A read-then-write ("select the
+  // row, copy its provisioning block, upsert") loses the race when the
+  // runner writes between the read and the write — the PUT then re-applies
+  // the block it read BEFORE the run and erases the new id. So the merge is
+  // done by Postgres inside the single upsert statement: on conflict, take
+  // the incoming state but graft the EXISTING row's provisioning block (and
+  // its `status` when already provisioned) onto it atomically.
+  //
+  // On first insert the block is reset (the VALUES row carries an empty
+  // block), so a crafted body can't smuggle a foreign businessNumber in
+  // before the row exists.
   const state: WizardState = {
     ...parsed.data,
-    status:
-      serverState?.status === "provisioned" ? "provisioned" : parsed.data.status,
-    provisioning:
-      serverState?.provisioning ?? { invitedUsers: [], mediaIds: [] },
+    provisioning: { invitedUsers: [], mediaIds: [] },
   };
 
-  await db
+  const existingState = onboardingStates.state;
+  await getDb()
     .insert(onboardingStates)
     .values({ userId: id, state, updatedAt: new Date() })
     .onConflictDoUpdate({
       target: onboardingStates.userId,
-      set: { state, updatedAt: new Date() },
+      set: {
+        // `excluded` = the row proposed for insertion (the client's state);
+        // the bare table reference = the row already stored.
+        state: sql`jsonb_set(
+          jsonb_set(
+            excluded.state,
+            '{provisioning}',
+            coalesce(${existingState}->'provisioning', '{"invitedUsers":[],"mediaIds":[]}'::jsonb)
+          ),
+          '{status}',
+          CASE
+            WHEN ${existingState}->>'status' = 'provisioned' THEN '"provisioned"'::jsonb
+            ELSE coalesce(excluded.state->'status', '"draft"'::jsonb)
+          END
+        )`,
+        updatedAt: new Date(),
+      },
     });
 
   return NextResponse.json({ ok: true });

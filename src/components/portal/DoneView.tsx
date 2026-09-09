@@ -14,10 +14,11 @@ import { Button } from "@/components/ui/button";
 import { InlineNotice } from "@/components/ui/notice";
 import { CodeBlock } from "@/components/ui/code-block";
 import { PageHeader } from "@/components/dashboard/PageHeader";
-import { Check, ExternalLink } from "lucide-react";
+import { Check, ExternalLink, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { PACKAGES, type PackageId } from "@/lib/wizard/packages";
 import { buildWebchatEmbedSnippet } from "@/lib/birdeye/payloads";
+import { isLiveRun } from "@/lib/birdeye/provisioned";
 import type { WizardState } from "@/lib/wizard/state";
 
 export function DoneView({
@@ -41,6 +42,9 @@ export function DoneView({
       const raw = localStorage.getItem(`gh_wizard_${onboardingId}`);
       if (raw) {
         const parsed = JSON.parse(raw) as WizardState;
+        // localStorage is only readable after mount (SSR'd client component),
+        // so this one-off hydration from an external store has to live here.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (parsed.onboardingId === onboardingId) setState(parsed);
       }
     } catch {
@@ -113,6 +117,24 @@ export function DoneView({
   const qrHref = businessName
     ? `/api/review-qr-pdf?title=${encodeURIComponent(businessName)}`
     : "/api/review-qr-pdf";
+
+  // A mock run created nothing in Birdeye: no real business number, no admin
+  // invite, no dashboard to open. Never claim otherwise — a Growth Strategist
+  // finishes the setup by hand. (Rows without `mode` predate the field and
+  // were all mock. The live rendering below is unchanged.)
+  if (state && !isLiveRun(state.provisioning)) {
+    return (
+      <MockDoneView
+        businessName={businessName}
+        pkgId={pkg.id}
+        invitedCount={invitedUsers.length}
+        mediaCount={mediaCount}
+        faqCount={faqCount}
+        contactCount={contactCount}
+        qrHref={qrHref}
+      />
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-2 pb-12 md:px-6 md:pt-4">
@@ -269,6 +291,115 @@ export function DoneView({
           </CardContent>
         </Card>
       ) : null}
+    </div>
+  );
+}
+
+/** Customer-facing view for a run that executed in mock mode. Honest about
+ *  what happened: we captured everything, and a person is now setting the
+ *  real account up. No business number, no dashboard link, no "check your
+ *  email for an invite" — none of those exist yet. */
+function MockDoneView({
+  businessName,
+  pkgId,
+  invitedCount,
+  mediaCount,
+  faqCount,
+  contactCount,
+  qrHref,
+}: {
+  businessName?: string;
+  pkgId: PackageId;
+  invitedCount: number;
+  mediaCount: number;
+  faqCount: number;
+  contactCount: number;
+  qrHref: string;
+}) {
+  const pkg = PACKAGES[pkgId];
+  const received: { label: string; detail: string }[] = [
+    { label: "Business profile", detail: businessName ?? "Captured" },
+    { label: "Plan", detail: `${pkg.name} — ${pkg.modules.join(", ")}` },
+    {
+      label: "Team members to invite",
+      detail: invitedCount > 0 ? `${invitedCount} additional user${invitedCount === 1 ? "" : "s"}` : "Just you",
+    },
+    { label: "Photos & media", detail: mediaCount > 0 ? `${mediaCount} items` : "None yet" },
+    { label: "FAQs", detail: `6 default + ${faqCount} custom` },
+    { label: "Initial contacts", detail: contactCount > 0 ? `${contactCount} contacts` : "None yet" },
+  ];
+
+  return (
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-2 pb-12 md:px-6 md:pt-4">
+      <PageHeader
+        kicker="Setup submitted"
+        title="Your setup is with our team"
+        sub="We've received everything we need. A Growth Strategist is setting up your Birdeye account and will email your login details — usually within two business days. Nothing more to do here."
+        actions={<Pill tone="teal">In progress</Pill>}
+      />
+
+      <div className="grid gap-5 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">What we received</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2">
+            {received.map((c) => (
+              <div
+                key={c.label}
+                className="grid grid-cols-[24px_1fr] items-start gap-3 border-t border-line py-3 first:border-0"
+              >
+                <span className="mt-0.5 flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1.5px] border-teal bg-teal text-white">
+                  <Check className="h-3 w-3" />
+                </span>
+                <div>
+                  <div className="font-sans text-sm font-medium text-ink">{c.label}</div>
+                  <div className="mt-0.5 font-sans text-xs text-ink-muted">{c.detail}</div>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="self-start">
+          <CardHeader>
+            <CardTitle className="text-base">What happens next</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ol className="list-decimal space-y-3 pl-4 text-sm leading-relaxed">
+              <li>
+                <strong>We build your account.</strong> A Growth Strategist creates
+                your Birdeye business from the details above and activates your{" "}
+                {pkg.name} modules.
+              </li>
+              <li>
+                <strong>You get an email.</strong> Your Birdeye login details arrive
+                within about two business days. Nothing to do until then.
+              </li>
+              <li>
+                <strong>Questions or changes?</strong> Message your strategist any
+                time — we can adjust anything before it goes live.
+              </li>
+            </ol>
+          </CardContent>
+          <CardFooter className="flex-wrap pt-5">
+            <Link href="/messages">
+              <Button variant="lime">
+                <MessageCircle className="h-4 w-4" />
+                Message your strategist
+              </Button>
+            </Link>
+            {pkg.id !== "foundations" ? (
+              <Link href={qrHref} target="_blank">
+                <Button variant="outline">Download review QR PDF</Button>
+              </Link>
+            ) : null}
+            <Link href="/dashboard">
+              <Button variant="ghost">Back to dashboard</Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 }

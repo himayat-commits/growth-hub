@@ -4,16 +4,18 @@
 // without a stream.
 
 import "server-only";
-import { isOpsEmail } from "@/lib/auth/ops";
 import { getSubscription, isActive } from "@/lib/subscription";
 import {
   acquireProvisionLock,
   isStaleRunning,
   loadOnboardingRow,
   releaseProvisionLock,
+  updateProvisioning,
 } from "@/lib/wizard/provisioning-store";
-import { getProvisionMode, resolveEffectiveMode } from "@/lib/birdeye/client";
+import { resolveEffectiveModeFor } from "@/lib/birdeye/allowlist";
+import { isProvisionedFor } from "@/lib/birdeye/provisioned";
 import { runProvision, type ProvisionResult } from "@/lib/birdeye/provision-runner";
+import type { WizardState } from "@/lib/wizard/state";
 
 const RESELLER_ID = process.env.BIRDEYE_RESELLER_ID ?? "demo-reseller";
 const API_HOST = process.env.BIRDEYE_API_HOST ?? "https://api.birdeye.com/resources";
@@ -30,20 +32,43 @@ export type RerunOutcome =
         | "inactive_subscription";
     };
 
+export type RerunOptions = {
+  /** Ops has confirmed in Birdeye that NO account exists for this user:
+   *  clear `provisioning.unresolvedCreate` (recording who/when) before the
+   *  run so the runner will create again. Never set by the cron. */
+  clearUnresolvedCreate?: { by: string };
+};
+
+/** The two idempotency short-circuits, shared by the pre-lock fast path and
+ *  the post-lock re-check. `mode` is the effective mode for the TARGET user. */
+function shortCircuit(
+  state: WizardState,
+  updatedAt: Date,
+  mode: "mock" | "live",
+): Extract<RerunOutcome, { ok: false }> | null {
+  if (isProvisionedFor(state, mode)) return { ok: false, reason: "already_provisioned" };
+  if (state.provisioning.runStatus === "running" && !isStaleRunning(state, updatedAt)) {
+    return { ok: false, reason: "in_progress" };
+  }
+  return null;
+}
+
 export async function rerunProvisionForUser(
   userId: string,
   runBy: "ops" | "cron",
+  opts: RerunOptions = {},
 ): Promise<RerunOutcome> {
   const row = await loadOnboardingRow(userId);
   if (!row) return { ok: false, reason: "no_state" };
-  const { state } = row;
 
-  if (
-    state.provisioning.businessNumber &&
-    state.provisioning.runStatus === "provisioned"
-  ) {
-    return { ok: false, reason: "already_provisioned" };
-  }
+  // Mode parity with the original user-initiated run: resolve against the
+  // TARGET account's email, never the operator's — otherwise a live
+  // customer's re-run silently goes mock under live_allowlist (or a mock
+  // test account gets re-run live).
+  const mode = resolveEffectiveModeFor(row.state.adminUser.email);
+
+  const early = shortCircuit(row.state, row.updatedAt, mode);
+  if (early) return early;
 
   // Same paid-only gate the user route enforces. Matters most for a `failed`
   // run (no sub-account yet) after a cancellation — automation must never
@@ -53,25 +78,32 @@ export async function rerunProvisionForUser(
   if (!isActive(sub)) {
     return { ok: false, reason: "inactive_subscription" };
   }
-  if (state.provisioning.runStatus === "running" && !isStaleRunning(state, row.updatedAt)) {
-    return { ok: false, reason: "in_progress" };
-  }
   if (!(await acquireProvisionLock(userId))) {
     return { ok: false, reason: "locked" };
   }
 
   try {
-    // Mode parity with the original user-initiated run: resolve against the
-    // TARGET account's email, never the operator's — otherwise a live
-    // customer's re-run silently goes mock under live_allowlist (or a mock
-    // test account gets re-run live).
-    const mode = resolveEffectiveMode(
-      getProvisionMode(),
-      isOpsEmail(state.adminUser.email),
-    );
+    if (opts.clearUnresolvedCreate) {
+      const by = opts.clearUnresolvedCreate.by;
+      await updateProvisioning(userId, () => ({
+        provisioning: {
+          unresolvedCreate: undefined,
+          unresolvedCleared: { by, at: new Date().toISOString() },
+        },
+      }));
+    }
+
+    // Re-read AFTER the lease is ours: another invocation may have finished
+    // (and persisted a businessNumber) between our first read and the lock.
+    // Running on the pre-lock snapshot is exactly how a second create happens.
+    const fresh = await loadOnboardingRow(userId);
+    if (!fresh) return { ok: false, reason: "no_state" };
+    const late = shortCircuit(fresh.state, fresh.updatedAt, mode);
+    if (late) return late;
+
     const result = await runProvision({
       userId,
-      state,
+      state: fresh.state,
       mode,
       resellerId: RESELLER_ID,
       apiHost: API_HOST,
