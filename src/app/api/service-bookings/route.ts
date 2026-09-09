@@ -8,18 +8,15 @@
 // Steps 2 and 3 are best-effort — they never block a successful response.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import { createBooking, getUserBookings, hasOpenBookingFor } from '@/lib/db/bookings';
 import { createNotification } from '@/lib/db/notifications';
 import { qualifyReferral } from '@/lib/db/referrals';
 import { getServiceBySlug } from '@/lib/cms';
 import { rateLimit, tooManyRequests } from '@/lib/rate-limit';
+import { DEFAULT_FROM, OPS_EMAIL, escapeHtml, sendEmail } from '@/lib/email/send';
 
 export const runtime = 'nodejs';
-
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const OPS_EMAIL = process.env.OPS_NOTIFICATION_EMAIL ?? 'hello@himayat.com.au';
 
 interface BookingRequest {
   serviceSlug: string;
@@ -125,17 +122,18 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Best-effort email to ops.
-  if (resend) {
-    try {
-      const userEmail = user.email ?? 'unknown';
-      const userName =
-        [user.firstName, user.lastName].filter(Boolean).join(' ') || userEmail;
-      await resend.emails.send({
-        from: 'Growth Hub <noreply@himayat.com.au>',
+  // Best-effort email to ops. sendEmail() never throws; a missing provider
+  // comes back as ok=false (already logged + Sentry'd once by the provider layer).
+  {
+    const userEmail = user.email ?? 'unknown';
+    const userName =
+      [user.firstName, user.lastName].filter(Boolean).join(' ') || userEmail;
+    const result = await sendEmail({
+        from: DEFAULT_FROM,
         to: OPS_EMAIL,
         replyTo: userEmail,
         subject: `[Booking] ${service.title} — ${userName}`,
+        text: `New service request: ${service.title} (${slug})\nMember: ${userName} <${userEmail}>\n${datePreference ? `When: ${datePreference}\n` : ''}Booking ID: #${booking.id}\n\n${notes ?? 'No notes provided.'}`,
         html: `
           <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.55;max-width:600px;">
             <h2 style="font-family:Georgia,serif;color:#0D3F48;margin:0 0 8px;">New service request</h2>
@@ -155,20 +153,9 @@ export async function POST(req: NextRequest) {
             <p style="margin:18px 0 0;font-size:13px;color:#7A9098;">Reply to this email to write back directly — the From address is set to the customer.</p>
           </div>
         `,
-      });
-    } catch (e) {
-      console.error('[service-bookings] ops email failed', e);
-    }
+    });
+    if (!result.ok) console.error('[service-bookings] ops email not sent', result.error);
   }
 
   return NextResponse.json({ booking });
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }

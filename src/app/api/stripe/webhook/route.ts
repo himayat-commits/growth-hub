@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type Stripe from 'stripe';
-import { Resend } from 'resend';
 import * as Sentry from '@sentry/nextjs';
 import { getStripe } from '@/lib/stripe';
 import { syncSubscription } from '@/lib/stripe/sync-subscription';
 import { sendServerConversion } from '@/lib/analytics/server-conversions';
 import { fulfilOrderFromSession, isShopSession } from '@/lib/shop/fulfil-order';
 import { cancelPendingBySession, markRefunded } from '@/lib/db/orders';
+import { sendEmail } from '@/lib/email/send';
 
 // Webhook needs the Node.js runtime so we can read the raw request body
 // for signature verification. Edge runtime parses bodies eagerly.
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const RELEVANT_EVENTS = new Set<Stripe.Event['type']>([
   'checkout.session.completed',
@@ -188,8 +186,10 @@ function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
   return null;
 }
 
+// Best-effort: a provider failure (or no provider configured) is logged by the
+// provider layer and must not make the webhook 500 — Stripe would retry and
+// re-run the subscription sync for nothing.
 async function sendPaymentFailedEmail(invoice: Stripe.Invoice) {
-  if (!resend) return;
   const to = invoice.customer_email;
   if (!to) return;
 
@@ -198,10 +198,11 @@ async function sendPaymentFailedEmail(invoice: Stripe.Invoice) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.thegrowthhub.com.au';
   const portalLink = `${appUrl}/plan`;
 
-  await resend.emails.send({
+  const result = await sendEmail({
     from: 'Himayat <hello@himayat.com.au>',
     to,
     subject: 'Action needed: your Himayat payment failed',
+    text: `Hi,\n\nWe weren't able to process your most recent Himayat subscription payment. To keep your subscription active, please update your payment method: ${portalLink}\n\nIf you need a hand, reply to this email and we'll sort it out.\n\n— Himayat`,
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6;">
         <p>Hi,</p>
@@ -218,4 +219,7 @@ async function sendPaymentFailedEmail(invoice: Stripe.Invoice) {
       </div>
     `,
   });
+  if (!result.ok) {
+    console.error('[stripe.webhook] payment-failed email not sent', { invoice: invoice.id, error: result.error });
+  }
 }

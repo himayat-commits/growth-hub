@@ -5,6 +5,7 @@
 import "server-only";
 import { getProvisionMode } from "@/lib/birdeye/client";
 import { hasProvisionAllowlist } from "@/lib/birdeye/allowlist";
+import { resolveEmailProvider } from "@/lib/email/send";
 
 export type HealthCheck = {
   name: string;
@@ -120,13 +121,41 @@ export function runProvisioningHealthChecks(): HealthCheck[] {
     });
   }
 
+  // ── Transactional email (src/lib/email/send.ts, docs/EMAIL.md) ────────
+  // Production ran for months with no RESEND_API_KEY and every email was
+  // silently skipped — so "no provider" is a FAIL, not a warn.
+  const email = resolveEmailProvider();
+  if (email.provider === "none") {
+    checks.push({
+      name: "email_provider",
+      level: "fail",
+      detail:
+        `no transactional email provider (${email.reason}) — every welcome/RSVP/order/ops email is dropped. ` +
+        "Fix: set HUBSPOT_PRIVATE_APP_TOKEN + HUBSPOT_TRANSACTIONAL_EMAIL_ID (HubSpot single-send), " +
+        "or RESEND_API_KEY (Resend fallback); optionally pin with EMAIL_PROVIDER. See docs/EMAIL.md",
+    });
+  } else {
+    checks.push({
+      name: "email_provider",
+      level: "pass",
+      detail: `transactional email via ${email.provider} (${email.reason})`,
+    });
+  }
+  checks.push({
+    name: "hubspot_contact_form",
+    level: has("HUBSPOT_CONTACT_FORM_ID") ? "pass" : "warn",
+    detail: has("HUBSPOT_CONTACT_FORM_ID")
+      ? "HUBSPOT_CONTACT_FORM_ID set — /api/contact enquiries also land in HubSpot CRM"
+      : "HUBSPOT_CONTACT_FORM_ID unset — /api/contact enquiries go to email only, not HubSpot CRM (F7.11)",
+  });
+
   // ── Ops handoff channels ──────────────────────────────────────────────
-  if (!has("RESEND_API_KEY") && !has("OPS_NOTIFY_WEBHOOK")) {
+  if (email.provider === "none" && !has("OPS_NOTIFY_WEBHOOK")) {
     checks.push({
       name: "ops_channels",
       level: "warn",
       detail:
-        "neither RESEND_API_KEY nor OPS_NOTIFY_WEBHOOK set — provisioning handoff falls back to console logs",
+        "no email provider and no OPS_NOTIFY_WEBHOOK — provisioning handoff falls back to console logs",
     });
   } else {
     checks.push({ name: "ops_channels", level: "pass", detail: "ops handoff channel configured" });

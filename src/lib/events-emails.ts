@@ -1,11 +1,17 @@
 // Send helpers for event emails (GTM review F3.2, F3.8). Best-effort: the
 // confirmation never fails an RSVP and the reminder reports success so the
-// cron only marks rows it actually sent. Both log + Sentry on failure.
+// cron only marks rows it actually sent. Both log on failure (the provider
+// layer in src/lib/email/send.ts already raises Sentry for provider errors).
+//
+// The RSVP confirmation carries the member .ics as an attachment. Only the
+// Resend provider can deliver attachments — HubSpot single-send cannot — so
+// the public ICS URL is also passed in `tags.icsUrl`; on HubSpot the provider
+// layer appends an "Attachments" footer linking to it, and the template body
+// already links to it too.
 
 import 'server-only';
-import * as Sentry from '@sentry/nextjs';
 import type { Event as PayloadEvent } from '@/payload-types';
-import { DEFAULT_FROM, OPS_EMAIL, getResend } from '@/lib/email/resend';
+import { DEFAULT_FROM, OPS_EMAIL, sendEmail } from '@/lib/email/send';
 import {
   eventReminderEmail,
   eventRsvpConfirmationEmail,
@@ -59,51 +65,50 @@ function memberIcs(event: PayloadEvent): { filename: string; content: Buffer; co
 
 /** Confirmation on RSVP create. Never throws. */
 export async function sendRsvpConfirmationEmail(event: PayloadEvent, to: string): Promise<void> {
-  const resend = getResend();
-  if (!resend || !to) return;
+  if (!to) return;
   try {
-    const mail = eventRsvpConfirmationEmail(eventMailInput(event));
-    const { error } = await resend.emails.send({
+    const input = eventMailInput(event);
+    const mail = eventRsvpConfirmationEmail(input);
+    const result = await sendEmail({
       from: DEFAULT_FROM,
       to,
       replyTo: OPS_EMAIL,
       ...mail,
       attachments: [memberIcs(event)],
+      tags: { icsUrl: input.icsUrl },
     });
-    if (error) throw new Error(`${error.name}: ${error.message}`);
+    if (!result.ok) {
+      console.error('[events] RSVP confirmation email not sent', { eventId: event.id, error: result.error });
+    }
   } catch (err) {
     console.error('[events] RSVP confirmation email failed', err);
-    Sentry.captureException(err, {
-      tags: { area: 'events.email', kind: 'rsvp_confirmation' },
-      extra: { eventId: event.id },
-    });
   }
 }
 
-/** Day-before / morning-of reminder. Returns true only when Resend accepted it. */
+/** Day-before / morning-of reminder. Returns true only when the provider accepted it. */
 export async function sendEventReminderEmail(
   event: PayloadEvent,
   to: string,
   when: 'today' | 'tomorrow',
 ): Promise<boolean> {
-  const resend = getResend();
-  if (!resend || !to) return false;
+  if (!to) return false;
   try {
-    const mail = eventReminderEmail(eventMailInput(event), when);
-    const { error } = await resend.emails.send({
+    const input = eventMailInput(event);
+    const mail = eventReminderEmail(input, when);
+    const result = await sendEmail({
       from: DEFAULT_FROM,
       to,
       replyTo: OPS_EMAIL,
       ...mail,
+      tags: { icsUrl: input.icsUrl },
     });
-    if (error) throw new Error(`${error.name}: ${error.message}`);
+    if (!result.ok) {
+      console.error('[events] reminder email not sent', { eventId: event.id, when, error: result.error });
+      return false;
+    }
     return true;
   } catch (err) {
     console.error('[events] reminder email failed', err);
-    Sentry.captureException(err, {
-      tags: { area: 'events.email', kind: `reminder_${when}` },
-      extra: { eventId: event.id },
-    });
     return false;
   }
 }

@@ -6,10 +6,9 @@
 // On success:
 //   1. Writes a messages row (fromTeam=true, authorName = strategist name)
 //   2. Creates a message_received notification for the member
-//   3. Sends a Resend email to the member (best-effort, never blocks)
+//   3. Emails the member via sendEmail() (best-effort, never blocks)
 
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import * as Sentry from '@sentry/nextjs';
 import { eq } from 'drizzle-orm';
 import { getOpsUser } from '@/lib/auth/ops';
@@ -19,14 +18,9 @@ import { userProfiles, subscriptions } from '@/lib/db/schema';
 import { sendTeamMessage } from '@/lib/db/messages';
 import { createNotification } from '@/lib/db/notifications';
 import { getActiveStrategists } from '@/lib/cms';
+import { escapeHtml, sendEmail } from '@/lib/email/send';
 
 export const runtime = 'nodejs';
-
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-
-function escapeHtml(s: string) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
 
 type Params = Promise<{ userId: string }>;
 
@@ -76,8 +70,9 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
       console.error('[ops.inbox] notification failed', e);
     });
 
-    // 3. Best-effort Resend email to the member.
-    if (resend) {
+    // 3. Best-effort email to the member (fire-and-forget; sendEmail never
+    //    throws and reports a missing provider as ok=false).
+    {
       // Look up member email from subscriptions table.
       const db = getDb();
       const [profile, sub] = await Promise.all([
@@ -94,11 +89,12 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
       const memberName = profile[0]?.businessName ?? 'there';
 
       if (memberEmail) {
-        resend.emails.send({
+        void sendEmail({
           from: `${authorName} via Growth Hub <noreply@himayat.com.au>`,
           to: memberEmail,
           replyTo: (strategist as { email?: string | null } | undefined)?.email ?? undefined,
           subject: `New message from ${authorName} — Growth Hub`,
+          text: `Hi ${memberName},\n\n${authorName} sent you a message in Growth Hub:\n\n${text}\n\nReply in Growth Hub: https://app.thegrowthhub.com.au/messages`,
           html: `
             <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6;max-width:600px;color:#1a2e2e;">
               <h2 style="font-family:Georgia,serif;color:#0D3F48;margin:0 0 12px;">Hi ${escapeHtml(memberName)},</h2>
@@ -116,8 +112,8 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
               </p>
             </div>
           `,
-        }).catch((e) => {
-          console.error('[ops.inbox] resend failed', e);
+        }).then((result) => {
+          if (!result.ok) console.error('[ops.inbox] member email not sent', result.error);
         });
       }
     }
