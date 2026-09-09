@@ -3,8 +3,16 @@
 // Client-side search + filter chips over the resources list. The full
 // list is server-rendered into props once; filtering happens in-browser
 // so there are no extra round trips.
+//
+// Gating: the server resolves the member's plan tier once (resources/page.tsx)
+// and passes `canOpenMemberResources`. A `free: false` item for a Free-tier
+// member renders as a locked card — no href to the file, a lock glyph,
+// "Members on a paid plan" and a /plan link — so the paid gate is real
+// rather than a "· Member" label next to a working link.
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import { IcoLock } from '@/components/dashboard/Icons';
 
 interface ResourceItem {
   id: string | number;
@@ -27,7 +35,38 @@ const FILTER_LABELS: Record<(typeof FILTERS)[number], string> = {
   webinar: 'Webinars',
 };
 
-export default function ResourcesGrid({ items }: { items: ResourceItem[] }) {
+// One empty-library message, shared with the page header (F5.10).
+export const EMPTY_LIBRARY_TITLE = "Library's empty for now";
+export const EMPTY_LIBRARY_BODY =
+  'New guides, templates and courses appear here as we publish them.';
+
+function Thumb({ r }: { r: ResourceItem }) {
+  const tone = r.tone ?? 'cream';
+  return r.thumbnailUrl ? (
+    <div
+      className={`gh-resource-thumb ${tone}`}
+      style={{
+        backgroundImage: `url(${r.thumbnailUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <span className="gh-resource-tag">{r.tag}</span>
+    </div>
+  ) : (
+    <div className={`gh-resource-thumb ${tone}`}>
+      <span className="gh-resource-tag">{r.tag}</span>
+    </div>
+  );
+}
+
+export default function ResourcesGrid({
+  items,
+  canOpenMemberResources,
+}: {
+  items: ResourceItem[];
+  canOpenMemberResources: boolean;
+}) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>('all');
   const [query, setQuery] = useState('');
 
@@ -78,18 +117,45 @@ export default function ResourcesGrid({ items }: { items: ResourceItem[] }) {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {items.length === 0 ? (
+        <div className="gh-empty">
+          <div className="gh-empty-h">{EMPTY_LIBRARY_TITLE}</div>
+          <p className="gh-empty-p">{EMPTY_LIBRARY_BODY}</p>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="gh-empty">
           <div className="gh-empty-h">Nothing matches that filter</div>
-          <p className="gh-empty-p">
-            Try a different category or clear the search box. New resources are added every week.
-          </p>
+          <p className="gh-empty-p">Try a different category or clear the search box.</p>
         </div>
       ) : (
         <div className="gh-grid-3">
           {filtered.map((r) => {
+            const locked = r.free === false && !canOpenMemberResources;
+
+            if (locked) {
+              return (
+                <div
+                  key={r.id}
+                  className="gh-resource"
+                  style={{ cursor: 'default' }}
+                  aria-label={`${r.title} — members on a paid plan`}
+                >
+                  <Thumb r={r} />
+                  <h4 className="gh-resource-h">{r.title}</h4>
+                  <div className="gh-resource-meta" style={{ justifyContent: 'space-between' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      <IcoLock style={{ width: 12, height: 12 }} />
+                      Members on a paid plan
+                    </span>
+                    <Link href="/plan" className="gh-card-link">
+                      Upgrade →
+                    </Link>
+                  </div>
+                </div>
+              );
+            }
+
             const href = r.url ?? '#';
-            const tone = r.tone ?? 'cream';
             return (
               <a
                 key={r.id}
@@ -99,27 +165,12 @@ export default function ResourcesGrid({ items }: { items: ResourceItem[] }) {
                 className="gh-resource"
                 style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
               >
-                {r.thumbnailUrl ? (
-                  <div
-                    className={`gh-resource-thumb ${tone}`}
-                    style={{
-                      backgroundImage: `url(${r.thumbnailUrl})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }}
-                  >
-                    <span className="gh-resource-tag">{r.tag}</span>
-                  </div>
-                ) : (
-                  <div className={`gh-resource-thumb ${tone}`}>
-                    <span className="gh-resource-tag">{r.tag}</span>
-                  </div>
-                )}
+                <Thumb r={r} />
                 <h4 className="gh-resource-h">{r.title}</h4>
                 <div className="gh-resource-meta">
                   <span>
                     {r.meta ?? r.tag}
-                    {r.free ? ' · Free' : ' · Member'}
+                    {r.free === false ? ' · Member' : ' · Free'}
                   </span>
                 </div>
               </a>

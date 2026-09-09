@@ -17,7 +17,10 @@ export default async function OrdersPage() {
   const { user } = await withAuth();
   if (!user) redirect('/sign-in?redirect_url=/orders');
 
-  const orders = await getOrdersForUser(user.id, user.email);
+  // Guest orders are matched by email. Only trust the email once WorkOS has
+  // verified it, otherwise signing up as victim@x would surface the victim's
+  // guest orders (name, address, phone).
+  const orders = await getOrdersForUser(user.id, user.emailVerified ? user.email : null);
   const fmt = new Intl.DateTimeFormat('en-AU', { dateStyle: 'medium' });
 
   return (

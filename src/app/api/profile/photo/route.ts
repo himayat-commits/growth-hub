@@ -75,7 +75,9 @@ export async function POST(req: NextRequest) {
 
     const media = await payload.create({
       collection: 'media',
-      data: { alt: `Profile photo for ${user.email ?? user.id}` },
+      // `media` read access is public, so alt must not carry PII (email or
+      // WorkOS id). Backfill for older rows is in the commit that changed this.
+      data: { alt: 'Profile photo' },
       file: {
         data: buffer,
         mimetype: file.type,

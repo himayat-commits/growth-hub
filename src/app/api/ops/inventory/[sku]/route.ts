@@ -3,6 +3,10 @@
 // Body: { delta: number }  — relative change (e.g. +12 restock, -1 damaged)
 //       { set: number }    — absolute value
 //
+// Role gating (same pattern as api/ops/referrals): `support` may only ADD
+// stock (positive delta). Absolute `set` and negative deltas can zero the
+// shelf, so they are admin-only.
+//
 // Going below zero is rejected by the CHECK constraint → 409.
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -29,6 +33,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
 
   const parsed = BodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: 'Invalid body' }, { status: 400 });
+
+  const isRestock = 'delta' in parsed.data && parsed.data.delta > 0;
+  if (!isRestock && opsUser.role !== 'admin') {
+    return NextResponse.json({ error: 'Admins only — support can add stock but not set or reduce it' }, { status: 403 });
+  }
 
   try {
     const stock = 'set' in parsed.data ? await setStock(sku, parsed.data.set) : await adjustStock(sku, parsed.data.delta);

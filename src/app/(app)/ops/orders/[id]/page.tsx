@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getOpsUser } from '@/lib/auth/ops';
 import { getOrderById, getOrderItems } from '@/lib/db/orders';
 import { formatAud } from '@/lib/shop/pricing';
 import type { OrderStatus } from '@/lib/shop/types';
@@ -29,6 +30,10 @@ export default async function OpsOrderDetailPage({ params }: { params: Params })
   const order = await getOrderById(id);
   if (!order) notFound();
   const items = await getOrderItems(id);
+  // The layout already gates to staff; the role decides whether the
+  // (pending-only) cancel button is offered. The API enforces it regardless.
+  const opsUser = await getOpsUser();
+  const canCancel = opsUser?.role === 'admin';
   const addr = (order.shippingAddress ?? {}) as Address;
   const fmt = new Intl.DateTimeFormat('en-AU', { dateStyle: 'medium', timeStyle: 'short' });
   const stripeBase = 'https://dashboard.stripe.com';
@@ -139,6 +144,7 @@ export default async function OpsOrderDetailPage({ params }: { params: Params })
           <FulfilOrderForm
             id={order.id}
             status={order.status as OrderStatus}
+            canCancel={canCancel}
             carrier={order.carrier}
             trackingNumber={order.trackingNumber}
             trackingUrl={order.trackingUrl}

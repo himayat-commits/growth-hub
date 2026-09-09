@@ -36,9 +36,13 @@ function normaliseSku(value: unknown): string {
 export const Products: CollectionConfig = {
   slug: 'products',
   access: {
-    // Public storefront reads the catalogue through the Local API; writes
-    // stay behind the admin login (Payload default).
-    read: () => true,
+    // Public storefront reads the catalogue through the Local API (which
+    // runs with overrideAccess: true, so this rule does not apply there —
+    // src/lib/cms/index.ts filters on status itself). This rule governs the
+    // Payload REST/GraphQL routes: anonymous callers only see Published
+    // products; admin-panel users see drafts and archived too. Writes stay
+    // behind the admin login (Payload default).
+    read: ({ req }) => (req.user ? true : { status: { equals: 'published' } }),
   },
   admin: {
     useAsTitle: 'name',

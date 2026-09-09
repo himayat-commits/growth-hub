@@ -4,7 +4,8 @@ import { withAuth } from '@/lib/auth/with-auth';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { IcoDownload } from '@/components/dashboard/Icons';
 import { getResources } from '@/lib/cms';
-import ResourcesGrid from './ResourcesGrid';
+import { getEffectivePlan, getSubscription } from '@/lib/subscription';
+import ResourcesGrid, { EMPTY_LIBRARY_BODY, EMPTY_LIBRARY_TITLE } from './ResourcesGrid';
 
 export const metadata: Metadata = {
   title: 'Resources — Growth Hub',
@@ -14,7 +15,13 @@ export default async function ResourcesPage() {
   const { user } = await withAuth();
   if (!user) redirect('/sign-in?redirect_url=/resources');
 
-  const resources = await getResources();
+  // Resolve the plan tier once per page; the client grid only needs the
+  // boolean. A lookup failure degrades to Free (locked), never to open.
+  const [resources, sub] = await Promise.all([
+    getResources(),
+    getSubscription(user.id).catch(() => null),
+  ]);
+  const canOpenMemberResources = getEffectivePlan(sub) !== 'free';
 
   // Project into the lightweight shape the client grid needs. depth: 1 means
   // `thumbnail` is either null, an id, or a populated Media object.
@@ -39,7 +46,7 @@ export default async function ResourcesPage() {
         title="Resources, courses & downloads"
         sub={
           items.length === 0
-            ? "Library's empty for now — new guides, templates and courses appear here as we publish them."
+            ? `${EMPTY_LIBRARY_TITLE} — ${EMPTY_LIBRARY_BODY.charAt(0).toLowerCase()}${EMPTY_LIBRARY_BODY.slice(1)}`
             : "Practical, plain-language pieces. Use what's useful, skip what isn't. Bookmark anything for later."
         }
         actions={
@@ -50,7 +57,7 @@ export default async function ResourcesPage() {
         }
       />
 
-      <ResourcesGrid items={items} />
+      <ResourcesGrid items={items} canOpenMemberResources={canOpenMemberResources} />
     </>
   );
 }

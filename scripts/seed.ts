@@ -1053,7 +1053,7 @@ async function seed() {
       },
     ];
     for (const r of sampleResources) {
-      await payload.create({ collection: 'resources', data: r });
+      await payload.create({ collection: 'resources', data: { ...r, status: 'published' } });
     }
     console.log(`✅  Created ${sampleResources.length} sample resources.`);
   }
