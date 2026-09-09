@@ -121,7 +121,7 @@ const ALL_MODULES: PortalModule[] = [
     name: "Social AI",
     tagline: "Content creation & scheduling",
     desc: "AI writes and schedules your social posts across every platform — set it once and let it run.",
-    requires: null,
+    requires: { tier: "foundations" },
     icon: <IconSocial />,
     steps: [
       { text: "Connect your Facebook, Instagram, and Google Business profiles" },
@@ -136,7 +136,7 @@ const ALL_MODULES: PortalModule[] = [
     name: "Listing AI",
     tagline: "50+ directory management",
     desc: "Your business name, address, and hours stay accurate across 50+ directories automatically.",
-    requires: null,
+    requires: { tier: "foundations" },
     icon: <IconListing />,
     steps: [
       { text: "Enter your business name, address, phone, and hours" },
@@ -151,7 +151,7 @@ const ALL_MODULES: PortalModule[] = [
     name: "Messaging",
     tagline: "Unified inbox for all channels",
     desc: "Every customer message — Facebook, Google, SMS, webchat — in a single inbox your team shares.",
-    requires: null,
+    requires: { tier: "foundations" },
     icon: <IconMessaging />,
     steps: [
       { text: "Connect your messaging channels (Facebook, Google, SMS)" },
