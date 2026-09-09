@@ -47,6 +47,15 @@ export default async function PlanPage() {
   // /api/change-plan with a prorated preview). Free-tier users still
   // go through Stripe Checkout to create a new subscription.
   const hasActiveSubscription = !!sub?.stripeSubscriptionId && sub.subscriptionStatus !== 'canceled';
+  // Anyone with a Stripe customer can open the portal — including members
+  // whose status is past_due/unpaid and who therefore read as `free` above.
+  // Gating this on tier hid the only self-serve way to fix a failed card.
+  const hasBillingAccount = !!sub?.stripeCustomerId;
+  const paymentProblem =
+    sub?.subscriptionStatus === 'past_due' ||
+    sub?.subscriptionStatus === 'unpaid' ||
+    sub?.subscriptionStatus === 'incomplete';
+  const lapsedPlanName = sub?.planTier && sub.planTier in PLANS ? PLANS[sub.planTier as PlanTier].name : null;
   function upgradeControl(tier: PaidPlanTier, label: string, className: string) {
     if (hasActiveSubscription && tier !== currentTier) {
       return (
@@ -69,9 +78,11 @@ export default async function PlanPage() {
         kicker="Your membership"
         title="My plan"
         sub={
-          currentTier === 'free'
-            ? "You’re on the Free Member plan. Upgrade any time to unlock the Birdeye platform, monthly 1:1s, and service credits."
-            : `You’re on the ${currentPlan.name} plan. Manage billing or upgrade below.`
+          paymentProblem
+            ? `Your last ${lapsedPlanName ?? 'subscription'} payment didn’t go through. Update your card below to keep your plan.`
+            : currentTier === 'free'
+              ? "You’re on the Free Member plan. Upgrade any time to unlock the Birdeye platform, monthly 1:1s, and service credits."
+              : `You’re on the ${currentPlan.name} plan. Manage billing or upgrade below.`
         }
         actions={
           <>
@@ -85,6 +96,23 @@ export default async function PlanPage() {
           </>
         }
       />
+
+      {paymentProblem && (
+        <div
+          className="gh-card"
+          role="alert"
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 20, borderColor: 'var(--plum)' }}
+        >
+          <div style={{ flex: 1 }}>
+            <div className="gh-plan-name" style={{ fontSize: 18 }}>Payment failed</div>
+            <p className="gh-plan-tagline" style={{ marginTop: 6 }}>
+              We couldn’t take your last {lapsedPlanName ?? 'subscription'} payment (status: {sub?.subscriptionStatus}).
+              Your paid features are paused until the card on file is updated — it takes a minute in the billing portal.
+            </p>
+          </div>
+          <ManageBillingButton />
+        </div>
+      )}
 
       <div className="gh-section-h">Current plan</div>
 
@@ -141,7 +169,7 @@ export default async function PlanPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'stretch' }}>
           {currentTier !== 'accelerate' &&
             upgradeControl(upgradeTarget, `Upgrade to ${PLANS[upgradeTarget].name}`, 'gh-btn lime')}
-          {currentTier !== 'free' && <ManageBillingButton />}
+          {hasBillingAccount && <ManageBillingButton />}
           {/* In-app cancel-with-survey, only for paid subs that aren't
               already scheduled for cancellation. The Manage billing
               portal is still available above for everything else. */}

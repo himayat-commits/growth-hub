@@ -169,6 +169,10 @@ export async function POST(req: NextRequest) {
       {
         items: [{ id: planItem.id, price: newPriceId }],
         proration_behavior: direction.prorationBehavior,
+        // CancelDialog promises "choose your tier and we'll undo the
+        // cancellation" — make that true instead of swapping the price on a
+        // subscription that still ends at period end.
+        cancel_at_period_end: false,
         metadata: {
           ...(stripeSub.metadata ?? {}),
           userId: user.id,

@@ -56,11 +56,52 @@ export async function syncSubscription(subscriptionId: string) {
   // Read the prior row so we can detect a "just activated" transition and
   // notify the user. Notifications only fire when we cross from non-active
   // into active/trialing — repeated activations from the same state are no-ops.
-  const existing = await getDb()
+  let existing = await getDb()
     .select()
     .from(subscriptions)
     .where(eq(subscriptions.stripeCustomerId, customerId))
     .limit(1);
+
+  if (!existing[0]) {
+    // No row for this customer: the subscription was created outside
+    // /api/checkout (Stripe dashboard, Customer Portal, or the checkout row
+    // insert failed). Previously the UPDATE below matched zero rows and the
+    // webhook returned 200 — the member paid and stayed "Free" forever.
+    // /api/checkout stamps `metadata.userId` on the customer, so try to
+    // materialise the row from that; otherwise alert and stop.
+    const customer = await getStripe().customers.retrieve(customerId);
+    const metaUserId = !customer.deleted ? customer.metadata?.userId : undefined;
+    const customerEmail = !customer.deleted ? customer.email : null;
+    if (metaUserId && customerEmail) {
+      await getDb()
+        .insert(subscriptions)
+        .values({ userId: metaUserId, email: customerEmail, stripeCustomerId: customerId })
+        .onConflictDoUpdate({
+          target: subscriptions.userId,
+          set: { stripeCustomerId: customerId, email: customerEmail, updatedAt: new Date() },
+        });
+      existing = await getDb()
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.stripeCustomerId, customerId))
+        .limit(1);
+      Sentry.captureMessage('stripe.sync: created missing subscriptions row from customer metadata', {
+        level: 'warning',
+        tags: { area: 'stripe.webhook', phase: 'sync' },
+        extra: { customerId, subscriptionId: sub.id, userId: metaUserId },
+      });
+    }
+    if (!existing[0]) {
+      Sentry.captureMessage('stripe.sync: no subscriptions row for customer and no metadata.userId', {
+        level: 'error',
+        tags: { area: 'stripe.webhook', phase: 'sync' },
+        extra: { customerId, subscriptionId: sub.id, status: sub.status },
+      });
+      console.error(`[stripe.sync] no subscriptions row for customer ${customerId} (sub ${sub.id}); not synced`);
+      return;
+    }
+  }
+
   const priorStatus = existing[0]?.subscriptionStatus ?? null;
   const priorCancelAtPeriodEnd = existing[0]?.cancelAtPeriodEnd ?? false;
   const userId = existing[0]?.userId ?? null;

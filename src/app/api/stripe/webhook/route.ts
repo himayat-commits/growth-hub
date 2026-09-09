@@ -188,8 +188,10 @@ async function sendPaymentFailedEmail(invoice: Stripe.Invoice) {
   const to = invoice.customer_email;
   if (!to) return;
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://himayat.com.au';
-  const portalLink = `${appUrl}/dashboard`;
+  // The Plan page carries the payment-failed banner + Manage billing button;
+  // /dashboard doesn't. Default to the member app host, not himayat.com.au.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.thegrowthhub.com.au';
+  const portalLink = `${appUrl}/plan`;
 
   await resend.emails.send({
     from: 'Himayat <hello@himayat.com.au>',
