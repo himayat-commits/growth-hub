@@ -22,6 +22,7 @@ import {
   IcoSpark,
   IcoGift,
   IcoArrow,
+  IcoLock,
 } from '@/components/dashboard/Icons';
 
 export const metadata: Metadata = {
@@ -626,6 +627,46 @@ export default async function DashboardPage() {
             {featuredResources.map((r) => {
               const thumb = r.thumbnail as { url?: string } | string | null | undefined;
               const thumbUrl = typeof thumb === 'object' && thumb?.url ? thumb.url : null;
+              const thumbBlock = (
+                <div className="gh-img-thumb">
+                  {thumbUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div className="gh-img-placeholder" />
+                  )}
+                  <span className={`tag-on-img ${toneClass(r.tone as string | null)}`}>
+                    {r.tag}
+                  </span>
+                </div>
+              );
+
+              // Paid-plan items are locked for Free-tier members: no link to
+              // the file, a lock + "Members on a paid plan", and a /plan CTA.
+              // `tier` is the same getEffectivePlan(sub) resolved above.
+              if (r.free === false && tier === 'free') {
+                return (
+                  <div
+                    key={r.id}
+                    className="gh-suggest-item"
+                    style={{ cursor: 'default' }}
+                    aria-label={`${r.title} — members on a paid plan`}
+                  >
+                    {thumbBlock}
+                    <h4 className="gh-suggest-h">{r.title}</h4>
+                    <div className="gh-suggest-meta" style={{ justifyContent: 'space-between' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                        <IcoLock style={{ width: 12, height: 12 }} />
+                        Members on a paid plan
+                      </span>
+                      <Link href="/plan" className="gh-card-link">
+                        Upgrade →
+                      </Link>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={r.id}
@@ -635,22 +676,12 @@ export default async function DashboardPage() {
                   className="gh-suggest-item"
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
-                  <div className="gh-img-thumb">
-                    {thumbUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <div className="gh-img-placeholder" />
-                    )}
-                    <span className={`tag-on-img ${toneClass(r.tone as string | null)}`}>
-                      {r.tag}
-                    </span>
-                  </div>
+                  {thumbBlock}
                   <h4 className="gh-suggest-h">{r.title}</h4>
                   <div className="gh-suggest-meta">
                     <span>{r.meta ?? r.tag}</span>
                     <span className="dot" />
-                    <span>{r.free ? 'Free' : 'Member'}</span>
+                    <span>{r.free === false ? 'Member' : 'Free'}</span>
                   </div>
                 </Link>
               );

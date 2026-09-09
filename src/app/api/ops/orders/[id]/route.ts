@@ -1,12 +1,17 @@
-// PATCH /api/ops/orders/[id] — fulfil or cancel a shop order. Staff-only
-// (both ops roles; shipping isn't a money movement).
+// PATCH /api/ops/orders/[id] — fulfil or cancel a shop order. Staff-only.
 //
 // Body: { status: 'shipped', carrier?, trackingNumber?, trackingUrl?, notes? }
 //       { status: 'cancelled', notes? }
 //
-// `shipped` is only allowed from `paid` and emails the buyer their tracking.
-// Refunds are NOT done here — refund in the Stripe dashboard and the
-// charge.refunded webhook flips the row to `refunded`.
+// `shipped` is only allowed from `paid` (both ops roles; shipping isn't a
+// money movement) and emails the buyer their tracking.
+//
+// `cancelled` is only allowed from `pending` (an unpaid checkout that never
+// completed) and only for admins. A PAID order must never be cancelled here:
+// the customer page would read "you were not charged", stock would stay
+// decremented and no refund would be issued. Refund in the Stripe dashboard
+// instead — the charge.refunded webhook flips the row to `refunded`, and
+// stock can be restocked from the order page.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -69,8 +74,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
       return NextResponse.json({ ok: true });
     }
 
-    // cancelled
-    if (order.status !== 'pending' && order.status !== 'paid') {
+    // cancelled — admin only; pending only.
+    if (opsUser.role !== 'admin') {
+      return NextResponse.json({ error: 'Admins only' }, { status: 403 });
+    }
+    if (order.status === 'paid') {
+      return NextResponse.json(
+        {
+          error:
+            'Paid orders are cancelled by refunding in Stripe — the charge.refunded webhook marks the order refunded and you can restock from the order page.',
+        },
+        { status: 409 },
+      );
+    }
+    if (order.status !== 'pending') {
       return NextResponse.json({ error: `Cannot cancel an order that is ${order.status}.` }, { status: 409 });
     }
     const ok = await cancelOrder(id, parsed.data.notes);

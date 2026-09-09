@@ -933,6 +933,13 @@ export interface Resource {
    * Uncheck to gate behind a paid plan.
    */
   free?: boolean | null;
+  /**
+   * Drafts never appear in the member library, search or dashboard.
+   */
+  status: 'draft' | 'published';
+  /**
+   * Leave blank to publish immediately. A future date hides the item until then.
+   */
   publishedAt?: string | null;
   /**
    * Show in the dashboard "Suggested first reads" card. Aim for 3 featured at any time.
@@ -1733,6 +1740,7 @@ export interface ResourcesSelect<T extends boolean = true> {
   thumbnail?: T;
   url?: T;
   free?: T;
+  status?: T;
   publishedAt?: T;
   featured?: T;
   updatedAt?: T;

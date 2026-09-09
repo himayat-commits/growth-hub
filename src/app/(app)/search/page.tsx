@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { withAuth } from '@/lib/auth/with-auth';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { getUpcomingEvents, getResources, getServices } from '@/lib/cms';
+import { getEffectivePlan, getSubscription } from '@/lib/subscription';
+import { IcoLock } from '@/components/dashboard/Icons';
 
 export const metadata: Metadata = {
   title: 'Search — Growth Hub',
@@ -25,11 +27,15 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q: rawQ } = await searchParams;
   const q = (rawQ ?? '').trim().toLowerCase();
 
-  const [events, resources, services] = await Promise.all([
+  const [events, resources, services, sub] = await Promise.all([
     q ? getUpcomingEvents(200) : Promise.resolve([]),
     q ? getResources(200) : Promise.resolve([]),
     q ? getServices() : Promise.resolve([]),
+    q ? getSubscription(user.id).catch(() => null) : Promise.resolve(null),
   ]);
+  // Paid-plan resources render locked (no link) for Free-tier members —
+  // same rule as /resources and the dashboard.
+  const canOpenMemberResources = getEffectivePlan(sub) !== 'free';
 
   const eventHits = q
     ? events.filter((e) => matches(e.title as string, q) || matches((e as { description?: string }).description, q))
@@ -108,16 +114,30 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               const url = (r as { url?: string }).url;
               const isExternal = !!url && /^https?:/.test(url);
               const href = url ?? '/resources';
+              const isMemberOnly = (r as { free?: boolean | null }).free === false;
+              const locked = isMemberOnly && !canOpenMemberResources;
               return (
                 <li key={String(r.id)}>
                   <div className="gh-list-body">
                     <div className="gh-list-h">{r.title as string}</div>
-                    <p className="gh-list-p">
+                    <p className="gh-list-p" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                       {(r.tag as string) ?? 'Resource'}
-                      {(r as { free?: boolean }).free === false ? ' · Member' : ' · Free'}
+                      {locked ? (
+                        <>
+                          {' · '}
+                          <IcoLock style={{ width: 12, height: 12 }} />
+                          Members on a paid plan
+                        </>
+                      ) : isMemberOnly ? (
+                        ' · Member'
+                      ) : (
+                        ' · Free'
+                      )}
                     </p>
                   </div>
-                  {isExternal ? (
+                  {locked ? (
+                    <Link href="/plan" className="gh-card-link">Upgrade →</Link>
+                  ) : isExternal ? (
                     <a href={href} target="_blank" rel="noopener noreferrer" className="gh-card-link">
                       Open →
                     </a>

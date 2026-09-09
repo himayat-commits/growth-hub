@@ -29,7 +29,9 @@ export default async function OrderDetailPage({ params }: { params: Params }) {
   const id = Number.parseInt(raw, 10);
   if (!Number.isFinite(id)) notFound();
 
-  const found = await getOrderForUser(id, user.id, user.email);
+  // Email-based (guest order) ownership only counts once WorkOS has verified
+  // the address — see /orders for the why.
+  const found = await getOrderForUser(id, user.id, user.emailVerified ? user.email : null);
   if (!found) notFound();
   const { order, items } = found;
   const addr = (order.shippingAddress ?? {}) as Address;

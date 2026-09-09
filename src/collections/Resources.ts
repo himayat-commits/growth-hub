@@ -3,16 +3,19 @@ import { revalidate } from '../lib/cms/revalidate.ts';
 
 /**
  * Resource library — guides, templates, courses, videos. Free for all
- * members; `free: false` items are gated behind a paid plan (display
- * "Member" badge instead of "Free", upgrade CTA on click).
+ * members; `free: false` items render locked for Free-tier members (no link,
+ * "Members on a paid plan" + /plan CTA) on /resources, /search and the
+ * dashboard "Suggested first reads" surface (which reads featured=true).
  *
- * The /dashboard "Suggested first reads" surface reads featured=true.
+ * Visibility: `status` = published (or unset, for rows that predate the
+ * column) AND `publishedAt` <= now (or unset). See visibleResourcesWhere()
+ * in src/lib/cms/index.ts.
  */
 export const Resources: CollectionConfig = {
   slug: 'resources',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'tag', 'free', 'featured', 'publishedAt'],
+    defaultColumns: ['title', 'tag', 'status', 'free', 'featured', 'publishedAt'],
   },
   fields: [
     {
@@ -77,9 +80,22 @@ export const Resources: CollectionConfig = {
       admin: { description: 'Uncheck to gate behind a paid plan.' },
     },
     {
+      name: 'status',
+      type: 'select',
+      options: ['draft', 'published'],
+      // Unlike Posts this defaults to 'published': the column was added
+      // after rows existed and every one of them was live.
+      defaultValue: 'published',
+      required: true,
+      admin: { description: 'Drafts never appear in the member library, search or dashboard.' },
+    },
+    {
       name: 'publishedAt',
       type: 'date',
-      admin: { date: { pickerAppearance: 'dayOnly' } },
+      admin: {
+        date: { pickerAppearance: 'dayOnly' },
+        description: 'Leave blank to publish immediately. A future date hides the item until then.',
+      },
     },
     {
       name: 'featured',

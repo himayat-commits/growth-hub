@@ -77,8 +77,11 @@ export default function OrderRowActions({ id, status }: { id: number; status: Or
       <button type="submit" className="gh-ops-actionbtn" disabled={pending}>
         {pending ? '…' : 'Ship it'}
       </button>
+      {/* Closes the inline form only. There is deliberately no "cancel order"
+          action for paid rows here or on the detail page — paid orders are
+          cancelled by refunding in Stripe (webhook → refunded). */}
       <button type="button" className="gh-ops-actionbtn" onClick={() => setOpen(false)} disabled={pending}>
-        cancel
+        close
       </button>
       {err && <span className="gh-ops-err">{err}</span>}
     </form>

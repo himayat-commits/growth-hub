@@ -49,3 +49,5 @@ export const IcoBenefitsNav = () => <Icon><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5
 export const IcoOrdersNav   = () => <Icon><path d="M6 8h12l-1 12H7L6 8z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /></Icon>
 export const IcoProfileNav  = () => <Icon><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></Icon>
 export const IcoPlanNav     = () => <Icon><path d="M5 4h11l3 3v13H5z" /><path d="M9 9h6M9 13h6M9 17h4" /></Icon>
+// Padlock — locked (paid-plan) resources on /resources, /search and the dashboard.
+export const IcoLock        = ({ style }: { style?: React.CSSProperties }) => <Icon style={style}><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></Icon>
