@@ -29,6 +29,18 @@ steps are the gate.
 - [ ] (Optional) Upstash for cross-instance rate limiting.
 
 ## 3. Promote to production
+
+**Migrations run in exactly one place.** Drizzle migrations are applied only by
+`scripts/prod-migrate.mjs`, which `npm run vercel-build` runs at the start of the
+Vercel *production* build (`VERCEL_ENV=production`); preview builds skip it and a
+failed migrate fails the build, so the deploy is blocked rather than shipped against
+the wrong schema. The old `.github/workflows/db-migrate.yml` GitHub Action was
+retired (Sep 2026) because it raced the Vercel build on the same push. To run a
+migration manually — e.g. to rehearse against a Neon branch — create the branch in
+the Neon console, then from a clean checkout:
+`DATABASE_URL='<neon-branch-connection-string>' npx drizzle-kit migrate`
+(never point this at the production URL by hand; let the build do that).
+
 - [ ] Merge → production deploy. `prod-migrate` runs the **Drizzle** migration (`0013`) against prod automatically. The Payload migration (`20260623…`) is **not** run by the build — `payload migrate` hangs in CI (see `scripts/prod-migrate.mjs`) — so apply its `up` SQL by hand in the Neon SQL editor before promoting.
 - [ ] Post-deploy checks:
   - [ ] Site loads; consent banner appears; pixels fire only after Accept.

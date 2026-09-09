@@ -8,7 +8,7 @@
 
 import Link from 'next/link';
 import { track } from '@/lib/analytics';
-import { SUMMIT } from '@/lib/summit';
+import { SUMMIT, isSummitPast } from '@/lib/summit';
 
 const Arrow = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
@@ -17,6 +17,11 @@ const Arrow = () => (
 );
 
 export default function SummitRecruitBanner() {
+  // The header comment promised this would self-retire; until now it didn't,
+  // so /partners kept asking people to "apply to take part" in a summit that
+  // had already run. Hide once the summit's end time has passed.
+  if (isSummitPast()) return null;
+
   return (
     <section aria-label="Summit partner recruitment" style={{ paddingTop: 'clamp(48px, 6vw, 80px)' }}>
       <div className="wrap">

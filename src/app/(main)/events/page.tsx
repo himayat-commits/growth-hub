@@ -164,9 +164,9 @@ export default async function EventsHubPage() {
             Canberra, mostly free, always inclusive.
           </p>
           <div className="events-meta">
-            <div className="stat"><span className="n">50+</span><span className="l">Events delivered</span></div>
-            <div className="stat"><span className="n">400+</span><span className="l">People in the room</span></div>
-            <div className="stat"><span className="n">12</span><span className="l">Partner orgs co-hosting</span></div>
+            <div className="stat"><span className="n">Workshops</span><span className="l">Mixers, clinics &amp; a summit</span></div>
+            <div className="stat"><span className="n">Canberra</span><span className="l">In a room, with locals</span></div>
+            <div className="stat"><span className="n">Co-hosted</span><span className="l">With partner organisations</span></div>
             <div className="stat"><span className="n">Free</span><span className="l">Community events · always</span></div>
           </div>
         </div>

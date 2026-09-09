@@ -34,7 +34,7 @@ const DEFAULT_ITEMS: FAQItem[] = [
   },
   {
     q: "How do I learn to use the platform?",
-    a: "Every subscriber gets access to our on-demand onboarding video library: short, plain-English walkthroughs covering every feature. You can learn at your own pace, rewatch anytime, and new videos unlock as you activate more tools. Prefer learning live? Our weekly subscriber webinar covers the same ground with a real person on the other end of your questions.",
+    a: "Every subscriber gets access to our on-demand onboarding video library: short, plain-English walkthroughs covering every feature. You can learn at your own pace, rewatch anytime, and new videos unlock as you activate more tools. Prefer learning live? Our weekly live webinar — open to every member, including Free — covers the same ground with a real person on the other end of your questions, and recordings are there if you miss it.",
   },
 ];
 

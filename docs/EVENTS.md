@@ -57,6 +57,32 @@ source). Each group has **Download CSV** → `GET /api/ops/events/[id]/roster.cs
 | `payload.events.meeting_url` | `src/migrations/20260909_events_meeting_url.ts` | **By hand.** `payload migrate` is never run in prod (see `scripts/prod-migrate.mjs`). Run: `ALTER TABLE "payload"."events" ADD COLUMN IF NOT EXISTS "meeting_url" varchar;` BEFORE deploying — Payload selects every declared column, so the CMS event queries return `[]` until it exists. |
 | `event_rsvps.email`, `event_rsvps.reminded_at` | `drizzle/0016_event_rsvps_email.sql` + `_journal.json` idx 16 | **Automatic.** `scripts/prod-migrate.mjs` runs `drizzle-kit migrate` in the production Vercel build. No `meta/0016_snapshot.json` was generated (needs `DATABASE_URL`); run `npx drizzle-kit generate` once against a Neon branch to backfill it before the next schema change. |
 
+## Paid workshops (launch)
+
+The first paid workshops sell through Eventbrite / Humanitix, not in-app Stripe
+(decision 9 Sep 2026). In `/admin` → Events:
+
+- `registerUrl` — the Eventbrite/Humanitix event URL. Members see "Register on
+  eventbrite.com.au" (host derived from the URL); this is where money changes
+  hands.
+- `cost` — the price as display text, e.g. `$40 · Free for Growth+ members`.
+  It is copy only; nothing in the app charges.
+- Capacity is managed on Eventbrite. `seats` is optional free text if you want
+  to mirror it ("6 spots left"); the in-app RSVP does not enforce a limit.
+
+## Zoom policy
+
+- One recurring Zoom meeting per webinar series; paste that same link into
+  `meetingUrl` on every event in the series. It is only ever shown to signed-in
+  members who have RSVP'd (and in their confirmation/reminder email), so
+  reusing it is safe.
+- Webinars and recordings are open to **every** signed-in member, Free tier
+  included — do not gate them by plan.
+- After the session, upload the recording to Media and set `recording` on the
+  event; it moves to "Past recordings" on `/my-events`. If the recording lives
+  on Zoom/YouTube instead, paste that URL into `registerUrl` for now (rendered
+  as "Register on <host>") — there is no dedicated `recordingUrl` field yet.
+
 ## Running a weekly webinar today
 
 1. In `/admin` → Events → Create: title, `date`, `time` (`12:30 – 1:30 pm`),

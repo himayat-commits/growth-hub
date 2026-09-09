@@ -84,8 +84,8 @@ const TABS = [
   {
     key: "webinar",
     label: "Weekly Live Webinar",
-    badge: "Subscribers Only",
-    locked: true,
+    badge: "All members",
+    locked: false,
     Icon: WifiIcon,
     panel: (
       <div className="comm-panel-inner comm-panel-split">
@@ -126,12 +126,18 @@ const TABS = [
           <h3>A network of owners who back each other</h3>
           <p>You&apos;re never on your own. The moment you sign up, you&apos;re part of a network of Canberra business owners who share advice, refer each other, and celebrate wins together.</p>
         </div>
-        <ul className="comm-bullets">
-          <li>Private Slack workspace for day-to-day questions</li>
-          <li>Facebook group for wider conversation and wins</li>
-          <li>WhatsApp group for quick help and local chat</li>
-          <li>Member-to-member referrals and introductions</li>
-        </ul>
+        <div>
+          <ul className="comm-bullets">
+            <li>Private Slack workspace for day-to-day questions</li>
+            <li>Facebook group for wider conversation and wins</li>
+            <li>WhatsApp group for quick help and local chat</li>
+            <li>Member-to-member referrals and introductions</li>
+          </ul>
+          <p style={{ margin: "18px 0 0", color: "rgba(243, 240, 231, 0.62)", fontSize: 13, lineHeight: 1.55 }}>
+            Growth Hub introduces members to each other but doesn&apos;t vet or endorse the services they provide to one another — read our{" "}
+            <Link href="/community-guidelines" style={{ color: "var(--lime)" }}>community guidelines</Link>.
+          </p>
+        </div>
       </div>
     ),
   },

@@ -252,6 +252,20 @@ export default async function PartnerMicrositePage({ params }: { params: Params 
         </section>
       )}
 
+      <section aria-label="Partner services disclaimer">
+        <div className="wrap" style={{ maxWidth: 780, padding: '8px var(--gutter) 40px' }}>
+          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: 'var(--fg-subtle, #7a9098)' }}>
+            Growth Hub introduces members and partners to each other but doesn&apos;t vet, supervise
+            or endorse the services they provide to one another. Check credentials, insurance and
+            references yourself and put agreements in writing — see our{' '}
+            <Link href="/community-guidelines" style={{ color: 'var(--plum, #5f304b)' }}>
+              community guidelines
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
+
       {/* CO-BRANDED NEWSLETTER */}
       <NewsletterStrip
         source={`with-${slug}`}
