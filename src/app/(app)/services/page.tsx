@@ -16,8 +16,11 @@ import {
   BirdeyeStatusBanner,
   type BirdeyeBannerState,
 } from '@/components/portal/BirdeyeStatusBanner';
-import { getServices } from '@/lib/cms';
+import { getServices, getStrategistBySlug } from '@/lib/cms';
 import { getActiveBookings, statusLabel } from '@/lib/db/bookings';
+import { getProfile } from '@/lib/db/profile';
+import { needLabel } from '@/lib/advisory/needs';
+import StrategistCard from '@/components/dashboard/StrategistCard';
 import ServicesTabs from './ServicesTabs';
 import ServicesCatalog, { type ServiceItem } from './ServicesCatalog';
 
@@ -45,11 +48,17 @@ export default async function ServicesPage() {
   const { user } = await withAuth();
   if (!user) redirect('/sign-in?redirect_url=/services');
 
-  const [sub, services, activeBookings] = await Promise.all([
+  const [sub, services, activeBookings, profile] = await Promise.all([
     getSubscription(),
     getServices(),
     getActiveBookings(user.id),
+    getProfile(user.id),
   ]);
+  // "Your strategist" block (F4.9) — the human behind the request form,
+  // with bio + Calendly so a member can book directly if they prefer.
+  const strategist = profile?.assignedStrategistId
+    ? await getStrategistBySlug(profile.assignedStrategistId).catch(() => null)
+    : null;
   const tier: PlanTier = getEffectivePlan(sub);
   const activeAddOns = resolveActiveAddOns(sub?.addOnPriceIds ?? []);
 
@@ -188,6 +197,7 @@ export default async function ServicesPage() {
                     {new Intl.DateTimeFormat('en-AU', { dateStyle: 'medium' }).format(
                       b.requestedAt,
                     )}
+                    {b.need ? ` · ${needLabel(b.need)}` : ''}
                     {b.datePreference ? ` · ${b.datePreference}` : ''}
                   </p>
                 </div>
@@ -199,6 +209,10 @@ export default async function ServicesPage() {
           </ul>
         </div>
       )}
+
+      <div style={{ marginBottom: 24 }}>
+        <StrategistCard strategist={strategist} />
+      </div>
 
       <ServicesTabs
         modules={

@@ -978,3 +978,23 @@ p { margin: 0; }
 .gh-muted { color: var(--ink-70); font-size: 13px; }
 .gh-totals { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; margin: 12px 0 8px; font-size: 14px; }
 .gh-totals dt { color: var(--ink-70); } .gh-totals dd { margin: 0; text-align: right; }
+
+/* ── Advisory triage (services + ops member 360) ─────────────────────────── */
+.gh-booking-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+@media (max-width: 900px) { .gh-booking-layout { grid-template-columns: 1fr; } }
+.gh-strategist-bio { margin-top: 10px; color: var(--ink-70); font-size: 14px; line-height: 1.65; }
+.gh-strategist-bio p { margin: 0 0 10px; }
+.gh-strategist-bio p:last-child { margin-bottom: 0; }
+.gh-ops-360 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 1000px) { .gh-ops-360 { grid-template-columns: 1fr; } }
+.gh-ops-360 .gh-ops-section { margin-top: 0; }
+.gh-ops-kv { display: grid; grid-template-columns: 140px 1fr; gap: 6px 14px; font-size: 13px; margin: 0; }
+.gh-ops-kv dt { color: var(--ink-50); }
+.gh-ops-kv dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+.gh-ops-booking { border-top: 1px solid var(--rule); padding: 12px 0; font-size: 13px; }
+.gh-ops-booking:first-child { border-top: none; }
+.gh-ops-booking-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.gh-ops-detail { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.gh-ops-detail textarea { width: 100%; min-height: 64px; border: 1px solid var(--rule); border-radius: var(--r-sm); padding: 8px 10px; font: inherit; font-size: 13px; color: var(--ink); background: var(--bg); resize: vertical; }
+.gh-ops-detail textarea:focus { outline: none; border-color: var(--teal); }
+.gh-ops-detail summary { cursor: pointer; font-size: 12px; color: var(--teal); }

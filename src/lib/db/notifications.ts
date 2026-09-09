@@ -18,7 +18,10 @@ export type NotificationKind =
   | 'event_reminder'
   | 'referral_signed_up'
   | 'message_received'
-  | 'community';
+  | 'community'
+  // Ops moved a service booking to scheduled / completed (gated by
+  // profile.notifBooking at the call site).
+  | 'booking_status';
 
 export interface NotificationInsert {
   userId: string;

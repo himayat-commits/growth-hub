@@ -195,7 +195,7 @@ export const notifications = pgTable(
     kind: varchar('kind', { length: 30 }).notNull(),
       // 'welcome' | 'subscription_active' | 'birdeye_provisioned'
       // | 'new_resource' | 'event_reminder' | 'referral_signed_up'
-      // | 'message_received'
+      // | 'message_received' | 'community' | 'booking_status'
     title: text('title').notNull(),
     body: text('body').notNull(),
     href: text('href'),
@@ -272,6 +272,22 @@ export const serviceBookings = pgTable(
     datePreference: text('date_preference'),
       // Free-text describing when the customer is available — e.g.
       // "Weekday mornings", "Next week", "ASAP".
+    // ── Advisory triage (drizzle/0018) ──────────────────────────────────
+    // What the member wants help with. One of src/lib/advisory/needs.ts NEEDS.
+    need: varchar('need', { length: 32 }),
+    // Up to 3 × { day: 'YYYY-MM-DD', window: 'morning'|'midday'|'afternoon' }.
+    preferredSlots: jsonb('preferred_slots'),
+    // Ops-only prep notes — never shown to the member.
+    preSessionNotes: text('pre_session_notes'),
+    // Filled by ops when the session is marked completed.
+    outcome: text('outcome'),
+    nextStep: text('next_step'),
+    // Strategist the booking was routed to (profile.assignedStrategistId at
+    // request time). Loose ref to payload.strategists.slug.
+    strategistSlug: text('strategist_slug'),
+    // Who last changed `status` (ops email) and when — the audit trail.
+    statusChangedBy: text('status_changed_by'),
+    statusChangedAt: timestamp('status_changed_at', { withTimezone: true }),
     requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow().notNull(),
     scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
     completedAt: timestamp('completed_at', { withTimezone: true }),

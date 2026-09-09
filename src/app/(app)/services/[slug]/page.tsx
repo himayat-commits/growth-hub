@@ -3,8 +3,11 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { withAuth } from '@/lib/auth/with-auth';
 import { PageHeader } from '@/components/dashboard/PageHeader';
-import { getServiceBySlug } from '@/lib/cms';
-import { hasOpenBookingFor } from '@/lib/db/bookings';
+import { getServiceBySlug, getStrategistBySlug } from '@/lib/cms';
+import { GROWTH_CALL_SLUG, hasEverBookedGrowthCall, hasOpenBookingFor } from '@/lib/db/bookings';
+import { getProfile } from '@/lib/db/profile';
+import { needFromHelpAreas } from '@/lib/advisory/needs';
+import StrategistCard from '@/components/dashboard/StrategistCard';
 import {
   IcoCal,
   IcoGlobe,
@@ -50,11 +53,25 @@ export default async function ServiceDetailPage({
   const { user } = await withAuth();
   if (!user) redirect('/sign-in?redirect_url=' + encodeURIComponent(`/services/${slug}`));
 
-  const [service, hasBooking] = await Promise.all([
+  const isGrowthCall = slug === GROWTH_CALL_SLUG;
+  const [service, hasOpen, usedGrowthCall, profile] = await Promise.all([
     getServiceBySlug(slug),
     hasOpenBookingFor(user.id, slug),
+    isGrowthCall ? hasEverBookedGrowthCall(user.id) : Promise.resolve(false),
+    getProfile(user.id),
   ]);
   if (!service) notFound();
+
+  const strategist = profile?.assignedStrategistId
+    ? await getStrategistBySlug(profile.assignedStrategistId).catch(() => null)
+    : null;
+
+  // The free Growth Call is one per member for life. A completed/scheduled
+  // call blocks the form outright; an open request shows the "received" card.
+  const blockedMessage =
+    isGrowthCall && usedGrowthCall && !hasOpen
+      ? "You've already had your free Growth Call — it's a one-off Free-tier benefit. Message your strategist to pick up where you left off, or request one of the paid services below."
+      : null;
 
   return (
     <>
@@ -103,11 +120,20 @@ export default async function ServiceDetailPage({
         )}
       </div>
 
-      <BookingForm
-        serviceSlug={slug}
-        serviceTitle={service.title}
-        initiallyBooked={hasBooking}
-      />
+      <div className="gh-booking-layout">
+        <div>
+          <BookingForm
+            serviceSlug={slug}
+            serviceTitle={service.title}
+            initiallyBooked={hasOpen}
+            blockedMessage={blockedMessage}
+            initialNeed={needFromHelpAreas(profile?.helpAreas)}
+          />
+        </div>
+        <aside>
+          <StrategistCard strategist={strategist} compact heading="Who you'll speak with" />
+        </aside>
+      </div>
     </>
   );
 }

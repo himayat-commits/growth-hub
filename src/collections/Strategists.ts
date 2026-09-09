@@ -74,7 +74,32 @@ export const Strategists: CollectionConfig = {
     {
       name: 'calendlyUrl',
       type: 'text',
-      admin: { description: 'Full URL including https://' },
+      admin: {
+        description:
+          'Full URL including https://. Doubles as the booking link shown on /services ("Your strategist") and next to the request form.',
+      },
+    },
+    {
+      // Mirrors src/lib/advisory/needs.ts NEEDS. Drives routing: a new
+      // member (or a booking with a need) is matched to an active strategist
+      // whose specialties include that need, least-loaded first. Stored by
+      // Payload in payload.strategists_specialties (hasMany select) — see
+      // src/migrations/20260909_strategists_specialties.ts.
+      name: 'specialties',
+      type: 'select',
+      hasMany: true,
+      options: [
+        { label: 'Starting a business', value: 'starting_business' },
+        { label: 'Behind on digital', value: 'behind_on_digital' },
+        { label: 'Marketing & growth', value: 'marketing_growth' },
+        { label: 'Website', value: 'website' },
+        { label: 'Funding & grants', value: 'funding_grants' },
+        { label: 'Other', value: 'other' },
+      ],
+      admin: {
+        description:
+          'Which member needs this strategist should be routed. Leave empty to only receive overflow / unmatched members.',
+      },
     },
     {
       name: 'active',

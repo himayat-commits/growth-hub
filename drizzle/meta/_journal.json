@@ -127,6 +127,13 @@
       "when": 1789020000000,
       "tag": "0017_pending_referral_credit",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1789030000000,
+      "tag": "0018_service_bookings_triage",
+      "breakpoints": true
     }
   ]
 }
