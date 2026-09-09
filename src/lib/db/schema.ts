@@ -166,6 +166,10 @@ export const userProfiles = pgTable('user_profiles', {
   notifEvents: boolean('notif_events').default(true).notNull(),
   notifNewsletter: boolean('notif_newsletter').default(false).notNull(),
   notifReferrals: boolean('notif_referrals').default(true).notNull(),
+  // Referral credit (A$50 per side) earned while the member had no Stripe
+  // customer. Held here and posted as ONE Stripe customer-balance credit by
+  // syncSubscription() when they first become active. Zeroed on application.
+  pendingCreditCents: integer('pending_credit_cents').default(0).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (t) => ({
@@ -307,8 +311,21 @@ export const referrals = pgTable(
       // regenerated later, so we keep what the URL actually carried.
     status: varchar('status', { length: 20 }).default('pending').notNull(),
       // 'pending' | 'qualified' | 'credited' | 'declined'
+      // pending   → attributed at sign-up
+      // qualified → ops marked the referred member's Growth Call completed
+      //             (or admin override in /ops/referrals)
+      // credited  → both per-side credit states below have left 'none'
     creditedAmountCents: integer('credited_amount_cents').default(0).notNull(),
-      // Total credit in cents issued to BOTH sides. 0 until status=credited.
+      // PER-SIDE credit in cents (what the referrer earned). 0 until credited.
+    // Per-side credit bookkeeping — the durable "exactly once" guard for the
+    // A$50. Each side moves 'none' → exactly one of:
+    //   'stripe'  posted to the user's Stripe customer balance
+    //   'pending' user had no Stripe customer; held in
+    //             user_profiles.pending_credit_cents
+    //   'applied' the held amount was posted to Stripe on first activation
+    // Only 'none' → X and 'pending' → 'applied' transitions ever happen.
+    referrerCreditState: varchar('referrer_credit_state', { length: 16 }).default('none').notNull(),
+    referredCreditState: varchar('referred_credit_state', { length: 16 }).default('none').notNull(),
     qualifiedAt: timestamp('qualified_at', { withTimezone: true }),
     creditedAt: timestamp('credited_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

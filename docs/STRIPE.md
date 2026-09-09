@@ -168,6 +168,31 @@ Save. Now `/api/billing-portal` will return a working URL.
 
 **Resend.** The webhook fires a `payment_failed` email via Resend from `hello@himayat.com.au` — make sure that domain is verified in your Resend account.
 
+## Referral credits
+
+Both sides of a referral earn A$50 (`REFERRAL_CREDIT_CENTS` in `src/lib/db/referrals.ts`). Code lives in `src/lib/db/referrals.ts` (state) and `src/lib/stripe/referral-credit.ts` (issuance).
+
+**Referral status** (`referrals.status`):
+
+| status | set by | meaning |
+|---|---|---|
+| `pending` | `/auth/callback` → `attributeReferral()` | referred user signed up via `?ref=` |
+| `qualified` | ops marking the referred member's Growth Call booking **completed** → `qualifyReferralForCompletedGrowthCall(userId)`; or admin override in `/ops/referrals` | the qualifying event happened. Booking a call is *not* enough (the free Growth Call is a Free-tier benefit). |
+| `credited` | `finalizeReferralCredit()` once **both** per-side states below have left `none` | terminal — the ops PATCH rejects any transition out of it |
+| `declined` | ops | fraud/self-referral etc.; can be reopened to `pending` |
+
+**Per-side credit state** (`referrals.referrer_credit_state`, `referred_credit_state`): `none → stripe`, or `none → pending → applied`. A side never returns to `none`; that is the exactly-once guard.
+
+- `stripe` — the user had a Stripe customer, so `customers.createBalanceTransaction(-5000 AUD)` was posted with idempotency key `gh-refcredit-<referralId>-<referrer|referred>`. A negative balance auto-applies to their next invoice.
+- `pending` — the user has **no** Stripe customer (Free member who never opened checkout). One CTE statement flips the side to `pending` and increments `user_profiles.pending_credit_cents` atomically (neon-http has no interactive transactions).
+- `applied` — `syncSubscription()` saw the member active with `pending_credit_cents > 0`, posted the whole held amount as one balance credit (key `gh-pending-<userId>-<stripeSubscriptionId>`), zeroed the column with a compare-and-set (`WHERE pending_credit_cents = <amount read>`; mismatch → Sentry warning, remainder posts next sync) and flipped their `pending` sides to `applied`.
+
+**Triggers.** `tryIssueReferralCredit(userId)` runs on every active/trialing subscription sync and settles every `qualified` referral the user is on either side of. `issueReferralCreditNow(referralId)` is the ops **Issue A$50 credits** action (`PATCH /api/ops/referrals/[id]` with `status: 'credited'`) — it runs the same per-side logic and only reports `credited` if both sides settled; a Stripe failure returns 502 and persists nothing. Either way a webhook retry or a second click is safe: Stripe replays under the same key and the DB writes are conditional on the current state.
+
+**Migration.** `drizzle/0017_pending_referral_credit.sql` adds the three columns (no snapshot file was regenerated — written by hand). It runs automatically via `scripts/prod-migrate.mjs` during `vercel-build`.
+
+**Member-facing copy** lives in `src/app/(app)/benefits/page.tsx`, the `referral_signed_up` notifications in `src/app/auth/callback/route.ts` and `referral-credit.ts`.
+
 ## Shop (one-time payments)
 
 The merch shop reuses this Stripe account with `mode: 'payment'` Checkout Sessions, inline `price_data`, Shipping Rates and an inclusive GST Tax Rate. See `docs/SHOP.md`.
