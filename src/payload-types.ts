@@ -1031,9 +1031,22 @@ export interface Strategist {
     [k: string]: unknown;
   } | null;
   /**
-   * Full URL including https://
+   * Full URL including https://. Doubles as the booking link shown on /services ("Your strategist") and next to the request form.
    */
   calendlyUrl?: string | null;
+  /**
+   * Which member needs this strategist should be routed. Leave empty to only receive overflow / unmatched members.
+   */
+  specialties?:
+    | (
+        | 'starting_business'
+        | 'behind_on_digital'
+        | 'marketing_growth'
+        | 'website'
+        | 'funding_grants'
+        | 'other'
+      )[]
+    | null;
   /**
    * Only active strategists receive auto-assignment of new signups. Inactive strategists keep existing assignments.
    */
@@ -1782,6 +1795,7 @@ export interface StrategistsSelect<T extends boolean = true> {
   email?: T;
   bio?: T;
   calendlyUrl?: T;
+  specialties?: T;
   active?: T;
   order?: T;
   updatedAt?: T;

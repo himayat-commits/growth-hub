@@ -70,17 +70,27 @@ export async function ensureUserRecord(user: WorkOSUserLike): Promise<UserProfil
 }
 
 /**
- * Pick the next strategist to assign a new signup to. Least-loaded
- * round-robin: counts current assignments per active strategist and picks
- * the one with the fewest (Payload `order` ascending breaks ties).
+ * Pick the strategist to assign a member to.
+ *
+ * Routing (F4.5): when a `need` is known (src/lib/advisory/needs.ts — derived
+ * from profile.helpAreas or chosen on the booking form) prefer active
+ * strategists whose `specialties` include it; fall back to every active
+ * strategist when nobody covers the need. Within the candidate set pick the
+ * least-loaded (fewest current assignments), Payload `order` ascending
+ * breaking ties.
  *
  * Returns null when no active strategists exist (collection not yet
  * seeded, or all marked inactive) — caller leaves the profile unassigned
  * and the UI falls back to "Growth Hub Team".
  */
-async function pickNextStrategistSlug(): Promise<string | null> {
+export async function pickNextStrategistSlug(need?: string | null): Promise<string | null> {
   const strategists = await getActiveStrategists();
   if (!strategists.length) return null;
+
+  const specialists = need
+    ? strategists.filter((s) => (s.specialties ?? []).includes(need as never))
+    : [];
+  const candidates = specialists.length ? specialists : strategists;
 
   const db = getDb();
   const counts = await db
@@ -98,11 +108,11 @@ async function pickNextStrategistSlug(): Promise<string | null> {
   }
 
   let best: { slug: string; load: number; order: number } | null = null;
-  for (const s of strategists) {
-    const slug = (s as { slug?: string | null }).slug;
+  for (const s of candidates) {
+    const slug = s.slug;
     if (!slug) continue;
     const load = loadBySlug.get(slug) ?? 0;
-    const order = (s as { order?: number | null }).order ?? 0;
+    const order = s.order ?? 0;
     if (
       !best ||
       load < best.load ||

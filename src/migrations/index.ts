@@ -20,6 +20,7 @@ import * as migration_20260623_site_settings_community_links from './20260623_si
 import * as migration_20260907_add_products from './20260907_add_products';
 import * as migration_20260909_resources_status from './20260909_resources_status';
 import * as migration_20260909_events_meeting_url from './20260909_events_meeting_url';
+import * as migration_20260909_strategists_specialties from './20260909_strategists_specialties';
 
 export const migrations = [
   {
@@ -131,5 +132,10 @@ export const migrations = [
     up: migration_20260909_events_meeting_url.up,
     down: migration_20260909_events_meeting_url.down,
     name: '20260909_events_meeting_url',
+  },
+  {
+    up: migration_20260909_strategists_specialties.up,
+    down: migration_20260909_strategists_specialties.down,
+    name: '20260909_strategists_specialties',
   },
 ];

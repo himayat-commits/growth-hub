@@ -42,6 +42,8 @@ export type EmailMessage = {
   /** Plain-text alternative. On HubSpot the first 140 chars become the preheader. */
   text?: string;
   replyTo?: string;
+  /** Carbon-copy recipients (e.g. the member's assigned strategist on a booking). */
+  cc?: string[];
   /** Defaults to DEFAULT_FROM. On HubSpot the domain must be a connected sending domain. */
   from?: string;
   /**
@@ -192,6 +194,7 @@ async function sendViaHubspot(msg: EmailMessage): Promise<SendResult> {
       to: msg.to,
       from: msg.from ?? DEFAULT_FROM,
       ...(msg.replyTo ? { replyTo: [msg.replyTo] } : {}),
+      ...(msg.cc?.length ? { cc: msg.cc } : {}),
     },
     customProperties: {
       subject: msg.subject,
@@ -289,6 +292,7 @@ async function sendViaResend(msg: EmailMessage): Promise<SendResult> {
       html: msg.html,
       text: msg.text,
       replyTo: msg.replyTo,
+      cc: msg.cc?.length ? msg.cc : undefined,
       attachments: msg.attachments?.map((a) => ({
         filename: a.filename,
         content: a.content,

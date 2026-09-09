@@ -69,11 +69,20 @@ export default async function OpsInboxThreadPage({ params }: { params: Params })
             {memberEmail} · strategist: {strategistSlug}
           </div>
         </div>
-        {subRows[0]?.email && (
-          <a href={`mailto:${subRows[0].email}`} className="gh-btn ghost" style={{ fontSize: 12 }}>
-            Email directly →
-          </a>
-        )}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Link
+            href={`/ops/members/${encodeURIComponent(userId)}`}
+            className="gh-btn ghost"
+            style={{ fontSize: 12 }}
+          >
+            Member 360 →
+          </Link>
+          {subRows[0]?.email && (
+            <a href={`mailto:${subRows[0].email}`} className="gh-btn ghost" style={{ fontSize: 12 }}>
+              Email directly →
+            </a>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
