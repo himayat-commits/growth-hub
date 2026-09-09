@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   title: "Growth Hub by Himayat — Your business deserves to grow.",
   description:
     "The all-in-one platform to run and grow your local business — work management, AI-powered marketing, and a community of local owners. From $299/mo. Social Traders Verified · NDIS Registered.",
+  alternates: { canonical: "/" },
 };
 
 export default async function HomePage() {

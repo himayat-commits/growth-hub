@@ -7,13 +7,14 @@
 //   3. "Add to calendar" → a self-contained .ics built from the SUMMIT
 //      constants (no CMS round-trip, so the date is always correct).
 //
-// The .ics uses explicit UTC instants for 9:30am–6:30pm AEST (UTC+10, no
+// The .ics uses explicit UTC instants for 9:30am–5:00pm AEST (UTC+10, no
 // winter DST in the ACT) so every calendar client lands on the right
-// wall-clock time.
+// wall-clock time. Once the summit is over (isSummitPast) the cluster
+// collapses to a single "see what's next" link.
 
 import Link from 'next/link';
 import { track } from '@/lib/analytics';
-import { SUMMIT, isSummitRegistrationOpen } from '@/lib/summit';
+import { SUMMIT, isSummitPast, isSummitRegistrationOpen } from '@/lib/summit';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
 
@@ -28,8 +29,8 @@ const ICS = [
   'DTSTAMP:20260601T000000Z',
   // 9:30am AEST (UTC+10) = 23:30 UTC the day before.
   'DTSTART:20260708T233000Z',
-  // 6:30pm AEST = 08:30 UTC same day.
-  'DTEND:20260709T083000Z',
+  // 5:00pm AEST = 07:00 UTC same day (program ends 5pm).
+  'DTEND:20260709T070000Z',
   `SUMMARY:${SUMMIT.name}`,
   `LOCATION:${SUMMIT.venueFull.replace(/,/g, '\\,')}`,
   'DESCRIPTION:A free full-day summit for Canberra small business — talks\\, workshops and help-desks. All welcome.',
@@ -68,6 +69,19 @@ export function SummitApplyLink({
 
 export default function SummitCtas({ surface = 'hero' }: { surface?: string }) {
   const open = isSummitRegistrationOpen();
+  if (isSummitPast()) {
+    return (
+      <div className="hero-ctas">
+        <Link
+          className="btn btn-primary"
+          href="/events#upcoming"
+          onClick={() => track('summit_register_intent', { slug: SUMMIT.slug, channel: 'past', surface })}
+        >
+          See what&apos;s coming up <Arrow />
+        </Link>
+      </div>
+    );
+  }
   return (
     <div className="hero-ctas">
       {open ? (

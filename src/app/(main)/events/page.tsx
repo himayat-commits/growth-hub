@@ -4,7 +4,7 @@ import { toPublicEvents } from '@/lib/events-data';
 import UpcomingFilterList from './UpcomingFilterList';
 import Contact from '@/components/sections/Contact';
 import NewsletterStrip from '@/components/NewsletterStrip';
-import { getPublicEvents, getPastEvents, getSiteSettings } from '@/lib/cms';
+import { getUpcomingEvents, getPastEvents, getSiteSettings } from '@/lib/cms';
 import type { Event as PayloadEvent } from '@/payload-types';
 import { SUMMIT } from '@/lib/summit';
 
@@ -115,9 +115,11 @@ const TESTIMONIALS = [
 ];
 
 export default async function EventsHubPage() {
+  // Upcoming only (date >= today). Past events live in the archive below —
+  // the hub used to list every event under "What's coming up".
   const [siteSettings, eventDocs, pastDocs] = await Promise.all([
     getSiteSettings(),
-    getPublicEvents(),
+    getUpcomingEvents(),
     getPastEvents(6),
   ]);
   // Relabel any summit-slug event to the canonical name + link so BOTH the
@@ -177,16 +179,16 @@ export default async function EventsHubPage() {
             <Link className="featured-card" href={featuredHref}>
               <div className="fe-copy">
                 <div>
-                  <span className="fe-badge"><span className="pulse" />Next up · free full-day summit</span>
+                  <span className="fe-badge"><span className="pulse" />{featuredIsSummit ? 'Next up · free full-day summit' : `Next up · ${featured.tag.toLowerCase()}`}</span>
                   <h2>{featuredTitle}</h2>
-                  <span className="fe-script">{SUMMIT.tagline}</span>
+                  {featuredIsSummit && <span className="fe-script">{SUMMIT.tagline}</span>}
                   <p className="fe-desc">{featured.desc}</p>
                 </div>
                 <div>
                   <div className="fe-meta">
                     <div className="it"><span className="l">When</span><span className="v">{featuredWhen}</span></div>
                     <div className="it"><span className="l">Where</span><span className="v">{featuredWhere}</span></div>
-                    <div className="it"><span className="l">Cost</span><span className="v">{featured.cost} · all-day</span></div>
+                    <div className="it"><span className="l">Cost</span><span className="v">{featuredIsSummit ? `${SUMMIT.cost} · all-day` : featured.cost}</span></div>
                   </div>
                   <span className="fe-arrow">
                     See the program &amp; get involved
@@ -204,9 +206,9 @@ export default async function EventsHubPage() {
                 </div>
                 <div className="fe-side-foot">
                   <span className="label">On the day</span>
-                  <div className="row"><span>Format</span><span className="v">{SUMMIT.time}</span></div>
-                  <div className="row"><span>Orgs involved</span><span className="v">30+</span></div>
-                  <div className="row"><span>Entry</span><span className="v">Free · all welcome</span></div>
+                  <div className="row"><span>Time</span><span className="v">{featuredIsSummit ? SUMMIT.time : featured.time}</span></div>
+                  {featuredIsSummit && <div className="row"><span>Orgs involved</span><span className="v">30+</span></div>}
+                  <div className="row"><span>Entry</span><span className="v">{featuredIsSummit ? 'Free · all welcome' : featured.cost}</span></div>
                 </div>
               </div>
             </Link>

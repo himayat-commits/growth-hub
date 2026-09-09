@@ -85,6 +85,12 @@ export default async function GenericEventPage({ params }: { params: Params }) {
     (doc as { memberPreviewUntil?: string | null }).memberPreviewUntil ?? null;
   const inPreviewWindow = isInMemberPreviewWindow(memberPreviewUntil);
 
+  // Past events keep their page (SEO, recap) but must not invite RSVPs or
+  // calendar adds for a day that has already happened.
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const hasEnded = doc.date ? new Date(String(doc.date)).getTime() < startOfToday.getTime() : false;
+
   return (
     <main>
       <CaptureAttribution slug={ev.slug} />
@@ -113,17 +119,25 @@ export default async function GenericEventPage({ params }: { params: Params }) {
             <div className="event-keyfact"><span className="lbl">Cost</span><span className="val">{ev.cost}</span></div>
           </div>
 
-          <div className="ed-cta">
-            {/* Mailto CTA hides during the member-preview window — members can
-                still RSVP via "Members register inside" below. */}
-            {!inPreviewWindow && (
-              <RsvpMailtoLink slug={ev.slug} title={ev.title} />
-            )}
-            <AddToCalendarLink slug={ev.slug} title={ev.title} />
-            <Link className="btn btn-secondary" href="/sign-up?redirect_url=%2Fmy-events">Members register inside</Link>
-          </div>
+          {hasEnded ? (
+            <div className="ed-cta">
+              <span className="btn btn-tertiary" aria-disabled="true">This event has run</span>
+              <Link className="btn btn-primary" href="/events#upcoming">See what&apos;s coming up</Link>
+              <Link className="btn btn-secondary" href="/sign-in?redirect_url=%2Fmy-events">Members: recordings inside</Link>
+            </div>
+          ) : (
+            <div className="ed-cta">
+              {/* Mailto CTA hides during the member-preview window — members can
+                  still RSVP via "Members register inside" below. */}
+              {!inPreviewWindow && (
+                <RsvpMailtoLink slug={ev.slug} title={ev.title} />
+              )}
+              <AddToCalendarLink slug={ev.slug} title={ev.title} />
+              <Link className="btn btn-secondary" href="/sign-in?redirect_url=%2Fmy-events">Members register inside</Link>
+            </div>
+          )}
 
-          {inPreviewWindow && memberPreviewUntil && (
+          {!hasEnded && inPreviewWindow && memberPreviewUntil && (
             <MemberPreviewBanner until={memberPreviewUntil} />
           )}
 

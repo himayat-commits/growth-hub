@@ -17,7 +17,7 @@ export function OrganizationJsonLd(props?: {
     '@type': 'Organization',
     name: 'Growth Hub by Himayat',
     url: SITE_URL,
-    logo: `${SITE_URL}/og-image.png`,
+    logo: `${SITE_URL}/images/himayat-logo.png`,
     description:
       'An all-in-one platform for Canberra small businesses to run and grow — work management, AI-powered marketing, and community support. Every subscription fuels employment pathways in the community.',
     sameAs: [

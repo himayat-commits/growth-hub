@@ -6,7 +6,7 @@ import NewsletterStrip from '@/components/NewsletterStrip';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 import { getSiteSettings } from '@/lib/cms';
-import { SUMMIT, isSummitRegistrationOpen } from '@/lib/summit';
+import { SUMMIT, isSummitPast, isSummitRegistrationOpen } from '@/lib/summit';
 import CaptureAttribution from '../[slug]/CaptureAttribution';
 import SummitCtas, { SummitApplyLink } from './SummitCtas';
 import SummitHeroHeadline from './SummitHeroHeadline';
@@ -161,15 +161,19 @@ const eventJsonLd: Record<string, unknown> = {
       addressCountry: 'AU',
     },
   },
-  offers: {
+  url: `${SITE_URL}${SUMMIT.path}`,
+};
+// Ticket offer only while the event is ahead of us — a past event must not
+// advertise free tickets "InStock" to search engines.
+if (!isSummitPast()) {
+  eventJsonLd.offers = {
     '@type': 'Offer',
     url: `${SITE_URL}${SUMMIT.path}`,
     price: '0',
     priceCurrency: 'AUD',
     availability: 'https://schema.org/InStock',
-  },
-  url: `${SITE_URL}${SUMMIT.path}`,
-};
+  };
+}
 
 export default async function EntrepreneurshipForEveryonePage() {
   const siteSettings = await getSiteSettings();
@@ -389,10 +393,18 @@ export default async function EntrepreneurshipForEveryonePage() {
           <div className="feedback-card">
             <div>
               <span className="section-label handscript" style={{ color: 'var(--lime)', textTransform: 'none', fontSize: 22, letterSpacing: 0 }}>
-                {isSummitRegistrationOpen() ? 'Registration is open →' : 'Save the date →'}
+                {isSummitPast() ? "That's a wrap →" : isSummitRegistrationOpen() ? 'Registration is open →' : 'Save the date →'}
               </span>
-              <h2 className="section-h2" style={{ marginTop: 12 }}>Be there on 9 July.</h2>
-              {isSummitRegistrationOpen() ? (
+              <h2 className="section-h2" style={{ marginTop: 12 }}>
+                {isSummitPast() ? 'Thanks for coming on 9 July.' : 'Be there on 9 July.'}
+              </h2>
+              {isSummitPast() ? (
+                <p>
+                  The first Entrepreneurship for Everyone has run. Recordings and slides from
+                  the day go out to the newsletter first, and the next Growth Hub events —
+                  workshops, webinars and clinics — are already on the calendar.
+                </p>
+              ) : isSummitRegistrationOpen() ? (
                 <p>
                   Entry is free and everyone&apos;s welcome — founders, tradies, side-hustlers,
                   and anyone thinking about starting. Grab your free ticket on Eventbrite,
@@ -426,14 +438,18 @@ export default async function EntrepreneurshipForEveryonePage() {
       <NewsletterStrip
         source={`event-${SUMMIT.slug}`}
         heading={
-          isSummitRegistrationOpen()
-            ? 'Get the final program first.'
-            : 'Get the registration link first.'
+          isSummitPast()
+            ? 'Get the recordings and the next date first.'
+            : isSummitRegistrationOpen()
+              ? 'Get the final program first.'
+              : 'Get the registration link first.'
         }
         sub={
-          isSummitRegistrationOpen()
-            ? 'One email with the full session lineup before the day — plus any late additions. No drip sequence.'
-            : 'One email when attendee registration opens — plus the final program. No drip sequence.'
+          isSummitPast()
+            ? 'One email with the session recordings, slides and the date of the next summit. No drip sequence.'
+            : isSummitRegistrationOpen()
+              ? 'One email with the full session lineup before the day — plus any late additions. No drip sequence.'
+              : 'One email when attendee registration opens — plus the final program. No drip sequence.'
         }
       />
 
