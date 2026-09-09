@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { SUMMIT } from '@/lib/summit';
+import Link from 'next/link';
+import { SUMMIT, isSummitPast } from '@/lib/summit';
 import ExpoApplyForm from './ExpoApplyForm';
 
 // Two-column layout mirroring the signup pages: event pitch + key facts on the
@@ -33,6 +34,9 @@ export const metadata: Metadata = {
 };
 
 export default function ExpoApplyPage() {
+  // The summit has run: keep the page (it is linked from HubSpot emails and
+  // search results) but stop taking applications for a past event.
+  const closed = isSummitPast();
   return (
     <main className="signup-main">
       <div className="wrap">
@@ -40,18 +44,30 @@ export default function ExpoApplyPage() {
           {/* Left summary column */}
           <div className="signup-summary">
             <div className="signup-eyebrow">
-              Call for involvement · with CBR Innovation Network
+              {closed
+                ? 'Applications closed · thanks to everyone who took part'
+                : 'Call for involvement · with CBR Innovation Network'}
             </div>
             <h1 className="signup-title">
-              Stallholders, facilitators &amp; speakers.
+              {closed ? 'The 2026 call has closed.' : <>Stallholders, facilitators &amp; speakers.</>}
             </h1>
             <p className="signup-tagline">
-              We&apos;re building a free, all-day expo for Canberra small business —
-              and we&apos;d love you to be part of it.
+              {closed ? (
+                <>
+                  {SUMMIT.name} ran on {SUMMIT.dateLong}. We&apos;ll open the next call for
+                  stallholders, facilitators and speakers here — join the newsletter and
+                  we&apos;ll email you first.
+                </>
+              ) : (
+                <>
+                  We&apos;re building a free, all-day expo for Canberra small business —
+                  and we&apos;d love you to be part of it.
+                </>
+              )}
             </p>
 
             <div className="signup-pricecard featured">
-              <span className="signup-freetag">Free to take part</span>
+              <span className="signup-freetag">{closed ? 'Held 9 July 2026' : 'Free to take part'}</span>
               <p className="signup-pricecard-name">{SUMMIT.name}</p>
               <p className="signup-pricecard-tagline">{SUMMIT.tagline}</p>
               <ul className="signup-features">
@@ -65,7 +81,22 @@ export default function ExpoApplyPage() {
           {/* Right form column */}
           <div>
             <div className="signup-formwrap signup-formwrap--steps">
-              <ExpoApplyForm />
+              {closed ? (
+                <div className="signup-closed" style={{ display: 'grid', gap: 16 }}>
+                  <h2 className="section-h2" style={{ margin: 0 }}>Next time, you&apos;re in.</h2>
+                  <p>
+                    Applications for the 2026 summit are closed. Workshops, webinars and clinics
+                    run all year — see what&apos;s on, or drop us a line if you&apos;d like to
+                    co-host something sooner.
+                  </p>
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    <Link className="btn btn-primary" href="/events#upcoming">See upcoming events</Link>
+                    <a className="btn btn-secondary" href="mailto:hello@himayat.com.au?subject=Co-hosting%20an%20event">Talk to us</a>
+                  </div>
+                </div>
+              ) : (
+                <ExpoApplyForm />
+              )}
             </div>
           </div>
         </div>
