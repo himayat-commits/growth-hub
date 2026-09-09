@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@workos-inc/authkit-nextjs/components';
-import { PLANS, calculateDisplayPrice, type BillingInterval, type PlanTier } from '@/lib/plans';
+import { PLANS, calculateDisplayPrice, type BillingInterval, type PaidPlanTier, type PlanTier } from '@/lib/plans';
 import { track } from '@/lib/analytics';
 
 // ── Compare table ─────────────────────────────────────────────────────────────
@@ -125,6 +125,35 @@ function ChevronIcon() {
   );
 }
 
+// ── Checkout intent carried in the URL ────────────────────────────────────────
+//
+// /pricing?tier=growth&interval=year is how a paid-tier choice survives the
+// WorkOS sign-up round trip (startCheckout puts it in redirect_url) and how
+// /signup/<tier> hands a ready buyer straight to Stripe. Reading the params
+// lives in this null-rendering leaf so the useSearchParams() Suspense
+// boundary covers only it: on a prerendered route Next client-renders
+// everything up to the nearest boundary, and wrapping the whole pricing grid
+// would blank it until hydration (node_modules/next/dist/docs/01-app/
+// 03-api-reference/04-functions/use-search-params.md).
+
+function parsePaidTier(v: string | null): PaidPlanTier | null {
+  return v === 'foundations' || v === 'growth' || v === 'accelerate' ? v : null;
+}
+
+function CheckoutIntent({
+  onIntent,
+}: {
+  onIntent: (tier: PaidPlanTier, interval: BillingInterval) => void;
+}) {
+  const searchParams = useSearchParams();
+  const tier = parsePaidTier(searchParams.get('tier'));
+  const interval: BillingInterval = searchParams.get('interval') === 'year' ? 'year' : 'month';
+  useEffect(() => {
+    if (tier) onIntent(tier, interval);
+  }, [tier, interval, onIntent]);
+  return null;
+}
+
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 export interface PricingPageContentProps {
@@ -149,7 +178,9 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
   async function startCheckout(tier: PlanTier) {
     if (!isLoaded) return;
     if (!isSignedIn) {
-      router.push(`/sign-up?redirect_url=${encodeURIComponent('/pricing')}`);
+      // Carry the tier through WorkOS so the visitor lands back here and
+      // checkout starts automatically (CheckoutIntent) instead of as Free.
+      router.push(`/sign-up?redirect_url=${encodeURIComponent(`/pricing?tier=${tier}&interval=${interval}`)}`);
       return;
     }
     setLoading(tier);
@@ -170,8 +201,34 @@ export default function PricingPageContent({ heading, subheading }: PricingPageC
     }
   }
 
+  // Auto-start checkout for a tier named in the URL (see CheckoutIntent).
+  // Two steps: the intent callback stores the tier and switches the toggle
+  // to the requested interval; the effect then fires once auth has resolved,
+  // so startCheckout sees the updated interval and the real signed-in state.
+  // Signed out, startCheckout itself bounces through /sign-up with the tier
+  // preserved, so /signup/<tier> → here → WorkOS → here → Stripe just works.
+  const [pendingTier, setPendingTier] = useState<PaidPlanTier | null>(null);
+  const autoStarted = useRef(false);
+  const onCheckoutIntent = useCallback((tier: PaidPlanTier, urlInterval: BillingInterval) => {
+    setInterval(urlInterval);
+    setPendingTier(tier);
+  }, []);
+  useEffect(() => {
+    if (!pendingTier || autoStarted.current || !isLoaded) return;
+    autoStarted.current = true;
+    // Strip the params so a back-navigation or refresh doesn't re-trigger.
+    if (isSignedIn) router.replace('/pricing', { scroll: false });
+    void startCheckout(pendingTier);
+    // startCheckout is a plain closure recreated every render; the ref guard
+    // makes this one-shot, so it is intentionally not a dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingTier, isLoaded, isSignedIn, router]);
+
   return (
     <>
+      <Suspense fallback={null}>
+        <CheckoutIntent onIntent={onCheckoutIntent} />
+      </Suspense>
       <section id="packages" className="pkg">
         <div className="wrap">
 

@@ -43,11 +43,11 @@ export default async function CaseStudiesIndexPage() {
             <div className="case-study-empty">
               <h2 className="section-h2">First stories coming soon.</h2>
               <p className="section-lead" style={{ marginTop: 12 }}>
-                We&apos;re writing them up now. In the meantime, the homepage
-                testimonials give a flavour of what members have built with us.
+                We&apos;re writing them up now. In the meantime, the member
+                testimonials on our events page give a flavour of what members have built with us.
               </p>
-              <Link href="/#testimonials" className="btn btn-primary" style={{ marginTop: 24 }}>
-                Read homepage testimonials
+              <Link href="/events#testimonials" className="btn btn-primary" style={{ marginTop: 24 }}>
+                Read member testimonials
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
                   <path d="M3 7h8M7 3l4 4-4 4" />
                 </svg>

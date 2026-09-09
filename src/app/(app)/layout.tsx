@@ -56,7 +56,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <PostHogProvider>
-      <PostHogIdentify userId={user.id} email={user.email ?? null} planTier={tier} />
+      <PostHogIdentify userId={user.id} planTier={tier} />
       <div className="gh-frame" style={{ width: '100vw', height: '100vh', minHeight: 720 }}>
         <Sidebar />
         <div className="gh-main">

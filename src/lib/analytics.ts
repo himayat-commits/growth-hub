@@ -17,6 +17,11 @@
 import { useEffect, useState } from 'react';
 import posthog from 'posthog-js';
 
+/** Dispatched on window by PostHogProvider once posthog.init() has run.
+ *  PostHog is consent-gated, so anything that wants to talk to the SDK on
+ *  mount (PostHogIdentify) listens for this instead of assuming it's up. */
+export const POSTHOG_LOADED_EVENT = 'gh-posthog-loaded';
+
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
@@ -117,10 +122,26 @@ interface MetaMap {
    *  Meta's optimisation models. */
   meta: 'Lead' | 'Subscribe' | 'Contact' | 'CompleteRegistration' | 'Schedule' | 'ViewContent' | 'AddToCart' | 'InitiateCheckout' | 'Purchase';
 }
+// LinkedIn conversion ids, one env var per conversion. This MUST be a static
+// object of literal `process.env.NEXT_PUBLIC_*` reads: Next only inlines
+// static references into the client bundle — `process.env[dynamicName]` is
+// left as-is and evaluates to undefined in the browser, which is why these
+// conversions never fired before (node_modules/next/dist/docs/01-app/
+// 02-guides/environment-variables.md, "dynamic lookups will not be inlined").
+// Add a key here AND to .env.example when the team creates a new conversion.
+const LINKEDIN_CONVERSION_IDS = {
+  FREE_JOIN: process.env.NEXT_PUBLIC_LINKEDIN_CONV_FREE_JOIN,
+  NEWSLETTER: process.env.NEXT_PUBLIC_LINKEDIN_CONV_NEWSLETTER,
+  CONTACT: process.env.NEXT_PUBLIC_LINKEDIN_CONV_CONTACT,
+  RSVP: process.env.NEXT_PUBLIC_LINKEDIN_CONV_RSVP,
+  SUMMIT_REGISTER: process.env.NEXT_PUBLIC_LINKEDIN_CONV_SUMMIT_REGISTER,
+  SUMMIT_APPLY: process.env.NEXT_PUBLIC_LINKEDIN_CONV_SUMMIT_APPLY,
+} as const satisfies Record<string, string | undefined>;
+
 interface LinkedInMap {
-  /** Env var name suffix — full var is `NEXT_PUBLIC_LINKEDIN_CONV_${key}`.
+  /** Key into LINKEDIN_CONVERSION_IDS (env var `NEXT_PUBLIC_LINKEDIN_CONV_${key}`).
    *  Only events the team set up as a LinkedIn conversion will fire. */
-  linkedinEnvKey: string;
+  linkedinEnvKey: keyof typeof LINKEDIN_CONVERSION_IDS;
 }
 
 type PlatformMap = GaMap & Partial<MetaMap> & Partial<LinkedInMap>;
@@ -176,10 +197,7 @@ function trackPixelEvent(event: AnalyticsEvent, props: CleanProps): void {
     window.fbq('track', map.meta, props ?? {});
   }
   if (window.lintrk && map.linkedinEnvKey) {
-    const conversionId =
-      process.env[
-        `NEXT_PUBLIC_LINKEDIN_CONV_${map.linkedinEnvKey}` as keyof NodeJS.ProcessEnv
-      ];
+    const conversionId = LINKEDIN_CONVERSION_IDS[map.linkedinEnvKey];
     if (conversionId) {
       window.lintrk('track', { conversion_id: Number(conversionId) });
     }
@@ -187,13 +205,13 @@ function trackPixelEvent(event: AnalyticsEvent, props: CleanProps): void {
 }
 
 /** Tie a PostHog person to a WorkOS user id post-signin so events on
- *  authenticated pages associate with the right profile. Call from a
- *  client component that knows the user's id + email (e.g. after sign-in). */
-export function identify(userId: string, traits?: { email?: string; planTier?: string | null }) {
+ *  authenticated pages associate with the right profile. Deliberately takes
+ *  no email: the WorkOS id joins to our own records and PII stays out of
+ *  PostHog. No-op until PostHog is loaded (consent-gated). */
+export function identify(userId: string, traits?: { planTier?: string | null }) {
   if (typeof window === 'undefined') return;
   if (!posthog.__loaded) return;
   posthog.identify(userId, {
-    email: traits?.email,
     planTier: traits?.planTier ?? 'free',
   });
 }

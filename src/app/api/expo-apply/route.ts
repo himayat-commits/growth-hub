@@ -19,6 +19,7 @@
 
 import { NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
+import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -50,6 +51,11 @@ const str = (v: unknown, max = 5000) =>
   typeof v === 'string' ? v.trim().slice(0, max) : '';
 
 export async function POST(req: Request) {
+  // Same per-IP limit as /api/newsletter: the honeypot alone doesn't stop a
+  // script from flooding the HubSpot form with junk contacts + notifications.
+  const rl = rateLimit(`expo:${clientIp(req)}`, 5, 60_000);
+  if (!rl.ok) return tooManyRequests(rl.retryAfterSec);
+
   let body: Body = {};
   try {
     body = await req.json();
@@ -111,6 +117,12 @@ export async function POST(req: Request) {
     // (e.g. "Host a stall"), not the snake_case ids the form field uses — and
     // the integration endpoint writes straight to the property, so we must
     // send the labels. Multi-checkbox values are ';'-separated.
+    //
+    // KNOWN MISMATCH (unverified): scripts/create-expo-hubspot-form.mjs created
+    // the property with snake_case *values*, and on 8 Jul the field was empty
+    // on 8 of 9 real contacts — HubSpot silently drops unknown enum options.
+    // Run scripts/verify-expo-form.mjs against the live property before
+    // changing which side (label vs value) is sent here.
     { objectTypeId: '0-1', name: 'expo_involvement', value: roles.map((r) => ROLE_LABELS[r]).join(';') },
   ];
   if (phone) fields.push({ objectTypeId: '0-1', name: 'phone', value: phone });

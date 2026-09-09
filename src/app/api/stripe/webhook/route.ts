@@ -85,6 +85,11 @@ export async function POST(req: NextRequest) {
         // / GOOGLE_ADS_* env vars aren't set, so safe to leave in.
         // Doesn't await — if Meta is slow we don't want to slow the
         // webhook ack and trigger Stripe to retry.
+        //
+        // Consent: /api/checkout stamps the visitor's gh_consent choice on
+        // the session. Only an explicit 'granted' lets hashed PII leave for
+        // Meta — 'denied', 'unset' and legacy sessions without the key skip.
+        if (session.metadata?.consent !== 'granted') break;
         void sendServerConversion({
           eventId: event.id,
           eventName: session.mode === 'subscription' ? 'Purchase' : 'Lead',

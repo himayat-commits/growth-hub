@@ -13,6 +13,17 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
 
 type Doc = { slug?: string | null; updatedAt?: string | null; date?: string | null };
 
+// CMS event slugs that resolve to the summit landing page. The two working
+// titles 301 there (next.config.ts redirects) and the canonical slug is
+// already in staticPages — listing them from the CMS would put redirecting
+// and duplicate URLs in the sitemap. Mirrors SUMMIT_SLUGS in
+// src/app/(main)/events/page.tsx.
+const SUMMIT_SLUGS = new Set([
+  'small-business-journey',
+  'ai-for-small-business-9-july',
+  'entrepreneurship-for-everyone',
+]);
+
 function entry(
   path: string,
   lastMod?: string | Date | null,
@@ -52,7 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const eventEntries: MetadataRoute.Sitemap = (events as Doc[])
-    .filter((e): e is Doc & { slug: string } => Boolean(e.slug))
+    .filter((e): e is Doc & { slug: string } => Boolean(e.slug) && !SUMMIT_SLUGS.has(e.slug as string))
     .map((e) => entry(`/events/${e.slug}`, e.updatedAt ?? e.date, 'weekly', 0.7));
 
   const partnerDocs = (partners?.docs ?? []) as Doc[];

@@ -3,6 +3,7 @@ import { withAuth } from '@workos-inc/authkit-nextjs';
 import { eq } from 'drizzle-orm';
 import { getStripe } from '@/lib/stripe';
 import { getDb } from '@/lib/db';
+import { CONSENT_COOKIE, consentStateFromCookie } from '@/lib/consent';
 import { subscriptions } from '@/lib/db/schema';
 import {
   ADDONS,
@@ -32,6 +33,11 @@ export async function POST(req: NextRequest) {
   if (!email) {
     return NextResponse.json({ error: 'No email on WorkOS user' }, { status: 400 });
   }
+
+  // Analytics consent rides along on the Stripe session so the webhook can
+  // decide whether Meta CAPI may see this purchase. Same opt-in cookie that
+  // gates the browser pixels; 'unset' is treated as denied downstream.
+  const consent = consentStateFromCookie(req.cookies.get(CONSENT_COOKIE)?.value);
 
   let body: CheckoutRequest;
   try {
@@ -113,7 +119,10 @@ export async function POST(req: NextRequest) {
 
   // Stable idempotency key so an accidental double-submit / client retry
   // returns the same Checkout Session instead of creating duplicates.
-  const idempotencyKey = `gh-checkout-${userId}-${tier}-${interval}-${lineItems
+  // `consent` is part of the key because it changes the session params —
+  // Stripe rejects a reused key with different params, which would 400 a
+  // visitor who declined, cancelled, then accepted cookies and retried.
+  const idempotencyKey = `gh-checkout-${userId}-${tier}-${interval}-${consent}-${lineItems
     .map((li) => li.price)
     .sort()
     .join('.')}`;
@@ -135,10 +144,12 @@ export async function POST(req: NextRequest) {
           userId,
           planTier: tier,
           billingInterval: interval,
+          consent,
         },
       },
       metadata: {
         userId,
+        consent,
       },
     },
     { idempotencyKey },

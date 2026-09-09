@@ -16,6 +16,7 @@ import { withAuth } from '@/lib/auth/with-auth';
 import { getStripe } from '@/lib/stripe';
 import { getSubscription, isActive } from '@/lib/subscription';
 import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit';
+import { CONSENT_COOKIE, consentStateFromCookie } from '@/lib/consent';
 import { getStockBySku } from '@/lib/db/inventory';
 import { attachSession, cancelOrder, createPendingOrder, type OrderLineInput } from '@/lib/db/orders';
 import { indexPublishedSkus, productImages, variantListPrice } from '@/lib/shop/catalogue';
@@ -42,6 +43,10 @@ const SESSION_TTL_SECONDS = 30 * 60;
 export async function POST(req: NextRequest) {
   const rl = rateLimit(`shop-checkout:${clientIp(req)}`, 10, 60_000);
   if (!rl.ok) return tooManyRequests(rl.retryAfterSec);
+
+  // Analytics consent rides along on the session so fulfilment can decide
+  // whether Meta CAPI may see the purchase (see src/lib/shop/fulfil-order.ts).
+  const consent = consentStateFromCookie(req.cookies.get(CONSENT_COOKIE)?.value);
 
   const parsed = BodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
@@ -130,7 +135,7 @@ export async function POST(req: NextRequest) {
       {
         mode: 'payment',
         client_reference_id: String(order.id),
-        metadata: { kind: 'shop_order', orderId: String(order.id), userId: user?.id ?? '' },
+        metadata: { kind: 'shop_order', orderId: String(order.id), userId: user?.id ?? '', consent },
         payment_intent_data: {
           metadata: { kind: 'shop_order', orderId: String(order.id) },
         },
