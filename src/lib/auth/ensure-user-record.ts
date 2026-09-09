@@ -4,9 +4,12 @@
 //
 // What it does:
 //   1. Ensures there's a `user_profiles` row keyed by the WorkOS user id.
-//   2. Generates a unique referral code (GROW-{LASTNAME}-{YYYY}) on first
-//      insert. Collisions are exceedingly rare given the timestamp suffix,
-//      but the column is UNIQUE so a retry will fix any clash.
+//   2. Generates a unique referral code (GROW-{LASTNAME}-{YYYY}-{XXXX}) on
+//      first insert. The 4-char random suffix makes collisions practically
+//      impossible; the column is UNIQUE and the insert retries with a fresh
+//      code if one ever happens. (Before Sep 2026 the code was deterministic
+//      per surname+year, so the second "Smith" of the year hit a 23505 on
+//      every page load — permanently.)
 //
 // What it deliberately does NOT do:
 //   - Create a `subscriptions` row. The absence of a row IS the Free Member
