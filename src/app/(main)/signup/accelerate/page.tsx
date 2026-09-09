@@ -14,7 +14,6 @@ const DEFAULTS = {
   tagline: "You're a step away from a real team in your corner.",
   features: [
     "Everything in Growth",
-    "Scheduling + Rostering",
     "Webchat AI (Robin): 24/7 lead capture",
     "Campaign Templates: SMS & email automation",
   ],

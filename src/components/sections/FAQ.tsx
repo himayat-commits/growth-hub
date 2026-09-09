@@ -18,7 +18,7 @@ const DEFAULT_ITEMS: FAQItem[] = [
   },
   {
     q: "Can I upgrade my package later?",
-    a: "Yes. Self-service tiers (Foundations, Growth, Accelerate) have no lock-in. You can upgrade anytime and your new modules activate immediately. Managed tiers have a 6-month minimum commitment.",
+    a: "Yes. Self-service tiers (Foundations, Growth, Accelerate) have no lock-in. You can upgrade anytime and your new modules unlock as soon as your account setup is complete. Managed tiers have a 6-month minimum commitment.",
   },
   {
     q: "What happens in the first month?",
@@ -34,7 +34,7 @@ const DEFAULT_ITEMS: FAQItem[] = [
   },
   {
     q: "How do I learn to use the platform?",
-    a: "Every subscriber gets access to our on-demand onboarding video library: short, plain-English walkthroughs covering every feature. You can learn at your own pace, rewatch anytime from your subscriber portal, and new videos unlock as you activate more tools. Prefer learning live? Our weekly subscriber webinar covers the same ground with a real person on the other end of your questions.",
+    a: "Every subscriber gets access to our on-demand onboarding video library: short, plain-English walkthroughs covering every feature. You can learn at your own pace, rewatch anytime, and new videos unlock as you activate more tools. Prefer learning live? Our weekly subscriber webinar covers the same ground with a real person on the other end of your questions.",
   },
 ];
 

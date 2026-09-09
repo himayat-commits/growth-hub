@@ -19,7 +19,7 @@ export function OrganizationJsonLd(props?: {
     url: SITE_URL,
     logo: `${SITE_URL}/images/himayat-logo.png`,
     description:
-      'An all-in-one platform for Canberra small businesses to run and grow — work management, AI-powered marketing, and community support. Every subscription fuels employment pathways in the community.',
+      'A platform for Canberra small businesses to grow — AI-powered marketing, expert advice, and community support. Every subscription fuels employment pathways in the community.',
     sameAs: [
       'https://www.linkedin.com/company/himayat-australia',
     ],

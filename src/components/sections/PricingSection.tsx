@@ -26,7 +26,6 @@ const SELF: Tier[] = [
     terms: "Billed monthly · No lock-in",
     desc: "The essential digital presence for businesses building their online footprint.",
     features: [
-      "Invoicing",
       "Social AI: content creation & scheduling",
       "Listing AI: 50+ directory management",
       "Messaging: unified inbox for all channels",
@@ -43,7 +42,6 @@ const SELF: Tier[] = [
     desc: "The reputation engine for businesses ready to grow through trust.",
     features: [
       "Everything in Foundations",
-      "Timesheets & Docketing",
       "Reviews AI: automated generation & responses",
       "Review Collateral Kit: QR cards, badges, templates",
     ],
@@ -61,7 +59,6 @@ const SELF: Tier[] = [
     desc: "The full conversion engine for turning visibility into revenue.",
     features: [
       "Everything in Growth",
-      "Scheduling + Rostering",
       "Webchat AI (Robin): 24/7 lead capture",
       "Campaign Templates: SMS & email automation",
     ],
@@ -117,15 +114,11 @@ const TIERS_COMPARE = [
 const C = "✓", D = "—", M = "Managed";
 const ROWS: [string, string[] | null][] = [
   ["Support", null],
-  ["Support Level", ["Basic email", "Basic email", "Basic email", "Dedicated manager", "Priority same-day"]],
+  ["Support Level", ["Email", "Email", "Email", "Dedicated manager", "Priority email"]],
   ["Onboarding Videos", [C, C, C, C, C]],
   ["Weekly Live Webinar", [C, C, C, C, C]],
   ["Community Access", [C, C, C, C, C]],
   ["In-Person Events", [C, C, C, C, C]],
-  ["Work Management Modules", null],
-  ["Invoicing", [C, C, C, M, M]],
-  ["Timesheets & Docketing", [D, C, C, M, M]],
-  ["Scheduling & Rostering", [D, D, C, M, M]],
   ["Marketing Platform Modules", null],
   ["Social AI", [C, C, C, M, M]],
   ["Listing AI", [C, C, C, M, M]],
@@ -289,11 +282,11 @@ export default function PricingSection({ heading, subheading }: PricingSectionPr
                 <div className="pkg-free-tag">Start free · no card needed</div>
                 <h3 className="pkg-free-h">Free Member</h3>
                 <p className="pkg-free-p">
-                  Community access, the public resource library, and one complimentary 30-minute Growth Call. Upgrade to a paid tier whenever you&apos;re ready.
+                  Community access, the member resource library, and one complimentary 30-minute Growth Call. Upgrade to a paid tier whenever you&apos;re ready.
                 </p>
                 <ul className="pkg-free-features">
-                  <li>Public resource library</li>
-                  <li>Community forum access</li>
+                  <li>Member resource library</li>
+                  <li>Member community access</li>
                   <li>1 free Growth Call (30 min)</li>
                   <li>Weekly group webinars</li>
                 </ul>

@@ -26,11 +26,11 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
     name: 'Free Member',
     tagline: 'Get started — no card needed.',
     description:
-      'Community access, the public resource library, and one complimentary 30-minute Growth Call.',
+      'Community access, the member resource library, and one complimentary 30-minute Growth Call.',
     monthlyPrice: 0,
     features: [
-      'Public resource library',
-      'Community forum access',
+      'Member resource library',
+      'Member community access',
       '1 free Growth Call (30 min)',
       'Weekly group webinars',
       'Member-only discounts',
@@ -44,7 +44,6 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
     description: 'The essential digital presence for businesses building their online footprint.',
     monthlyPrice: 299,
     features: [
-      'Invoicing',
       'Social AI: content creation & scheduling',
       'Listing AI: 50+ directory management',
       'Messaging: unified inbox for all channels',
@@ -60,7 +59,6 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
     monthlyPrice: 499,
     features: [
       'Everything in Foundations',
-      'Timesheets & Docketing',
       'Reviews AI: automated generation & responses',
       'Review Collateral Kit: QR cards, badges, templates',
     ],
@@ -75,7 +73,6 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
     monthlyPrice: 799,
     features: [
       'Everything in Growth',
-      'Scheduling + Rostering',
       'Webchat AI (Robin): 24/7 lead capture',
       'Campaign Templates: SMS & email automation',
     ],

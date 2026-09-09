@@ -167,7 +167,7 @@ export default async function EventsHubPage() {
             <div className="stat"><span className="n">50+</span><span className="l">Events delivered</span></div>
             <div className="stat"><span className="n">400+</span><span className="l">People in the room</span></div>
             <div className="stat"><span className="n">12</span><span className="l">Partner orgs co-hosting</span></div>
-            <div className="stat"><span className="n">100%</span><span className="l">Free entry · always</span></div>
+            <div className="stat"><span className="n">Free</span><span className="l">Community events · always</span></div>
           </div>
         </div>
       </section>

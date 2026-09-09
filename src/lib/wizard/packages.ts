@@ -1,8 +1,7 @@
-// Self-service + managed tiers. Content matches the latest canonical
-// brand site (per the screenshots dated 2026-05-05): prices stepped up
-// to $299/$499/$799, plus three new Work Management modules layered in
-// (Invoicing on Foundations, Timesheets & Docketing on Growth,
-// Scheduling & Rostering on Accelerate).
+// Self-service + managed tiers. Prices $299/$499/$799. The work-management
+// modules (Invoicing, Timesheets & Docketing, Scheduling & Rostering) were
+// removed in Sep 2026 — that pillar is not launching and has no product
+// behind it. Keep this list in step with src/lib/plans.ts.
 //
 // Managed tiers are enquire-only — no checkout, no wizard.
 
@@ -41,14 +40,12 @@ export const PACKAGES: Record<PackageId, PackageDef> = {
     pricePerMonth: 299,
     terms: "Billed monthly · No lock-in",
     modules: [
-      "Invoicing",
       "Social AI: content creation & scheduling",
       "Listing AI: 50+ directory management",
       "Messaging: unified inbox for all channels",
       "Community + weekly webinars included",
     ],
     newInTier: [
-      "Invoicing",
       "Social AI: content creation & scheduling",
       "Listing AI: 50+ directory management",
       "Messaging: unified inbox for all channels",
@@ -65,12 +62,10 @@ export const PACKAGES: Record<PackageId, PackageDef> = {
     terms: "Billed monthly · No lock-in",
     modules: [
       "Everything in Foundations",
-      "Timesheets & Docketing",
       "Reviews AI: automated generation & responses",
       "Review Collateral Kit: QR cards, badges, templates",
     ],
     newInTier: [
-      "Timesheets & Docketing",
       "Reviews AI: automated generation & responses",
       "Review Collateral Kit: QR cards, badges, templates",
     ],
@@ -86,12 +81,10 @@ export const PACKAGES: Record<PackageId, PackageDef> = {
     terms: "Billed monthly · No lock-in",
     modules: [
       "Everything in Growth",
-      "Scheduling + Rostering",
       "Webchat AI (Robin): 24/7 lead capture",
       "Campaign Templates: SMS & email automation",
     ],
     newInTier: [
-      "Scheduling + Rostering",
       "Webchat AI (Robin): 24/7 lead capture",
       "Campaign Templates: SMS & email automation",
     ],

@@ -25,13 +25,13 @@ const DEFAULTS = {
   eyebrow: "A Social Traders Verified Enterprise",
   handnote: "Grow local. Grow together.",
   subheading:
-    "We make that happen — with one platform to run the day-to-day and grow what's next: work management, AI-powered marketing, and a community of local owners in your corner. And every subscription helps create local jobs.",
+    "We make that happen — with one place to grow what's next: AI-powered marketing, expert advice, and a community of local owners in your corner. And every subscription helps create local jobs.",
   ctaLabel: "View Packages",
   ctaHref: "#packages",
   secondaryCtaLabel: "Learn More",
   secondaryCtaHref: "#how",
   chips: [
-    { text: "Run + grow in one place" },
+    { text: "Grow from one place" },
     { text: "Backed by a local community" },
     { text: "Canberra-based support" },
   ],

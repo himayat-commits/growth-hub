@@ -106,7 +106,7 @@ export default async function BenefitsPage() {
       tone: '',
       Icon: IcoBook,
       title: 'Resource library',
-      p: 'Guides, templates and short courses on running a small business. Updated weekly.',
+      p: 'Guides, templates and short courses on running a small business.',
       tag: 'Browse the library',
       href: '/resources',
     },

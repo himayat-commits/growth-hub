@@ -63,7 +63,6 @@ export const SignupPageContent: GlobalConfig = {
         title: 'Get online. Get noticed.',
         tagline: "You're a step away from a real team in your corner.",
         features: [
-          'Invoicing',
           'Social AI: content creation & scheduling',
           'Listing AI: 50+ directory management',
           'Messaging: unified inbox for all channels',
@@ -80,7 +79,6 @@ export const SignupPageContent: GlobalConfig = {
         tagline: "You're a step away from a real team in your corner.",
         features: [
           'Everything in Foundations',
-          'Timesheets & Docketing',
           'Reviews AI: automated generation & responses',
           'Review Collateral Kit: QR cards, badges, templates',
         ],
@@ -96,7 +94,6 @@ export const SignupPageContent: GlobalConfig = {
         tagline: "You're a step away from a real team in your corner.",
         features: [
           'Everything in Growth',
-          'Scheduling + Rostering',
           'Webchat AI (Robin): 24/7 lead capture',
           'Campaign Templates: SMS & email automation',
         ],

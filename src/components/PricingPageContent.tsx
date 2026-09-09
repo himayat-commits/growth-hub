@@ -23,16 +23,12 @@ const C = '✓', D = '—', M = 'Managed';
 // and one complimentary Growth Call. No SaaS modules.
 const ROWS: [string, string[] | null][] = [
   ['Support', null],
-  ['Support Level',           ['Community',  'Basic email',  'Basic email',  'Basic email',  'Dedicated manager', 'Priority same-day']],
+  ['Support Level',           ['Community',  'Email',  'Email',  'Email',  'Dedicated manager', 'Priority email']],
   ['Onboarding Videos',       [D, C, C, C, C, C]],
   ['Weekly Live Webinar',     [C, C, C, C, C, C]],
   ['Community Access',        [C, C, C, C, C, C]],
   ['In-Person Events',        [C, C, C, C, C, C]],
   ['Free Growth Call (30m)',  [C, C, C, C, C, C]],
-  ['Work Management Modules', null],
-  ['Invoicing',               [D, C, C, C, M, M]],
-  ['Timesheets & Docketing',  [D, D, C, C, M, M]],
-  ['Scheduling & Rostering',  [D, D, D, C, M, M]],
   ['Marketing Platform Modules', null],
   ['Social AI',               [D, C, C, C, M, M]],
   ['Listing AI',              [D, C, C, C, M, M]],
