@@ -73,6 +73,11 @@ export default async function OpsProvisioningDetailPage({ params }: { params: Pa
 
   const email = subRows[0]?.email ?? (state.adminUser.email || '—');
   const plan = subRows[0]?.planTier ?? state.packageId;
+  // Rows without `mode` predate the field; production only ever ran mock.
+  const mode = prov.mode ?? (prov.runStatus ? 'mock' : null);
+  const mockProvisioned =
+    Boolean(prov.businessNumber) && mode !== 'live' && (status === 'provisioned' || status === 'partial');
+  const unresolved = prov.unresolvedCreate ?? null;
   const latestNotify = [...logs].reverse().find((l) => l.kind === 'notify_ops');
   const openTasks = tasks.filter((t) => t.status === 'open').length;
 
@@ -88,6 +93,7 @@ export default async function OpsProvisioningDetailPage({ params }: { params: Pa
         <h1>{state.business.name || email}</h1>
         <p>
           {email} · plan: {plan} · business #: {prov.businessNumber ?? '—'}
+          {prov.businessNumber && mode !== 'live' ? ' (mock — not a real account)' : ''}
         </p>
       </div>
 
@@ -101,6 +107,16 @@ export default async function OpsProvisioningDetailPage({ params }: { params: Pa
         }}
       >
         <span className={`gh-ops-status status-${status}`}>{status}</span>
+        <span className="gh-ops-meta">
+          mode:{' '}
+          {mode === 'live' ? (
+            <span className="gh-ops-status status-ok">live</span>
+          ) : mode === 'mock' ? (
+            <span className="gh-ops-status status-open">mock</span>
+          ) : (
+            '—'
+          )}
+        </span>
         <span className="gh-ops-meta">attempts: {prov.attempts ?? 0}</span>
         <span className="gh-ops-meta">last run by: {prov.lastRunBy ?? '—'}</span>
         <span className="gh-ops-meta">
@@ -109,8 +125,51 @@ export default async function OpsProvisioningDetailPage({ params }: { params: Pa
         {prov.escalatedAt && (
           <span className="gh-ops-meta">escalated: {fmt(prov.escalatedAt)}</span>
         )}
-        <RerunButtons userId={userId} running={freshRunning} />
+        <RerunButtons userId={userId} running={freshRunning} unresolved={Boolean(unresolved)} />
       </div>
+
+      {mockProvisioned && (
+        <div
+          className="gh-ops-section"
+          style={{ borderColor: 'var(--plum)', marginBottom: 28 }}
+        >
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--plum)' }}>
+            <strong>Mock run — no Birdeye account exists.</strong> The business number above
+            is synthetic. Create the account manually and tick the tasks below, or re-run once
+            PROVISION_MODE is live (the runner discards the mock identifiers and creates for
+            real).
+          </p>
+        </div>
+      )}
+
+      {unresolved && (
+        <div
+          className="gh-ops-section"
+          style={{ borderColor: 'var(--plum)', marginBottom: 28 }}
+        >
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--plum)' }}>
+            <strong>Unresolved create — provisioning is blocked.</strong> The
+            create_subaccount call at {fmt(unresolved.at)} ended with an unknown outcome
+            (status {unresolved.status}
+            {unresolved.reason ? ` · ${unresolved.reason}` : ''}). Birdeye may have created the
+            account. Check the reseller console / <code>GET /v1/business/child/all</code> for a
+            business matching “{state.business.name || email}”. If one exists, record its number
+            (SQL) and re-run; if none exists, use “I checked Birdeye — no account exists. Clear
+            and re-run” above.
+          </p>
+          <details>
+            <summary className="gh-ops-meta" style={{ cursor: 'pointer', marginTop: 8 }}>
+              Raw create response
+            </summary>
+            <pre style={preStyle}>{JSON.stringify(unresolved.response ?? null, null, 2)}</pre>
+          </details>
+          {prov.unresolvedCleared && (
+            <p className="gh-ops-meta" style={{ margin: '8px 0 0' }}>
+              Previously cleared by {prov.unresolvedCleared.by} at {fmt(prov.unresolvedCleared.at)}.
+            </p>
+          )}
+        </div>
+      )}
 
       {latestNotify && !latestNotify.ok && (
         <div

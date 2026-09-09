@@ -8,6 +8,7 @@ import { getSubscription, getEffectivePlan } from '@/lib/subscription';
 import { ADDONS, getAddOnPriceId, type AddOnId, type PlanTier } from '@/lib/plans';
 import { wizardProgress } from '@/lib/wizard/initial-state';
 import { loadOnboardingRow, isStaleRunning } from '@/lib/wizard/provisioning-store';
+import { isLiveRun } from '@/lib/birdeye/provisioned';
 import type { PackageId } from '@/lib/wizard/packages';
 import { getBirdeyeDashboardUrl } from '@/lib/birdeye/dashboard-url';
 import PortalModuleGrid from '@/components/portal/PortalModuleGrid';
@@ -70,6 +71,9 @@ export default async function ServicesPage() {
   const isPartial = runStatus === 'partial';
   const isEscalated = isPartial && Boolean(wizardState?.provisioning?.escalatedAt);
   const provisioned = !!businessNumber && !isPartial && runStatus !== 'running';
+  // A mock run's businessNumber is synthetic — no account exists. Show the
+  // "with our team" state instead of a dashboard link that goes nowhere.
+  const mockRun = provisioned && !isLiveRun(wizardState?.provisioning);
   const hasActivePaidSub = tier !== 'free';
   const dashboardUrl = getBirdeyeDashboardUrl(businessNumber);
 
@@ -134,6 +138,9 @@ export default async function ServicesPage() {
       <div style={{ marginBottom: 24 }}>
         <BirdeyeStatusBanner
           state={((): BirdeyeBannerState => {
+            if (provisioned && mockRun) {
+              return { kind: 'manual', businessName };
+            }
             if (provisioned) {
               return { kind: 'ready', businessName, businessNumber: businessNumber!, dashboardUrl };
             }

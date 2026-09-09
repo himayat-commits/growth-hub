@@ -4,35 +4,55 @@
 // ops API then router.refresh() so the server-rendered timeline/checklist
 // pick up the new state. A re-run can genuinely take minutes on live mode,
 // so the button holds its pending copy until the response lands.
+//
+// When `unresolved` is set the runner refuses to create (a previous create
+// has an unknown outcome). The plain re-run stays available (it will be
+// refused, which is the point) and a distinct, confirmed button sends
+// `{ confirmNoOrphan: true }` — the operator's assertion that they checked
+// Birdeye and no account exists.
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
 const REASON_LABELS: Record<string, string> = {
   no_state: 'no onboarding state found',
-  already_provisioned: 'already fully provisioned',
+  already_provisioned: 'already fully provisioned (for the current mode)',
   in_progress: 'a run is already in progress',
   locked: 'another run holds the lock',
+  inactive_subscription: 'subscription is not active — never create a seat for an inactive customer',
 };
+
+const CLEAR_CONFIRM =
+  'Only continue if you have checked Birdeye (reseller console or GET /v1/business/child/all) and there is NO sub-account for this customer.\n\nClearing and re-running will CREATE a new billable sub-account. If one already exists this makes a duplicate.\n\nProceed?';
 
 export default function RerunButtons({
   userId,
   running,
+  unresolved = false,
 }: {
   userId: string;
   running: boolean;
+  /** provisioning.unresolvedCreate is set — the runner refuses to create. */
+  unresolved?: boolean;
 }) {
   const router = useRouter();
-  const [busy, setBusy] = useState<'rerun' | 'handoff' | null>(null);
+  const [busy, setBusy] = useState<'rerun' | 'clear' | 'handoff' | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  const rerun = async () => {
-    setBusy('rerun');
+  const rerun = async (confirmNoOrphan = false) => {
+    if (confirmNoOrphan && !window.confirm(CLEAR_CONFIRM)) return;
+    setBusy(confirmNoOrphan ? 'clear' : 'rerun');
     setNote(null);
     try {
       const res = await fetch(`/api/ops/provisioning/${encodeURIComponent(userId)}/rerun`, {
         method: 'POST',
+        ...(confirmNoOrphan
+          ? {
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ confirmNoOrphan: true }),
+            }
+          : {}),
       });
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -78,11 +98,24 @@ export default function RerunButtons({
       <button
         type="button"
         className="gh-ops-actionbtn"
-        onClick={rerun}
+        onClick={() => void rerun(false)}
         disabled={busy !== null || running}
       >
         {busy === 'rerun' ? 'Re-running… this can take a few minutes' : 'Re-run provisioning'}
       </button>
+      {unresolved && (
+        <button
+          type="button"
+          className="gh-ops-actionbtn"
+          onClick={() => void rerun(true)}
+          disabled={busy !== null || running}
+          style={{ borderColor: 'var(--plum)', color: 'var(--plum)' }}
+        >
+          {busy === 'clear'
+            ? 'Clearing and re-running…'
+            : 'I checked Birdeye — no account exists. Clear and re-run'}
+        </button>
+      )}
       <button
         type="button"
         className="gh-ops-actionbtn"

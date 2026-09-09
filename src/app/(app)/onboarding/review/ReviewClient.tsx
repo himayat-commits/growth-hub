@@ -23,6 +23,7 @@ import {
 import { assembleAllPayloads, REQUEST_LABELS } from "@/lib/birdeye/payloads";
 import { PACKAGES } from "@/lib/wizard/packages";
 import { track } from "@/lib/analytics";
+import { isLiveRun } from "@/lib/birdeye/provisioned";
 import type { Provisioning, WizardState } from "@/lib/wizard/state";
 
 const PUBLIC_HOST = "https://api.birdeye.com/resources";
@@ -40,7 +41,12 @@ type DoneEvent = {
   invitedUsers: string[];
   mediaIds: string[];
   status?: "provisioned" | "partial";
+  mode?: "mock" | "live";
 };
+
+// Emitted once before the first step; carries the run's mode. Informational
+// only — not a step, so it must not reach the checklist.
+type StartEvent = { type: "start"; mode: "mock" | "live"; resuming: boolean; total: number };
 
 // `polling` = a run is executing in another invocation (re-entry after a
 // closed tab, second device, or a 409) — we watch the server until terminal.
@@ -49,11 +55,17 @@ type RunState = "idle" | "running" | "polling" | "success" | "already" | "error"
 
 export function ReviewClient({
   serverProvisioning,
+  serverProvisionedForMode = false,
   serverStale = false,
 }: {
   /** Authoritative provisioning block from Neon — the client context's copy
    *  can lag behind (localStorage mirror). Re-entry states key off this. */
   serverProvisioning: Provisioning | null;
+  /** Server verdict: would POST /api/provision short-circuit with
+   *  alreadyProvisioned for this user under the CURRENT deployment mode? A
+   *  row provisioned under mock is not provisioned for a live caller, and
+   *  only the server knows the mode — so the client never derives this. */
+  serverProvisionedForMode?: boolean;
   /** True when a `running` row hasn't moved past the staleness threshold —
    *  i.e. the run crashed. Skip the watcher and offer retry immediately
    *  (the POST falls through the stale guard to the resume path). */
@@ -62,10 +74,7 @@ export function ReviewClient({
   const { state, patch } = useWizard();
   const router = useRouter();
   const [runState, setRunState] = React.useState<RunState>(() => {
-    if (
-      serverProvisioning?.businessNumber &&
-      serverProvisioning.runStatus === "provisioned"
-    ) {
+    if (serverProvisionedForMode) {
       return "already";
     }
     if (serverProvisioning?.runStatus === "running" && !serverStale) {
@@ -221,7 +230,9 @@ export function ReviewClient({
           const ev = JSON.parse(line.slice(5).trim()) as
             | ProvisionEvent
             | DoneEvent
+            | StartEvent
             | { status: "error"; error?: string };
+          if ("type" in ev && ev.type === "start") continue;
           if ("type" in ev && ev.type === "done") {
             sawDone = true;
             track("onboarding_provision_result", {
@@ -243,6 +254,7 @@ export function ReviewClient({
                   invitedUsers: ev.invitedUsers,
                   mediaIds: ev.mediaIds,
                   runStatus: ev.status ?? "provisioned",
+                  mode: ev.mode,
                   completedAt: new Date().toISOString(),
                 },
               }),
@@ -289,15 +301,27 @@ export function ReviewClient({
 
   // ── Re-entry short-circuit renders ────────────────────────────────────
   if (runState === "already") {
+    // A mock run has no real account behind it — say "with our team", not
+    // "live". (`serverProvisionedForMode` is only true for a mock row while
+    // the deployment itself is still on mock.)
+    const liveAccount = isLiveRun(serverProvisioning);
     return (
       <div className="mx-auto w-full max-w-3xl px-4 pt-6 md:px-6">
-        <InlineNotice tone="success" title="You're already live.">
-          Your Birdeye account is provisioned
-          {serverProvisioning?.businessNumber
-            ? ` (business #${serverProvisioning.businessNumber})`
-            : ""}
-          .
-        </InlineNotice>
+        {liveAccount ? (
+          <InlineNotice tone="success" title="You're already live.">
+            Your Birdeye account is provisioned
+            {serverProvisioning?.businessNumber
+              ? ` (business #${serverProvisioning.businessNumber})`
+              : ""}
+            .
+          </InlineNotice>
+        ) : (
+          <InlineNotice tone="info" title="Your setup is with our team.">
+            We&apos;ve received everything we need. A Growth Strategist is setting up
+            your Birdeye account and will email your login details — usually within
+            two business days.
+          </InlineNotice>
+        )}
         <div className="mt-4">
           <Link href="/onboarding/done">
             <Button variant="lime">See your setup summary</Button>

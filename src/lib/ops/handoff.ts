@@ -12,12 +12,25 @@ export type HandoffSeverity = "info" | "action_required";
 
 export type HandoffSummary = ReturnType<typeof buildHandoffSummary>;
 
+/** The run executed against the real API. Missing `mode` = mock (production
+ *  only ever ran mock before the field existed). */
+export const isLiveHandoff = (state: WizardState): boolean =>
+  state.provisioning.mode === "live";
+
+/** A paid customer with NO account: the create step failed or was refused. */
+export const isCreateFailed = (state: WizardState): boolean =>
+  !state.provisioning.businessNumber && state.provisioning.runStatus === "failed";
+
 export function buildHandoffSummary(state: WizardState, severity: HandoffSeverity) {
   const pkg = PACKAGES[state.packageId];
   const failedSteps = state.provisioning.failedSteps ?? [];
   return {
     onboardingId: state.onboardingId,
     severity,
+    mode: isLiveHandoff(state) ? ("live" as const) : ("mock" as const),
+    runStatus: state.provisioning.runStatus ?? null,
+    createFailed: isCreateFailed(state),
+    unresolvedCreate: state.provisioning.unresolvedCreate ?? null,
     package: pkg.name,
     modules: pkg.modules,
     businessNumber: state.provisioning.businessNumber,
@@ -42,6 +55,28 @@ export function buildHandoffSummary(state: WizardState, severity: HandoffSeverit
 export function buildHandoffTasks(state: WizardState): HandoffTask[] {
   const pkg = PACKAGES[state.packageId];
   const failedSteps = state.provisioning.failedSteps ?? [];
+
+  // No account exists: the only task that makes sense is getting one. The
+  // module/webchat/FAQ checklist would otherwise send ops to configure a
+  // business that isn't there; it is (re)built on the next successful run.
+  if (isCreateFailed(state)) {
+    const unresolved = state.provisioning.unresolvedCreate;
+    const createError = failedSteps.find((f) => f.kind === "create_subaccount")?.error;
+    return [
+      {
+        kind: "create_failed",
+        label: unresolved
+          ? "Birdeye sub-account NOT confirmed (paid customer, no account) — check Birdeye for an orphan (child/all by name/date). If none exists, use “I checked Birdeye — no account exists. Clear and re-run” in the ops console."
+          : `Birdeye sub-account creation FAILED (paid customer, no account)${createError ? ` — ${createError}` : ""}. Fix the cause and re-run provisioning.`,
+        snapshot: {
+          error: createError ?? null,
+          unresolvedCreate: unresolved ?? null,
+          attempts: state.provisioning.attempts ?? 0,
+          mode: isLiveHandoff(state) ? "live" : "mock",
+        },
+      },
+    ];
+  }
   const contactTags = state.contacts
     .filter((c) => c.tags.length > 0)
     .map((c) => ({ email: c.email, phone: c.phone, tags: c.tags }));

@@ -6,6 +6,8 @@ import { getStripe } from "@/lib/stripe";
 import { syncSubscription } from "@/lib/stripe/sync-subscription";
 import { getSubscription, isActive } from "@/lib/subscription";
 import { loadOnboardingState } from "@/lib/wizard/provisioning-store";
+import { resolveEffectiveModeFor } from "@/lib/birdeye/allowlist";
+import { isProvisionedFor } from "@/lib/birdeye/provisioned";
 import { wizardProgress } from "@/lib/wizard/initial-state";
 import { PACKAGES, type PackageId } from "@/lib/wizard/packages";
 import TrackOnMount from "@/components/TrackOnMount";
@@ -62,7 +64,9 @@ export default async function UpgradedPage({
   const sub = await getSubscription(user.id);
   const state = await loadOnboardingState(user.id);
 
-  if (state?.provisioning.businessNumber && state.provisioning.runStatus === "provisioned") {
+  // Same predicate the provision route uses: a row provisioned under mock
+  // does NOT count once this user would run live — send them to launch.
+  if (isProvisionedFor(state, resolveEffectiveModeFor(user.email))) {
     redirect("/onboarding/done");
   }
 

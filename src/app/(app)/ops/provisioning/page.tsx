@@ -32,7 +32,7 @@ export default async function OpsProvisioningPage() {
   if (!opsUser) redirect('/dashboard');
 
   const db = getDb();
-  const [rows, openTasks, partialRuns, stalledRuns, notifyFailedRes] = await Promise.all([
+  const [rows, openTasks, partialRuns, stalledRuns, mockProvisioned, unresolvedCreates, notifyFailedRes] = await Promise.all([
     db
       .select({
         userId: onboardingStates.userId,
@@ -42,6 +42,8 @@ export default async function OpsProvisioningPage() {
         businessNumber: sql<string | null>`${onboardingStates.state}->'provisioning'->>'businessNumber'`,
         attempts: sql<number | null>`(${onboardingStates.state}->'provisioning'->>'attempts')::int`,
         lastRunBy: sql<string | null>`${onboardingStates.state}->'provisioning'->>'lastRunBy'`,
+        mode: sql<string | null>`${onboardingStates.state}->'provisioning'->>'mode'`,
+        unresolvedCreate: sql<boolean>`(${onboardingStates.state}->'provisioning'->'unresolvedCreate') IS NOT NULL`,
         email: subscriptions.email,
         planTier: subscriptions.planTier,
       })
@@ -56,6 +58,18 @@ export default async function OpsProvisioningPage() {
     db.select({ c: count() }).from(onboardingStates).where(
       sql`${onboardingStates.state}->'provisioning'->>'runStatus' = 'running'
           AND ${onboardingStates.updatedAt} < NOW() - INTERVAL '10 minutes'`,
+    ),
+    // Provisioned under mock: the customer has a synthetic business number
+    // and NO Birdeye account. Each needs a manual build or a live re-run.
+    // Rows without `mode` predate the field and were all mock.
+    db.select({ c: count() }).from(onboardingStates).where(
+      sql`${onboardingStates.state}->'provisioning'->>'runStatus' = 'provisioned'
+          AND coalesce(${onboardingStates.state}->'provisioning'->>'mode', 'mock') <> 'live'`,
+    ),
+    // A create call whose outcome is unknown — blocked until ops confirms in
+    // Birdeye and clears it from the detail page.
+    db.select({ c: count() }).from(onboardingStates).where(
+      sql`(${onboardingStates.state}->'provisioning'->'unresolvedCreate') IS NOT NULL`,
     ),
     // Users whose LATEST notify_ops attempt failed — the handoff email/webhook
     // never landed, so the checklist below is the only trace of the work.
@@ -88,6 +102,16 @@ export default async function OpsProvisioningPage() {
       label: 'Stalled runs',
       num: stalledRuns[0]?.c ?? 0,
       sub: 'Running >10 min with no progress',
+    },
+    {
+      label: 'Mock-provisioned (needs real run)',
+      num: mockProvisioned[0]?.c ?? 0,
+      sub: 'Paid, wizard done, no Birdeye account exists',
+    },
+    {
+      label: 'Unresolved creates',
+      num: unresolvedCreates[0]?.c ?? 0,
+      sub: 'Create outcome unknown — confirm in Birdeye, then clear',
     },
     {
       label: 'Handoff notify failures',
@@ -130,6 +154,7 @@ export default async function OpsProvisioningPage() {
                 <th>Email</th>
                 <th>Plan</th>
                 <th>Status</th>
+                <th>Mode</th>
                 <th>Business #</th>
                 <th>Attempts</th>
                 <th>Last run by</th>
@@ -160,8 +185,35 @@ export default async function OpsProvisioningPage() {
                     <td className="gh-ops-meta">{r.planTier ?? '—'}</td>
                     <td>
                       <span className={`gh-ops-status status-${status}`}>{status}</span>
+                      {r.unresolvedCreate ? (
+                        <span
+                          className="gh-ops-status status-failed"
+                          style={{ marginLeft: 6 }}
+                          title="create_subaccount outcome unknown — clear from the detail page after checking Birdeye"
+                        >
+                          unresolved
+                        </span>
+                      ) : null}
                     </td>
-                    <td className="gh-ops-meta">{r.businessNumber ?? '—'}</td>
+                    <td>
+                      {status === 'provisioned' && r.mode !== 'live' ? (
+                        <span
+                          className="gh-ops-status status-open"
+                          title="Provisioned under mock — no Birdeye account exists"
+                        >
+                          mock
+                        </span>
+                      ) : (
+                        <span className="gh-ops-meta">{r.mode ?? '—'}</span>
+                      )}
+                    </td>
+                    <td className="gh-ops-meta">
+                      {r.businessNumber
+                        ? r.mode !== 'live'
+                          ? `${r.businessNumber} (mock)`
+                          : r.businessNumber
+                        : '—'}
+                    </td>
                     <td className="gh-ops-meta">{r.attempts ?? 0}</td>
                     <td className="gh-ops-meta">{r.lastRunBy ?? '—'}</td>
                     <td>

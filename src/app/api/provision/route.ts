@@ -12,7 +12,6 @@
 
 import { z } from "zod";
 import { withAuth } from "@/lib/auth/with-auth";
-import { isOpsEmail } from "@/lib/auth/ops";
 import { getSubscription, isActive } from "@/lib/subscription";
 import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 import { wizardStateSchema } from "@/lib/wizard/state";
@@ -23,8 +22,10 @@ import {
   loadOnboardingRow,
   releaseProvisionLock,
 } from "@/lib/wizard/provisioning-store";
-import { getProvisionMode, resolveEffectiveMode } from "@/lib/birdeye/client";
+import { resolveEffectiveModeFor } from "@/lib/birdeye/allowlist";
+import { isProvisionedFor } from "@/lib/birdeye/provisioned";
 import { runProvision } from "@/lib/birdeye/provision-runner";
+import type { WizardState } from "@/lib/wizard/state";
 
 // Live runs can fan out to many calls (profile + media + N users + N contacts)
 // each with retries, so give the function generous headroom. Confirm the
@@ -43,6 +44,41 @@ const json = (data: unknown, status = 200) =>
     headers: { "Content-Type": "application/json" },
   });
 
+const ALREADY_RUNNING = {
+  alreadyRunning: true,
+  error: "A provisioning run is already in progress. This page will pick it up shortly.",
+};
+
+/** The two idempotency short-circuits. Run once before the lock (cheap
+ *  fast-path) and AGAIN on a fresh read after the lock — the pre-lock
+ *  snapshot may predate another invocation's create. A mock-provisioned row
+ *  does not short-circuit a live caller (isProvisionedFor). */
+function shortCircuit(
+  state: WizardState,
+  updatedAt: Date | null,
+  mode: "mock" | "live",
+): Response | null {
+  if (isProvisionedFor(state, mode)) {
+    return json({
+      alreadyProvisioned: true,
+      businessNumber: state.provisioning.businessNumber,
+      status: "provisioned",
+    });
+  }
+  // A fresh `running` row means another invocation is mid-flight (each
+  // runner step bumps updatedAt) — a second run would double Birdeye calls
+  // and could double-create the billable sub-account. A STALE `running`
+  // row is a crashed function; fall through and let the resume path run.
+  if (
+    updatedAt &&
+    state.provisioning.runStatus === "running" &&
+    !isStaleRunning(state, updatedAt)
+  ) {
+    return json(ALREADY_RUNNING, 409);
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
@@ -58,8 +94,11 @@ export async function POST(req: Request) {
 
   // ── Rate limit ───────────────────────────────────────────────────────────
   // Provisioning is idempotent, but each attempt burns Birdeye API calls and
-  // a 5-minute function slot. Keyed by user (post-auth), not IP.
-  const rl = rateLimit(`provision:${user.id}`, 3, 10 * 60_000);
+  // a 5-minute function slot. Keyed by user (post-auth), not IP. The lease
+  // below is the real duplicate guard; this only throttles hammering. 5 per
+  // 10 min leaves room for a launch + two retries plus the E2E suite's
+  // double-launch test (which legitimately POSTs 3× for the same user).
+  const rl = rateLimit(`provision:${user.id}`, 5, 10 * 60_000);
   if (!rl.ok) return tooManyRequests(rl.retryAfterSec);
 
   // ── Subscription gate (defense-in-depth) ─────────────────────────────────
@@ -81,48 +120,37 @@ export async function POST(req: Request) {
   };
   await ensureOnboardingState(user.id, state);
 
-  if (state.provisioning.businessNumber && state.provisioning.runStatus === "provisioned") {
-    return json({
-      alreadyProvisioned: true,
-      businessNumber: state.provisioning.businessNumber,
-      status: "provisioned",
-    });
-  }
+  // ── Resolve effective mode (deployment switch × provisioning allowlist) ──
+  // Needed before the short-circuit: a row provisioned under mock is NOT
+  // provisioned for a caller who would now run live.
+  const mode = resolveEffectiveModeFor(user.email);
 
-  // ── Concurrent-run guard ─────────────────────────────────────────────────
-  // A fresh `running` row means another invocation is mid-flight (each
-  // runner step bumps updatedAt) — a second run would double Birdeye calls
-  // and could double-create the billable sub-account. A STALE `running`
-  // row is a crashed function; fall through and let the resume path run.
-  if (
-    row &&
-    state.provisioning.runStatus === "running" &&
-    !isStaleRunning(state, row.updatedAt)
-  ) {
-    return json(
-      {
-        alreadyRunning: true,
-        error: "A provisioning run is already in progress. This page will pick it up shortly.",
-      },
-      409,
-    );
-  }
+  const early = shortCircuit(state, row?.updatedAt ?? null, mode);
+  if (early) return early;
 
   // The lock is the authoritative mutual exclusion (the check above is a
   // fast-path courtesy); user Resume, ops re-run and the retry cron all
   // acquire it before touching Birdeye.
   if (!(await acquireProvisionLock(user.id))) {
-    return json(
-      {
-        alreadyRunning: true,
-        error: "A provisioning run is already in progress. This page will pick it up shortly.",
-      },
-      409,
-    );
+    return json(ALREADY_RUNNING, 409);
   }
 
-  // ── Resolve effective mode (deployment switch × allowlist) ───────────────
-  const mode = resolveEffectiveMode(getProvisionMode(), isOpsEmail(user.email));
+  // ── Post-lock re-read ────────────────────────────────────────────────────
+  // Two near-simultaneous POSTs both pass the checks above on a snapshot
+  // without a businessNumber; A locks, creates, persists, releases; B then
+  // locks and — on its stale snapshot — would create again. Re-read under
+  // the lease and re-run the same checks on what is actually in the row.
+  const fresh = await loadOnboardingRow(user.id);
+  if (!fresh) {
+    await releaseProvisionLock(user.id).catch(() => {});
+    return json({ error: "Onboarding state disappeared — please retry." }, 409);
+  }
+  const late = shortCircuit(fresh.state, fresh.updatedAt, mode);
+  if (late) {
+    await releaseProvisionLock(user.id).catch(() => {});
+    return late;
+  }
+  const runState = fresh.state;
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -140,7 +168,7 @@ export async function POST(req: Request) {
       try {
         await runProvision({
           userId: user.id,
-          state,
+          state: runState,
           mode,
           resellerId: RESELLER_ID,
           apiHost: API_HOST,

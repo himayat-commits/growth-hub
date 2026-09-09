@@ -4,6 +4,7 @@
 
 import "server-only";
 import { getProvisionMode } from "@/lib/birdeye/client";
+import { hasProvisionAllowlist } from "@/lib/birdeye/allowlist";
 
 export type HealthCheck = {
   name: string;
@@ -71,11 +72,23 @@ export function runProvisioningHealthChecks(): HealthCheck[] {
       : "BIRDEYE_DASHBOARD_URL_TEMPLATE unset — done-page links go to the generic login",
   });
   if (has("NEXT_PUBLIC_PROVISION_MODE")) {
+    // The code no longer reads it, but a public var that LOOKS like the
+    // switch invites someone to flip it and believe provisioning changed.
     checks.push({
       name: "legacy_public_mode",
-      level: "warn",
+      level: "fail",
       detail:
-        "NEXT_PUBLIC_PROVISION_MODE is still set — transitional fallback; move to PROVISION_MODE and remove it",
+        "NEXT_PUBLIC_PROVISION_MODE is set — it is ignored by the code and must be deleted; PROVISION_MODE is the only switch",
+    });
+  }
+  if (mode === "live_allowlist") {
+    const set = hasProvisionAllowlist();
+    checks.push({
+      name: "provision_allowlist",
+      level: set ? "pass" : "warn",
+      detail: set
+        ? "PROVISION_ALLOWLIST set — live allowlist is separate from ops admin"
+        : "PROVISION_ALLOWLIST unset — live_allowlist falls back to OPS_EMAILS; pilot customers would need ops admin to go live",
     });
   }
 

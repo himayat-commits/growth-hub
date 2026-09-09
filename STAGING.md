@@ -49,7 +49,7 @@ In Vercel → **Settings → Environment Variables**, set these for the
 | `DATABASE_URL` | the **Neon `staging` branch** connection string (step 1) |
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRICE_*` | Stripe **test-mode** keys + test price IDs |
 | `WORKOS_API_KEY` / `WORKOS_CLIENT_ID` / redirect URIs | a WorkOS **staging** environment (add the preview URL as a redirect) |
-| `BIRDEYE_API_KEY` | leave unset, or set `NEXT_PUBLIC_PROVISION_MODE=mock` so provisioning never hits live Birdeye |
+| `BIRDEYE_API_KEY` | leave unset, and set `PROVISION_MODE=mock` (the default) so provisioning never hits live Birdeye. Do **not** set `NEXT_PUBLIC_PROVISION_MODE` — it is ignored and the health check fails on it |
 | `PAYLOAD_SECRET`, `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY` | staging-specific (Resend can stay on a test/sandbox domain) |
 | `OPS_EMAILS` | e.g. `you@himayat.com.au:admin, teammate@himayat.com.au:support` to exercise the new roles |
 | `PLAYWRIGHT_TEST_TOKEN` | set a random secret so the E2E auth-bypass works on staging (it's auto-disabled in Production) |

@@ -77,7 +77,7 @@ The pain: messages are currently a single "Growth Hub Team" thread per user. No 
 - Add `PLAYWRIGHT_TEST_TOKEN` env-gated middleware bypass in `src/proxy.ts` (hard-fail if `VERCEL_ENV === 'production'`)
 - `tests/setup/seed-test-user.ts` — create/cleanup `playwright-user-001` profile + subscription rows
 - `tests/e2e/wizard.spec.ts` — visit `/onboarding`, fill 14 steps with realistic-looking data, hit Submit, assert SSE stream completes
-- Force `NEXT_PUBLIC_PROVISION_MODE=mock` for the test environment
+- Force `PROVISION_MODE=mock` for the test environment (`NEXT_PUBLIC_PROVISION_MODE` is no longer read)
 
 ---
 
