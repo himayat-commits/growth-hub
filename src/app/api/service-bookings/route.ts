@@ -25,15 +25,11 @@ import {
   hasOpenBookingFor,
 } from '@/lib/db/bookings';
 import { createNotification } from '@/lib/db/notifications';
-<<<<<<< HEAD
-import { getServiceBySlug } from '@/lib/cms';
-=======
 import { getProfile } from '@/lib/db/profile';
 import { getDb } from '@/lib/db';
 import { userProfiles } from '@/lib/db/schema';
 import { pickNextStrategistSlug } from '@/lib/auth/ensure-user-record';
 import { getServiceBySlug, getStrategistBySlug } from '@/lib/cms';
->>>>>>> 02e0828 (feat(advisory): triage intake, adviser 360, status workflow, specialties routing (F4.1–F4.3, F4.5–F4.10))
 import { rateLimit, tooManyRequests } from '@/lib/rate-limit';
 import { DEFAULT_FROM, OPS_EMAIL, escapeHtml, sendEmail } from '@/lib/email/send';
 import { getEffectivePlan, getSubscription } from '@/lib/subscription';
@@ -172,18 +168,15 @@ export async function POST(req: NextRequest) {
     console.error('[service-bookings] customer notification failed', e);
   }
 
-<<<<<<< HEAD
   // Referral qualification does NOT happen here. A booking *request* is free
   // and unverified; the referral qualifies when ops marks the Growth Call
   // completed (PATCH /api/ops/bookings/[id] →
   // qualifyReferralForCompletedGrowthCall).
-=======
   const userEmail = user.email ?? 'unknown';
   const userName = [user.firstName, user.lastName].filter(Boolean).join(' ') || userEmail;
   const slotsText = formatSlots(preferredSlots);
   const memberUrl = `${APP_URL}/ops/members/${encodeURIComponent(user.id)}`;
   const strategistEmail = strategist?.email ?? null;
->>>>>>> 02e0828 (feat(advisory): triage intake, adviser 360, status workflow, specialties routing (F4.1–F4.3, F4.5–F4.10))
 
   // HubSpot CRM — fire-and-forget (never awaited; crm.ts swallows + Sentry's
   // its own errors). The note carries the booking id so a replay is

@@ -37,9 +37,9 @@ import {
 } from '@/lib/db/bookings';
 import { createNotification } from '@/lib/db/notifications';
 import { getProfile } from '@/lib/db/profile';
-// TODO(merge): rename to qualifyReferralForCompletedGrowthCall once the
+
 // referral branch (pending-credit rework) lands — same call site, new name.
-import { qualifyReferral } from '@/lib/db/referrals';
+import { qualifyReferralForCompletedGrowthCall } from '@/lib/db/referrals';
 import { DEFAULT_FROM, escapeHtml, sendEmail } from '@/lib/email/send';
 import { syncNote } from '@/lib/hubspot/crm';
 
@@ -143,7 +143,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
 
   if (nextStatus === 'completed' && booking.serviceSlug === GROWTH_CALL_SLUG) {
     try {
-      const referral = await qualifyReferral(booking.userId);
+      const referral = await qualifyReferralForCompletedGrowthCall(booking.userId);
       if (referral) {
         await Promise.all([
           createNotification({
