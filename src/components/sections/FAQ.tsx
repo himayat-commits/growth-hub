@@ -56,7 +56,7 @@ export default function FAQ({ items }: FAQProps = {}) {
               Common<br />questions.
             </h2>
             <p className="section-lead">
-              Can't find what you need? Email{" "}
+              Can&apos;t find what you need? Email{" "}
               <a style={{ textDecoration: "underline" }} href="mailto:hello@himayat.com.au">
                 hello@himayat.com.au
               </a>{" "}

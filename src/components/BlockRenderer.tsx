@@ -18,7 +18,6 @@ import BigQuote from "@/components/sections/BigQuote";
 import Testimonials from "@/components/sections/Testimonials";
 import About from "@/components/sections/About";
 import FinalCTA from "@/components/sections/FinalCTA";
-import Contact from "@/components/sections/Contact";
 import FAQ, { type FAQItem } from "@/components/sections/FAQ";
 
 // ── Lexical helpers ───────────────────────────────────────────────────────────

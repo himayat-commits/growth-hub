@@ -29,7 +29,7 @@ steps are the gate.
 - [ ] (Optional) Upstash for cross-instance rate limiting.
 
 ## 3. Promote to production
-- [ ] Merge → production deploy. `prod-migrate` runs the two migrations against prod automatically.
+- [ ] Merge → production deploy. `prod-migrate` runs the **Drizzle** migration (`0013`) against prod automatically. The Payload migration (`20260623…`) is **not** run by the build — `payload migrate` hangs in CI (see `scripts/prod-migrate.mjs`) — so apply its `up` SQL by hand in the Neon SQL editor before promoting.
 - [ ] Post-deploy checks:
   - [ ] Site loads; consent banner appears; pixels fire only after Accept.
   - [ ] `/privacy` resolves.
@@ -39,7 +39,7 @@ steps are the gate.
 
 ## 4. Rollback plan
 - [ ] **Code:** redeploy the previous production deployment in Vercel (instant).
-- [ ] **Drizzle migration `0013`:** the dedupe `DELETE` is not reversible (deleted duplicate rows are gone). The schema change is — `down()` drops the PK and restores the index (`drizzle/0013` has no down; recreate the index manually if needed). Take a Neon point-in-time/branch snapshot before deploying so you can restore.
+- [ ] **Drizzle migration `0013`:** the dedupe `DELETE` is not reversible (deleted duplicate rows are gone). There is **no `down()`** — Drizzle SQL migrations here are forward-only — so to roll the schema back you drop the compound PK and recreate the previous index by hand. Take a Neon point-in-time/branch snapshot before deploying so you can restore.
 - [ ] **Payload migration:** `20260623…` has a `down()` that drops the `community_links_*` columns.
 - [ ] Keep the Neon pre-deploy snapshot until you're confident.
 

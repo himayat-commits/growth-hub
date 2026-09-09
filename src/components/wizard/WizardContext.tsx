@@ -61,6 +61,15 @@ export function WizardProvider({
   const saveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const lsKey = `gh_wizard_${initialState.onboardingId}`;
 
+  // One-shot adoption of the localStorage snapshot AFTER hydration. This is
+  // deliberately a setState in an effect: a lazy useState initialiser would
+  // read localStorage during the client's first render and mismatch the
+  // server HTML (every step form is controlled by this state), and
+  // useSyncExternalStore does not fit because the snapshot is merged once into
+  // state that is then mutated by patch()/setState — deriving it on every
+  // render would re-parse + schema-validate localStorage after each edit.
+  // It runs exactly once and only re-renders when a snapshot is adopted.
+  /* eslint-disable react-hooks/set-state-in-effect */
   React.useEffect(() => {
     try {
       const raw = localStorage.getItem(lsKey);
@@ -102,6 +111,7 @@ export function WizardProvider({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const putImmediate = React.useCallback(async (next: WizardState) => {
     setSaving(true);

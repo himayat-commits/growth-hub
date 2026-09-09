@@ -8,6 +8,7 @@
 
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import { assertSafeDatabaseTarget } from '../../scripts/_guard.mjs';
 
 // Load local env before doing anything else so DATABASE_URL is available.
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
@@ -22,6 +23,10 @@ export default async function globalSetup() {
   if (!process.env.PLAYWRIGHT_TEST_TOKEN) {
     throw new Error('[global-setup] PLAYWRIGHT_TEST_TOKEN is not set.');
   }
+
+  // Refuse to seed into production — the handoff .env.local points there.
+  // Point DATABASE_URL at a Neon branch (STAGING.md §1) or set ALLOW_PROD=1.
+  assertSafeDatabaseTarget('tests/setup/global-setup.ts (Playwright test-user seed)');
 
   // Dynamic import after env is loaded.
   const { neon } = await import('@neondatabase/serverless');

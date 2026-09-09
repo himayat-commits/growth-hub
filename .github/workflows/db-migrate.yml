@@ -1,3 +1,13 @@
+# ┌─ OWNER DECISION NEEDED ──────────────────────────────────────────────────┐
+# │ This workflow DUPLICATES scripts/prod-migrate.mjs, which the Vercel      │
+# │ production build already runs (`npm run vercel-build`). Both fire on the │
+# │ same push to master, so two `drizzle-kit migrate` runs race against the  │
+# │ same database whenever drizzle/** changes. Drizzle's journal makes this  │
+# │ mostly benign, but it is redundant and a second failure surface.         │
+# │ Recommendation: keep exactly one. The Vercel-build path blocks the       │
+# │ deploy on failure (the safer property), so the likely answer is to       │
+# │ delete this file — left in place for the owner to decide.               │
+# └──────────────────────────────────────────────────────────────────────────┘
 name: DB migrate (production)
 
 # Applies pending Drizzle migrations to the production Neon database.

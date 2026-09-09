@@ -27,8 +27,12 @@
  *      Social Impact, CBR Innovation Network) as anchors so the new
  *      anchor-tier card variant has something to render against.
  */
+import { assertSafeDatabaseTarget } from './_guard.mjs';
 import { getPayload } from 'payload';
 import config from '../src/payload.config';
+
+// Refuse to run against the production DB unless ALLOW_PROD=1 (see scripts/_guard.mjs).
+assertSafeDatabaseTarget('scripts/fix-partners-data.ts');
 
 const BACKFILL_CONTRIB_HOW: Array<{
   name: string;

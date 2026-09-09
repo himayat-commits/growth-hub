@@ -10,10 +10,14 @@
  * Requires DATABASE_URL + PAYLOAD_SECRET in .env.local, and BOTH migrations
  * applied (payload: 20260907_add_products, drizzle: 0015_shop_orders_inventory).
  */
+import { assertSafeDatabaseTarget } from './_guard.mjs';
 import path from 'node:path';
 import { getPayload } from 'payload';
 import config from '../src/payload.config';
 import { ensureInventoryRows, setStock } from '../src/lib/db/inventory';
+
+// Refuse to run against the production DB unless ALLOW_PROD=1 (see scripts/_guard.mjs).
+assertSafeDatabaseTarget('scripts/seed-shop-demo.ts');
 
 export const DEMO_SLUG = 'growth-hub-tee';
 

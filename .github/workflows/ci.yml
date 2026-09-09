@@ -1,0 +1,38 @@
+name: CI
+
+# Typecheck + lint on every PR and on pushes to master. This is the gate that
+# was missing: `npm run lint` had 17 errors on master with nothing enforcing it,
+# and there was no `typecheck` script at all.
+#
+# Deliberately read-only: no DATABASE_URL, no build, no Playwright. E2E runs
+# against a staging deploy once staging has its own database (STAGING.md).
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint

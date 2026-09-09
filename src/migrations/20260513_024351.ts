@@ -1,6 +1,6 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    CREATE TYPE "payload"."enum_pages_blocks_about_stats_tone" AS ENUM('teal', 'lime', 'plain');
   CREATE TYPE "payload"."enum_pages_blocks_big_quote_badges_icon" AS ENUM('verified', 'ndis', 'location');
@@ -332,7 +332,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_pages_v_blocks_community_path_idx" ON "payload"."_pages_v_blocks_community" USING btree ("_path");`)
 }
 
-export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
    DROP TABLE "payload"."pages_blocks_hero_chips" CASCADE;
   DROP TABLE "payload"."pages_blocks_logo_strip_text_items" CASCADE;

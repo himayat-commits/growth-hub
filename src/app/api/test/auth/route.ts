@@ -1,7 +1,8 @@
 // POST /api/test/auth
 // Sets the __gh_test_uid session cookie that the with-auth.ts bypass reads.
 // This endpoint exists ONLY for Playwright E2E tests and is permanently
-// disabled in production (returns 404).
+// disabled in production (returns 404) — same gate as the with-auth.ts bypass
+// (isTestAuthBypassEnabled), so the two can never disagree.
 //
 // The test token in the request body must match PLAYWRIGHT_TEST_TOKEN — so
 // even though this route bypasses WorkOS, it can't be abused without knowing
@@ -9,7 +10,7 @@
 
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
-import { TEST_USER_ID, TEST_COOKIE_NAME } from '@/lib/auth/with-auth';
+import { TEST_USER_ID, TEST_COOKIE_NAME, isTestAuthBypassEnabled } from '@/lib/auth/with-auth';
 
 export const runtime = 'nodejs';
 
@@ -23,9 +24,10 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 export async function POST(req: Request): Promise<NextResponse> {
-  // Hard-fail in production or when the feature flag isn't configured.
+  // Hard-fail in production, on a non-Vercel production build, or when the
+  // token isn't configured.
   const expectedToken = process.env.PLAYWRIGHT_TEST_TOKEN;
-  if (!expectedToken || process.env.VERCEL_ENV === 'production') {
+  if (!expectedToken || !isTestAuthBypassEnabled()) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
@@ -43,7 +45,9 @@ export async function POST(req: Request): Promise<NextResponse> {
   const response = NextResponse.json({ ok: true, userId: TEST_USER_ID });
   response.cookies.set(TEST_COOKIE_NAME, TEST_USER_ID, {
     httpOnly: true,
-    secure: false,     // localhost tests don't need HTTPS
+    // HTTPS-only on real builds (Vercel Preview is https); plain http is only
+    // ever a local `next dev` server.
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: 2 * 60 * 60, // 2 hours — enough for any test run

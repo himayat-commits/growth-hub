@@ -41,15 +41,24 @@ export default function SummitHeroHeadline() {
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    let i = 0;
-    setWord(ROLL[0]);
-    const id = window.setInterval(() => {
+    // Every state update happens inside a timer callback — never synchronously
+    // in the effect body (react-hooks/set-state-in-effect). The first word
+    // lands on a 0 ms timeout so the roll still starts straight after mount;
+    // the interval then carries it to the final word and stops.
+    let i = -1;
+    const advance = () => {
       i += 1;
       setWord(ROLL[i]);
-      if (i >= ROLL.length - 1) window.clearInterval(id);
-    }, STEP_MS);
+      // intervalId is assigned below, before any timer can fire.
+      if (i >= ROLL.length - 1) window.clearInterval(intervalId);
+    };
+    const kickoff = window.setTimeout(advance, 0);
+    const intervalId = window.setInterval(advance, STEP_MS);
 
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearTimeout(kickoff);
+      window.clearInterval(intervalId);
+    };
   }, []);
 
   // Two deliberate lines: "Entrepreneurship" on its own, then "for <word>" as a

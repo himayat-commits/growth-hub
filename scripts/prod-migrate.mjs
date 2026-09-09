@@ -16,6 +16,11 @@
 // mutate the shared database (DATABASE_URL is the same for Preview & Production).
 // If migrate fails, the build fails — we'd rather block the deploy than ship
 // code that expects a schema the database doesn't have yet.
+//
+// Deliberately NOT wrapped in scripts/_guard.mjs: that guard exists to stop
+// one-off scripts and the Playwright seed from touching production by accident,
+// whereas this script's whole job is to run on VERCEL_ENV=production. The gate
+// below is the only condition it needs.
 
 import { execSync } from 'node:child_process';
 

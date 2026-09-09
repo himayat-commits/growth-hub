@@ -2,13 +2,18 @@
   "name": "growth-hub",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9"
+  },
   "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "payload generate:importmap && next build",
     "vercel-build": "node scripts/prod-migrate.mjs && payload generate:importmap && next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint src scripts tests",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck && npm run lint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
@@ -23,7 +28,7 @@
     "shop:seed-demo": "node --env-file=.env.local --import tsx/esm scripts/seed-shop-demo.ts",
     "event:draft-case-study": "node --env-file=.env.local --import tsx/esm scripts/draft-case-study-from-event.ts",
     "test:e2e": "playwright test",
-    "test:e2e:prod": "BASE_URL=https://thegrowthhub.com.au playwright test"
+    "test:e2e:smoke:prod": "playwright test --config playwright.smoke.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
