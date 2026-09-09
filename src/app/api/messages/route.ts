@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@workos-inc/authkit-nextjs';
 import { getThread, sendUserMessage } from '@/lib/db/messages';
+import { rateLimit, tooManyRequests } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -17,6 +18,9 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const { user } = await withAuth();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const rl = rateLimit(`message:${user.id}`, 20, 10 * 60_000);
+  if (!rl.ok) return tooManyRequests(rl.retryAfterSec);
 
   const body = await req.json().catch(() => null);
   const text =

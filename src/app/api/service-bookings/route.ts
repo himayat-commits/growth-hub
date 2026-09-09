@@ -14,6 +14,7 @@ import { createBooking, getUserBookings, hasOpenBookingFor } from '@/lib/db/book
 import { createNotification } from '@/lib/db/notifications';
 import { qualifyReferral } from '@/lib/db/referrals';
 import { getServiceBySlug } from '@/lib/cms';
+import { rateLimit, tooManyRequests } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -36,6 +37,11 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const { user } = await withAuth();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // Each request emails ops; the duplicate guard below only blocks the same
+  // slug while a booking is open, so cap the rate per member as well.
+  const rl = rateLimit(`booking:${user.id}`, 5, 10 * 60_000);
+  if (!rl.ok) return tooManyRequests(rl.retryAfterSec);
 
   let body: BookingRequest;
   try {

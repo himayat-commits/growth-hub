@@ -33,6 +33,7 @@ const APP_PATHS = [
   '/profile',
   '/my-events',
   '/resources',
+  '/search',   // topbar search form posts here; missing => 308 to the apex + sign-in loop
   '/messages',
   '/benefits',
   '/orders',   // shop order history (the public /shop stays on the apex)
