@@ -1,13 +1,11 @@
 'use client';
 
-// Share-this-page row for event and case-study pages. Each link carries a
-// `?ref={anonId}` so when the recipient eventually signs up we can attribute
-// the share — picked up by the existing tryIssueReferralCredit() pipeline.
-//
-// The anonId is a stable per-browser identifier stored in a long-lived
-// cookie. Generated lazily on first share click so we don't write cookies
-// on a passive read; matches PostHog's distinct_id pattern at a high level
-// without needing to import the SDK here.
+// Share-this-page row for event and case-study pages. Links carry UTM
+// parameters only. They used to append `?ref={random anon id}` and write it
+// into the `gh_ref` cookie — the same cookie the proxy uses for member
+// referral codes — so a recipient who signed up had their cookie consumed
+// and deleted with zero attribution (the id never matched a member). Member
+// referral links live on /benefits and use the real code.
 //
 // Networks supported: LinkedIn, X (Twitter), WhatsApp, Email. No Facebook —
 // Meta's share endpoint drops query strings unless an ad-account is wired
@@ -15,25 +13,6 @@
 
 import { useCallback } from 'react';
 import { track } from '@/lib/analytics';
-
-const REF_COOKIE = 'gh_ref';
-const REF_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
-
-/** Read or lazily create a stable per-browser ref id. Client-only. */
-function getRefId(): string {
-  if (typeof document === 'undefined') return '';
-  const existing = document.cookie
-    .split(';')
-    .map((c) => c.trim())
-    .find((c) => c.startsWith(`${REF_COOKIE}=`));
-  if (existing) return existing.split('=')[1] ?? '';
-  // Compact 12-char id from crypto.getRandomValues — readable in URLs.
-  const buf = new Uint8Array(9);
-  crypto.getRandomValues(buf);
-  const id = btoa(String.fromCharCode(...buf)).replace(/[+/=]/g, '').slice(0, 12);
-  document.cookie = `${REF_COOKIE}=${id}; Path=/; Max-Age=${REF_MAX_AGE}; SameSite=Lax`;
-  return id;
-}
 
 type Network = 'linkedin' | 'x' | 'whatsapp' | 'email';
 
@@ -86,11 +65,10 @@ export default function ShareButtons({
 }) {
   const onShare = useCallback(
     (network: Network) => {
-      const ref = getRefId();
       const origin =
         typeof window !== 'undefined' ? window.location.origin : 'https://thegrowthhub.com.au';
-      const url = `${origin}${path}?ref=${ref}&utm_source=share-${network}&utm_medium=referral`;
-      track('referral_share_click', { network, surface, path, ref });
+      const url = `${origin}${path}?utm_source=share-${network}&utm_medium=social`;
+      track('referral_share_click', { network, surface, path });
       return NETWORKS.find((n) => n.network === network)!.build({ url, title });
     },
     [path, surface, title],

@@ -16,6 +16,7 @@
 //     name/email/phone. We just mirror onto our own data.
 
 import 'server-only';
+import { randomBytes } from 'node:crypto';
 import { eq, sql } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { userProfiles, type UserProfile } from '@/lib/db/schema';
@@ -28,9 +29,20 @@ interface WorkOSUserLike {
   email?: string | null;
 }
 
+/** Unambiguous upper-case alphanumerics (no 0/O/1/I) for the random suffix. */
+const SUFFIX_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function randomSuffix(len = 4): string {
+  const bytes = randomBytes(len);
+  let out = '';
+  for (let i = 0; i < len; i++) out += SUFFIX_ALPHABET[bytes[i]! % SUFFIX_ALPHABET.length];
+  return out;
+}
+
 /**
- * Build a referral code like GROW-AQIQ-2026. Falls back to the userId
- * suffix when no last name is on the WorkOS profile.
+ * Build a referral code like GROW-AQIQ-2026-7K2Q. Falls back to the userId
+ * suffix when no last name is on the WorkOS profile. Always matches
+ * REF_CODE_PATTERN (src/lib/referral-code.ts): max 4+1+8+1+4+1+4 = 23 chars.
  */
 function makeReferCode(user: WorkOSUserLike): string {
   const slug =
@@ -38,7 +50,16 @@ function makeReferCode(user: WorkOSUserLike): string {
       .toUpperCase()
       .replace(/[^A-Z0-9]+/g, '')
       .slice(0, 8) || 'MEMBER';
-  return `GROW-${slug}-${new Date().getFullYear()}`;
+  return `GROW-${slug}-${new Date().getFullYear()}-${randomSuffix()}`;
+}
+
+/** Postgres unique_violation on the refer_code column (not the userId PK). */
+function isReferCodeCollision(err: unknown): boolean {
+  const e = err as { code?: string; constraint?: string; message?: string; cause?: { code?: string; constraint?: string; message?: string } };
+  const code = e?.code ?? e?.cause?.code;
+  const constraint = e?.constraint ?? e?.cause?.constraint ?? '';
+  const message = e?.message ?? e?.cause?.message ?? '';
+  return code === '23505' && /refer_code/.test(`${constraint} ${message}`);
 }
 
 export async function ensureUserRecord(user: WorkOSUserLike): Promise<UserProfile> {
@@ -100,17 +121,28 @@ export async function ensureUserRecordWithStatus(
   const rows = await db.select().from(userProfiles).where(eq(userProfiles.userId, user.id)).limit(1);
   if (rows[0]) return { profile: rows[0], created: false };
 
-  // First sign-in. Insert a starter profile.
+  // First sign-in. Insert a starter profile. onConflictDoNothing only covers
+  // the userId PK (a concurrent sign-in); a refer_code collision surfaces as
+  // a 23505 and is retried with a fresh random suffix.
   const assignedStrategistId = await pickNextStrategistSlug();
-  const inserted = await db
-    .insert(userProfiles)
-    .values({
-      userId: user.id,
-      referCode: makeReferCode(user),
-      assignedStrategistId,
-    })
-    .onConflictDoNothing({ target: userProfiles.userId })
-    .returning();
+  let inserted: UserProfile[] = [];
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      inserted = await db
+        .insert(userProfiles)
+        .values({
+          userId: user.id,
+          referCode: makeReferCode(user),
+          assignedStrategistId,
+        })
+        .onConflictDoNothing({ target: userProfiles.userId })
+        .returning();
+      break;
+    } catch (err) {
+      if (isReferCodeCollision(err) && attempt < 2) continue;
+      throw err;
+    }
+  }
 
   if (inserted[0]) return { profile: inserted[0], created: true };
 
