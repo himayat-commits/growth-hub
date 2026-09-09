@@ -32,8 +32,6 @@ export interface DirectoryPartner {
   contribution?: string | null;
   howWeWork?: string | null;
   website?: string | null;
-  contactName?: string | null;
-  contactEmail?: string | null;
   /** Real logo image URL (from the CMS `logo` upload field). When absent the
    *  card falls back to the abstract PartnerMark glyph. */
   logoUrl?: string | null;

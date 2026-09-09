@@ -86,8 +86,6 @@ export default async function PartnersPage() {
     contribution: (p as { contribution?: string | null }).contribution ?? null,
     howWeWork: (p as { howWeWork?: string | null }).howWeWork ?? null,
     website: p.website ?? null,
-    contactName: p.contactName ?? null,
-    contactEmail: p.contactEmail ?? null,
     logoUrl: logoOf(p).url,
     logoAlt: logoOf(p).alt,
   }));
