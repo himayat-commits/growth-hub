@@ -50,6 +50,7 @@ export default async function AccelerateSignup() {
       features={features}
       addon={tier?.addon ?? DEFAULTS.addon}
       trustItems={trustItems}
+      checkoutTier="accelerate"
       hubspotPortalId="442026767"
       hubspotFormId="2fbee7de-e158-409a-89ae-9b7345e0b2df"
       hubspotRegion="ap1"

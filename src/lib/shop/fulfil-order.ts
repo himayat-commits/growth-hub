@@ -89,7 +89,9 @@ export async function fulfilOrderFromSession(
   // 3. Side effects — best-effort.
   await sendOrderConfirmationEmail(orderId);
 
-  if (opts.stripeEventId) {
+  // Server-side Meta conversion only with the visitor's explicit analytics
+  // consent, stamped on the session by /api/shop/checkout ('unset' = no).
+  if (opts.stripeEventId && session.metadata?.consent === 'granted') {
     void sendServerConversion({
       eventId: opts.stripeEventId,
       eventName: 'Purchase',

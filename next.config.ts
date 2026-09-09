@@ -24,6 +24,26 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // Baseline security headers on every response. Deliberately no CSP yet:
+  // Stripe Checkout, HubSpot forms/embeds, PostHog, GA4 / Meta / LinkedIn
+  // pixels, Sentry's /monitoring tunnel and Payload admin each need their
+  // script/connect/frame origins allow-listed — do that as its own change
+  // with report-only first. X-Frame-Options is SAMEORIGIN (not DENY) because
+  // Payload admin renders live preview in a same-origin iframe.
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+    ];
+  },
+
   // Legacy → new URL redirects as we migrate the post-signup surface onto the
   // mockup-derived dashboard shell. 301s so bookmarks + crawlers update.
   async redirects() {

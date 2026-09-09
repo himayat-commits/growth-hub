@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import * as Sentry from "@sentry/nextjs";
 import { rateLimit, clientIp, tooManyRequests } from "@/lib/rate-limit";
 
 // Escape user-supplied values before interpolating into the email HTML so a
@@ -17,8 +18,21 @@ export async function POST(req: NextRequest) {
   const rl = rateLimit(`contact:${clientIp(req)}`, 5, 60_000);
   if (!rl.ok) return tooManyRequests(rl.retryAfterSec);
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  // Fail loudly rather than 500 with a generic message: an unset key is a
+  // deployment problem, and the visitor deserves a working fallback address.
+  if (!process.env.RESEND_API_KEY) {
+    Sentry.captureMessage("RESEND_API_KEY unset — contact form unavailable", {
+      level: "error",
+      tags: { area: "contact", provider: "resend" },
+    });
+    return NextResponse.json(
+      { error: "Contact form is temporarily unavailable — email hello@himayat.com.au" },
+      { status: 503 },
+    );
+  }
+
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const { name, email, business, interests, message, ref } = await req.json();
 
     if (!name || !email) {
@@ -80,6 +94,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Contact API error:", err);
+    // A lost enquiry is a lost lead — make sure someone sees it.
+    Sentry.captureException(err, { tags: { area: "contact", provider: "resend" } });
     return NextResponse.json(
       { error: "Failed to send message. Please email us directly." },
       { status: 500 }

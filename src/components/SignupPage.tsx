@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import Script from "next/script";
+import { track } from "@/lib/analytics";
+import type { PaidPlanTier } from "@/lib/plans";
 
 interface TrustItem {
   text: string;
@@ -16,6 +19,8 @@ interface SignupPageProps {
   addon?: string;
   featured?: boolean;
   trustItems: TrustItem[];
+  /** Which paid tier this page sells — powers the "straight to checkout" link. */
+  checkoutTier: PaidPlanTier;
   hubspotPortalId: string;
   hubspotFormId: string;
   hubspotRegion: string;
@@ -37,6 +42,7 @@ export default function SignupPage({
   addon,
   featured,
   trustItems,
+  checkoutTier,
   hubspotPortalId,
   hubspotFormId,
   hubspotRegion,
@@ -74,6 +80,22 @@ export default function SignupPage({
                   </p>
                 )}
               </div>
+
+              {/* Secondary CTA. The HubSpot form (right column) stays the primary
+                  lead capture; this is the shortcut for a visitor who already
+                  knows they want this tier. /pricing reads ?tier=&interval= and
+                  starts Stripe Checkout, via WorkOS sign-up first if needed
+                  (CheckoutIntent in PricingPageContent) — previously this page
+                  never reached Stripe at all. */}
+              <p className="signup-checkout-cta" style={{ margin: "16px 0 0", fontSize: 15 }}>
+                <Link
+                  href={`/pricing?tier=${checkoutTier}&interval=month`}
+                  onClick={() => track("cta_click_upgrade", { location: "signup-page", tier: checkoutTier, interval: "month" })}
+                  style={{ fontWeight: 600, textDecoration: "underline", textUnderlineOffset: 4 }}
+                >
+                  Ready now? Go straight to checkout →
+                </Link>
+              </p>
 
               <div className="signup-trust">
                 {trustItems.map((item, i) => (
