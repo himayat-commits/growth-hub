@@ -41,24 +41,6 @@ function IconMessaging() {
     </svg>
   );
 }
-function IconInvoice() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
-    </svg>
-  );
-}
-function IconTimesheets() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
-    </svg>
-  );
-}
 function IconReviews() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -78,15 +60,6 @@ function IconSearch() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-    </svg>
-  );
-}
-function IconScheduling() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   );
 }
@@ -189,36 +162,6 @@ const ALL_MODULES: PortalModule[] = [
     videoUrl: "https://himayat.com.au/onboarding-videos#messaging",
   },
   {
-    id: "invoicing",
-    name: "Invoicing",
-    tagline: "Branded invoices from Growth Hub",
-    desc: "Generate professional invoices with your branding and send them directly — no double-entry into accounting tools.",
-    requires: null,
-    icon: <IconInvoice />,
-    steps: [
-      { text: "Upload your logo and set your business details" },
-      { text: "Create your first invoice template" },
-      { text: "Send your first invoice to a customer" },
-      { text: "Set up payment reminders for overdue invoices" },
-    ],
-    videoUrl: "https://himayat.com.au/onboarding-videos#invoicing",
-  },
-  {
-    id: "timesheets",
-    name: "Timesheets & Docketing",
-    tagline: "Digital forms, timesheets, and job records",
-    desc: "Replaces paper checklists, food safety logs, intake forms, and SWMS records with audit-ready digital records.",
-    requires: { tier: "growth" },
-    icon: <IconTimesheets />,
-    steps: [
-      { text: "Choose a template (food safety log, timesheet, job report, or custom)" },
-      { text: "Customise fields to match your business workflows" },
-      { text: "Share the form link with staff or clients" },
-      { text: "Review completed records in your dashboard" },
-    ],
-    videoUrl: "https://himayat.com.au/onboarding-videos#timesheets",
-  },
-  {
     id: "reviews_ai",
     name: "Reviews AI",
     tagline: "Automated review generation & responses",
@@ -262,21 +205,6 @@ const ALL_MODULES: PortalModule[] = [
       { text: "Set up weekly ranking reports" },
     ],
     videoUrl: "https://himayat.com.au/onboarding-videos#search-ai",
-  },
-  {
-    id: "scheduling",
-    name: "Scheduling + Rostering",
-    tagline: "Drag-and-drop job scheduling",
-    desc: "Real-time wage cost forecasting, leave management, and Fair Work compliant records — replaces spreadsheets and group chats.",
-    requires: { tier: "accelerate" },
-    icon: <IconScheduling />,
-    steps: [
-      { text: "Add your team members and their roles/rates" },
-      { text: "Create your first job or shift on the schedule board" },
-      { text: "Set up leave approval workflows" },
-      { text: "Enable wage cost forecasting to see your weekly labour budget" },
-    ],
-    videoUrl: "https://himayat.com.au/onboarding-videos#scheduling",
   },
   {
     id: "webchat",

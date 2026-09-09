@@ -14,7 +14,6 @@ const DEFAULTS = {
   tagline: "You're a step away from a real team in your corner.",
   features: [
     "Everything in Foundations",
-    "Timesheets & Docketing",
     "Reviews AI: automated generation & responses",
     "Review Collateral Kit: QR cards, badges, templates",
   ],

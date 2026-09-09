@@ -7,7 +7,7 @@ const DEFAULT_STATS = [
 
 const DEFAULT_PARAGRAPHS = [
   "We're a grassroots social enterprise. We started by helping people navigate complex systems that weren't built for them. Now, we bring that same unwavering support to local business owners.",
-  "Big agencies overlook small, diverse businesses. We don't. We bring together everything you need to run and grow — work management, AI-powered marketing, and accessible community support — so you grow with a team that gets it.",
+  "Big agencies overlook small, diverse businesses. We don't. We bring together everything you need to grow — AI-powered marketing, expert advice, and accessible community support — so you grow with a team that gets it.",
 ];
 
 const DEFAULT_PULL_QUOTE =

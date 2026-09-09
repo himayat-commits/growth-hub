@@ -13,7 +13,6 @@ const DEFAULTS = {
   title: "Get online. Get noticed.",
   tagline: "You're a step away from a real team in your corner.",
   features: [
-    "Invoicing",
     "Social AI: content creation & scheduling",
     "Listing AI: 50+ directory management",
     "Messaging: unified inbox for all channels",

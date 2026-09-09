@@ -22,8 +22,8 @@ export default function Footer() {
             </div>
             <p>
               A grassroots social enterprise helping local Canberra businesses
-              run and grow — with work management tools, AI-powered marketing,
-              and a community that has your back.
+              grow — with AI-powered marketing, expert advice, and a community
+              that has your back.
             </p>
             <div className="foot-badges">
               <span className="mini">Social Traders Verified</span>

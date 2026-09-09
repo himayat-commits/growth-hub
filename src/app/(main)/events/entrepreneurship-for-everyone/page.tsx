@@ -210,8 +210,8 @@ export default async function EntrepreneurshipForEveryonePage() {
           </div>
           <p className="hero-sub">
             A free, full-day program of talks, workshops and help-desks for people starting,
-            running and growing small businesses in Canberra — with dedicated tracks for
-            diverse founders, tradies, and emerging community-service operators.
+            running and growing small businesses in Canberra — built for diverse founders,
+            tradies, and emerging community-service operators.
           </p>
 
           <SummitCtas surface="hero" />

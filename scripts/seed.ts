@@ -246,7 +246,6 @@ async function seed() {
         title: 'Get online. Get noticed.',
         tagline: "You're a step away from a real team in your corner.",
         features: [
-          { text: 'Invoicing' },
           { text: 'Social AI: content creation & scheduling' },
           { text: 'Listing AI: 50+ directory management' },
           { text: 'Messaging: unified inbox for all channels' },
@@ -264,7 +263,6 @@ async function seed() {
         tagline: "You're a step away from a real team in your corner.",
         features: [
           { text: 'Everything in Foundations' },
-          { text: 'Timesheets & Docketing' },
           { text: 'Reviews AI: automated generation & responses' },
           { text: 'Review Collateral Kit: QR cards, badges, templates' },
         ],
@@ -280,7 +278,6 @@ async function seed() {
         tagline: "You're a step away from a real team in your corner.",
         features: [
           { text: 'Everything in Growth' },
-          { text: 'Scheduling + Rostering' },
           { text: 'Webchat AI (Robin): 24/7 lead capture' },
           { text: 'Campaign Templates: SMS & email automation' },
         ],
@@ -317,7 +314,7 @@ async function seed() {
             heading: 'Your business deserves to grow.',
             handnote: 'Grow local. Grow together.',
             subheading:
-              "We make that happen — with one platform to run the day-to-day and grow what's next: work management, AI-powered marketing, and a community of local owners in your corner. And every subscription helps create local jobs.",
+              "We make that happen — with one place to grow what's next: AI-powered marketing, expert advice, and a community of local owners in your corner. And every subscription helps create local jobs.",
             ctaLabel: 'View Packages',
             ctaHref: '#packages',
             secondaryCtaLabel: 'Learn More',
@@ -455,7 +452,7 @@ async function seed() {
             subheading: 'With people.',
             paragraphs: [
               { text: "We're a grassroots social enterprise. We started by helping people navigate complex systems that weren't built for them. Now, we bring that same unwavering support to local business owners." },
-              { text: "Big agencies overlook small, diverse businesses. We don't. We bring together everything you need to run and grow — work management, AI-powered marketing, and accessible community support — so you grow with a team that gets it." },
+              { text: "Big agencies overlook small, diverse businesses. We don't. We bring together everything you need to grow — AI-powered marketing, expert advice, and accessible community support — so you grow with a team that gets it." },
             ],
             pullQuote:
               "When you choose Growth Hub, you're not just growing your business. You're partnering with an ecosystem that turns barriers into bridges, creating real jobs in the neighbourhoods we share.",
