@@ -1330,6 +1330,7 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .ev-tag { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
 .tag-summit { background: var(--lime); color: var(--teal); }
 .tag-workshop { background: rgba(13,63,72,0.08); color: var(--teal); }
+.tag-webinar { background: rgba(13,63,72,0.08); color: var(--teal); box-shadow: inset 0 0 0 1px rgba(13,63,72,0.25); }
 .tag-mixer { background: var(--lavender); color: var(--plum); }
 .tag-clinic { background: var(--eggshell-warm); color: var(--teal); }
 .tag-community { background: rgba(95,48,75,0.1); color: var(--plum); }

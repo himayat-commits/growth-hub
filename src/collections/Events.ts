@@ -107,6 +107,14 @@ export const Events: CollectionConfig = {
       admin: { description: 'External registration URL (e.g. Eventbrite, Zoom).' },
     },
     {
+      name: 'meetingUrl',
+      type: 'text',
+      admin: {
+        description:
+          "Zoom/Meet link. Shown to signed-in members who have RSVP'd, never on the public page; not emitted in the .ics",
+      },
+    },
+    {
       name: 'recording',
       type: 'upload',
       relationTo: 'media',

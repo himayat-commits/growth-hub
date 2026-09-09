@@ -113,6 +113,13 @@
       "when": 1788786047110,
       "tag": "0015_shop_orders_inventory",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1788930000000,
+      "tag": "0016_event_rsvps_email",
+      "breakpoints": true
     }
   ]
 }

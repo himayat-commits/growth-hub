@@ -1,39 +1,18 @@
 import type { Event as PayloadEvent } from '@/payload-types';
+import { parseCanberraRange } from '@/lib/events-time';
 import { JsonLd } from './JsonLd';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
 
-// Parse the Payload `time` free-text field into a start ISO + optional end ISO,
-// anchored to the event's calendar date. Returns null when the format isn't
-// recognised — Schema.org Event allows startDate alone, so we degrade gracefully.
+// Combine the Payload `date` + free-text `time` into ISO start/end instants,
+// interpreting the time as Australia/Canberra wall-clock (src/lib/events-time.ts).
+// Returns null when the date is invalid — Schema.org Event allows startDate
+// alone, so we degrade gracefully. All-day events emit the date only.
 function buildStartEnd(dateIso: string, timeStr: string | null | undefined): { start: string; end?: string } | null {
-  if (!dateIso) return null;
-  const day = new Date(dateIso);
-  if (Number.isNaN(day.getTime())) return null;
-  if (!timeStr) return { start: day.toISOString() };
-
-  // Accept formats like "12:30 – 1:30 pm", "10:00 – 11:30 am", "6 – 8 pm".
-  const m = timeStr
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*[–\-]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
-  if (!m) return { start: day.toISOString() };
-
-  const [, sH, sM, sMer, eH, eM, eMer] = m;
-  const mer = (eMer ?? sMer ?? 'pm').toLowerCase();
-  const sMerFinal = (sMer ?? mer).toLowerCase();
-  const to24 = (h: number, ampm: string) => {
-    if (ampm === 'pm' && h < 12) return h + 12;
-    if (ampm === 'am' && h === 12) return 0;
-    return h;
-  };
-  const start = new Date(day);
-  start.setHours(to24(Number(sH), sMerFinal), Number(sM ?? '0'), 0, 0);
-  const end = new Date(day);
-  end.setHours(to24(Number(eH), mer), Number(eM ?? '0'), 0, 0);
-  // If end resolves before start (e.g. "11 – 1 pm"), assume same-day cross-over.
-  if (end.getTime() <= start.getTime()) end.setHours(end.getHours() + 12);
-  return { start: start.toISOString(), end: end.toISOString() };
+  const range = parseCanberraRange(dateIso, timeStr);
+  if (!range) return null;
+  if (range.allDay || !range.end) return { start: range.dateKey };
+  return { start: range.start.toISOString(), end: range.end.toISOString() };
 }
 
 /** True when the event's calendar day is more than a day behind us. Kept

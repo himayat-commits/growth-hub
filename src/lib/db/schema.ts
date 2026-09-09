@@ -346,6 +346,14 @@ export const eventRsvps = pgTable(
     utmCampaign: varchar('utm_campaign', { length: 80 }),
     utmContent: varchar('utm_content', { length: 80 }),
     ref: varchar('ref', { length: 64 }),
+    // WorkOS email captured at RSVP time so the roster / reminders don't
+    // depend on a `subscriptions` row (Free members have none). Nullable:
+    // rows created before migration 0016 fall back to subscriptions.email.
+    email: text('email'),
+    // Set by /api/cron/event-reminders once a reminder has been sent for this
+    // RSVP (one reminder per RSVP: the day before when possible, else the
+    // morning of). Null = not yet reminded.
+    remindedAt: timestamp('reminded_at', { withTimezone: true }),
   },
   (t) => ({
     // Compound primary key enforces "one RSVP per user per event" at the DB

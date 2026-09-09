@@ -41,7 +41,7 @@ const TAG_CLASSES: Record<EventCategory, string> = {
   Mixer: 'tag-mixer',
   Clinic: 'tag-clinic',
   Community: 'tag-community',
-  Webinar: 'tag-workshop',
+  Webinar: 'tag-webinar',
 };
 
 function formatDateLong(iso: string): string {
