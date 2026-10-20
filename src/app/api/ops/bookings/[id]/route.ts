@@ -45,7 +45,7 @@ import { syncNote } from '@/lib/hubspot/crm';
 
 export const runtime = 'nodejs';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.thegrowthhub.com.au';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://my.thegrowthhub.com.au';
 
 const BodySchema = z
   .object({

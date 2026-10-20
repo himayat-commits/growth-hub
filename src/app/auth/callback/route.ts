@@ -129,7 +129,7 @@ export const GET = handleAuth({
                     <li style="margin:0 0 6px;">Book your free 30-minute Growth Call when you're ready.</li>
                     <li style="margin:0 0 6px;">Have a poke around the resource library.</li>
                   </ol>
-                  <a href="https://app.thegrowthhub.com.au/dashboard"
+                  <a href="https://my.thegrowthhub.com.au/dashboard"
                      style="display:inline-block;background:#0D3F48;color:#fff;text-decoration:none;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:600;">
                     Open your dashboard →
                   </a>

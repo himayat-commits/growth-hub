@@ -21,7 +21,7 @@ import { buildEventIcs } from '@/lib/events-ics';
 import { formatCanberraDateLong, formatCanberraTimeLabel } from '@/lib/events-time';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.thegrowthhub.com.au';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://my.thegrowthhub.com.au';
 
 /** Only http(s) links are ever rendered as a join link. */
 function safeUrl(raw: string | null | undefined): string | null {

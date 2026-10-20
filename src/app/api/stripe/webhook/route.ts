@@ -195,7 +195,7 @@ async function sendPaymentFailedEmail(invoice: Stripe.Invoice) {
 
   // The Plan page carries the payment-failed banner + Manage billing button;
   // /dashboard doesn't. Default to the member app host, not himayat.com.au.
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.thegrowthhub.com.au';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://my.thegrowthhub.com.au';
   const portalLink = `${appUrl}/plan`;
 
   const result = await sendEmail({

@@ -1,7 +1,7 @@
 /* Tailwind entry for the authenticated (app) surface.
  *
  * The app shell previously imported ONLY dashboard.css — Tailwind was never
- * loaded on app.thegrowthhub.com.au, so every utility class in the wizard,
+ * loaded on my.thegrowthhub.com.au, so every utility class in the wizard,
  * billing dialogs and portal components silently rendered unstyled. This
  * file (imported by src/app/(app)/layout.tsx BEFORE dashboard.css, so gh-*
  * rules keep cascade priority) gives the app surface the same Tailwind layer

@@ -94,7 +94,7 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
           to: memberEmail,
           replyTo: (strategist as { email?: string | null } | undefined)?.email ?? undefined,
           subject: `New message from ${authorName} — Growth Hub`,
-          text: `Hi ${memberName},\n\n${authorName} sent you a message in Growth Hub:\n\n${text}\n\nReply in Growth Hub: https://app.thegrowthhub.com.au/messages`,
+          text: `Hi ${memberName},\n\n${authorName} sent you a message in Growth Hub:\n\n${text}\n\nReply in Growth Hub: https://my.thegrowthhub.com.au/messages`,
           html: `
             <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6;max-width:600px;color:#1a2e2e;">
               <h2 style="font-family:Georgia,serif;color:#0D3F48;margin:0 0 12px;">Hi ${escapeHtml(memberName)},</h2>
@@ -102,13 +102,13 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
               <div style="background:#f5f3ef;border-left:3px solid #0D3F48;padding:16px 20px;border-radius:0 8px 8px 0;margin:0 0 20px;white-space:pre-wrap;font-size:15px;">
                 ${escapeHtml(text)}
               </div>
-              <a href="https://app.thegrowthhub.com.au/messages"
+              <a href="https://my.thegrowthhub.com.au/messages"
                  style="display:inline-block;background:#0D3F48;color:#fff;text-decoration:none;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:600;">
                 Reply in Growth Hub →
               </a>
               <p style="margin:24px 0 0;font-size:12px;color:#999;">
                 You received this because you're a Growth Hub member.
-                <a href="https://app.thegrowthhub.com.au/profile" style="color:#999;">Manage notification settings</a>
+                <a href="https://my.thegrowthhub.com.au/profile" style="color:#999;">Manage notification settings</a>
               </p>
             </div>
           `,

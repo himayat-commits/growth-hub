@@ -71,7 +71,7 @@ export function renderOpsHandoffEmail(args: {
       <p style="margin:0 0 4px;color:#4A6A70;">Admin: ${escapeHtml(state.adminUser.email)}</p>
       <p style="margin:0 0 18px;color:#4A6A70;">Attempt ${summary.attempts}${summary.escalated ? " · ESCALATED — ops owns the remaining retries" : ""}</p>
       <h3 style="font-family:Georgia,serif;color:#0D3F48;margin:0 0 8px;">Manual steps to finish</h3>
-      <p style="margin:0 0 8px;color:#4A6A70;">Tracked in the ops console at <a href="https://app.thegrowthhub.com.au/ops/provisioning/${encodeURIComponent(state.onboardingId)}" style="color:#0D3F48;">/ops/provisioning</a> — tick them off there.</p>
+      <p style="margin:0 0 8px;color:#4A6A70;">Tracked in the ops console at <a href="https://my.thegrowthhub.com.au/ops/provisioning/${encodeURIComponent(state.onboardingId)}" style="color:#0D3F48;">/ops/provisioning</a> — tick them off there.</p>
       <ul style="margin:0 0 18px;padding-left:18px;color:#0D3F48;">
         ${tasks.map((t) => `<li style="margin:0 0 6px;">${escapeHtml(t.label)}</li>`).join("")}
       </ul>
