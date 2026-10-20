@@ -302,7 +302,7 @@ export const GH_CONTACT_PROPERTIES: PropertyDef[] = [
     label: 'GH member id',
     type: 'string',
     fieldType: 'text',
-    description: 'WorkOS user id — open https://app.thegrowthhub.com.au/ops/members/<id>.',
+    description: 'WorkOS user id — open https://my.thegrowthhub.com.au/ops/members/<id>.',
   },
 ];
 

@@ -9,7 +9,7 @@ import { REF_CODE_PATTERN } from '@/lib/referral-code';
 /**
  * Two hostname split:
  *   thegrowthhub.com.au       → marketing site (home, /pricing, /partners, auth)
- *   app.thegrowthhub.com.au   → authenticated app surface (/portal, /dashboard, /onboarding)
+ *   my.thegrowthhub.com.au   → authenticated app surface (/portal, /dashboard, /onboarding)
  *
  * Apex requests for app paths get 308'd to the subdomain. Subdomain requests
  * for non-app paths get 308'd back to the apex. Both hostnames continue to
@@ -19,8 +19,8 @@ import { REF_CODE_PATTERN } from '@/lib/referral-code';
  * preview environments behave like today.
  */
 const MARKETING_HOSTNAME = 'thegrowthhub.com.au';
-const APP_HOSTNAME = 'app.thegrowthhub.com.au';
-// All routes that should live under app.thegrowthhub.com.au. /portal and
+const APP_HOSTNAME = 'my.thegrowthhub.com.au';
+// All routes that should live under my.thegrowthhub.com.au. /portal and
 // /account are legacy URLs that 301 to /dashboard and /profile via
 // next.config.ts redirects — they're listed here so the redirect happens
 // on the right subdomain (otherwise the apex would 308 first, then the
