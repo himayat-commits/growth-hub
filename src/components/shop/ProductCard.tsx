@@ -45,7 +45,7 @@ export function ProductGrid({ products, isMember }: { products: ProductView[]; i
     return (
       <div className="shop-empty">
         <h2>Nothing on the shelves yet.</h2>
-        <p>We&apos;re stocking up. Check back soon — or <Link href="/#contact">tell us what you&apos;d wear</Link>.</p>
+        <p>We&apos;re stocking up. Check back soon — or <Link href="/about#contact">tell us what you&apos;d wear</Link>.</p>
       </div>
     );
   }

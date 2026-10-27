@@ -1,222 +1,115 @@
-import type { Metadata } from "next";
-import { getPartners, getPartnersPage, getSiteSettings } from "@/lib/cms";
-import Hero from "@/components/sections/Hero";
-import FeaturedWall from "@/components/sections/partners/FeaturedWall";
-import NetworkStatsStrip from "@/components/sections/partners/NetworkStatsStrip";
-import PartnerDirectory from "@/components/sections/partners/PartnerDirectory";
-import PartnerBenefits from "@/components/sections/partners/PartnerBenefits";
-import PartnerProof from "@/components/sections/partners/PartnerProof";
-import BecomePartnerCTA from "@/components/sections/partners/BecomePartnerCTA";
-import SummitRecruitBanner from "@/components/sections/partners/SummitRecruitBanner";
-import Contact from "@/components/sections/Contact";
-import NewsletterStrip from "@/components/NewsletterStrip";
-
-const PARTNERS_DESC =
-  "Meet the technology providers, community organisations, and funding bodies that power the Growth Hub ecosystem — and co-host Canberra's free Entrepreneurship for Everyone summit.";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { PARTNER_NETWORK } from '@/lib/partner-network';
 
 export const metadata: Metadata = {
-  title: "Strategic Partners — Growth Hub by Himayat",
-  description: PARTNERS_DESC,
-  alternates: { canonical: "/partners" },
-  openGraph: {
-    title: "Strategic Partners — Growth Hub by Himayat",
-    description: PARTNERS_DESC,
-    url: "/partners",
-    type: "website",
-    siteName: "Growth Hub by Himayat",
-    locale: "en_AU",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Strategic Partners — Growth Hub by Himayat",
-    description: PARTNERS_DESC,
-  },
+  title: 'Partners — Growth Hub by Himayat',
+  description:
+    'Growth Hub works alongside the organisations Canberra small businesses already trust. Co-host a Session, present, or refer owners our way.',
+  alternates: { canonical: '/partners' },
 };
 
-// ISR: revalidated when the 'partners' or 'partners-page' CMS tags are purged.
-export const revalidate = 3600;
+const WAYS = [
+  {
+    kicker: 'Co-host',
+    title: 'Run a Session with us',
+    body: 'Bring the expertise and your community. We bring the room, the format, the promotion and the follow-up.',
+  },
+  {
+    kicker: 'Present',
+    title: 'Teach one practical move',
+    body: 'Thirty minutes, Canberra examples, no product pitch. Then help out at the table clinic.',
+  },
+  {
+    kicker: 'Refer',
+    title: 'Send owners our way',
+    body: 'Sessions are free for everyone. Owners you refer can have a free Build Lab seat.',
+  },
+];
 
-export default async function PartnersPage() {
-  const [page, partnersResult, siteSettings] = await Promise.all([
-    getPartnersPage(),
-    getPartners(),
-    getSiteSettings(),
-  ]);
-
-  const partners = partnersResult?.docs ?? [];
-
-  // The `logo` upload relation is populated as a full media object at depth>=1
-  // (getPartners uses depth:1). Extract a usable absolute URL + alt text; null
-  // when no logo is set, so the components fall back to the abstract glyph.
-  const logoOf = (p: unknown): { url: string | null; alt: string | null } => {
-    const logo = (p as { logo?: { url?: string | null; alt?: string | null } | null }).logo;
-    return {
-      url: logo && typeof logo === "object" ? logo.url ?? null : null,
-      alt: logo && typeof logo === "object" ? logo.alt ?? null : null,
-    };
-  };
-
-  // Split partners: featured wall vs. full directory.
-  // `category` is the canonical field (post-Phase-9 schema). The
-  // shared.ts → legacyCategoryFallback() also handles older `type` values
-  // in case any unmigrated records linger.
-  const featuredPartners = partners
-    .filter((p) => p.featured)
-    .map((p) => ({
-      id: String(p.id),
-      name: p.name,
-      category: (p as { category?: string | null }).category ?? null,
-      shape: (p as { shape?: string | null }).shape ?? null,
-      logoUrl: logoOf(p).url,
-      logoAlt: logoOf(p).alt,
-    }));
-
-  const directoryPartners = partners.map((p) => ({
-    id: String(p.id),
-    slug: (p as { slug?: string | null }).slug ?? null,
-    name: p.name,
-    category: (p as { category?: string | null }).category ?? null,
-    secondaryCategories:
-      (p as { secondaryCategories?: Array<string | null> | null }).secondaryCategories ?? null,
-    isAnchor: Boolean((p as { isAnchor?: boolean | null }).isAnchor),
-    shape: (p as { shape?: string | null }).shape ?? null,
-    description: p.description ?? null,
-    region: (p as { region?: string | null }).region ?? null,
-    since: (p as { since?: string | null }).since ?? null,
-    contribution: (p as { contribution?: string | null }).contribution ?? null,
-    howWeWork: (p as { howWeWork?: string | null }).howWeWork ?? null,
-    website: p.website ?? null,
-    logoUrl: logoOf(p).url,
-    logoAlt: logoOf(p).alt,
-  }));
-
+export default function PartnersPage() {
   return (
     <main>
-      {/* Hero — dark variant (teal background) */}
-      <Hero
-        variant="dark"
-        className="p-hero"
-        eyebrow={page?.heroEyebrow ?? "Strategic Partners"}
-        heading={page?.heroHeading ?? "Better together."}
-        subheading={
-          page?.heroSubheading ??
-          "We partner with technology providers, community organisations, funding bodies, and business support services that share our commitment to local growth and real community impact."
-        }
-        ctaLabel={page?.heroCtaLabel ?? "Become a Partner"}
-        ctaHref={page?.heroCtaHref ?? "#become"}
-        secondaryCtaLabel={page?.heroSecondaryCtaLabel ?? "View Directory"}
-        secondaryCtaHref={page?.heroSecondaryCtaHref ?? "#directory"}
-        tertiaryCtaLabel={(page as { heroTertiaryCtaLabel?: string | null })?.heroTertiaryCtaLabel ?? "Refer a partner"}
-        tertiaryCtaHref={
-          (page as { heroTertiaryCtaHref?: string | null })?.heroTertiaryCtaHref ??
-          `mailto:${siteSettings?.supportEmail ?? "hello@thegrowthhub.com.au"}?subject=Partner%20referral`
-        }
-        tertiaryCtaHint={(page as { heroTertiaryCtaHint?: string | null })?.heroTertiaryCtaHint ?? "— know someone we should meet?"}
-        tertiaryCtaAriaLabel="Refer a partner — opens an email"
-        chips={
-          page?.heroChips && page.heroChips.length > 0
-            ? (page.heroChips as Array<{ text: string }>)
-            : [
-                { text: "Canberra-based ecosystem" },
-                { text: "Social Traders Verified" },
-                { text: "Community-first" },
-              ]
-        }
-      />
+      <section className="site-hero">
+        <div className="wrap site-split" style={{ alignItems: 'end' }}>
+          <div>
+            <span className="section-label">Partners</span>
+            <h1 className="hero-h1">We don&apos;t grow alone.</h1>
+            <p className="site-lede" style={{ marginBottom: 0 }}>
+              Growth Hub works alongside the organisations Canberra owners already
+              trust: advisers, employment and settlement services, industry bodies and
+              local specialists.
+            </p>
+          </div>
+          <div className="site-ctas" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+            <Link className="btn btn-primary" href="/about#contact" style={{ justifyContent: 'center' }}>
+              Talk to us about partnering
+            </Link>
+            <Link className="btn btn-secondary" href="/events" style={{ justifyContent: 'center' }}>
+              See the Sessions calendar
+            </Link>
+          </div>
+        </div>
+      </section>
 
-      {/* Summit co-host recruitment — activates the contributor funnel */}
-      <SummitRecruitBanner />
+      <section className="site-sec site-sec--white" id="work-with-us">
+        <div className="wrap">
+          <div className="site-head">
+            <h2 className="section-h2">Ways to work with us</h2>
+          </div>
+          <div className="site-grid">
+            {WAYS.map((w) => (
+              <div className="site-card site-card--egg" key={w.title}>
+                <span className="site-kicker">{w.kicker}</span>
+                <h3>{w.title}</h3>
+                <p>{w.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* Featured Partners Wall */}
-      <FeaturedWall
-        heading={page?.featuredWallHeading ?? "The network behind the network."}
-        lead={page?.featuredWallLead ?? null}
-        partners={featuredPartners.length > 0 ? featuredPartners : null}
-      />
+      <section className="site-sec">
+        <div className="wrap">
+          <div className="site-head site-head--row">
+            <div>
+              <span className="section-label">Who we&apos;ve worked with</span>
+              <h2 className="section-h2">The people who showed up</h2>
+            </div>
+            <p className="site-fine" style={{ maxWidth: '46ch' }}>
+              Organisations that took part in Entrepreneurship for Everyone in July
+              2026, or work with us now.
+            </p>
+          </div>
+          {PARTNER_NETWORK.map((g) => (
+            <div className="network-group" key={g.heading}>
+              <h3>{g.heading}</h3>
+              <div className="network-orgs">
+                {g.orgs.map((o) => (
+                  <span className="network-org" key={o.name}>
+                    <b>{o.name}</b>
+                    <span>{o.role}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      {/* By-the-numbers strip — credibility signal between wall and directory */}
-      <NetworkStatsStrip partners={directoryPartners} />
-
-      {/* Partner Directory (client component — filterable) */}
-      <PartnerDirectory
-        heading={page?.directoryHeading ?? "Meet our partners."}
-        lead={page?.directoryLead ?? null}
-        partners={directoryPartners.length > 0 ? directoryPartners : null}
-        recruitmentCard={{
-          heading: (page as { recruitHeading?: string | null })?.recruitHeading ?? null,
-          body: (page as { recruitBody?: string | null })?.recruitBody ?? null,
-          needs: (page as { recruitNeeds?: Array<{ text: string }> | null })?.recruitNeeds?.map((n) => n.text) ?? null,
-          ctaLabel: (page as { recruitCtaLabel?: string | null })?.recruitCtaLabel ?? null,
-          ctaHref: (page as { recruitCtaHref?: string | null })?.recruitCtaHref ?? null,
-        }}
-        quotes={
-          page?.proofQuotes && page.proofQuotes.length > 0
-            ? (page.proofQuotes as Array<{ text: string; attribution: string }>)
-            : null
-        }
-      />
-
-      {/* Benefits (plum background) */}
-      <PartnerBenefits
-        heading={page?.benefitsHeading ?? null}
-        lead={page?.benefitsLead ?? null}
-        benefits={
-          page?.benefits && page.benefits.length > 0
-            ? (page.benefits as Array<{ tag: string; heading: string; body: string; handnote?: string | null }>)
-            : null
-        }
-      />
-
-      {/* Proof / Stats (teal background) */}
-      <PartnerProof
-        heading={page?.proofHeading ?? null}
-        lead={page?.proofLead ?? null}
-        stats={
-          page?.proofStats && page.proofStats.length > 0
-            ? (page.proofStats as Array<{ tag?: string; num: string; unit?: string; heading: string; body?: string }>)
-            : null
-        }
-        quotes={
-          page?.proofQuotes && page.proofQuotes.length > 0
-            ? (page.proofQuotes as Array<{ text: string; attribution: string }>)
-            : null
-        }
-      />
-
-      {/* Become a Partner CTA */}
-      <BecomePartnerCTA
-        heading={page?.becomeHeading ?? null}
-        body={page?.becomeBody ?? null}
-        bullets={
-          page?.becomeBullets && page.becomeBullets.length > 0
-            ? (page.becomeBullets as Array<{ text: string }>)
-            : null
-        }
-        ctaLabel={page?.becomeCtaLabel ?? null}
-        ctaHref={page?.becomeCtaHref ?? null}
-        secondaryCtaLabel={page?.becomeSecondaryCtaLabel ?? null}
-        secondaryCtaHref={page?.becomeSecondaryCtaHref ?? null}
-        partnershipLead={(page as { partnershipLead?: string | null })?.partnershipLead ?? null}
-        partnerEmail={(page as { partnerEmail?: string | null })?.partnerEmail ?? null}
-        deckUrl={(page as { deckUrl?: string | null })?.deckUrl ?? null}
-        requirementsUrl={(page as { requirementsUrl?: string | null })?.requirementsUrl ?? null}
-        email={siteSettings?.supportEmail ?? null}
-        phone={siteSettings?.phone ?? null}
-        address={siteSettings?.address ?? null}
-      />
-
-      <NewsletterStrip
-        source="partners"
-        heading="Stay in the loop."
-        sub="Quarterly partnership updates — new co-host opportunities, joint events, partner-only roundtables."
-      />
-
-      {/* Contact form (hardcoded — same as homepage) */}
-      <Contact
-        supportEmail={siteSettings?.supportEmail ?? null}
-        phone={siteSettings?.phone ?? null}
-        address={siteSettings?.address ?? null}
-      />
+      <section className="site-sec site-sec--tight">
+        <div className="wrap">
+          <div className="site-panel site-panel--plum">
+            <div>
+              <h2 className="section-h2">Know someone we should meet?</h2>
+              <span className="site-script handscript">introductions always welcome</span>
+            </div>
+            <div>
+              <Link className="btn btn-lime" href="/about#contact">Write us a line</Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

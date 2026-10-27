@@ -51,7 +51,7 @@ export const SUMMIT: SummitInfo = {
   venueFull: 'Ann Harding Conference Centre · 24 University Drive South, Bruce ACT 2617',
   cost: 'Free · all welcome',
   eventbriteUrl: 'https://www.eventbrite.com.au/e/entrepreneurship-for-everyone-tickets-1990920554974',
-  applyPath: '/expo/apply',
+  applyPath: '/partners#work-with-us',
 };
 
 /** True once the Eventbrite attendee link has been set. Drives whether the

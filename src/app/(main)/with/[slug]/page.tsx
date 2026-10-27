@@ -9,8 +9,7 @@
 // Sections, in order:
 //   1. Hero lock-up (Growth Hub × Partner with partner mark)
 //   2. Upcoming co-hosted events (host=partner or in partners[])
-//   3. Joint case studies (case_study.client === partner.name)
-//   4. Co-branded CTA (newsletter + contact)
+//   3. Co-branded CTA (newsletter + contact)
 //
 // Pulls from the existing CMS helpers so the partner edits once in Payload
 // and both this surface and /partners/[slug] update together.
@@ -22,7 +21,6 @@ import {
   getPartnerBySlug,
   getPartnerSlugs,
   getEventsForPartner,
-  getCaseStudiesForPartner,
 } from '@/lib/cms';
 import { toPublicEvents } from '@/lib/events-data';
 import type { Event as PayloadEvent } from '@/payload-types';
@@ -78,10 +76,7 @@ export default async function PartnerMicrositePage({ params }: { params: Params 
 
   const partnerName = String(partner.name ?? '');
 
-  const [eventDocs, caseStudyDocs] = await Promise.all([
-    getEventsForPartner(partner.id, 6),
-    getCaseStudiesForPartner(partner.id, partnerName),
-  ]);
+  const eventDocs = await getEventsForPartner(partner.id, 6);
 
   const events = toPublicEvents(eventDocs as PayloadEvent[]);
   // Same category fallback chain as /partners/[slug] keeps the mark/glyph
@@ -100,7 +95,7 @@ export default async function PartnerMicrositePage({ params }: { params: Params 
   const description = (partner as { description?: string | null }).description ?? null;
   const contribution = (partner as { contribution?: string | null }).contribution ?? null;
 
-  // UTM-tag every outbound to /events and /case-studies so we can answer
+  // UTM-tag every outbound to /events so we can answer
   // "how many RSVPs came from a partner micro-site share?" on PostHog.
   const tag = `?utm_source=with-${slug}&utm_medium=partner-microsite`;
 
@@ -219,39 +214,6 @@ export default async function PartnerMicrositePage({ params }: { params: Params 
         </section>
       )}
 
-      {/* JOINT CASE STUDIES */}
-      {caseStudyDocs.length > 0 && (
-        <section className="case-study-related" style={{ paddingTop: 'clamp(72px, 9vw, 120px)' }}>
-          <div className="wrap">
-            <span className="section-label">What we&apos;ve built together</span>
-            <h2 className="section-h2" style={{ marginTop: 8 }}>
-              Joint case studies.
-            </h2>
-            <div className="case-study-grid" style={{ marginTop: 32 }}>
-              {caseStudyDocs.map((cs) => {
-                const csSlug = String((cs as { slug?: string }).slug ?? '');
-                const csTitle = String(cs.title);
-                const csOutcome = (cs as { outcome?: string }).outcome;
-                return (
-                  <Link
-                    key={String(cs.id)}
-                    href={`/case-studies/${csSlug}${tag}`}
-                    className="case-study-card"
-                  >
-                    <span className="section-label" style={{ marginBottom: 8 }}>
-                      {partnerName}
-                    </span>
-                    <h3>{csTitle}</h3>
-                    {csOutcome && <p>{csOutcome}</p>}
-                    <span className="case-study-card-link">Read the story →</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
       <section aria-label="Partner services disclaimer">
         <div className="wrap" style={{ maxWidth: 780, padding: '8px var(--gutter) 40px' }}>
           <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: 'var(--fg-subtle, #7a9098)' }}>
@@ -270,7 +232,7 @@ export default async function PartnerMicrositePage({ params }: { params: Params 
       <NewsletterStrip
         source={`with-${slug}`}
         heading={`Follow what ${partnerName} and Growth Hub are building.`}
-        sub="Joint workshops, partner-only events, and case-study updates. One email a month."
+        sub="Joint workshops and partner events. One email a month."
       />
     </main>
   );

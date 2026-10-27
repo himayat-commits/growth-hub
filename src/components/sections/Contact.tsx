@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { track } from "@/lib/analytics";
+import { CONTACT } from "@/lib/site";
 
 const schema = z.object({
   name: z.string().min(1, "Your name is required"),
@@ -16,12 +17,10 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 const INTERESTS = [
-  "Foundations — $299/mo",
-  "Growth — $499/mo",
-  "Accelerate — $799/mo",
-  "Done-for-you support",
-  "Community & workshops",
-  "Partnership / funding",
+  "A Session or Build Lab",
+  "Growth Hub Sites",
+  "Launch — build it with us",
+  "Partnering with us",
   "Not sure yet",
 ];
 
@@ -247,14 +246,14 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
             {status === "error" && (
               <p style={{ color: "#A8423E", fontSize: 14, marginTop: 8 }}>
                 Something went wrong. Please email us directly at{" "}
-                <a href="mailto:hello@himayat.com.au" style={{ textDecoration: "underline" }}>
-                  hello@himayat.com.au
+                <a href={`mailto:${CONTACT.email}`} style={{ textDecoration: "underline" }}>
+                  {CONTACT.email}
                 </a>
               </p>
             )}
 
             <div className="cf2-fine">
-              <span>↳ arrives at <b>hello@himayat.com.au</b></span>
+              <span>↳ read by a person on the Growth Hub team</span>
               <span className="cf2-sep">·</span>
               <span>usually a reply within 48 hours</span>
               <span className="cf2-sep">·</span>
@@ -278,8 +277,8 @@ function ContactStrip({
   phone?: string | null;
   address?: string | null;
 }) {
-  const resolvedEmail = email ?? "hello@himayat.com.au";
-  const resolvedPhone = phone ?? "02 5119 0005";
+  const resolvedEmail = email ?? CONTACT.email;
+  const resolvedPhone = phone ?? CONTACT.phone;
   const resolvedPhoneHref = resolvedPhone.replace(/\s/g, "");
   const resolvedAddress = address ?? "Level 4, 1 Moore St · Canberra ACT 2601";
 

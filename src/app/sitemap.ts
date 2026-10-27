@@ -1,11 +1,5 @@
 import type { MetadataRoute } from 'next';
-import {
-  getPublicEvents,
-  getPartners,
-  getCaseStudies,
-  getPosts,
-  getProductSlugs,
-} from '@/lib/cms';
+import { getPublicEvents, getPartners, getProductSlugs } from '@/lib/cms';
 
 // Canonical production host. The Vercel deployment URL and any preview
 // hosts fall back to this so search engines don't index split content.
@@ -39,29 +33,22 @@ function entry(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [events, partners, caseStudies, posts, productSlugs] = await Promise.all([
+  const [events, partners, productSlugs] = await Promise.all([
     getPublicEvents(100).catch(() => [] as Doc[]),
     getPartners().catch(() => null),
-    getCaseStudies().catch(() => null),
-    getPosts(100, 1).catch(() => null),
     getProductSlugs().catch(() => [] as Array<{ slug: string; updatedAt: string }>),
   ]);
 
   const staticPages: MetadataRoute.Sitemap = [
     entry('/', null, 'weekly', 1),
     entry('/events', null, 'daily', 0.9),
-    entry('/events/entrepreneurship-for-everyone', null, 'weekly', 0.8),
-    entry('/expo/apply', null, 'monthly', 0.7),
-    entry('/partners', null, 'weekly', 0.8),
-    entry('/case-studies', null, 'weekly', 0.7),
-    entry('/insights', null, 'weekly', 0.7),
-    entry('/pricing', null, 'monthly', 0.8),
-    entry('/shop', null, 'weekly', 0.8),
+    entry('/events/entrepreneurship-for-everyone', null, 'monthly', 0.6),
+    entry('/sites', null, 'monthly', 0.9),
+    entry('/partners', null, 'monthly', 0.7),
+    entry('/about', null, 'monthly', 0.7),
+    entry('/shop', null, 'weekly', 0.5),
     entry('/privacy', null, 'yearly', 0.3),
     entry('/community-guidelines', null, 'yearly', 0.4),
-    entry('/signup/foundations', null, 'monthly', 0.8),
-    entry('/signup/growth', null, 'monthly', 0.8),
-    entry('/signup/accelerate', null, 'monthly', 0.8),
   ];
 
   const eventEntries: MetadataRoute.Sitemap = (events as Doc[])
@@ -83,16 +70,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry(`/with/${p.slug}`, p.updatedAt, 'monthly', 0.6),
   ]);
 
-  const caseStudyDocs = (caseStudies?.docs ?? []) as Doc[];
-  const caseStudyEntries: MetadataRoute.Sitemap = caseStudyDocs
-    .filter((c): c is Doc & { slug: string } => Boolean(c.slug))
-    .map((c) => entry(`/case-studies/${c.slug}`, c.updatedAt, 'monthly', 0.6));
-
-  const postDocs = (posts?.docs ?? []) as Doc[];
-  const postEntries: MetadataRoute.Sitemap = postDocs
-    .filter((p): p is Doc & { slug: string } => Boolean(p.slug))
-    .map((p) => entry(`/insights/${p.slug}`, p.updatedAt, 'monthly', 0.5));
-
   const productEntries: MetadataRoute.Sitemap = productSlugs.map((p) =>
     entry(`/shop/${p.slug}`, p.updatedAt, 'weekly', 0.7),
   );
@@ -101,8 +78,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticPages,
     ...eventEntries,
     ...partnerEntries,
-    ...caseStudyEntries,
-    ...postEntries,
     ...productEntries,
   ];
 }

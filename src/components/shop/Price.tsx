@@ -4,7 +4,6 @@
 //   Non-member (discount exists): A$35.00  "Members pay A$31.50"
 //   No discount:                  A$35.00
 
-import Link from 'next/link';
 import { formatAud } from '@/lib/shop/pricing';
 
 export interface PriceProps {
@@ -39,8 +38,7 @@ export function Price({ priceCents, memberPriceCents, isMember, from = false, nu
       <strong className="shop-price-now">{formatAud(priceCents)}</strong>
       {nudge && hasDiscount && !isMember && (
         <span className="shop-price-nudge">
-          Members pay {formatAud(memberPriceCents)}. <Link href="/sign-up?redirect_url=%2Fshop">Join free</Link> or{' '}
-          <Link href="/pricing">pick a plan</Link>.
+          Members pay {formatAud(memberPriceCents)}.
         </span>
       )}
     </span>

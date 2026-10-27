@@ -5,7 +5,7 @@ import { ImageResponse } from 'next/og';
 export const runtime = 'nodejs';
 export const contentType = 'image/png';
 export const size = { width: 1200, height: 630 };
-export const alt = 'Growth Hub Events — Where the work happens';
+export const alt = 'Growth Hub Sessions — Learn it in a room. Use it the same week.';
 
 export default function EventsHubOgImage() {
   return new ImageResponse(
@@ -36,7 +36,7 @@ export default function EventsHubOgImage() {
               letterSpacing: '0.04em',
             }}
           >
-            Workshops · Mixers · Summits · Clinics
+            Free Sessions · Build Labs
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 26 }}>
             <span style={{ color: '#F3F0E7' }}>Growth Hub</span>
@@ -46,16 +46,16 @@ export default function EventsHubOgImage() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <span style={{ fontSize: 110, lineHeight: 1, letterSpacing: '-0.03em' }}>
-            Where the work
+            Learn it in a room.
           </span>
           <span style={{ fontSize: 110, lineHeight: 1, letterSpacing: '-0.03em', color: '#E3F29C' }}>
-            happens.
+            Use it this week.
           </span>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: 22 }}>
           <span style={{ color: 'rgba(243,240,231,0.7)' }}>
-            Practical · community-first · mostly free · Canberra
+            One practical topic a month · Canberra
           </span>
           <span style={{ color: '#E3F29C', fontStyle: 'italic' }}>
             thegrowthhub.com.au/events

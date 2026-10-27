@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { getEventBySlug, getGenericEventSlugs, getUpcomingEvents } from '@/lib/cms';
+import { toPublicEvent } from '@/lib/events-data';
 import {
-  getEventBySlug,
-  getGenericEventSlugs,
-  getPublicEvents,
-  getSiteSettings,
-} from '@/lib/cms';
-import { toPublicEvent, toPublicEvents } from '@/lib/events-data';
+  buildCalendar,
+  LAB_STEPS,
+  RUN_SHEET,
+  SESSION_FORMAT,
+  seasonItemFor,
+} from '@/lib/sessions';
 import type { Event as PayloadEvent } from '@/payload-types';
-import Contact from '@/components/sections/Contact';
 import NewsletterStrip from '@/components/NewsletterStrip';
 import RsvpMailtoLink from './RsvpMailtoLink';
 import AddToCalendarLink from './AddToCalendarLink';
@@ -18,10 +19,8 @@ import { EventJsonLd } from '@/components/seo/EventJsonLd';
 import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 import { PartnerLockup } from '@/components/sections/events/PartnerLockup';
 import ShareButtons from '@/components/sections/ShareButtons';
-import {
-  MemberPreviewBanner,
-  isInMemberPreviewWindow,
-} from '@/components/sections/events/MemberPreviewBanner';
+import SessionDate from '@/components/sections/site/SessionDate';
+import ThreeDoors from '@/components/sections/site/ThreeDoors';
 
 export const revalidate = 3600;
 
@@ -70,20 +69,18 @@ export default async function GenericEventPage({ params }: { params: Params }) {
   // route never out-competes the hand-built layout.
   if (ev.bespoke) redirect(`/events/${ev.slug}`);
 
-  const [siteSettings, allDocs] = await Promise.all([
-    getSiteSettings(),
-    getPublicEvents(),
-  ]);
-  const related = toPublicEvents(allDocs as PayloadEvent[])
-    .filter((e) => e.slug !== ev.slug)
-    .slice(0, 3);
+  // Season Sessions and Build Labs get their format (tag, run sheet, three
+  // doors); anything else (a webinar, a one-off) renders as a plain event.
+  const season = seasonItemFor(doc as PayloadEvent);
+  const kind = season?.kind ?? 'other';
+  const label = season ? SESSION_FORMAT[season.kind].label : ev.tag;
+  const registerUrl = (doc as { registerUrl?: string | null }).registerUrl ?? null;
+  const seats = (doc as { seats?: string | null }).seats ?? null;
 
-  // Tier 3.3: member-preview window. When `memberPreviewUntil` is set
-  // and in the future, the public mailto CTA is hidden — authenticated
-  // members can still RSVP via the "Members register inside" flow.
-  const memberPreviewUntil =
-    (doc as { memberPreviewUntil?: string | null }).memberPreviewUntil ?? null;
-  const inPreviewWindow = isInMemberPreviewWindow(memberPreviewUntil);
+  const upcoming = await getUpcomingEvents().catch(() => []);
+  const related = buildCalendar(upcoming as PayloadEvent[])
+    .filter((r) => r.href !== `/events/${ev.slug}`)
+    .slice(0, 3);
 
   // Past events keep their page (SEO, recap) but must not invite RSVPs or
   // calendar adds for a day that has already happened.
@@ -97,85 +94,163 @@ export default async function GenericEventPage({ params }: { params: Params }) {
       <EventJsonLd ev={doc as PayloadEvent} />
       <BreadcrumbListJsonLd
         crumbs={[
-          { name: 'Events', path: '/events' },
+          { name: 'Sessions', path: '/events' },
           { name: ev.title, path: `/events/${ev.slug}` },
         ]}
       />
-      <section className="hero event-hero event-detail" id="top">
+
+      <section className="site-sec" style={{ paddingTop: 32 }}>
         <div className="wrap">
-          <Link href="/events" className="ed-back">← All events</Link>
-          <div className="hero-eyebrow">
-            <span className="dot" />
-            {ev.tag}
-            {ev.audience ? ` · ${ev.audience}` : ''}
-          </div>
-          <h1 className="hero-h1">{ev.title}</h1>
-          <p className="hero-sub">{ev.desc}</p>
+          <p className="session-crumb">
+            <Link href="/events">Sessions</Link> / {ev.title}
+          </p>
 
-          <div className="ed-meta">
-            <div className="event-keyfact"><span className="lbl">When</span><span className="val">{ev.dateLong}</span></div>
-            <div className="event-keyfact"><span className="lbl">Time</span><span className="val">{ev.time}</span></div>
-            <div className="event-keyfact"><span className="lbl">Where</span><span className="val">{ev.location}</span></div>
-            <div className="event-keyfact"><span className="lbl">Cost</span><span className="val">{ev.cost}</span></div>
-          </div>
+          <div className="session-layout" style={{ marginTop: 24 }}>
+            <div className="session-main">
+              <div>
+                <span className="cal-tags">
+                  <span className={`site-tag${kind === 'lab' ? ' site-tag--lab' : kind === 'session' ? ' site-tag--free' : ''}`}>
+                    {season ? `Growth Hub ${label}` : label} · {ev.cost}
+                  </span>
+                  {season?.area && <span>{season.area}{season.pilot ? ' · pilot' : ''}</span>}
+                </span>
+                <h1>{ev.title}</h1>
+                {ev.desc && (
+                  <p className="site-lede" style={{ margin: 0, maxWidth: '60ch' }}>{ev.desc}</p>
+                )}
+              </div>
 
-          {hasEnded ? (
-            <div className="ed-cta">
-              <span className="btn btn-tertiary" aria-disabled="true">This event has run</span>
-              <Link className="btn btn-primary" href="/events#upcoming">See what&apos;s coming up</Link>
-              <Link className="btn btn-secondary" href="/sign-in?redirect_url=%2Fmy-events">Members: recordings inside</Link>
-            </div>
-          ) : (
-            <div className="ed-cta">
-              {/* Mailto CTA hides during the member-preview window — members can
-                  still RSVP via "Members register inside" below. */}
-              {!inPreviewWindow && (
-                <RsvpMailtoLink slug={ev.slug} title={ev.title} />
+              {kind === 'session' && (
+                <div>
+                  <h2>How the ninety minutes run</h2>
+                  <div className="runsheet">
+                    {RUN_SHEET.map((s) => (
+                      <div className={`runsheet-step${s.yours ? ' is-yours' : ''}`} key={s.t}>
+                        <span className="t">{s.t}</span>
+                        <span className="h">{s.h}</span>
+                        <span className="p">{s.p}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
-              <AddToCalendarLink slug={ev.slug} title={ev.title} />
-              <Link className="btn btn-secondary" href="/sign-in?redirect_url=%2Fmy-events">Members register inside</Link>
+
+              {kind === 'lab' && (
+                <div className="site-sec--teal" style={{ borderRadius: 24, padding: 'clamp(24px, 3vw, 36px)' }}>
+                  <h2 style={{ color: 'var(--eggshell)' }}>How the morning runs</h2>
+                  <ol className="lab-steps">
+                    {LAB_STEPS.map((s) => (
+                      <li className="lab-step" key={s.h}>
+                        <span className="t">{s.t}</span>
+                        <span>
+                          <b>{s.h}</b> <span>{s.p}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              <div className="site-grid">
+                <div className="site-card">
+                  <h3>It&apos;s for you if</h3>
+                  <p>
+                    {ev.audience ||
+                      'You run a small business or work for yourself in the ACT or region, whether you are starting out, trading or ready to grow.'}
+                  </p>
+                </div>
+                <div className="site-card">
+                  <h3>Bring</h3>
+                  <p>
+                    {kind === 'lab'
+                      ? 'A laptop, your logo and a few photos if you have them, and the basics: what you sell, who to, and where.'
+                      : 'Your phone (a laptop helps but isn’t needed), a question about your own business, and a business friend if you like.'}
+                  </p>
+                </div>
+              </div>
+
+              <PartnerLockup
+                host={(doc as { host?: unknown }).host as Parameters<typeof PartnerLockup>[0]['host']}
+                partners={(doc as { partners?: unknown }).partners as Parameters<typeof PartnerLockup>[0]['partners']}
+              />
+
+              {kind === 'session' && (
+                <div>
+                  <h2>After the Session, three doors</h2>
+                  <ThreeDoors />
+                </div>
+              )}
+
+              <ShareButtons title={ev.title} path={`/events/${ev.slug}`} surface="event" />
             </div>
-          )}
 
-          {!hasEnded && inPreviewWindow && memberPreviewUntil && (
-            <MemberPreviewBanner until={memberPreviewUntil} />
-          )}
-
-          <PartnerLockup
-            host={(doc as { host?: unknown }).host as Parameters<typeof PartnerLockup>[0]['host']}
-            partners={(doc as { partners?: unknown }).partners as Parameters<typeof PartnerLockup>[0]['partners']}
-          />
-
-          <div style={{ marginTop: 28 }}>
-            <ShareButtons
-              title={ev.title}
-              path={`/events/${ev.slug}`}
-              surface="event"
-            />
+            <aside className="session-aside">
+              <div className="session-book">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+                  <span className="price">{ev.cost}</span>
+                  {seats && !hasEnded && <span className="cal-seats">{seats}</span>}
+                </div>
+                <dl>
+                  <dt>When</dt>
+                  <dd>
+                    {ev.dateLong}
+                    {ev.time && (
+                      <>
+                        <br />
+                        <span style={{ fontWeight: 400 }}>{ev.time}</span>
+                      </>
+                    )}
+                  </dd>
+                  <dt>Where</dt>
+                  <dd>{ev.location || 'Online'}</dd>
+                </dl>
+                {hasEnded ? (
+                  <>
+                    <span className="btn btn-secondary" aria-disabled="true">This event has run</span>
+                    <Link className="btn btn-primary" href="/events#whats-on">See dates</Link>
+                  </>
+                ) : (
+                  <>
+                    <RsvpMailtoLink
+                      slug={ev.slug}
+                      title={ev.title}
+                      registerUrl={registerUrl}
+                      label={registerUrl ? 'Book a seat' : undefined}
+                    />
+                    <AddToCalendarLink slug={ev.slug} title={ev.title} />
+                  </>
+                )}
+              </div>
+              <div className="session-note">
+                <b>Access and support</b>
+                Tell us when you register if you need an interpreter, Auslan or access
+                support, and we&apos;ll arrange it.
+              </div>
+            </aside>
           </div>
         </div>
       </section>
 
       {related.length > 0 && (
-        <section className="events-list" style={{ paddingTop: 'clamp(72px, 9vw, 120px)' }}>
+        <section className="site-sec site-sec--white">
           <div className="wrap">
-            <span className="section-label">Also coming up</span>
-            <h2 className="section-h2">Other events you might like.</h2>
-            <div className="evlist" style={{ marginTop: 32 }}>
+            <div className="site-head site-head--row">
+              <h2 className="section-h2">Also coming up</h2>
+              <Link className="site-link" href="/events#whats-on">Everything that&apos;s on</Link>
+            </div>
+            <div className="site-grid">
               {related.map((r) => (
-                <Link className="ev-row" key={r.slug} href={`/events/${r.slug}`}>
-                  <div className="ev-date">
-                    <span className="month">{r.monthShort}</span>
-                    <span className="day">{r.day === '?' ? <em>?</em> : r.day}</span>
-                    <span className="year">{r.year}</span>
+                <div className="site-card" key={r.key} style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+                  <SessionDate date={r.date} kind={r.kind} muted={!r.href} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+                    <span className="site-kicker">{r.label} · {r.price}</span>
+                    {r.href ? (
+                      <Link className="cal-title" href={r.href} style={{ fontSize: 19 }}>{r.title}</Link>
+                    ) : (
+                      <span className="cal-title" style={{ fontSize: 19 }}>{r.title}</span>
+                    )}
                   </div>
-                  <div className="ev-main">
-                    <span className={'ev-tag ' + r.tagClass}>{r.tag}</span>
-                    <h3>{r.title}</h3>
-                    <p className="ev-desc">{r.desc}</p>
-                  </div>
-                  <span className="ev-cta">View event →</span>
-                </Link>
+                </div>
               ))}
             </div>
           </div>
@@ -184,14 +259,8 @@ export default async function GenericEventPage({ params }: { params: Params }) {
 
       <NewsletterStrip
         source={`event-${ev.slug}`}
-        heading={`Can't make ${ev.title}?`}
-        sub="Get the events digest — one email a month with the next workshops, mixers and clinics. No drip sequence."
-      />
-
-      <Contact
-        supportEmail={siteSettings?.supportEmail ?? null}
-        phone={siteSettings?.phone ?? null}
-        address={siteSettings?.address ?? null}
+        heading={hasEnded ? 'Get new Session dates by email.' : `Can't make ${ev.title}?`}
+        sub="One email a month with what's on next."
       />
     </main>
   );

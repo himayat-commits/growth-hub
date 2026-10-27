@@ -36,7 +36,7 @@ export default function PartnersHubOgImage() {
               letterSpacing: '0.04em',
             }}
           >
-            Strategic Partners
+            Partners
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 26 }}>
             <span style={{ color: '#F3F0E7' }}>Growth Hub</span>
@@ -55,7 +55,7 @@ export default function PartnersHubOgImage() {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: 22 }}>
           <span style={{ color: 'rgba(243,240,231,0.7)' }}>
-            15 partners · 6 categories · Canberra-grounded
+            Co-host · present · refer · Canberra
           </span>
           <span style={{ color: '#E3F29C', fontStyle: 'italic' }}>
             thegrowthhub.com.au/partners
