@@ -1,5 +1,6 @@
 import type { Event as PayloadEvent } from '@/payload-types';
 import { parseCanberraRange } from '@/lib/events-time';
+import { eventFacts, SESSION_FORMAT } from '@/lib/sessions';
 import { JsonLd } from './JsonLd';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
@@ -13,6 +14,15 @@ function buildStartEnd(dateIso: string, timeStr: string | null | undefined): { s
   if (!range) return null;
   if (range.allDay || !range.end) return { start: range.dateKey };
   return { start: range.start.toISOString(), end: range.end.toISOString() };
+}
+
+/** schema.org wants a number: "Free" → "0", "A$179" → "179". Falls back to
+ *  `fallback` (the season price) when the text has no amount; null if neither. */
+function offerPrice(cost: string, fallback?: string): string | null {
+  if (/free/i.test(cost)) return '0';
+  const amount = cost.replace(/,/g, '').match(/\d+(?:\.\d{1,2})?/)?.[0];
+  if (amount) return amount;
+  return fallback ? offerPrice(fallback) : null;
 }
 
 /** True when the event's calendar day is more than a day behind us. Kept
@@ -32,11 +42,12 @@ export function EventJsonLd({ ev }: { ev: PayloadEvent }) {
   const time = (ev as { time?: string | null }).time ?? null;
   const startEnd = buildStartEnd(dateIso, time);
 
-  const isOnline = ((ev as { type?: string }).type ?? 'webinar') === 'webinar';
-  const location = String(ev.location ?? '').trim();
+  // Sessions and Build Labs are in person whatever the CMS `type` says, at the
+  // venue unless `location` is set.
+  const { season, price: cost, location } = eventFacts(ev);
+  const isOnline = !season && ((ev as { type?: string }).type ?? 'webinar') === 'webinar';
   const url = `${SITE_URL}/events/${slug}`;
-  const cost = String((ev as { cost?: string | null }).cost ?? 'Free').trim();
-  const looksFree = /free/i.test(cost);
+  const price = offerPrice(cost, season && SESSION_FORMAT[season.kind].price);
 
   const data: Record<string, unknown> = {
     '@context': 'https://schema.org',
@@ -84,11 +95,11 @@ export function EventJsonLd({ ev }: { ev: PayloadEvent }) {
   // Only advertise an offer for events still ahead of us; a past event with
   // an "InStock" free ticket is a rich-result error.
   const hasEnded = isPastDate(dateIso);
-  if (!hasEnded) {
+  if (!hasEnded && price !== null) {
     data.offers = {
       '@type': 'Offer',
       url,
-      price: looksFree ? '0' : cost,
+      price,
       priceCurrency: 'AUD',
       availability: 'https://schema.org/InStock',
       validFrom: new Date().toISOString(),

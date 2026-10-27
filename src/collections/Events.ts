@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload';
 import { revalidate } from '../lib/cms/revalidate.ts';
+import { isCanberraTimeRange } from '../lib/events-time.ts';
 
 /**
  * Events the Himayat team runs — webinars, in-person workshops, monthly
@@ -76,7 +77,13 @@ export const Events: CollectionConfig = {
     {
       name: 'time',
       type: 'text',
-      admin: { description: 'Display time, e.g. "12:30 – 1:30 pm" or "10:00 – 11:30 am".' },
+      admin: { description: 'Start and end time in Canberra, e.g. "12:00–1:30pm" or "9:30am–12:30pm".' },
+      // The .ics, JSON-LD and event page read this with parseCanberraRange;
+      // anything it can't read silently becomes an all-day event.
+      validate: (value: string | null | undefined) =>
+        !value?.trim() || isCanberraTimeRange(value)
+          ? true
+          : 'Use a start and end time like "12:00–1:30pm" or "9:30am–12:30pm" (a hyphen is fine), or leave it blank.',
     },
     {
       name: 'type',
@@ -91,7 +98,10 @@ export const Events: CollectionConfig = {
     {
       name: 'location',
       type: 'text',
-      admin: { description: 'For in-person events. Leave blank for online.' },
+      admin: {
+        description:
+          'For in-person events. Leave blank for online. Sessions and Build Labs default to the venue on the site.',
+      },
     },
     {
       name: 'seats',
@@ -104,7 +114,14 @@ export const Events: CollectionConfig = {
     {
       name: 'registerUrl',
       type: 'text',
-      admin: { description: 'External registration URL (e.g. Eventbrite, Zoom).' },
+      admin: {
+        description:
+          'Full https:// booking link (e.g. Eventbrite). "Book a seat" shows on the site only once this is set.',
+      },
+      validate: (value: string | null | undefined) =>
+        !value?.trim() || /^https?:\/\/\S+$/i.test(value.trim())
+          ? true
+          : 'Paste the full link, starting with https://, or leave it blank.',
     },
     {
       name: 'meetingUrl',

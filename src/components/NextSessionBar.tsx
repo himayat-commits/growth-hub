@@ -1,11 +1,11 @@
 // Site-wide top bar announcing the next free Growth Hub Session. Server
 // component: it reads the season plan plus the CMS bookings, so it moves on to
-// the next date by itself and links straight to the booking once the CMS
-// event exists. Renders nothing when no Session is scheduled.
+// the next date by itself and says "Book a seat" once the CMS event has a
+// booking link. Renders nothing when no Session is scheduled.
 
 import Link from 'next/link';
 import { getUpcomingEvents } from '@/lib/cms';
-import { buildCalendar, dateParts, nextSession } from '@/lib/sessions';
+import { buildCalendar, dateParts, nextSession, rowCta } from '@/lib/sessions';
 import type { Event as PayloadEvent } from '@/payload-types';
 
 export default async function NextSessionBar() {
@@ -13,6 +13,7 @@ export default async function NextSessionBar() {
   const next = nextSession(buildCalendar(docs as PayloadEvent[]));
   if (!next) return null;
   const when = dateParts(next.date);
+  const cta = rowCta(next);
 
   return (
     <div role="region" aria-label="Next Session" className="top-bar">
@@ -23,8 +24,8 @@ export default async function NextSessionBar() {
           </strong>
           <span className="top-bar-topic"> · {next.title}</span>
         </span>
-        <Link href={next.href ?? '/events#whats-on'} className="top-bar-link">
-          {next.href ? 'Book a seat →' : 'See dates →'}
+        <Link href={cta.href} className="top-bar-link">
+          {cta.label} →
         </Link>
       </div>
     </div>

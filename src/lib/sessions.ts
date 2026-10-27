@@ -1,9 +1,10 @@
 // Growth Hub Sessions: the published season plan, merged with the CMS.
 //
 // Free Sessions run on the 2nd Wednesday (12:00–1:30) and paid Build Labs on
-// the 4th Wednesday (9:30–12:30). SEASON is the plan we publish; bookings
-// live on the matching Payload event (same Canberra date), so creating that
-// event in the CMS (with its registerUrl) is all it takes to open a date.
+// the 4th Wednesday (9:30–12:30) from February; the December pilot is 2 and
+// 9 Dec. SEASON is the plan we publish; bookings live on the matching Payload
+// event (same Canberra date). "Book a seat" shows only once that event has a
+// registerUrl; until then the date links to its event page ("See details").
 // Upcoming CMS events that aren't part of the season (webinars, one-offs)
 // still list, after the season rows.
 
@@ -31,7 +32,7 @@ export const SESSION_VENUE = VENUE_CONFIRMED
   : { short: 'Canberra city, venue to be confirmed', row: 'Canberra city · venue TBC' };
 
 export const SESSION_FORMAT: Record<'session' | 'lab', { label: string; price: string; time: string; where: string }> = {
-  session: { label: 'Session', price: 'Free', time: '12:00–1:30pm', where: VENUE_CONFIRMED ? 'CBRIN · and streamed' : SESSION_VENUE.row },
+  session: { label: 'Session', price: 'Free', time: '12:00–1:30pm', where: VENUE_CONFIRMED ? 'CBRIN · in person' : SESSION_VENUE.row },
   lab: { label: 'Build Lab', price: 'A$179', time: '9:30am–12:30pm', where: VENUE_CONFIRMED ? 'CBRIN · in person' : SESSION_VENUE.row },
 };
 
@@ -88,6 +89,26 @@ export function seasonItemFor(doc: Pick<PayloadEvent, 'date'>): SeasonItem | und
   return SEASON.find((s) => s.date === key);
 }
 
+/** The event's booking link, or null when the editor hasn't added one yet. */
+export function registerUrlOf(doc: Pick<PayloadEvent, 'registerUrl'>): string | null {
+  return String(doc.registerUrl ?? '').trim() || null;
+}
+
+/** Price and venue as the public pages show them. Sessions and Build Labs fill
+ *  blanks from the season plan, so a Lab saved without `cost` still reads
+ *  A$179 and a blank `location` reads as the venue, never "Online". */
+export function eventFacts(doc: Pick<PayloadEvent, 'date' | 'cost' | 'location'>) {
+  const season = seasonItemFor(doc);
+  const cost = String(doc.cost ?? '').trim();
+  const location = String(doc.location ?? '').trim();
+  if (!season) return { season, price: cost || 'Free', location };
+  return {
+    season,
+    price: !cost || /^free$/i.test(cost) ? SESSION_FORMAT[season.kind].price : cost,
+    location: location || SESSION_VENUE.short,
+  };
+}
+
 export interface CalendarRow {
   key: string;
   /** Canberra calendar date, YYYY-MM-DD. */
@@ -103,6 +124,8 @@ export interface CalendarRow {
   where: string;
   /** Event page, once the date exists in the CMS. */
   href?: string;
+  /** The CMS event has a booking link, so the row says "Book a seat". */
+  bookable?: boolean;
   seats?: string;
 }
 
@@ -143,6 +166,7 @@ export function buildCalendar(upcomingDocs: PayloadEvent[], now: Date = new Date
       time: doc?.time ? String(doc.time) : format.time,
       where: format.where,
       href: doc ? `/events/${doc.slug}` : undefined,
+      bookable: doc ? Boolean(registerUrlOf(doc)) : false,
       seats: doc?.seats ? String(doc.seats) : undefined,
     };
   });
@@ -161,6 +185,7 @@ export function buildCalendar(upcomingDocs: PayloadEvent[], now: Date = new Date
         time: ev.time,
         where: ev.location || 'Online',
         href: `/events/${ev.slug}`,
+        bookable: Boolean(registerUrlOf(d)),
         seats: d.seats ? String(d.seats) : undefined,
       };
     })
@@ -172,6 +197,13 @@ export function buildCalendar(upcomingDocs: PayloadEvent[], now: Date = new Date
 /** The next free Session — drives the top bar and the home page card. */
 export function nextSession(rows: CalendarRow[]): CalendarRow | null {
   return rows.find((r) => r.kind === 'session') ?? null;
+}
+
+/** One button per state: "Book a seat" once the event has a booking link,
+ *  "See details" while its page exists without one, else "See dates". */
+export function rowCta(row: CalendarRow | null): { label: string; href: string } {
+  if (!row?.href) return { label: 'See dates', href: '/events#whats-on' };
+  return { label: row.bookable ? 'Book a seat' : 'See details', href: row.href };
 }
 
 /** "2026-12-02" → { weekday: "Wed", day: "2", month: "Dec", long: "Wednesday 2 December" }.

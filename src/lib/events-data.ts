@@ -1,9 +1,10 @@
 // Adapter between Payload Event docs and the shape the public /events
 // pages render. Most fields are pulled straight from the CMS; date display
-// strings (monthShort / day / year / dateLong) are derived from `date`
-// unless `dateDisplay` is set as an override.
+// strings (monthShort / day / year / dateLong) are derived from `date`, as
+// a Canberra calendar date, unless `dateDisplay` is set as an override.
 
 import type { Event as PayloadEvent } from '@/payload-types';
+import { CANBERRA_TZ, canberraParts, formatCanberraDateLong } from '@/lib/events-time';
 
 export type EventCategory = 'Summit' | 'Workshop' | 'Mixer' | 'Clinic' | 'Community' | 'Webinar';
 
@@ -44,33 +45,22 @@ const TAG_CLASSES: Record<EventCategory, string> = {
   Webinar: 'tag-webinar',
 };
 
-function formatDateLong(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
-  return new Intl.DateTimeFormat('en-AU', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(d);
-}
-
 function monthShort(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return 'TBC';
-  return d.toLocaleString('en-AU', { month: 'short' });
+  return d.toLocaleString('en-AU', { month: 'short', timeZone: CANBERRA_TZ });
 }
 
 function dayOf(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '—';
-  return String(d.getDate()).padStart(2, '0');
+  return String(canberraParts(d).d).padStart(2, '0');
 }
 
 function yearOf(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  return String(d.getFullYear());
+  return String(canberraParts(d).y);
 }
 
 /** Map a Payload Event document into the shape the public pages render.
@@ -91,7 +81,7 @@ export function toPublicEvent(ev: PayloadEvent): PublicEvent {
     monthShort: override ? 'TBC' : monthShort(dateIso),
     day: override ? '—' : dayOf(dateIso),
     year: override ? '' : yearOf(dateIso),
-    dateLong: override || formatDateLong(dateIso),
+    dateLong: override || formatCanberraDateLong(dateIso),
     time: String(ev.time ?? ''),
     location: String(ev.location ?? ''),
     cost: String((ev as { cost?: string | null }).cost ?? 'Free'),

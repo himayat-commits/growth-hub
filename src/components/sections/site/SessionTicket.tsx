@@ -1,10 +1,11 @@
 // The next Session as a paper admission ticket — the home page hero. The stub
 // is the button: "Book a seat" once the CMS event has a booking link, "See
-// dates" until then. A Build Lab ticket sits tucked behind it when one is on
-// the calendar, so the ladder (free Session → paid Lab) is visible at a glance.
+// details" while it has only a page, "See dates" before that. A Build Lab
+// ticket sits tucked behind it when one is on the calendar, so the ladder
+// (free Session → paid Lab) is visible at a glance.
 
 import Link from 'next/link';
-import { dateParts, SESSION_VENUE, type CalendarRow } from '@/lib/sessions';
+import { dateParts, rowCta, SESSION_VENUE, type CalendarRow } from '@/lib/sessions';
 
 export default function SessionTicket({
   session,
@@ -14,8 +15,7 @@ export default function SessionTicket({
   lab: CalendarRow | null;
 }) {
   const when = session ? dateParts(session.date) : null;
-  const label = session?.href ? 'Book a seat' : 'See dates';
-  const href = session?.href ?? '/events#whats-on';
+  const { label, href } = rowCta(session);
 
   return (
     <div className="ticket-stack">
@@ -43,7 +43,7 @@ export default function SessionTicket({
                 <>
                   {when.long} · {session.time}
                   <br />
-                  {SESSION_VENUE.short} · and streamed
+                  {SESSION_VENUE.short}
                 </>
               ) : (
                 'Get the monthly email to hear about the next season first.'

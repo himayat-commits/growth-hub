@@ -4,7 +4,7 @@ import NewsletterStrip from '@/components/NewsletterStrip';
 import SessionsCalendar from '@/components/sections/site/SessionsCalendar';
 import Questions from '@/components/sections/site/Questions';
 import { getUpcomingEvents } from '@/lib/cms';
-import { buildCalendar, LAB_STEPS, RUN_SHEET, SESSION_AREAS, SESSION_FORMAT, SESSION_VENUE } from '@/lib/sessions';
+import { buildCalendar, dateParts, LAB_STEPS, RUN_SHEET, SESSION_AREAS, SESSION_FORMAT, SESSION_VENUE } from '@/lib/sessions';
 import { SUMMIT } from '@/lib/summit';
 import type { Event as PayloadEvent } from '@/payload-types';
 
@@ -20,6 +20,14 @@ export const revalidate = 3600;
 export default async function SessionsPage() {
   const docs = await getUpcomingEvents().catch(() => []);
   const rows = buildCalendar(docs as PayloadEvent[]);
+  // The December pilot (2 and 9 Dec) is off the 2nd/4th-Wednesday rhythm; say
+  // so until it has run.
+  const pilot = (kind: 'session' | 'lab') => {
+    const row = rows.find((r) => r.kind === kind && r.pilot);
+    if (!row) return '';
+    const { day, month } = dateParts(row.date);
+    return ` from February · December pilot ${day} ${month}`;
+  };
 
   return (
     <main>
@@ -40,16 +48,19 @@ export default async function SessionsPage() {
           <div className="site-grid" style={{ gridTemplateColumns: '1fr' }}>
             <div className="site-card">
               <span className="site-tag site-tag--free">Session · {SESSION_FORMAT.session.price}</span>
-              <h3>Second Wednesday, {SESSION_FORMAT.session.time}</h3>
+              <h3>Second Wednesday{pilot('session')}</h3>
               <p>
-                In {SESSION_VENUE.short}, and streamed for anyone who can&apos;t be
-                there. Ninety minutes, one topic, one change to make this week.
+                {SESSION_FORMAT.session.time} in {SESSION_VENUE.short}. Ninety
+                minutes, one topic, one change to make this week.
               </p>
             </div>
             <div className="site-card">
               <span className="site-tag site-tag--lab">Build Lab · {SESSION_FORMAT.lab.price}</span>
-              <h3>Fourth Wednesday, {SESSION_FORMAT.lab.time}</h3>
-              <p>Same venue, in person. Bring a laptop and leave with a website that&apos;s live.</p>
+              <h3>Fourth Wednesday{pilot('lab')}</h3>
+              <p>
+                {SESSION_FORMAT.lab.time}, same venue, in person. Bring a laptop and
+                leave with a website that&apos;s live.
+              </p>
             </div>
           </div>
         </div>
@@ -180,7 +191,7 @@ export default async function SessionsPage() {
               },
               {
                 q: 'Can I watch online, or later?',
-                a: 'Sessions are streamed, and the recording goes to everyone who registered. Build Labs are in person only.',
+                a: 'Not for the December pilot: Sessions are in person. Everyone who registers gets the slides and three next steps by email afterwards.',
               },
               {
                 q: 'Can I bring an interpreter, or ask for other support?',
