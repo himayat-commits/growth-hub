@@ -5,7 +5,7 @@ import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import SummitAnnouncementBar from "@/components/SummitAnnouncementBar";
+import NextSessionBar from "@/components/NextSessionBar";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import PostHogProvider from "@/components/PostHogProvider";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
@@ -39,7 +39,7 @@ const biroScript = localFont({
 export const metadata: Metadata = {
   title: "Growth Hub by Himayat — Your business deserves to grow.",
   description:
-    "Grow your local business from one platform — AI-powered marketing, expert advice, and community support. Every subscription helps fund local jobs in Canberra.",
+    "Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses and sole traders. A Social Traders Verified social enterprise.",
   metadataBase: new URL(SITE_URL),
   // No `alternates.canonical` here: a layout-level canonical is inherited by
   // every child page that doesn't set its own, which pointed /pricing,
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Growth Hub by Himayat",
     description:
-      "Grow your local business from one platform — AI marketing, expert advice, and a community that has your back.",
+      "Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses.",
     url: SITE_URL,
     siteName: "Growth Hub by Himayat",
     locale: "en_AU",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Growth Hub by Himayat",
-    description: "Grow your local business from one platform — AI marketing, expert advice, and a community that has your back.",
+    description: "Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses.",
   },
 };
 
@@ -77,7 +77,7 @@ export default function MainLayout({
                 <Pixels />
               </ConsentGate>
               <OrganizationJsonLd />
-              <SummitAnnouncementBar />
+              <NextSessionBar />
               <Navbar />
               {children}
               <Footer />

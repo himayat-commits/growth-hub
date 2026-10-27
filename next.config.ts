@@ -59,6 +59,20 @@ const nextConfig: NextConfig = {
       { source: '/events/small-business-journey', destination: '/events/entrepreneurship-for-everyone', permanent: true },
       { source: '/events/ai-for-small-business-9-july', destination: '/events/entrepreneurship-for-everyone', permanent: true },
       { source: '/expo', destination: '/events/entrepreneurship-for-everyone', permanent: true },
+      // Site refresh (Oct 2026): the portal-era pricing and sign-up pages are
+      // retired in favour of Growth Hub Sites, and the closed summit form goes
+      // to the summit page.
+      { source: '/pricing', destination: '/sites', permanent: true },
+      { source: '/signup/:path*', destination: '/sites', permanent: true },
+      { source: '/expo/apply', destination: '/events/entrepreneurship-for-everyone', permanent: true },
+      { source: '/contact', destination: '/about#contact', permanent: true },
+      { source: '/sessions', destination: '/events', permanent: true },
+      // Hidden until there are real stories and articles to show — temporary
+      // (307) so the URLs can come back without fighting browser caches.
+      { source: '/case-studies', destination: '/', permanent: false },
+      { source: '/case-studies/:path*', destination: '/', permanent: false },
+      { source: '/insights', destination: '/events', permanent: false },
+      { source: '/insights/:path*', destination: '/events', permanent: false },
     ];
   },
 };

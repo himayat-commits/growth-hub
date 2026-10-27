@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { CONTACT, SITES } from "@/lib/site";
 
 export default function Footer() {
   return (
@@ -21,46 +22,62 @@ export default function Footer() {
               </div>
             </div>
             <p>
-              A grassroots social enterprise helping local Canberra businesses
-              grow — with AI-powered marketing, expert advice, and a community
-              that has your back.
+              Free monthly Sessions, hands-on Build Labs and websites you can run
+              yourself, for Canberra small businesses and sole traders.
             </p>
             <div className="foot-badges">
               <span className="mini">Social Traders Verified</span>
-              <span className="mini">NDIS Registered</span>
             </div>
           </div>
 
           <div className="foot-col">
-            <h5>Explore</h5>
+            <h5>Sessions</h5>
             <ul>
-              <li><Link href="/#packages">Packages</Link></li>
-              <li><Link href="/events">Events</Link></li>
+              <li><Link href="/events">What&apos;s on</Link></li>
+              <li><Link href="/events#build-lab">Build Labs</Link></li>
               <li><Link href="/events/entrepreneurship-for-everyone">Entrepreneurship for Everyone</Link></li>
-              <li><Link href="/partners">Partners</Link></li>
-              <li><Link href="/shop">Shop</Link></li>
-              <li><Link href="/#community">Community</Link></li>
-              <li><Link href="/pricing#faq">FAQ</Link></li>
-              <li><Link href="/#why">About us</Link></li>
-              <li><Link href="/#contact">Contact</Link></li>
-              <li><Link href="/community-guidelines">Community guidelines</Link></li>
-              <li><Link href="/privacy">Privacy</Link></li>
             </ul>
           </div>
 
           <div className="foot-col">
-            <h5>Get in touch</h5>
+            <h5>Growth Hub Sites</h5>
             <ul>
-              <li><a href="mailto:hello@himayat.com.au">hello@himayat.com.au</a></li>
-              <li><a href="tel:0251190005">02 5119 0005</a></li>
-              <li>Level 4, 1 Moore St, Canberra ACT 2601</li>
+              <li><Link href="/sites">Plans and templates</Link></li>
+              <li><a href={SITES.signIn}>Sign in to your site</a></li>
+            </ul>
+          </div>
+
+          <div className="foot-col">
+            <h5>Growth Hub</h5>
+            <ul>
+              <li><Link href="/about">About</Link></li>
+              <li><Link href="/partners">Partners</Link></li>
+              <li><Link href="/about#contact">Contact</Link></li>
+              <li><Link href="/shop">Shop</Link></li>
+            </ul>
+          </div>
+
+          <div className="foot-col">
+            <h5>Say hello</h5>
+            <ul>
+              <li><a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a></li>
+              <li><a href={CONTACT.phoneHref}>{CONTACT.phone}</a></li>
+              <li>{CONTACT.address}</li>
             </ul>
           </div>
         </div>
 
+        <p className="foot-ack">
+          We acknowledge the Ngunnawal people, traditional custodians of the land
+          where we work, and pay our respects to Elders past and present.
+        </p>
+
         <div className="foot-legal">
-          <span>© Himayat 2026. Built by the people it serves.</span>
-          <span>ABN 40 169 711 734 · NDIS Reg. 4050130469</span>
+          <span>© Himayat 2026 · ABN 40 169 711 734</span>
+          <span className="foot-legal-links">
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/community-guidelines">Community guidelines</Link>
+          </span>
         </div>
       </div>
     </footer>

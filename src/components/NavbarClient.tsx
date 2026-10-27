@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import SignOutButton from "./SignOutButton";
 import { track } from "@/lib/analytics";
@@ -24,13 +25,10 @@ export interface NavbarClientProps {
 }
 
 const DEFAULT_NAV_ITEMS: NavItem[] = [
-  { label: "Packages", href: "/#packages" },
-  { label: "Events", href: "/events" },
+  { label: "Sessions", href: "/events" },
+  { label: "Growth Hub Sites", href: "/sites" },
   { label: "Partners", href: "/partners" },
-  { label: "Shop", href: "/shop" },
-  { label: "About", href: "/#why" },
-  { label: "FAQ", href: "/pricing#faq" },
-  { label: "Contact", href: "/#contact" },
+  { label: "About", href: "/about" },
 ];
 
 function ArrowIcon() {
@@ -48,6 +46,7 @@ export default function NavbarClient({
   isSignedIn = false,
   userEmail = null,
 }: NavbarClientProps) {
+  const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -65,11 +64,10 @@ export default function NavbarClient({
   }, [menuOpen]);
 
   const resolvedItems = navItems && navItems.length > 0 ? navItems : DEFAULT_NAV_ITEMS;
-  const resolvedCtaLabel = ctaLabel ?? "Sign Up Now";
-  // Signed-out CTA bounces through WorkOS sign-up first, then lands on /portal —
-  // users explore the free modules and click "Choose a plan" inside the portal
-  // when they want to upgrade.
-  const resolvedCtaHref = ctaHref ?? "/sign-up?redirect_url=%2Fportal";
+  // Signed-out visitors are pointed at the free Sessions, the front door to
+  // everything else now the member portal is parked.
+  const resolvedCtaLabel = ctaLabel ?? "Book a free Session";
+  const resolvedCtaHref = ctaHref ?? "/events";
 
   return (
     <header className="nav" style={{ position: "sticky", top: 0, zIndex: 50 }}>
@@ -95,7 +93,11 @@ export default function NavbarClient({
                 {item.label}
               </a>
             ) : (
-              <Link key={item.href} href={item.href}>
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={pathname === item.href || pathname.startsWith(`${item.href}/`) ? "page" : undefined}
+              >
                 {item.label}
               </Link>
             )
@@ -103,6 +105,10 @@ export default function NavbarClient({
         </nav>
 
         <NavCartButton />
+
+        <Link className="nav-contact" href="/about#contact">
+          Contact
+        </Link>
 
         {isSignedIn ? (
           <div className="nav-account" ref={menuRef}>
@@ -196,6 +202,9 @@ export default function NavbarClient({
               </Link>
             )
           )}
+          <Link href="/about#contact" onClick={() => setOpen(false)}>
+            Contact
+          </Link>
           {isSignedIn && (
             <>
               <Link href="/profile" onClick={() => setOpen(false)}>

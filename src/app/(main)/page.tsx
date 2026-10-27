@@ -1,69 +1,249 @@
-import type { Metadata } from "next";
-import { getPageBySlug, getSiteSettings } from "@/lib/cms";
-import BlockRenderer from "@/components/BlockRenderer";
+import type { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import NewsletterStrip from '@/components/NewsletterStrip';
+import BrowserMock from '@/components/sections/site/BrowserMock';
+import GrowWord from '@/components/sections/site/GrowWord';
+import SessionDate from '@/components/sections/site/SessionDate';
+import { getUpcomingEvents } from '@/lib/cms';
+import { PROOF_NAMES } from '@/lib/partner-network';
+import { buildCalendar, dateParts, nextSession, SESSION_FORMAT } from '@/lib/sessions';
+import { CBRIN_DIGITAL_SOLUTIONS_URL } from '@/lib/site';
+import { SUMMIT } from '@/lib/summit';
+import type { Event as PayloadEvent } from '@/payload-types';
 
-// Fallback section imports — used when the 'home' page hasn't been seeded yet
-import Hero from "@/components/sections/Hero";
-import SupportedBy from "@/components/sections/SupportedBy";
-import HowItWorks from "@/components/sections/HowItWorks";
-import PricingSection from "@/components/sections/PricingSection";
-import Community from "@/components/sections/Community";
-import BigQuote from "@/components/sections/BigQuote";
-import Testimonials from "@/components/sections/Testimonials";
-import About from "@/components/sections/About";
-import FinalCTA from "@/components/sections/FinalCTA";
-import Contact from "@/components/sections/Contact";
-import NewsletterStrip from "@/components/NewsletterStrip";
+// The home page is built in code (it no longer renders the CMS "home" page
+// blocks): one story, three ways in, and the next real date on the calendar.
 
 export const metadata: Metadata = {
-  title: "Growth Hub by Himayat — Your business deserves to grow.",
+  title: 'Growth Hub by Himayat — Your business deserves to grow.',
   description:
-    "The platform to grow your local business — AI-powered marketing, expert advice, and a community of local owners. From $299/mo. Social Traders Verified · NDIS Registered.",
-  alternates: { canonical: "/" },
+    'Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses and sole traders. A Social Traders Verified social enterprise.',
+  alternates: { canonical: '/' },
 };
 
+export const revalidate = 3600;
+
+const WAYS_IN = [
+  {
+    kicker: '1 · Free, monthly',
+    title: 'Come to a Session',
+    body: 'Ninety minutes on one practical topic, with other local owners. You leave with one change to make this week.',
+    href: '/events',
+    cta: 'See the calendar',
+  },
+  {
+    kicker: `2 · One morning, ${SESSION_FORMAT.lab.price}`,
+    title: 'Build your site at a Build Lab',
+    body: "Bring a laptop and what you know about your business. With us beside you, you leave with a website that's live.",
+    href: '/events#build-lab',
+    cta: 'How a Build Lab works',
+  },
+  {
+    kicker: '3 · From A$39 a month',
+    title: 'Keep growing with Growth Hub Sites',
+    body: 'Your own domain, bookings, a simple shop and help when you need it. Or we build it with you.',
+    href: '/sites',
+    cta: 'See plans',
+  },
+];
+
 export default async function HomePage() {
-  const [page, siteSettings] = await Promise.all([
-    getPageBySlug("home").catch(() => null),
-    getSiteSettings().catch(() => null),
-  ]);
+  const docs = await getUpcomingEvents().catch(() => []);
+  const rows = buildCalendar(docs as PayloadEvent[]);
+  const next = nextSession(rows);
+  const season = rows.filter((r) => r.kind === 'session').slice(0, 5);
 
-  // If the CMS page has blocks, render via BlockRenderer.
-  // The Contact section is always appended — it has no CMS block (form logic stays in code).
-  if (page?.layout && page.layout.length > 0) {
-    // Build a plain SiteSettings object for props forwarding
-    const settingsData = siteSettings
-      ? {
-          supportEmail: (siteSettings as { supportEmail?: string | null }).supportEmail ?? null,
-          phone: (siteSettings as { phone?: string | null }).phone ?? null,
-          address: (siteSettings as { address?: string | null }).address ?? null,
-        }
-      : null;
-
-    return (
-      <main>
-        <BlockRenderer blocks={page.layout as Parameters<typeof BlockRenderer>[0]["blocks"]} siteSettings={settingsData} />
-        <NewsletterStrip source="home" />
-        <Contact supportEmail={settingsData?.supportEmail} />
-      </main>
-    );
-  }
-
-  // Fallback: render all hardcoded sections until the 'home' page is seeded in the CMS.
-  // This keeps the site working immediately after deployment even without seed data.
   return (
-    <main>
-      <Hero />
-      <SupportedBy />
-      <HowItWorks />
-      <PricingSection />
-      <Community />
-      <BigQuote />
-      <Testimonials />
-      <About />
-      <FinalCTA />
-      <NewsletterStrip source="home" />
-      <Contact />
+    <main className="has-sticky-cta">
+      <section className="site-hero">
+        <div className="wrap site-split">
+          <div>
+            <span className="section-label">Growth Hub by Himayat · Canberra and region</span>
+            <h1 className="hero-h1">
+              Your business deserves to <GrowWord />.
+            </h1>
+            <p className="site-lede">
+              Free monthly Sessions, a hands-on Build Lab and a website you can run
+              yourself. For Canberra small businesses and sole traders, wherever
+              you&apos;re starting from.
+            </p>
+            <div className="site-ctas" style={{ marginBottom: 20 }}>
+              <Link className="btn btn-primary" href={next?.href ?? '/events'}>Book a free Session</Link>
+              <Link className="btn btn-secondary" href="/sites">See Growth Hub Sites</Link>
+            </div>
+            <p className="site-fine">Run by Himayat, a Social Traders Verified social enterprise.</p>
+          </div>
+          <div className="site-hero-media">
+            <Image
+              src="/images/hero-workshop-2.jpg"
+              alt="A presenter talking small business owners through a workshop in Canberra"
+              width={1600}
+              height={1200}
+              priority
+              sizes="(max-width: 900px) 100vw, 46vw"
+            />
+            {next && (
+              <div className="site-next">
+                <SessionDate date={next.date} kind="session" />
+                <div className="site-next-body">
+                  <span className="site-tag site-tag--free">{next.area ?? 'Session'} · free</span>
+                  <span className="site-next-title">{next.title}</span>
+                  <span className="site-fine">
+                    {dateParts(next.date).weekday} {next.time} · {next.where}
+                  </span>
+                </div>
+                <Link className="site-link" href={next.href ?? '/events'}>
+                  {next.href ? 'Book' : 'Details'}
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="site-sec site-sec--white">
+        <div className="wrap">
+          <div className="site-head">
+            <span className="section-label">How it works</span>
+            <h2 className="section-h2">Three ways in. Start wherever suits you.</h2>
+          </div>
+          <div className="site-grid">
+            {WAYS_IN.map((w) => (
+              <div className="site-card site-card--egg" key={w.title}>
+                <span className="site-kicker">{w.kicker}</span>
+                <h3>{w.title}</h3>
+                <p>{w.body}</p>
+                <Link className="site-link" href={w.href}>{w.cta}</Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {season.length > 0 && (
+        <section className="site-sec">
+          <div className="wrap">
+            <div className="site-head site-head--row">
+              <div>
+                <span className="section-label">Growth Hub Sessions · Wednesday lunchtime</span>
+                <h2 className="section-h2">One practical topic a month</h2>
+              </div>
+              <Link className="site-link" href="/events">All Sessions and Build Labs</Link>
+            </div>
+            <div className="site-grid site-grid--small">
+              {season.map((r) => {
+                const p = dateParts(r.date);
+                return (
+                  <div className="season-card" key={r.key}>
+                    <span className="when">{p.day} {p.month}</span>
+                    {r.area && <span className="site-tag site-tag--free">{r.area}</span>}
+                    {r.href ? (
+                      <Link className="title" href={r.href}>{r.title}</Link>
+                    ) : (
+                      <span className="title">{r.title}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="site-sec site-sec--teal">
+        <div className="wrap site-split">
+          <div>
+            <span className="section-label">Growth Hub Sites</span>
+            <h2 className="section-h2">A website you can run yourself. Live in a morning.</h2>
+            <p className="section-lead">
+              Start from a template made for your kind of business, check it with us,
+              and publish. Bookings, a menu or a shop when you need them.
+            </p>
+            <div className="site-ctas" style={{ marginTop: 28 }}>
+              <Link className="btn btn-lime" href="/sites">See plans and templates</Link>
+              <span className="site-fine">From A$39 a month · 14-day free trial</span>
+            </div>
+          </div>
+          <BrowserMock />
+        </div>
+      </section>
+
+      <section className="site-sec">
+        <div className="wrap">
+          <div className="site-panel site-panel--lime">
+            <div>
+              <span className="section-label">Free expert advice, too</span>
+              <h2 className="section-h2">Run an ACT business? You may be eligible for five hours of one-on-one digital advice.</h2>
+            </div>
+            <div>
+              <p>
+                CBR Innovation Network&apos;s Digital Solutions program offers up to five
+                hours with an expert, for $110 or free if you&apos;re doing it tough. We
+                point people to the right door at every Session.
+              </p>
+              <a className="site-link" href={CBRIN_DIGITAL_SOLUTIONS_URL}>About the program, on CBRIN&apos;s site</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="site-sec site-sec--tight">
+        <div className="wrap" style={{ maxWidth: 900 }}>
+          <span className="section-label">Where we&apos;ve shown up</span>
+          <h2 className="section-h2">{SUMMIT.name}</h2>
+          <p className="section-lead" style={{ marginBottom: 20 }}>
+            A free, all-day expo for Canberra small business on {SUMMIT.dateLong},
+            co-hosted with CBR Innovation Network: workshops, one-on-one help and more
+            than 30 organisations under one roof.
+          </p>
+          <p style={{ margin: '0 0 24px' }}>
+            <Link className="site-link" href={SUMMIT.path}>See the day</Link>
+          </p>
+          <div className="site-names">
+            {PROOF_NAMES.map((n) => (
+              <span key={n}>{n}</span>
+            ))}
+            <Link href="/partners" style={{ color: 'var(--plum)' }}>and more →</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="site-sec site-sec--plum">
+        <div className="wrap site-split">
+          <div>
+            <p className="site-statement">Support that starts where systems stop. With people.</p>
+            <span className="site-script handscript">beside you, not above you</span>
+          </div>
+          <div>
+            <p className="section-lead" style={{ marginTop: 0 }}>
+              Himayat started by helping people find their way through systems that
+              weren&apos;t built for them. Growth Hub brings the same patience to running a
+              small business: plain answers, in a room, with people who&apos;ve done it.
+            </p>
+            <Link className="site-link" href="/about">Who we are</Link>
+          </div>
+        </div>
+      </section>
+
+      <NewsletterStrip
+        source="home"
+        heading="Get the next Session in your inbox."
+        sub="One email a month with what's on next. Unsubscribe any time."
+      />
+
+      {next && (
+        <div className="sticky-cta">
+          <span className="txt">
+            Next: {dateParts(next.date).weekday} {dateParts(next.date).day} {dateParts(next.date).month}
+            <br />
+            <b>{next.title} · free</b>
+          </span>
+          <Link className="btn btn-primary" href={next.href ?? '/events'}>
+            {next.href ? 'Book a seat' : 'See dates'}
+          </Link>
+        </div>
+      )}
     </main>
   );
 }

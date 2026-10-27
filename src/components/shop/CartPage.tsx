@@ -172,11 +172,6 @@ export default function CartPage({ cancelled }: { cancelled: boolean }) {
           {checkingOut ? 'Heading to checkout…' : 'Checkout'}
         </button>
         {cart.blocked && <p className="shop-hint">Remove sold-out items to continue.</p>}
-        {!cart.isMember && cart.rows.some((r) => r.memberPriceCents === null) && (
-          <p className="shop-fine">
-            Members with a paid plan get a discount on merch. <Link href="/pricing">See plans</Link>.
-          </p>
-        )}
         <Link href="/shop" className="shop-continue">
           ← Keep browsing
         </Link>
