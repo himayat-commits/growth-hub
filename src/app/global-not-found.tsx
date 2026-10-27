@@ -5,15 +5,15 @@ import { Inter, Source_Serif_4 } from 'next/font/google';
 import './globals.css';
 import NotFoundPanel from '@/components/sections/site/NotFoundPanel';
 
-// 404 for URLs that match no route. The app has three root layouts ((main),
-// (app) and (payload)) and no app/layout.tsx, so a root app/not-found.tsx has
+// 404 for URLs that match no route. The app has two root layouts ((main) and
+// (payload)) and no app/layout.tsx, so a root app/not-found.tsx has
 // no layout to render in. global-not-found (switched on by
 // experimental.globalNotFound in next.config.ts) skips layouts and renders this
 // full document instead. Payload's /admin and /api are catch-all routes in
 // (payload), so they never reach this page.
 //
 // Because it renders outside the (main) layout it brings its own CSS and fonts,
-// and a logo-only header: the full Navbar needs the AuthKit and cart providers.
+// and a logo-only header.
 
 const sourceSerif = Source_Serif_4({
   subsets: ['latin'],

@@ -34,8 +34,8 @@ function entry(
 }
 
 // Only the public marketing pages and upcoming events. Partner profiles and
-// /with/{slug} micro-sites are retired (they 308 to /partners), and /shop and
-// its products are left out while the shop is hidden (still reachable by URL).
+// /with/{slug} micro-sites are retired (they 308 to /partners), and the shop
+// was removed in Oct 2026 (/shop redirects home).
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const events = await getPublicEvents(100).catch(() => [] as Doc[]);
 

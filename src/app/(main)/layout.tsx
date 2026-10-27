@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import localFont from "next/font/local";
-import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -12,14 +11,13 @@ import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import Pixels from "@/components/analytics/Pixels";
 import ConsentGate from "@/components/analytics/ConsentGate";
 import ConsentBanner from "@/components/analytics/ConsentBanner";
-import { CartProvider } from "@/components/shop/CartProvider";
 import { ogBase, twitterBase } from "./shared-metadata";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegrowthhub.com.au";
 
 // Root layout for the main app (multiple root layouts pattern — no app/layout.tsx).
-// Provides <html>/<body>, fonts, metadata, AuthKitProvider, Navbar, and Footer.
+// Provides <html>/<body>, fonts, metadata, analytics, Navbar, and Footer.
 // The (payload) route group has its own root layout via Payload's RootLayout.
 
 const sourceSerif = Source_Serif_4({
@@ -67,22 +65,18 @@ export default function MainLayout({
   return (
     <html lang="en-AU" className={`${sourceSerif.variable} ${inter.variable} ${biroScript.variable}`}>
       <body>
-        <AuthKitProvider>
-          <PostHogProvider>
-            <CartProvider>
-              <ConsentGate>
-                <Pixels />
-              </ConsentGate>
-              <OrganizationJsonLd />
-              <NextSessionBar />
-              <Navbar />
-              {children}
-              <Footer />
-              <RevealOnScroll />
-              <ConsentBanner />
-            </CartProvider>
-          </PostHogProvider>
-        </AuthKitProvider>
+        <PostHogProvider>
+          <ConsentGate>
+            <Pixels />
+          </ConsentGate>
+          <OrganizationJsonLd />
+          <NextSessionBar />
+          <Navbar />
+          {children}
+          <Footer />
+          <RevealOnScroll />
+          <ConsentBanner />
+        </PostHogProvider>
       </body>
     </html>
   );
