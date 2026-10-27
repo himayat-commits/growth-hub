@@ -1,99 +1,56 @@
-# Events, webinars, RSVPs
+# Events: Sessions, Build Labs and the calendar
 
-Events live in the Payload `events` collection (`src/collections/Events.ts`);
-member RSVPs live in the Drizzle table `public.event_rsvps`
-(`src/lib/db/schema.ts`, helpers in `src/lib/db/rsvps.ts`). The two are in
-different Postgres schemas with no foreign key — the join key is the Payload
-event `id`.
+The Sessions season is **code**: `SEASON` in `src/lib/sessions.ts` lists every Growth Hub
+Session and Build Lab date, title and topic. The site renders the calendar, the home-page
+ticket and the top bar from it.
 
-## Fields that matter
+A **Payload event** (`/admin` → Events) on the same **Australia/Canberra calendar date** as a
+season item attaches to it and supplies the booking link. Ticketing is on Eventbrite; nothing
+on this site takes payment or RSVPs.
 
-| Field | Where | Public? | Notes |
+## What the visitor sees
+
+| CMS state for that date | Calendar row / top bar / ticket |
+|---|---|
+| No event | "Registration opens soon" / "See dates" |
+| Event without `registerUrl` | "See details" → the event page, which says "Registration opens soon" |
+| Event with `registerUrl` | **"Book a seat"** → the Eventbrite page |
+
+Events have **no drafts**: saving publishes. Enter everything, including `registerUrl`, in one
+save. Changes appear immediately if the revalidate hook can reach `/api/revalidate` with
+`REVALIDATION_SECRET`, otherwise within an hour.
+
+## Fields for a Session or Build Lab
+
+| Field | Session | Build Lab | Notes |
 |---|---|---|---|
-| `date` | Payload | yes | An instant. "The event's date" always means its **Australia/Canberra** calendar date (`canberraDateKey`). |
-| `time` | Payload | yes | Free text, e.g. `12:30 – 1:30 pm`. Parsed as Canberra wall-clock by `src/lib/events-time.ts` (`parseCanberraRange`) for the `.ics`, JSON-LD and emails. Unrecognised text → all-day. |
-| `type` | Payload | yes | `webinar` = online. Drives the dashboard label and the JSON-LD attendance mode. |
-| `category` | Payload | yes | Public hub filter chip (`Webinar` chip added). |
-| `location` | Payload | yes | Blank for online events. |
-| `registerUrl` | Payload | members | External registration page (Eventbrite). Shown as "Register on <host>" once RSVP'd when there is no `meetingUrl`. |
-| `meetingUrl` | Payload | **members who RSVP'd only** | Zoom/Meet link. Rendered on `/my-events` as "Join online" only for RSVP'd users (the server never ships it to the client otherwise), included in the confirmation/reminder emails and the emailed `.ics`. Never on the public page or the public `.ics`. |
-| `recording` | Payload | members | Media upload; surfaces under "Past recordings" on `/my-events`. |
-| `event_rsvps.email` | Drizzle | ops | WorkOS email captured at RSVP. Roster/CSV/cron prefer it and fall back to `subscriptions.email`. |
-| `event_rsvps.reminded_at` | Drizzle | ops | Set by the reminder cron; null = not yet reminded. |
+| `title` | e.g. Be found and chosen online | Build and publish your website | Replaces the season title |
+| `slug` | e.g. `be-found-and-chosen-online` | e.g. `build-lab-9-dec-2026` | Unique; not a summit slug |
+| `date` | Pick the day in the date picker (stored as 12:00 UTC) | same | Matched by Canberra date. Via the API use `YYYY-MM-DDT12:00:00.000Z`, never Canberra midnight |
+| `time` | `12:00–1:30pm` | `9:30am–12:30pm` | Validated: must parse (`src/lib/events-time.ts`), otherwise the `.ics` would be all-day |
+| `type` | `workshop` | `workshop` | Season items are always published as in-person events |
+| `location` | leave blank | leave blank | Blank follows `SESSION_VENUE` / `VENUE_CONFIRMED` in `sessions.ts` |
+| `registerUrl` | Eventbrite link | Eventbrite link | Validated: empty or a full `http(s)://` URL |
+| `cost` | Free | `A$179` | A Lab with blank or "Free" cost shows the season price anyway |
+| `tag` | Growth Hub Session | Build Lab | Label on the share card |
+| `description` | 1–2 sentences | 1–2 sentences | Meta description, share card, `.ics` |
+| `bespoke`, `dateDisplay` | leave unticked / blank | same | `bespoke` redirects to a hand-built page |
 
-## What happens on RSVP (`POST /api/events/[id]/rsvp`)
+Don't create two events on the same date: only the first attaches.
 
-1. Signed-in only; event must exist; events whose Canberra date is before
-   today are rejected with `409 This event has already run`.
-2. Row inserted (idempotent on `(user_id, event_id)`), storing attribution
-   cookie + `user.email`.
-3. On a **new** row a confirmation email is sent via Resend
-   (`src/lib/events-emails.ts`, template `src/lib/email/templates/event-rsvp.ts`):
-   subject `You're in: <title> — <date>`, when/where in Canberra time, the
-   `meetingUrl` if set, a "Manage in My events" link
-   (`NEXT_PUBLIC_APP_URL ?? https://app.thegrowthhub.com.au`), and the `.ics`
-   attached (`src/lib/events-ics.ts`, same builder as the public route but
-   with the meeting link). Email failure never fails the RSVP (logged + Sentry).
+## Venue
 
-## Reminder cron (`/api/cron/event-reminders`)
+`VENUE_CONFIRMED` in `src/lib/sessions.ts` switches the venue line from "Canberra city, venue
+to be confirmed" to the confirmed venue across the calendar, ticket, event pages, `.ics` and
+JSON-LD. Flip it in code once the room is confirmed.
 
-`vercel.json`: `0 21 * * *` (21:00 UTC = 07:00 AEST / 08:00 AEDT). Hobby plan
-= daily only. For every event dated **today or tomorrow** (Canberra), emails
-each RSVP with an address and `reminded_at IS NULL`, then sets `reminded_at`.
-One reminder per RSVP: "Tomorrow: …" if the RSVP existed the morning before,
-otherwise "Today: …". Auth: `Authorization: Bearer $CRON_SECRET`
-(timing-safe). Manual run: `curl -H "Authorization: Bearer $CRON_SECRET" https://thegrowthhub.com.au/api/cron/event-reminders`.
+## Calendar files and search data
 
-## Ops
+- `GET /api/events/ics/[slug]`: public `.ics` (Canberra time zone), linked as "Add to calendar".
+- `EventJsonLd`: schema.org Event with an offline Place, the venue and a numeric AUD price.
+- Past events drop off the calendar and sitemap after their Canberra date.
 
-`/ops/events` lists every event with RSVPs (business, email, plan, RSVP time,
-source). Each group has **Download CSV** → `GET /api/ops/events/[id]/roster.csv`
-(ops-gated; columns `name,email,rsvp_at,reminded_at,source,utm_medium,utm_campaign,utm_content,ref`).
+## The July 2026 summit
 
-## Migrations shipped with this feature — how each reaches prod
-
-| Change | File | Applied how |
-|---|---|---|
-| `payload.events.meeting_url` | `src/migrations/20260909_events_meeting_url.ts` | **By hand.** `payload migrate` is never run in prod (see `scripts/prod-migrate.mjs`). Run: `ALTER TABLE "payload"."events" ADD COLUMN IF NOT EXISTS "meeting_url" varchar;` BEFORE deploying — Payload selects every declared column, so the CMS event queries return `[]` until it exists. |
-| `event_rsvps.email`, `event_rsvps.reminded_at` | `drizzle/0016_event_rsvps_email.sql` + `_journal.json` idx 16 | **Automatic.** `scripts/prod-migrate.mjs` runs `drizzle-kit migrate` in the production Vercel build. No `meta/0016_snapshot.json` was generated (needs `DATABASE_URL`); run `npx drizzle-kit generate` once against a Neon branch to backfill it before the next schema change. |
-
-## Paid workshops (launch)
-
-The first paid workshops sell through Eventbrite / Humanitix, not in-app Stripe
-(decision 9 Sep 2026). In `/admin` → Events:
-
-- `registerUrl` — the Eventbrite/Humanitix event URL. Members see "Register on
-  eventbrite.com.au" (host derived from the URL); this is where money changes
-  hands.
-- `cost` — the price as display text, e.g. `$40 · Free for Growth+ members`.
-  It is copy only; nothing in the app charges.
-- Capacity is managed on Eventbrite. `seats` is optional free text if you want
-  to mirror it ("6 spots left"); the in-app RSVP does not enforce a limit.
-
-## Zoom policy
-
-- One recurring Zoom meeting per webinar series; paste that same link into
-  `meetingUrl` on every event in the series. It is only ever shown to signed-in
-  members who have RSVP'd (and in their confirmation/reminder email), so
-  reusing it is safe.
-- Webinars and recordings are open to **every** signed-in member, Free tier
-  included — do not gate them by plan.
-- After the session, upload the recording to Media and set `recording` on the
-  event; it moves to "Past recordings" on `/my-events`. If the recording lives
-  on Zoom/YouTube instead, paste that URL into `registerUrl` for now (rendered
-  as "Register on <host>") — there is no dedicated `recordingUrl` field yet.
-
-## Running a weekly webinar today
-
-1. In `/admin` → Events → Create: title, `date`, `time` (`12:30 – 1:30 pm`),
-   `type = Webinar · Online`, `category = Webinar`, leave `location` blank,
-   paste the Zoom/Meet link into `meetingUrl`. Save. (The slug auto-generates;
-   `/events/<slug>` and `/api/events/ics/<slug>` go live on revalidation.)
-2. Members RSVP from `/my-events` → they get the confirmation + `.ics` with the
-   join link, and "Join online" stays visible on `/my-events`.
-3. The morning before, the cron sends "Tomorrow: …"; late RSVPs get "Today: …".
-4. Afterwards, upload the recording to Media and set `recording` on the event —
-   it moves to "Past recordings" for members. (A recording-announcement mail
-   using `event-recap.tsx` is not wired yet.)
-5. Next week: create the next event (there is no series/clone yet — see the
-   GTM review §3.3 for the recurring-series scope).
+`/events/entrepreneurship-for-everyone` is a hand-built page (`bespoke`), now in its
+"how the day ran" state. It is not part of the season.

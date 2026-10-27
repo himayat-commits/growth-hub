@@ -5,7 +5,7 @@ name: CI
 # and there was no `typecheck` script at all.
 #
 # Deliberately read-only: no DATABASE_URL, no build, no Playwright. E2E runs
-# against a staging deploy once staging has its own database (STAGING.md).
+# against a staging deploy once staging has its own database (a Neon branch).
 
 on:
   pull_request:

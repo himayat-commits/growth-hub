@@ -64,7 +64,7 @@ export function assertSafeDatabaseTarget(purpose) {
       '│ accident (see the June 2026 schema incident in scripts/prod-migrate.mjs).',
       '│',
       '│ To run safely: create a Neon branch and point DATABASE_URL at it — see',
-      '│ STAGING.md §1. Either edit .env.local or pass a different env file:',
+      '│ README.md (Running locally). Edit .env.local or pass another env file:',
       '│   node --env-file=.env.staging --import tsx/esm scripts/<script>.ts',
       '│',
       '│ To run against production ON PURPOSE, set ALLOW_PROD=1 for this command:',
