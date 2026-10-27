@@ -7,31 +7,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // Member app, staff console, CMS admin, API and transactional shop pages
-      // are auth-gated or per-session; keep their sign-in redirects out of
-      // the index. Same for the sign-in / sign-up / auth callback routes and
-      // the parked /portal.
-      disallow: [
-        "/api/",
-        "/admin",
-        "/sign-in",
-        "/sign-up",
-        "/auth",
-        "/portal",
-        "/dashboard",
-        "/ops",
-        "/orders",
-        "/onboarding",
-        "/profile",
-        "/messages",
-        "/my-events",
-        "/resources",
-        "/benefits",
-        "/plan",
-        "/search",
-        "/shop/cart",
-        "/shop/success",
-      ],
+      // CMS admin and API routes aren't pages. The retired member portal and
+      // shop paths now redirect (next.config.ts), so they need no entry here.
+      disallow: ["/api/", "/admin"],
     },
     sitemap: `${BASE}/sitemap.xml`,
   };

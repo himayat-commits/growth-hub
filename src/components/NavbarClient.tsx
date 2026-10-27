@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import NavCartButton from "@/components/shop/NavCartButton";
 
 export interface NavItem {
   label: string;
@@ -43,8 +42,8 @@ export default function NavbarClient({
 
   const resolvedItems = navItems && navItems.length > 0 ? navItems : DEFAULT_NAV_ITEMS;
   // Visitors are pointed at the Sessions calendar, the front door to
-  // everything else now the member portal is parked. The label names where
-  // it goes, not a booking that may not be open yet.
+  // everything else. The label names where it goes, not a booking that may
+  // not be open yet.
   const resolvedCtaLabel = ctaLabel ?? "See Session dates";
   const resolvedCtaHref = ctaHref ?? "/events#whats-on";
 
@@ -82,8 +81,6 @@ export default function NavbarClient({
             )
           )}
         </nav>
-
-        <NavCartButton />
 
         <Link className="nav-contact" href="/about#contact">
           Contact

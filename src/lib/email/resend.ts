@@ -1,4 +1,4 @@
-// Lazy Resend singleton — same shape as getStripe(). Returns null when
+// Lazy Resend singleton. Returns null when
 // RESEND_API_KEY is unset. Resend is now the FALLBACK provider: app code
 // must send through sendEmail() in src/lib/email/send.ts (which picks
 // HubSpot or Resend from env) rather than calling getResend() directly.

@@ -19,7 +19,7 @@ import posthog from 'posthog-js';
 
 /** Dispatched on window by PostHogProvider once posthog.init() has run.
  *  PostHog is consent-gated, so anything that wants to talk to the SDK on
- *  mount (PostHogIdentify) listens for this instead of assuming it's up. */
+ *  mount listens for this instead of assuming it's up. */
 export const POSTHOG_LOADED_EVENT = 'gh-posthog-loaded';
 
 declare global {
@@ -33,18 +33,10 @@ declare global {
 export type AnalyticsEvent =
   // Signup funnel
   | 'cta_click_signup'           // any "Sign Up Now" / "Join free" CTA
-  | 'cta_click_portal'           // signed-in navbar "My Growth Hub" CTA — not a signup;
-                                 // deliberately absent from EVENT_MAP so it never fires
-                                 // ad-pixel conversions
   | 'cta_click_upgrade'          // pricing tier "Start with X" buttons
   | 'free_tier_join'             // the dedicated Free banner CTA
   | 'pricing_interval_toggle'    // monthly/annual toggle on /pricing
   | 'pricing_compare_open'       // expand the comparison table
-  // Plan management (dashboard)
-  | 'plan_change_open'           // ChangePlanDialog opened
-  | 'plan_change_committed'      // user confirmed a plan change
-  | 'plan_cancel_open'           // CancelDialog opened
-  | 'plan_cancel_committed'      // user submitted a cancellation
   // Marketing
   | 'newsletter_signup'          // /api/newsletter success
   | 'contact_form_submit'        // homepage Contact form submitted
@@ -58,24 +50,7 @@ export type AnalyticsEvent =
   | 'partner_recruit_click'      // clicked the inline "Could you be here?" recruitment card
   | 'partner_summit_cta_click'   // clicked a summit-recruitment CTA on /partners
   | 'case_study_open'            // viewed a /case-studies/[slug] page
-  // Add-ons / referrals
-  | 'referral_link_copy'         // copied referral link from /benefits
-  | 'referral_share_click'       // clicked a ShareButtons network link
-  // Onboarding funnel (wizard + Birdeye provisioning)
-  | 'onboarding_wizard_start'    // first step viewed with zero completed steps (props: mode, package)
-  | 'onboarding_step_view'       // wizard step mounted (props: step, index, mode, package)
-  | 'onboarding_step_complete'   // Continue clicked on a step (props: step, index, mode, package)
-  | 'onboarding_launch_click'    // "Launch my Birdeye account" clicked (props: package, attempt)
-  | 'onboarding_provision_result'// terminal SSE outcome (props: status, failedSteps, package)
-  | 'onboarding_action_plan_view'// free-tier action plan rendered
-  | 'action_plan_upgrade_click'  // upgrade CTA clicked on the action plan
-  | 'checkout_success_return'    // landed on /onboarding/upgraded after Stripe checkout (props: tier)
-  // Shop (merch)
-  | 'shop_product_view'          // /shop/[slug] rendered (props: product)
-  | 'shop_add_to_cart'           // Add to cart clicked (props: sku, product, qty, member)
-  | 'shop_cart_view'             // /shop/cart rendered (props: lines)
-  | 'shop_checkout_start'        // Checkout clicked -> POST /api/shop/checkout (props: lines, subtotal, member)
-  | 'shop_purchase';             // landed on /shop/success (props: orderId, value)
+  | 'referral_share_click';      // clicked a ShareButtons network link
 
 export function track(
   event: AnalyticsEvent,
@@ -167,23 +142,8 @@ const EVENT_MAP: Partial<Record<AnalyticsEvent, PlatformMap>> = {
   partner_summit_cta_click: { ga4: 'partner_summit_cta_click', meta: 'Lead' },
   case_study_open:      { ga4: 'case_study_open', meta: 'ViewContent' },
 
-  // Referrals
-  referral_link_copy:   { ga4: 'share' },
+  // Sharing
   referral_share_click: { ga4: 'share' },
-
-  // Onboarding funnel — only the two acquisition-relevant moments fan out;
-  // the step-by-step wizard events are dashboard-only (PostHog).
-  action_plan_upgrade_click: { ga4: 'cta_click_upgrade', meta: 'Lead' },
-  checkout_success_return:   { ga4: 'checkout_success_return', meta: 'Subscribe' },
-
-  // Shop - standard e-commerce events on both platforms.
-  shop_product_view:   { ga4: 'view_item', meta: 'ViewContent' },
-  shop_add_to_cart:    { ga4: 'add_to_cart', meta: 'AddToCart' },
-  shop_cart_view:      { ga4: 'view_cart' },
-  shop_checkout_start: { ga4: 'begin_checkout', meta: 'InitiateCheckout' },
-  shop_purchase:       { ga4: 'purchase', meta: 'Purchase' },
-  // Plan-management events (plan_change_*, plan_cancel_*) intentionally
-  // omitted — they're dashboard-only and don't belong in acquisition pixels.
 };
 
 function trackPixelEvent(event: AnalyticsEvent, props: CleanProps): void {
@@ -202,24 +162,6 @@ function trackPixelEvent(event: AnalyticsEvent, props: CleanProps): void {
       window.lintrk('track', { conversion_id: Number(conversionId) });
     }
   }
-}
-
-/** Tie a PostHog person to a WorkOS user id post-signin so events on
- *  authenticated pages associate with the right profile. Deliberately takes
- *  no email: the WorkOS id joins to our own records and PII stays out of
- *  PostHog. No-op until PostHog is loaded (consent-gated). */
-export function identify(userId: string, traits?: { planTier?: string | null }) {
-  if (typeof window === 'undefined') return;
-  if (!posthog.__loaded) return;
-  posthog.identify(userId, {
-    planTier: traits?.planTier ?? 'free',
-  });
-}
-
-export function reset() {
-  if (typeof window === 'undefined') return;
-  if (!posthog.__loaded) return;
-  posthog.reset();
 }
 
 // ── A/B experiment harness ───────────────────────────────────────────────

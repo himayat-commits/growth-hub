@@ -51,13 +51,33 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Legacy → new URL redirects as we migrate the post-signup surface onto the
-  // mockup-derived dashboard shell. 301s so bookmarks + crawlers update.
+  // Legacy → new URL redirects so bookmarks, old emails and crawlers land on
+  // a live page (308 = permanent).
   async redirects() {
     return [
-      { source: '/portal', destination: '/dashboard', permanent: true },
-      { source: '/portal/:path*', destination: '/dashboard', permanent: true },
-      { source: '/account', destination: '/profile', permanent: true },
+      // The member portal, ops console and shop were removed in Oct 2026
+      // (code archived at tag archive/member-portal-and-shop-2026-10). They
+      // lived on my.thegrowthhub.com.au, which now just sends every request
+      // to the home page. /_next is left alone so a page already open on the
+      // old host can still load its assets.
+      {
+        source: '/:path((?!_next/).*)',
+        has: [{ type: 'host', value: 'my.thegrowthhub.com.au' }],
+        destination: 'https://thegrowthhub.com.au/',
+        permanent: true,
+      },
+      // Retired member entry points on the main site. Growth Hub Sites
+      // customers sign in at app.thegrowthhub.com.au ("Sign in to your site"
+      // in the footer), so these go to /sites.
+      { source: '/sign-in', destination: '/sites', permanent: true },
+      { source: '/sign-up', destination: '/sites', permanent: true },
+      { source: '/portal', destination: '/sites', permanent: true },
+      { source: '/portal/:path*', destination: '/sites', permanent: true },
+      { source: '/dashboard', destination: '/sites', permanent: true },
+      { source: '/plan', destination: '/sites', permanent: true },
+      { source: '/account', destination: '/sites', permanent: true },
+      { source: '/shop', destination: '/', permanent: true },
+      { source: '/shop/:path*', destination: '/', permanent: true },
       // Summit consolidation → the canonical "Entrepreneurship for Everyone"
       // landing page. The old working titles ("Small Business Journey",
       // "AI for Small Business") and the bare /expo path all funnel here.
