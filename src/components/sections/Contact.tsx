@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import Link from "next/link";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { track } from "@/lib/analytics";
@@ -12,7 +13,17 @@ const schema = z.object({
   email: z.string().email("A valid email is required"),
   business: z.string().optional(),
   message: z.string().optional(),
+  hp: z.string().optional(), // honeypot — see /api/contact
 });
+
+// Same off-screen trick as the newsletter honeypot (.gh-newsletter-hp).
+const HONEYPOT_STYLE = {
+  position: "absolute",
+  left: "-9999px",
+  width: 1,
+  height: 1,
+  overflow: "hidden",
+} as const;
 
 type FormValues = z.infer<typeof schema>;
 
@@ -36,19 +47,23 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
   const [focused, setFocused] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
+  // Random ref is client-only (rendering it on the server would mismatch on
+  // hydration), so it's set once after mount.
   useEffect(() => {
     const num = Math.floor(Math.random() * 900) + 100;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRef(`GH-${new Date().getFullYear()}-${num}`);
   }, []);
 
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  const nameValue = watch("name") ?? "";
+  const nameValue = useWatch({ control, name: "name" }) ?? "";
+  const emailValue = useWatch({ control, name: "email" });
 
   const toggleInterest = (i: string) => {
     setInterests((prev) => {
@@ -99,7 +114,7 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
                 </svg>
               </div>
               <h3>Your message is on its way.</h3>
-              <p>We&apos;ll reply to <strong>{watch("email")}</strong> within 48 hours — usually sooner.</p>
+              <p>We&apos;ll reply to <strong>{emailValue}</strong> within 48 hours — usually sooner.</p>
             </div>
           </div>
           <ContactStrip email={supportEmail} phone={phone} address={address} />
@@ -221,6 +236,12 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
               </label>
             </div>
 
+            {/* Honeypot — hidden from humans via CSS + aria. Bots will fill it. */}
+            <label style={HONEYPOT_STYLE} aria-hidden="true">
+              Leave this field blank:
+              <input type="text" tabIndex={-1} autoComplete="off" {...register("hp")} />
+            </label>
+
             <div className="cf2-sign">
               <div className="cf2-sign-line">
                 <span className="cf2-sign-lbl">Signed,</span>
@@ -258,6 +279,15 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
               <span>usually a reply within 48 hours</span>
               <span className="cf2-sep">·</span>
               <span>no newsletter, no drip sequence</span>
+              {/* Collection notice (APP 5). Darker than the fine print above
+                  so it clears 4.5:1 on the letter background. */}
+              <p style={{ flexBasis: "100%", margin: 0, color: "rgba(13,63,72,0.75)" }}>
+                We&apos;ll use these details to reply to you.{" "}
+                <Link href="/privacy" style={{ color: "var(--teal)", textDecoration: "underline" }}>
+                  Privacy policy
+                </Link>
+                .
+              </p>
             </div>
           </form>
         </div>
@@ -298,7 +328,7 @@ function ContactStrip({
       </div>
       <div className="cs-item">
         <span className="cs-lbl">Hours</span>
-        <span className="cs-val">Mon–Fri · 9am–5pm AEST</span>
+        <span className="cs-val">Mon–Fri · 9am–5pm Canberra time</span>
       </div>
     </div>
   );

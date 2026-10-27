@@ -18,7 +18,7 @@ export const SiteSettings: GlobalConfig = {
     {
       name: 'supportEmail',
       type: 'email',
-      defaultValue: 'hello@himayat.com.au',
+      defaultValue: 'hello@thegrowthhub.com.au',
     },
     {
       name: 'phone',
