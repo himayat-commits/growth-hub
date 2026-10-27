@@ -1,15 +1,21 @@
 import type { Metadata } from 'next';
+import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
 import BrowserMock from '@/components/sections/site/BrowserMock';
 import Questions from '@/components/sections/site/Questions';
 import { CONTACT, SITES, SITES_TRIALS_OPEN } from '@/lib/site';
 import { SESSION_FORMAT } from '@/lib/sessions';
 
+const TITLE = 'Growth Hub Sites — a website you can run yourself';
+const DESCRIPTION =
+  'Templates made for local businesses, an AI builder that drafts from your answers, and real people to check it with you. From A$39 a month.';
+
 export const metadata: Metadata = {
-  title: 'Growth Hub Sites — a website you can run yourself',
-  description:
-    'Templates made for local businesses, an AI builder that drafts from your answers, and real people to check it with you. From A$39 a month.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/sites' },
+  openGraph: { ...ogBase, title: TITLE, description: DESCRIPTION, url: '/sites' },
+  twitter: { ...twitterBase, title: TITLE, description: DESCRIPTION },
 };
 
 const FEATURES = [

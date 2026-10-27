@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ogBase, twitterBase } from './shared-metadata';
 import Link from 'next/link';
 import NewsletterStrip from '@/components/NewsletterStrip';
 import BrowserMock from '@/components/sections/site/BrowserMock';
@@ -14,11 +15,16 @@ import type { Event as PayloadEvent } from '@/payload-types';
 // The home page is built in code (it no longer renders the CMS "home" page
 // blocks): one story, three ways in, and the next real date on the calendar.
 
+const TITLE = 'Growth Hub by Himayat — Your business deserves to grow.';
+const DESCRIPTION =
+  'Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses and sole traders. A Social Traders Verified social enterprise.';
+
 export const metadata: Metadata = {
-  title: 'Growth Hub by Himayat — Your business deserves to grow.',
-  description:
-    'Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses and sole traders. A Social Traders Verified social enterprise.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/' },
+  openGraph: { ...ogBase, title: TITLE, description: DESCRIPTION, url: '/' },
+  twitter: { ...twitterBase, title: TITLE, description: DESCRIPTION },
 };
 
 export const revalidate = 3600;

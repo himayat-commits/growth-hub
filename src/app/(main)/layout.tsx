@@ -13,6 +13,7 @@ import Pixels from "@/components/analytics/Pixels";
 import ConsentGate from "@/components/analytics/ConsentGate";
 import ConsentBanner from "@/components/analytics/ConsentBanner";
 import { CartProvider } from "@/components/shop/CartProvider";
+import { ogBase, twitterBase } from "./shared-metadata";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegrowthhub.com.au";
@@ -50,22 +51,12 @@ export const metadata: Metadata = {
   // No `alternates.canonical` here: a layout-level canonical is inherited by
   // every child page that doesn't set its own, which pointed /pricing,
   // /case-studies/*, /signup/* at the homepage. The home page sets its own.
-  openGraph: {
-    title: "Growth Hub by Himayat",
-    description:
-      "Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses.",
-    url: SITE_URL,
-    siteName: "Growth Hub by Himayat",
-    locale: "en_AU",
-    type: "website",
-    // OG image comes from src/app/(main)/opengraph-image.tsx (file convention);
-    // /og-image.png never existed in public/.
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Growth Hub by Himayat",
-    description: "Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses.",
-  },
+  // Same reasoning for Open Graph: no url or title here, or every page that
+  // doesn't set its own `openGraph` shares the home page's card. Pages without
+  // one get og:title / og:description from their own title and description.
+  // OG image comes from src/app/(main)/opengraph-image.tsx (file convention).
+  openGraph: { ...ogBase },
+  twitter: { ...twitterBase },
 };
 
 export default function MainLayout({

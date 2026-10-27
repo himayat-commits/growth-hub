@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
 import NewsletterStrip from '@/components/NewsletterStrip';
 import SessionsCalendar from '@/components/sections/site/SessionsCalendar';
@@ -8,11 +9,16 @@ import { buildCalendar, LAB_STEPS, RUN_SHEET, SESSION_AREAS, SESSION_FORMAT, SES
 import { SUMMIT } from '@/lib/summit';
 import type { Event as PayloadEvent } from '@/payload-types';
 
+const TITLE = 'Sessions and Build Labs — Growth Hub by Himayat';
+const DESCRIPTION =
+  'Free monthly Growth Hub Sessions and hands-on Build Labs in Canberra. One practical topic a month, with time to work on your own business at the table.';
+
 export const metadata: Metadata = {
-  title: 'Sessions and Build Labs — Growth Hub by Himayat',
-  description:
-    'Free monthly Growth Hub Sessions and hands-on Build Labs in Canberra. One practical topic a month, with time to work on your own business at the table.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/events' },
+  openGraph: { ...ogBase, title: TITLE, description: DESCRIPTION, url: '/events' },
+  twitter: { ...twitterBase, title: TITLE, description: DESCRIPTION },
 };
 
 export const revalidate = 3600;

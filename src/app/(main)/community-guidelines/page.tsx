@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
+import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
 
 // Community guidelines + member-to-member services disclaimer for the public
-// site. Linked from the footer, the Community section on the home page, and
-// the partner profile / micro-site pages.
+// site. Linked from the footer.
 //
 // NOTE: Plain-English baseline written for launch (GTM review F6.11). Have the
 // disclaimer wording checked by someone qualified before relying on it — it is
@@ -11,12 +11,17 @@ import Link from 'next/link';
 
 const LAST_UPDATED = '9 September 2026';
 
+const TITLE = 'Community guidelines — Growth Hub by Himayat';
+const DESCRIPTION =
+  'How the Growth Hub community works: what we expect of members, how referrals work, and what we do and don’t vouch for.';
+
 export const metadata: Metadata = {
-  title: 'Community guidelines — Growth Hub by Himayat',
-  description:
-    'How the Growth Hub community works: what we expect of members, how referrals work, and what we do and don’t vouch for.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/community-guidelines' },
   robots: { index: true, follow: true },
+  openGraph: { ...ogBase, title: TITLE, description: DESCRIPTION, url: '/community-guidelines' },
+  twitter: { ...twitterBase, title: TITLE, description: DESCRIPTION },
 };
 
 // Same presentational helpers as /privacy so the two policy pages read alike.

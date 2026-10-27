@@ -1,12 +1,18 @@
 import type { Metadata } from 'next';
+import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
 import { PARTNER_NETWORK } from '@/lib/partner-network';
 
+const TITLE = 'Partners — Growth Hub by Himayat';
+const DESCRIPTION =
+  'Growth Hub works alongside the organisations Canberra small businesses already trust. Co-host a Session, present, or refer owners our way.';
+
 export const metadata: Metadata = {
-  title: 'Partners — Growth Hub by Himayat',
-  description:
-    'Growth Hub works alongside the organisations Canberra small businesses already trust. Co-host a Session, present, or refer owners our way.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/partners' },
+  openGraph: { ...ogBase, title: TITLE, description: DESCRIPTION, url: '/partners' },
+  twitter: { ...twitterBase, title: TITLE, description: DESCRIPTION },
 };
 
 const WAYS = [
