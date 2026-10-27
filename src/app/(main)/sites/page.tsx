@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
+import Image from 'next/image';
 import BrowserMock from '@/components/sections/site/BrowserMock';
 import Questions from '@/components/sections/site/Questions';
 import { CONTACT, SITES, SITES_TRIALS_OPEN } from '@/lib/site';
@@ -27,11 +28,14 @@ const FEATURES = [
   { h: 'Help from a person', p: "Step-by-step guides, and a real person when you're stuck." },
 ];
 
+// Screenshots of the four Growth Hub Sites templates (platform template sites
+// 111311–111314), captured 27 Oct 2026 at 1280×960. Re-capture when the
+// templates change.
 const TEMPLATES = [
-  { name: 'Café and food', note: 'Menu, hours, bookings', bg: '#E9D9C4' },
-  { name: 'Trades and services', note: 'Services, quotes, service area', bg: '#6FA0A8' },
-  { name: 'Health and wellbeing', note: 'Practitioners, appointments', bg: '#D5E2E5' },
-  { name: 'Community and care', note: 'Programs, referrals, contact', bg: '#ECDDE5' },
+  { name: 'Café and food', note: 'Menu, hours, bookings', img: '/images/templates/cafe.jpg' },
+  { name: 'Trades and services', note: 'Services, quotes, service area', img: '/images/templates/trades.jpg' },
+  { name: 'Health and wellbeing', note: 'Practitioners, appointments', img: '/images/templates/health.jpg' },
+  { name: 'Community and care', note: 'Programs, referrals, contact', img: '/images/templates/care.jpg' },
 ];
 
 export default function SitesPage() {
@@ -87,16 +91,21 @@ export default function SitesPage() {
               <span className="section-label">Templates</span>
               <h2 className="section-h2">Start from one made for your trade</h2>
             </div>
-            <p className="site-fine">Or let the AI builder draft one from your answers.</p>
+            <p className="site-fine">
+              Or let the AI builder draft one from your answers. Previews show each template&rsquo;s
+              sample content.
+            </p>
           </div>
           <div className="site-grid site-grid--small">
             {TEMPLATES.map((t) => (
               <div className="template-card" key={t.name}>
-                <div className="template-thumb" style={{ background: t.bg }} aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
+                <div className="template-thumb template-thumb--shot">
+                  <Image
+                    src={t.img}
+                    alt={`The ${t.name.toLowerCase()} template, as it looks on a computer screen`}
+                    fill
+                    sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 25vw"
+                  />
                 </div>
                 <h3>{t.name}</h3>
                 <p>{t.note}</p>
