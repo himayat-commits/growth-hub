@@ -73,8 +73,8 @@ function startPostHog(): void {
   // consented first load and on a mid-session Accept.
   posthog.capture('$pageview', { $current_url: window.location.href });
 
-  // Let one-shot consumers (PostHogIdentify) know they can now talk to the
-  // SDK — they mount before this provider's effect runs.
+  // Let one-shot consumers know they can now talk to the SDK — they mount
+  // before this provider's effect runs.
   window.dispatchEvent(new Event(POSTHOG_LOADED_EVENT));
 }
 

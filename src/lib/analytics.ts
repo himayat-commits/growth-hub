@@ -19,7 +19,7 @@ import posthog from 'posthog-js';
 
 /** Dispatched on window by PostHogProvider once posthog.init() has run.
  *  PostHog is consent-gated, so anything that wants to talk to the SDK on
- *  mount (PostHogIdentify) listens for this instead of assuming it's up. */
+ *  mount listens for this instead of assuming it's up. */
 export const POSTHOG_LOADED_EVENT = 'gh-posthog-loaded';
 
 declare global {
@@ -202,24 +202,6 @@ function trackPixelEvent(event: AnalyticsEvent, props: CleanProps): void {
       window.lintrk('track', { conversion_id: Number(conversionId) });
     }
   }
-}
-
-/** Tie a PostHog person to a WorkOS user id post-signin so events on
- *  authenticated pages associate with the right profile. Deliberately takes
- *  no email: the WorkOS id joins to our own records and PII stays out of
- *  PostHog. No-op until PostHog is loaded (consent-gated). */
-export function identify(userId: string, traits?: { planTier?: string | null }) {
-  if (typeof window === 'undefined') return;
-  if (!posthog.__loaded) return;
-  posthog.identify(userId, {
-    planTier: traits?.planTier ?? 'free',
-  });
-}
-
-export function reset() {
-  if (typeof window === 'undefined') return;
-  if (!posthog.__loaded) return;
-  posthog.reset();
 }
 
 // ── A/B experiment harness ───────────────────────────────────────────────
