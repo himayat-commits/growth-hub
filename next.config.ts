@@ -3,6 +3,13 @@ import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Renders src/app/global-not-found.tsx for URLs that match no route. Needed
+  // because there are several root layouts and no app/layout.tsx to host a
+  // root not-found page.
+  experimental: {
+    globalNotFound: true,
+  },
+
   images: {
     formats: ["image/avif", "image/webp"],
     localPatterns: [
