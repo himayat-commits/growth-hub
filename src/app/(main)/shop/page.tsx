@@ -11,11 +11,11 @@ import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 export const metadata: Metadata = {
   title: 'Shop — Growth Hub by Himayat',
   description:
-    'Growth Hub merch. Wear the community that has your back — every purchase helps fund local jobs in Canberra. Members with a paid plan get a discount.',
+    'Growth Hub merch. Wear the community that has your back — every purchase helps fund local jobs in Canberra.',
   alternates: { canonical: '/shop' },
   openGraph: {
     title: 'Growth Hub Shop',
-    description: 'Merch from the Growth Hub community. Members save on every order.',
+    description: 'Merch from the Growth Hub community. Every order helps fund local jobs in Canberra.',
     url: '/shop',
     type: 'website',
   },
@@ -40,7 +40,6 @@ export default async function ShopPage() {
           </h1>
           <p className="shop-lead">
             Merch for people building something local. Every order helps fund jobs in Canberra.
-            {isMember ? ' Your member price is already applied.' : ' Members with a paid plan save on every order.'}
           </p>
         </div>
       </section>

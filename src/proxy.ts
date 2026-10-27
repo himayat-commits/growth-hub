@@ -5,6 +5,7 @@ import {
 } from '@workos-inc/authkit-nextjs';
 import { NextRequest, NextResponse, type NextFetchEvent } from 'next/server';
 import { REF_CODE_PATTERN } from '@/lib/referral-code';
+import { PORTAL_PARKED } from '@/lib/portal';
 
 /**
  * Two hostname split:
@@ -63,8 +64,11 @@ const REF_COOKIE_MAX_AGE = 90 * 24 * 60 * 60; // 90 days
  *
  *  Uses Headers.append rather than NextResponse.cookies.set because the
  *  authkit middleware can return either a NextResponse or a plain Response
- *  depending on whether it short-circuits, and Headers.append works on both. */
+ *  depending on whether it short-circuits, and Headers.append works on both.
+ *
+ *  No-op while the portal is parked: there's no sign-up for it to attribute. */
 function attachReferralCookie(response: Response, request: NextRequest): Response {
+  if (PORTAL_PARKED) return response;
   const ref = request.nextUrl.searchParams.get('ref');
   if (!ref || !REF_CODE_PATTERN.test(ref)) return response;
   const cookie = `${REF_COOKIE_NAME}=${encodeURIComponent(ref)}; Path=/; Max-Age=${REF_COOKIE_MAX_AGE}; SameSite=Lax; HttpOnly`;

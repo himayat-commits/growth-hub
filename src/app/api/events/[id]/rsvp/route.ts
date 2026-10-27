@@ -6,6 +6,9 @@
 // .ics attached). DELETE removes the RSVP.
 //
 // Past events (Canberra calendar date before today) are rejected with 409.
+//
+// While the portal is parked, POST returns 410 so Sessions keep one
+// registration channel; DELETE still works so members can cancel.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -14,6 +17,7 @@ import { rsvpToEvent, cancelRsvp, type RsvpAttribution } from '@/lib/db/rsvps';
 import { getEventById } from '@/lib/cms';
 import { sendRsvpConfirmationEmail } from '@/lib/events-emails';
 import { canberraDateKey } from '@/lib/events-time';
+import { PORTAL_PARKED, portalParkedResponse } from '@/lib/portal';
 
 export const runtime = 'nodejs';
 
@@ -48,6 +52,8 @@ async function readAttributionCookie(slug?: string): Promise<RsvpAttribution | u
 }
 
 export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  if (PORTAL_PARKED) return portalParkedResponse();
+
   const { user } = await withAuth();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

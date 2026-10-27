@@ -25,6 +25,7 @@ import {
   type BillingInterval,
   type PaidPlanTier,
 } from '@/lib/plans';
+import { PORTAL_PARKED, portalParkedResponse } from '@/lib/portal';
 
 export const runtime = 'nodejs';
 
@@ -58,6 +59,10 @@ function classify(
 }
 
 export async function POST(req: NextRequest) {
+  // Portal parked: no up/downgrades. Blocks preview too, and commit would
+  // also clear cancel_at_period_end (un-cancel) on the subscription.
+  if (PORTAL_PARKED) return portalParkedResponse();
+
   const { user } = await withAuth();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

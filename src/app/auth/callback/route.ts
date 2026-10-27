@@ -8,6 +8,7 @@ import { attributeReferral } from '@/lib/db/referrals';
 import { getStrategistBySlug } from '@/lib/cms';
 import { escapeHtml, sendEmail } from '@/lib/email/send';
 import { syncContact } from '@/lib/hubspot/crm';
+import { PORTAL_PARKED } from '@/lib/portal';
 
 // Exchanges the WorkOS authorization code for a session cookie.
 // Configure this URL as a Redirect URI in dashboard.workos.com → Redirects.
@@ -29,7 +30,11 @@ export const GET = handleAuth({
         email: user.email,
       });
 
-      if (created) {
+      // Portal parked (stage 0): a brand-new user still gets the minimal
+      // profile row above, but no referral attribution, welcome
+      // notification/message/email or HubSpot contact — those promise a
+      // strategist and a Growth Call the parked portal can't deliver.
+      if (created && !PORTAL_PARKED) {
         // Referral attribution FIRST, in its own try: it must not be skipped
         // because welcome seeding threw (`created` is true exactly once, so a
         // missed attribution is lost forever). Reads the gh_ref cookie set by

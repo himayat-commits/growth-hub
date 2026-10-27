@@ -141,14 +141,6 @@ export default function CartPage({ cancelled }: { cancelled: boolean }) {
       <aside className="shop-summary" aria-label="Order summary">
         <h2>Summary</h2>
         <dl>
-          {cart.savingsCents > 0 && (
-            <>
-              <dt>Items</dt>
-              <dd>{formatAud(cart.listSubtotalCents)}</dd>
-              <dt>Member savings</dt>
-              <dd className="shop-savings">−{formatAud(cart.savingsCents)}</dd>
-            </>
-          )}
           <dt>Subtotal</dt>
           <dd>
             <strong>{formatAud(cart.subtotalCents)}</strong>

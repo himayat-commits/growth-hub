@@ -42,6 +42,7 @@ import {
   needFromHelpAreas,
   needLabel,
 } from '@/lib/advisory/needs';
+import { PORTAL_PARKED, portalParkedResponse } from '@/lib/portal';
 
 export const runtime = 'nodejs';
 
@@ -73,6 +74,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  // Portal parked: no new bookings (GET still lists a member's existing ones).
+  if (PORTAL_PARKED) return portalParkedResponse();
+
   const { user } = await withAuth();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
