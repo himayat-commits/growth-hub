@@ -26,13 +26,15 @@ export const revalidate = 3600;
 export default async function SessionsPage() {
   const docs = await getUpcomingEvents().catch(() => []);
   const rows = buildCalendar(docs as PayloadEvent[]);
-  // The December pilot (2 and 9 Dec) is off the 2nd/4th-Wednesday rhythm; say
-  // so until it has run.
-  const pilot = (kind: 'session' | 'lab') => {
-    const row = rows.find((r) => r.kind === kind && r.pilot);
+  // Sessions sit on the 2nd Wednesday and Labs on the 4th. Name the next
+  // upcoming date that breaks that rhythm (the December pilot, 2 and 9 Dec) so
+  // the card stays true; it drops off once that date has passed.
+  const offRhythm = (kind: 'session' | 'lab') => {
+    const nth = kind === 'session' ? 2 : 4;
+    const row = rows.find((r) => r.kind === kind && Math.ceil(Number(r.date.slice(8, 10)) / 7) !== nth);
     if (!row) return '';
-    const { day, month } = dateParts(row.date);
-    return ` from February · December pilot ${day} ${month}`;
+    const { day, month, long } = dateParts(row.date);
+    return ` · ${long.split(' ').pop()}'s is ${day} ${month}`;
   };
 
   return (
@@ -54,7 +56,7 @@ export default async function SessionsPage() {
           <div className="site-grid" style={{ gridTemplateColumns: '1fr' }}>
             <div className="site-card">
               <span className="site-tag site-tag--free">Session · {SESSION_FORMAT.session.price}</span>
-              <h3>Second Wednesday{pilot('session')}</h3>
+              <h3>Second Wednesday{offRhythm('session')}</h3>
               <p>
                 {SESSION_FORMAT.session.time} in {SESSION_VENUE.short}. Ninety
                 minutes, one topic, one change to make this week.
@@ -62,7 +64,7 @@ export default async function SessionsPage() {
             </div>
             <div className="site-card">
               <span className="site-tag site-tag--lab">Build Lab · {SESSION_FORMAT.lab.price}</span>
-              <h3>Fourth Wednesday{pilot('lab')}</h3>
+              <h3>Fourth Wednesday{offRhythm('lab')}</h3>
               <p>
                 {SESSION_FORMAT.lab.time}, same venue, in person. Bring a laptop and
                 leave with a website that&apos;s live.
@@ -197,7 +199,7 @@ export default async function SessionsPage() {
               },
               {
                 q: 'Can I watch online, or later?',
-                a: 'Not for the December pilot: Sessions are in person. Everyone who registers gets the slides and three next steps by email afterwards.',
+                a: 'Not for the 2026 pilot Sessions: they are in person. Everyone who registers gets the slides and three next steps by email afterwards.',
               },
               {
                 q: 'Can I bring an interpreter, or ask for other support?',
