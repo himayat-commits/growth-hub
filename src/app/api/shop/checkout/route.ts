@@ -22,6 +22,7 @@ import { attachSession, cancelOrder, createPendingOrder, type OrderLineInput } f
 import { indexPublishedSkus, productImages, variantListPrice } from '@/lib/shop/catalogue';
 import { memberPriceCents, variantLabel } from '@/lib/shop/pricing';
 import { MAX_CART_LINES, MAX_QTY_PER_LINE } from '@/lib/shop/types';
+import { CONTACT } from '@/lib/site';
 
 export const runtime = 'nodejs';
 
@@ -183,7 +184,7 @@ export async function POST(req: NextRequest) {
     Sentry.captureException(err, { tags: { area: 'shop.checkout' }, extra: { orderId: order.id } });
     await cancelOrder(order.id, 'Stripe session creation failed').catch(() => undefined);
     return NextResponse.json(
-      { error: "Couldn't start checkout just now. Give it another go, or email hello@himayat.com.au if it keeps happening." },
+      { error: `Couldn't start checkout just now. Give it another go, or email ${CONTACT.email} if it keeps happening.` },
       { status: 502 },
     );
   }

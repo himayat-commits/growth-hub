@@ -101,6 +101,12 @@ export async function POST(req: Request) {
       // so the form doesn't leak HubSpot internals.
       const detail = await res.text().catch(() => '');
       console.warn('[newsletter] HubSpot rejected submission', res.status, detail.slice(0, 200));
+      // 404 = wrong HUBSPOT_REGION or HUBSPOT_FORM_ID. That's our config, not
+      // the visitor's email — throw so it's logged + in Sentry and the
+      // visitor gets the generic error below.
+      if (res.status === 404) {
+        throw new Error(`HubSpot 404 (check HUBSPOT_REGION=${region} and HUBSPOT_FORM_ID): ${detail.slice(0, 120)}`);
+      }
       // Treat HubSpot's "already exists" / "INVALID_EMAIL" responses as
       // a 4xx the user should see, but anything else is a server problem.
       if (res.status >= 400 && res.status < 500) {

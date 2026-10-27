@@ -11,6 +11,7 @@ import { useHydratedCart, type CartRow } from './useHydratedCart';
 import { formatAud } from '@/lib/shop/pricing';
 import { track } from '@/lib/analytics';
 import { MAX_QTY_PER_LINE } from '@/lib/shop/types';
+import { CONTACT } from '@/lib/site';
 
 function LineItem({ row, highlight }: { row: CartRow; highlight: boolean }) {
   const { setQty, remove } = useCart();
@@ -94,12 +95,12 @@ export default function CartPage({ cancelled }: { cancelled: boolean }) {
         return;
       }
       if (!res.ok || !data.url) {
-        setError(data.error ?? "Couldn't start checkout just now. Give it another go, or email hello@himayat.com.au if it keeps happening.");
+        setError(data.error ?? `Couldn't start checkout just now. Give it another go, or email ${CONTACT.email} if it keeps happening.`);
         return;
       }
       window.location.assign(data.url);
     } catch {
-      setError("Couldn't start checkout just now. Give it another go, or email hello@himayat.com.au if it keeps happening.");
+      setError(`Couldn't start checkout just now. Give it another go, or email ${CONTACT.email} if it keeps happening.`);
     } finally {
       setCheckingOut(false);
     }

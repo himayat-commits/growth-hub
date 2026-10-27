@@ -137,13 +137,18 @@ provider that delivers real attachments. Resend's SDK reports failures as
 `/api/contact` also submits the enquiry to a HubSpot **form** (Forms v3
 integration endpoint, same host logic as `/api/newsletter`) when
 `HUBSPOT_CONTACT_FORM_ID` is set. Fields sent: `firstname`, `lastname` (split
-from the name), `email`, `message`, and — only when
-`HUBSPOT_CONTACT_FORM_HAS_INTERESTS=1` — `gh_interests`, a plain single-line
-text contact property holding the interest chips joined with `;`. HubSpot
-rejects a submission that carries a field the form doesn't have, so create
-the property and add it to the form before flipping that flag. Business name
-and the enquiry ref are in the email only (add a `company` field later if
-wanted). Context: `pageUri: growth-hub:contact`, `pageName: Contact form (<ref>)`.
+from the name), `email`, `company` (the form's "Business" field), `message`,
+and — only when `HUBSPOT_CONTACT_FORM_HAS_INTERESTS=1` — `gh_interests`, a
+plain single-line text contact property holding the interest chips joined
+with `;`. `lastname`, `company` and `message` are only sent when filled in.
+HubSpot rejects a submission that carries a field the form doesn't have, so
+create the property and add it to the form before flipping that flag. The
+enquiry ref goes in the email and the `pageName` only. Context:
+`pageUri: growth-hub:contact`, `pageName: Contact form (<ref>)`. A non-empty
+`hp` (honeypot) field gets a silent 200 and nothing is sent.
+
+The email goes to `CONTACT.email` (`src/lib/site.ts`, hello@thegrowthhub.com.au)
+unless `CONTACT_TO_EMAIL` is set.
 
 The form submit and the email are independent: the route returns
 `200 { ok: true, channels: ['hubspot', 'email'] }` if either landed, `503` if
@@ -153,7 +158,7 @@ neither is configured, `500` if everything configured failed.
 
 | Email | Trigger | To | From | Where |
 | --- | --- | --- | --- | --- |
-| Contact enquiry | `POST /api/contact` | hello@himayat.com.au (reply-to visitor) | Growth Hub noreply | `src/app/api/contact/route.ts` |
+| Contact enquiry | `POST /api/contact` | `CONTACT_TO_EMAIL` or hello@thegrowthhub.com.au (reply-to visitor) | Growth Hub noreply | `src/app/api/contact/route.ts` |
 | Welcome | first ever sign-in (WorkOS callback) | new member | "<strategist> via Growth Hub" noreply (reply-to strategist) | `src/app/auth/callback/route.ts` |
 | Team reply notification | staff reply in `/ops/inbox` | member | "<strategist> via Growth Hub" noreply | `src/app/api/ops/inbox/[userId]/route.ts` |
 | Service booking alert | `POST /api/service-bookings` | OPS_EMAIL (reply-to member) | Growth Hub noreply | `src/app/api/service-bookings/route.ts` |
@@ -182,4 +187,5 @@ RESEND_API_KEY=                    # fallback provider
 HUBSPOT_PORTAL_ID= / HUBSPOT_REGION=ap1   # shared with /api/newsletter
 HUBSPOT_CONTACT_FORM_ID=           # contact form → CRM
 HUBSPOT_CONTACT_FORM_HAS_INTERESTS=1      # only once gh_interests is on the form
+CONTACT_TO_EMAIL=                  # optional; blank = hello@thegrowthhub.com.au
 ```

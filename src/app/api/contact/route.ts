@@ -5,22 +5,26 @@
 //      integration endpoint, same mechanics as /api/newsletter) when
 //      HUBSPOT_CONTACT_FORM_ID is set, so it lands on the contact record with
 //      the form's own lifecycle / list / workflow automations.
-//   2. Email to ops — via sendEmail() (HubSpot single-send or Resend, see
-//      src/lib/email/send.ts).
+//   2. Email to the team — via sendEmail() (HubSpot single-send or Resend, see
+//      src/lib/email/send.ts), addressed to CONTACT.email (the public
+//      hello@thegrowthhub.com.au) unless CONTACT_TO_EMAIL overrides it.
 // The request succeeds (200) if EITHER channel lands; 503 only when neither
 // is configured at all; 500 when everything configured failed. The JSON says
 // which channels succeeded so the client can be honest.
 //
-// HubSpot form fields expected: firstname, lastname, email, message and an
-// optional single-line text property `gh_interests` (interest chips joined
-// with ';'). HubSpot rejects submissions carrying fields that are not on the
-// form, so if the form lacks `gh_interests` we simply don't send it — set
-// HUBSPOT_CONTACT_FORM_HAS_INTERESTS=1 once the property + field exist.
+// `hp` is a honeypot (same as /api/newsletter): non-empty → silent 200.
+//
+// HubSpot form fields expected: firstname, lastname, email, company, message
+// and an optional single-line text property `gh_interests` (interest chips
+// joined with ';'). HubSpot rejects submissions carrying fields that are not
+// on the form, so if the form lacks `gh_interests` we simply don't send it —
+// set HUBSPOT_CONTACT_FORM_HAS_INTERESTS=1 once the property + field exist.
 
 import { NextRequest, NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 import { rateLimit, clientIp, tooManyRequests } from "@/lib/rate-limit";
 import { escapeHtml, sendEmail } from "@/lib/email/send";
+import { CONTACT } from "@/lib/site";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -31,6 +35,7 @@ type ContactBody = {
   interests?: unknown;
   message?: unknown;
   ref?: unknown;
+  hp?: unknown;
 };
 
 const str = (v: unknown, max: number): string => (typeof v === "string" ? v.trim().slice(0, max) : "");
@@ -44,6 +49,11 @@ export async function POST(req: NextRequest) {
     body = (await req.json()) as ContactBody;
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  // Honeypot — bots fill hidden fields. Return success silently.
+  if (typeof body.hp === "string" && body.hp.trim().length > 0) {
+    return NextResponse.json({ ok: true, success: true });
   }
 
   const name = str(body.name, 200);
@@ -74,7 +84,7 @@ export async function POST(req: NextRequest) {
   const hubspotConfigured = Boolean(portalId && formId);
   if (portalId && formId) {
     try {
-      await submitToHubspotForm({ portalId, formId, name, email, message, interests, ref });
+      await submitToHubspotForm({ portalId, formId, name, email, business, message, interests, ref });
       channels.push("hubspot");
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);
@@ -84,7 +94,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // ── 2. Email to ops ─────────────────────────────────────────────────────
+  // ── 2. Email to the team ────────────────────────────────────────────────
   const businessLine = business || "no business listed";
   const interestLine = interests.length > 0 ? interests.join(", ") : "Not specified";
 
@@ -137,7 +147,7 @@ export async function POST(req: NextRequest) {
   ].join("\n");
 
   const emailResult = await sendEmail({
-    to: "hello@himayat.com.au",
+    to: process.env.CONTACT_TO_EMAIL?.trim() || CONTACT.email,
     replyTo: email,
     subject,
     html,
@@ -167,7 +177,7 @@ export async function POST(req: NextRequest) {
       tags: { area: "contact" },
     });
     return NextResponse.json(
-      { error: "Contact form is temporarily unavailable — email hello@himayat.com.au" },
+      { error: `Contact form is temporarily unavailable — email ${CONTACT.email}` },
       { status: 503 },
     );
   }
@@ -180,7 +190,7 @@ export async function POST(req: NextRequest) {
     extra: { failures, hubspotConfigured, emailProvider: emailResult.provider },
   });
   return NextResponse.json(
-    { error: "Failed to send message. Please email us directly." },
+    { error: `Failed to send message. Please email us directly at ${CONTACT.email}` },
     { status: 500 },
   );
 }
@@ -192,11 +202,12 @@ async function submitToHubspotForm(args: {
   formId: string;
   name: string;
   email: string;
+  business: string;
   message: string;
   interests: string[];
   ref: string;
 }): Promise<void> {
-  const { portalId, formId, name, email, message, interests, ref } = args;
+  const { portalId, formId, name, email, business, message, interests, ref } = args;
   const region = (process.env.HUBSPOT_REGION ?? "na1").toLowerCase();
   const apiHost = region === "na1" ? "api.hsforms.com" : `api-${region}.hsforms.com`;
   const url = `https://${apiHost}/submissions/v3/integration/submit/${portalId}/${formId}`;
@@ -212,6 +223,8 @@ async function submitToHubspotForm(args: {
     { objectTypeId: "0-1", name: "email", value: email },
   ];
   if (lastname) fields.push({ objectTypeId: "0-1", name: "lastname", value: lastname });
+  // The form's "Business" field → HubSpot's standard contact `company`.
+  if (business) fields.push({ objectTypeId: "0-1", name: "company", value: business });
   if (message) fields.push({ objectTypeId: "0-1", name: "message", value: message });
   // `gh_interests` is a plain single-line text contact property (NOT a
   // ticket field, no enumeration) so any chip label we add later still

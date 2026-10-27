@@ -11,6 +11,7 @@
 import { escapeHtml } from '@/lib/email/resend';
 import { formatAud, gstComponentCents } from '@/lib/shop/pricing';
 import type { Order, OrderItem } from '@/lib/db/schema';
+import { CONTACT } from '@/lib/site';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
 const ABN = process.env.SHOP_ABN ?? '';
@@ -78,7 +79,7 @@ function shell(inner: string): string {
   return `
   <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.55;max-width:600px;color:#0D3F48;">
     ${inner}
-    <p style="margin:24px 0 0;font-size:13px;color:#7A9098;">Questions? Reply to this email or write to hello@himayat.com.au.<br/>— The Growth Hub team</p>
+    <p style="margin:24px 0 0;font-size:13px;color:#7A9098;">Questions? Reply to this email or write to ${CONTACT.email}.<br/>— The Growth Hub team</p>
   </div>`;
 }
 
@@ -123,7 +124,7 @@ export function orderConfirmationEmail(order: Order, items: OrderItem[]): OrderE
     '',
     addr.length ? `Shipping to:\n${addr.join('\n')}` : null,
     '',
-    `We'll email tracking once it ships. Questions: hello@himayat.com.au`,
+    `We'll email tracking once it ships. Questions: ${CONTACT.email}`,
   ]
     .filter((l) => l !== null)
     .join('\n');
