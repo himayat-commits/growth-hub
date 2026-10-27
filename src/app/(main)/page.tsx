@@ -6,7 +6,7 @@ import GrowWord from '@/components/sections/site/GrowWord';
 import SessionTicket from '@/components/sections/site/SessionTicket';
 import { getUpcomingEvents } from '@/lib/cms';
 import { PROOF_NAMES } from '@/lib/partner-network';
-import { buildCalendar, dateParts, nextSession, SESSION_FORMAT } from '@/lib/sessions';
+import { buildCalendar, dateParts, nextSession, rowCta, SESSION_FORMAT } from '@/lib/sessions';
 import { CBRIN_DIGITAL_SOLUTIONS_URL } from '@/lib/site';
 import { SUMMIT } from '@/lib/summit';
 import type { Event as PayloadEvent } from '@/payload-types';
@@ -53,9 +53,9 @@ export default async function HomePage() {
   const next = nextSession(rows);
   const nextLab = rows.find((r) => r.kind === 'lab') ?? null;
   const season = rows.filter((r) => r.kind === 'session').slice(0, 5);
-  // One label per state: "Book a seat" goes to a booking, "See dates" to the calendar.
-  const bookLabel = next?.href ? 'Book a seat' : 'See dates';
-  const bookHref = next?.href ?? '/events#whats-on';
+  // One label per state: "Book a seat" once there's a booking link, "See
+  // details" for an event page without one, "See dates" for the calendar.
+  const { label: bookLabel, href: bookHref } = rowCta(next);
 
   return (
     <main className="has-sticky-cta">

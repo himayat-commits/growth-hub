@@ -3,12 +3,14 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getEventBySlug, getGenericEventSlugs, getUpcomingEvents } from '@/lib/cms';
 import { toPublicEvent } from '@/lib/events-data';
+import { isBeforeCanberraToday } from '@/lib/events-time';
 import {
   buildCalendar,
+  eventFacts,
   LAB_STEPS,
+  registerUrlOf,
   RUN_SHEET,
   SESSION_FORMAT,
-  seasonItemFor,
 } from '@/lib/sessions';
 import type { Event as PayloadEvent } from '@/payload-types';
 import NewsletterStrip from '@/components/NewsletterStrip';
@@ -70,11 +72,12 @@ export default async function GenericEventPage({ params }: { params: Params }) {
   if (ev.bespoke) redirect(`/events/${ev.slug}`);
 
   // Season Sessions and Build Labs get their format (tag, run sheet, three
-  // doors); anything else (a webinar, a one-off) renders as a plain event.
-  const season = seasonItemFor(doc as PayloadEvent);
+  // doors, and price and venue from code when the CMS leaves them blank);
+  // anything else (a webinar, a one-off) renders as a plain event.
+  const { season, price, location } = eventFacts(doc as PayloadEvent);
   const kind = season?.kind ?? 'other';
   const label = season ? SESSION_FORMAT[season.kind].label : ev.tag;
-  const registerUrl = (doc as { registerUrl?: string | null }).registerUrl ?? null;
+  const registerUrl = registerUrlOf(doc as PayloadEvent);
   const seats = (doc as { seats?: string | null }).seats ?? null;
 
   const upcoming = await getUpcomingEvents().catch(() => []);
@@ -82,11 +85,9 @@ export default async function GenericEventPage({ params }: { params: Params }) {
     .filter((r) => r.href !== `/events/${ev.slug}`)
     .slice(0, 3);
 
-  // Past events keep their page (SEO, recap) but must not invite RSVPs or
-  // calendar adds for a day that has already happened.
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const hasEnded = doc.date ? new Date(String(doc.date)).getTime() < startOfToday.getTime() : false;
+  // Past events keep their page (SEO, recap) but must not invite bookings or
+  // calendar adds for a day that has already happened (in Canberra).
+  const hasEnded = doc.date ? isBeforeCanberraToday(String(doc.date)) : false;
 
   return (
     <main>
@@ -110,7 +111,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
               <div>
                 <span className="cal-tags">
                   <span className={`site-tag${kind === 'lab' ? ' site-tag--lab' : kind === 'session' ? ' site-tag--free' : ''}`}>
-                    {season ? `Growth Hub ${label}` : label} · {ev.cost}
+                    {season ? `Growth Hub ${label}` : label} · {price}
                   </span>
                   {season?.area && <span>{season.area}{season.pilot ? ' · pilot' : ''}</span>}
                 </span>
@@ -187,7 +188,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
             <aside className="session-aside">
               <div className="session-book">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
-                  <span className="price">{ev.cost}</span>
+                  <span className="price">{price}</span>
                   {seats && !hasEnded && <span className="cal-seats">{seats}</span>}
                 </div>
                 <dl>
@@ -202,7 +203,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
                     )}
                   </dd>
                   <dt>Where</dt>
-                  <dd>{ev.location || 'Online'}</dd>
+                  <dd>{location || 'Online'}</dd>
                 </dl>
                 {hasEnded ? (
                   <>
@@ -211,12 +212,11 @@ export default async function GenericEventPage({ params }: { params: Params }) {
                   </>
                 ) : (
                   <>
-                    <RsvpMailtoLink
-                      slug={ev.slug}
-                      title={ev.title}
-                      registerUrl={registerUrl}
-                      label={registerUrl ? 'Book a seat' : undefined}
-                    />
+                    {registerUrl ? (
+                      <RsvpMailtoLink slug={ev.slug} title={ev.title} registerUrl={registerUrl} label="Book a seat" />
+                    ) : (
+                      <span className="cal-soon">Registration opens soon</span>
+                    )}
                     <AddToCalendarLink slug={ev.slug} title={ev.title} />
                   </>
                 )}

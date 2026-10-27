@@ -16,12 +16,12 @@ export default function ThreeDoors() {
       </div>
       <div className="site-card">
         <h3>Build Lab</h3>
-        <p>Build and publish your website with us in one morning, two weeks later.</p>
+        <p>Build and publish your website with us in one morning, a week or two later.</p>
         <Link className="site-link" href="/events#build-lab">How a Build Lab works</Link>
       </div>
       <div className="site-card">
         <h3>Stay connected</h3>
-        <p>The recording, next month&apos;s Session and one email a month.</p>
+        <p>The slides and three next steps, next month&apos;s Session and one email a month.</p>
       </div>
     </div>
   );

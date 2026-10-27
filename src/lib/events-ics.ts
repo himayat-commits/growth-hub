@@ -10,6 +10,7 @@
 // Pure function, no I/O.
 
 import { parseCanberraRange } from '@/lib/events-time';
+import { eventFacts } from '@/lib/sessions';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://thegrowthhub.com.au';
 
@@ -70,7 +71,8 @@ export function buildEventIcs(input: IcsEventInput, now: Date = new Date()): str
   const title = input.title || 'Event';
   const url = `${SITE_URL}/events/${input.slug}`;
   const meetingUrl = (input.meetingUrl ?? '').trim();
-  const location = (input.location ?? '').trim() || meetingUrl;
+  // Sessions and Build Labs fall back to the venue when `location` is blank.
+  const location = eventFacts({ date: input.dateIso, location: input.location }).location || meetingUrl;
   const description = [
     (input.description ?? '').trim(),
     meetingUrl ? `Join online: ${meetingUrl}` : '',

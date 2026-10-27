@@ -32,6 +32,7 @@
 import { getPayload, type Where } from 'payload';
 import config from '@payload-config';
 import { unstable_cache } from 'next/cache';
+import { canberraDateKey, canberraStartOfDay } from '@/lib/events-time';
 
 // Internal — returns the Payload instance (memoised within the Lambda lifecycle).
 async function getPayloadClient() {
@@ -469,12 +470,13 @@ export const getPartnersPage = cachedSafe(
 
 // ── Events ────────────────────────────────────────────────────────────────────
 
-/** All events with date >= today (or no date), sorted by date ascending. */
+/** All events on or after today's Canberra date, sorted by date ascending.
+ *  Canberra midnight, not the server's (UTC on Vercel), so an event keeps its
+ *  booking link for the whole of its day in Canberra. */
 export const getUpcomingEvents = cachedSafe(
   async (limit: number = 50) => {
     const payload = await getPayloadClient();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = canberraStartOfDay(canberraDateKey(new Date()));
     const { docs } = await payload.find({
       collection: 'events',
       where: {

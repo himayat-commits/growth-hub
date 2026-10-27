@@ -122,6 +122,24 @@ export function canberraStartOfDay(dateKey: string): Date {
 const TIME_RANGE_RE =
   /^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*[–\-]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/;
 
+function normaliseTime(timeStr: string): string {
+  return timeStr.toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+/** True when parseCanberraRange can read `timeStr` as a start–end range, e.g.
+ *  "12:00–1:30pm" or "9:30am–12:30pm". Anything else becomes an all-day event
+ *  in the .ics and JSON-LD, so the Events `time` field validates with this. */
+export function isCanberraTimeRange(timeStr: string): boolean {
+  return TIME_RANGE_RE.test(normaliseTime(timeStr));
+}
+
+/** Canberra calendar date of `dateIso` is before today's Canberra date. */
+export function isBeforeCanberraToday(dateIso: string, now: Date = new Date()): boolean {
+  const at = new Date(dateIso);
+  if (!dateIso || Number.isNaN(at.getTime())) return false;
+  return canberraDateKey(at) < canberraDateKey(now);
+}
+
 function to24(h: number, ampm: string): number {
   if (ampm === 'pm' && h < 12) return h + 12;
   if (ampm === 'am' && h === 12) return 0;
@@ -151,7 +169,7 @@ export function parseCanberraRange(
   });
 
   if (!timeStr) return allDay();
-  const match = timeStr.toLowerCase().replace(/\s+/g, ' ').trim().match(TIME_RANGE_RE);
+  const match = normaliseTime(timeStr).match(TIME_RANGE_RE);
   if (!match) return allDay();
 
   const [, sH, sM, sMer, eH, eM, eMer] = match;

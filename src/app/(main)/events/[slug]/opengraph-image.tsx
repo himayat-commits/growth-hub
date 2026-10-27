@@ -5,6 +5,7 @@
 import { ImageResponse } from 'next/og';
 import { getEventBySlug } from '@/lib/cms';
 import { toPublicEvent } from '@/lib/events-data';
+import { eventFacts } from '@/lib/sessions';
 import type { Event as PayloadEvent } from '@/payload-types';
 
 // Tells Next this is a route segment so generateStaticParams in the
@@ -21,11 +22,16 @@ export default async function EventOgImage({ params }: { params: Params }) {
   const doc = await getEventBySlug(slug);
   // Fall back to a generic placeholder card if the slug doesn't resolve.
   const ev = doc ? toPublicEvent(doc as PayloadEvent) : null;
+  // Sessions and Build Labs label themselves and default to the venue when
+  // the CMS `tag` / `location` are blank.
+  const facts = doc ? eventFacts(doc as PayloadEvent) : null;
+  const cmsTag = String((doc as { tag?: string | null } | null)?.tag ?? '').trim();
+  const seasonTag = facts?.season ? (facts.season.kind === 'lab' ? 'Build Lab' : 'Growth Hub Session') : '';
 
   const title = ev?.title ?? 'Growth Hub event';
   const dateLine = ev?.dateLong ?? '';
-  const tag = ev?.tag ?? 'Event';
-  const location = ev?.location ?? 'Canberra';
+  const tag = cmsTag || seasonTag || ev?.tag || 'Event';
+  const location = facts?.location || 'Canberra';
 
   // When the event has a co-host partner, surface their name in the
   // wordmark area. depth=1 on getEventBySlug populates `host` as an
