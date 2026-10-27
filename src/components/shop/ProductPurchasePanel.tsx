@@ -68,7 +68,7 @@ export default function ProductPurchasePanel({ product, isMember }: { product: P
 
   return (
     <div className="shop-buy">
-      <Price priceCents={priceCents} memberPriceCents={memberPrice} isMember={isMember} nudge size="lg" />
+      <Price priceCents={priceCents} memberPriceCents={memberPrice} isMember={isMember} size="lg" />
 
       {!single && axes.size && (
         <fieldset className="shop-axis">

@@ -14,6 +14,7 @@ import {
   type BillingInterval,
   type PlanTier,
 } from '@/lib/plans';
+import { PORTAL_PARKED, portalParkedResponse } from '@/lib/portal';
 
 export const runtime = 'nodejs';
 
@@ -24,6 +25,9 @@ interface CheckoutRequest {
 }
 
 export async function POST(req: NextRequest) {
+  // Portal parked: no new subscriptions (lapsed members can't rejoin either).
+  if (PORTAL_PARKED) return portalParkedResponse();
+
   const { user } = await withAuth();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

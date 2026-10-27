@@ -114,10 +114,12 @@ footer.foot :focus-visible {
 .nav-toggle span { width: 16px; height: 1.5px; background: var(--teal); position: relative; display: block; }
 .nav-toggle span::before, .nav-toggle span::after { content:''; position:absolute; left:0; width:16px; height:1.5px; background:var(--teal); }
 .nav-toggle span::before { top:-5px; } .nav-toggle span::after { top:5px; }
-.nav-drawer { position: absolute; top: 72px; left: 0; right: 0; display: none; flex-direction: column; background: rgba(243, 240, 231, 0.98); border-top: 1px solid rgba(13, 63, 72, 0.08); padding: 8px 0 16px; z-index: 49; }
+.nav-drawer { position: absolute; top: 72px; left: 0; right: 0; display: none; flex-direction: column; background: var(--eggshell); border-top: 1px solid rgba(13, 63, 72, 0.08); padding: 8px 0 16px; z-index: 49; }
 .nav-drawer.open { display: flex; }
 .nav-drawer a { padding: 14px var(--gutter); font-size: 18px; color: var(--teal); border-bottom: 1px solid rgba(13, 63, 72, 0.06); }
 .nav-drawer .nav-drawer-cta { padding: 16px var(--gutter); }
+/* `.nav-drawer a` outranks `.btn-primary`, which left the CTA teal-on-teal. */
+.nav-drawer .nav-drawer-cta .btn { padding: 13px 22px; color: var(--eggshell); border-bottom: 0; }
 .nav-contact { font-size: 16px; color: var(--teal); padding: 8px 4px; }
 .nav-contact:hover { text-decoration: underline; text-underline-offset: 4px; }
 .nav-links a, .nav-logo, .nav-contact { white-space: nowrap; }

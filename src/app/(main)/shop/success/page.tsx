@@ -7,6 +7,7 @@ import { getStripe } from '@/lib/stripe';
 import { getOrderBySessionId, getOrderItems } from '@/lib/db/orders';
 import { fulfilOrderFromSession, isShopSession } from '@/lib/shop/fulfil-order';
 import { formatAud, gstComponentCents } from '@/lib/shop/pricing';
+import { CONTACT } from '@/lib/site';
 import TrackOnMount from '@/components/TrackOnMount';
 import { OrderStatusBadge } from '@/components/shop/OrderStatusBadge';
 import ClearCartOnMount from './ClearCartOnMount';
@@ -115,7 +116,7 @@ export default async function ShopSuccessPage({
               <dd>{formatAud(order.subtotalCents)}</dd>
               {order.discountCents > 0 && (
                 <>
-                  <dt>Member savings</dt>
+                  <dt>Discount</dt>
                   <dd className="shop-savings">−{formatAud(order.discountCents)}</dd>
                 </>
               )}
@@ -130,20 +131,21 @@ export default async function ShopSuccessPage({
           </div>
         )}
 
+        {/* No "join to track orders" CTA while the member portal is parked:
+            the email receipt is the record. Signed-in members keep /orders. */}
         <div className="shop-success-ctas">
-          {user ? (
+          {user && (
             <Link href="/orders" className="btn btn-primary">
               View your orders
-            </Link>
-          ) : (
-            <Link href="/sign-up?redirect_url=%2Forders" className="btn btn-primary">
-              Join free to track orders
             </Link>
           )}
           <Link href="/shop" className="btn btn-secondary">
             Keep browsing
           </Link>
         </div>
+        <p className="shop-fine" style={{ marginTop: 16 }}>
+          Questions about your order? Email <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.
+        </p>
       </div>
     </main>
   );

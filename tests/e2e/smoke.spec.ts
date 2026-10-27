@@ -159,5 +159,6 @@ test("/api/checkout rejects tier:free with 400", async ({ request }) => {
   });
   // Either 401 (unauthenticated path runs first) or 400 (tier:free check).
   // Both confirm the endpoint is registered + can't be tricked into freeing.
-  expect([400, 401]).toContain(res.status());
+  // 410 while the member portal is parked (src/lib/portal.ts).
+  expect([400, 401, 410]).toContain(res.status());
 });

@@ -39,7 +39,7 @@ export default async function ProductOgImage({ params }: { params: Params }) {
             <span style={{ fontSize: 68, lineHeight: 1.05, letterSpacing: '-0.02em' }}>{name}</span>
             {price && <span style={{ fontSize: 40, color: '#E3F29C' }}>{price}</span>}
           </div>
-          <span style={{ fontSize: 22, color: 'rgba(243,240,231,0.7)' }}>Members save · Ships Australia-wide</span>
+          <span style={{ fontSize: 22, color: 'rgba(243,240,231,0.7)' }}>Ships Australia-wide</span>
         </div>
         {hero && (
           <div style={{ width: 520, height: '100%', display: 'flex', overflow: 'hidden' }}>

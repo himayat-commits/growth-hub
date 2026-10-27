@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import SignOutButton from "./SignOutButton";
-import { track } from "@/lib/analytics";
 import NavCartButton from "@/components/shop/NavCartButton";
 
 export interface NavItem {
@@ -18,10 +16,6 @@ export interface NavbarClientProps {
   navItems?: NavItem[] | null;
   ctaLabel?: string | null;
   ctaHref?: string | null;
-  /** Surface the auth state so we can show an account menu instead of the
-   *  "Sign Up Now" CTA when the user is signed in. */
-  isSignedIn?: boolean;
-  userEmail?: string | null;
 }
 
 const DEFAULT_NAV_ITEMS: NavItem[] = [
@@ -43,29 +37,13 @@ export default function NavbarClient({
   navItems,
   ctaLabel,
   ctaHref,
-  isSignedIn = false,
-  userEmail = null,
 }: NavbarClientProps) {
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  // Close the account menu when clicking outside it.
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onDown = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [menuOpen]);
 
   const resolvedItems = navItems && navItems.length > 0 ? navItems : DEFAULT_NAV_ITEMS;
-  // Signed-out visitors are pointed at the Sessions calendar, the front door
-  // to everything else now the member portal is parked. The label names where
+  // Visitors are pointed at the Sessions calendar, the front door to
+  // everything else now the member portal is parked. The label names where
   // it goes, not a booking that may not be open yet.
   const resolvedCtaLabel = ctaLabel ?? "See Session dates";
   const resolvedCtaHref = ctaHref ?? "/events#whats-on";
@@ -111,68 +89,10 @@ export default function NavbarClient({
           Contact
         </Link>
 
-        {isSignedIn ? (
-          <div className="nav-account" ref={menuRef}>
-            <Link
-              className="btn btn-primary nav-cta"
-              href={resolvedCtaHref}
-              onClick={() =>
-                track('cta_click_portal', {
-                  location: 'navbar',
-                  signedIn: isSignedIn,
-                })
-              }
-            >
-              {resolvedCtaLabel}
-              <ArrowIcon />
-            </Link>
-            <button
-              type="button"
-              className="nav-account-toggle"
-              aria-label="Account menu"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              <span aria-hidden="true" className="nav-account-avatar">
-                {(userEmail?.[0] ?? "?").toUpperCase()}
-              </span>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            {menuOpen && (
-              <div className="nav-account-menu" role="menu">
-                {userEmail && (
-                  <p className="nav-account-email" title={userEmail}>
-                    {userEmail}
-                  </p>
-                )}
-                {/* "My Growth Hub" is already a pill to the left of this menu,
-                    so it only appears here at the 720–900px window where that
-                    pill is hidden — avoids duplicating the same action twice. */}
-                <Link role="menuitem" className="nav-account-portal-link" href="/portal" onClick={() => setMenuOpen(false)}>
-                  My Growth Hub
-                </Link>
-                <Link role="menuitem" href="/profile" onClick={() => setMenuOpen(false)}>
-                  Profile &amp; settings
-                </Link>
-                <Link role="menuitem" href="/plan" onClick={() => setMenuOpen(false)}>
-                  Plan &amp; billing
-                </Link>
-                <Link role="menuitem" href="/orders" onClick={() => setMenuOpen(false)}>
-                  My orders
-                </Link>
-                <div className="nav-account-divider" />
-                <SignOutButton className="nav-account-signout" />
-              </div>
-            )}
-          </div>
-        ) : (
-          <Link className="btn btn-primary nav-cta" href={resolvedCtaHref}>
-            {resolvedCtaLabel}
-            <ArrowIcon />
-          </Link>
-        )}
+        <Link className="btn btn-primary nav-cta" href={resolvedCtaHref}>
+          {resolvedCtaLabel}
+          <ArrowIcon />
+        </Link>
 
         <button
           className="nav-toggle"
@@ -206,20 +126,6 @@ export default function NavbarClient({
           <Link href="/about#contact" onClick={() => setOpen(false)}>
             Contact
           </Link>
-          {isSignedIn && (
-            <>
-              <Link href="/profile" onClick={() => setOpen(false)}>
-                Profile &amp; settings
-              </Link>
-              <Link href="/plan" onClick={() => setOpen(false)}>
-                Plan &amp; billing
-              </Link>
-              <Link href="/orders" onClick={() => setOpen(false)}>
-                My orders
-              </Link>
-              <SignOutButton className="nav-drawer-signout" />
-            </>
-          )}
           <div className="nav-drawer-cta">
             <Link className="btn btn-primary" href={resolvedCtaHref} onClick={() => setOpen(false)}>
               {resolvedCtaLabel}

@@ -5,22 +5,12 @@
  * always matches the pages that exist; the CMS `navigation` global is no
  * longer read here.
  *
- * Signed-in visitors keep a portal entry point ("My Growth Hub" → /portal) so
- * existing members can still reach their account while the portal is parked.
+ * The member portal is parked, so the public nav no longer reads the session
+ * or shows a signed-in account menu: everyone gets the same nav. Existing
+ * members reach their account via /sign-in (portal pages bounce there too).
  */
-import { withAuth } from "@workos-inc/authkit-nextjs";
 import NavbarClient from "@/components/NavbarClient";
 
-export default async function Navbar() {
-  const auth = await withAuth().catch(() => ({ user: null }));
-  const isSignedIn = !!auth.user;
-
-  return (
-    <NavbarClient
-      ctaLabel={isSignedIn ? "My Growth Hub" : null}
-      ctaHref={isSignedIn ? "/portal" : null}
-      isSignedIn={isSignedIn}
-      userEmail={auth.user?.email ?? null}
-    />
-  );
+export default function Navbar() {
+  return <NavbarClient />;
 }
