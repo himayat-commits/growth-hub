@@ -1,8 +1,9 @@
 // Growth Hub Sessions: the published season plan, merged with the CMS.
 //
 // Free Sessions run on the 2nd Wednesday (12:00–1:30) and paid Build Labs on
-// the 4th Wednesday (9:30–12:30) from February; the December pilot is 2 and
-// 9 Dec. SEASON is the plan we publish; bookings live on the matching Payload
+// the 4th Wednesday (9:30–12:30). The 2026 pilot runs in November (11 and
+// 25 Nov, on that rhythm) and December (2 and 9 Dec, off it); the season
+// proper starts in February. SEASON is the plan we publish; bookings live on the matching Payload
 // event (same Canberra date). "Book a seat" shows only once that event has a
 // registerUrl; until then the date links to its event page ("See details").
 // Upcoming CMS events that aren't part of the season (webinars, one-offs)
@@ -49,6 +50,8 @@ interface SeasonItem {
 const LAB_TITLE = 'Build and publish your website';
 
 export const SEASON: SeasonItem[] = [
+  { date: '2026-11-11', kind: 'session', area: 'Get started', title: 'Digital set-up that saves hours', pilot: true },
+  { date: '2026-11-25', kind: 'lab', title: LAB_TITLE, pilot: true },
   { date: '2026-12-02', kind: 'session', area: 'Get found', title: 'Be found and chosen online', pilot: true },
   { date: '2026-12-09', kind: 'lab', title: LAB_TITLE, pilot: true },
   { date: '2027-02-10', kind: 'session', area: 'Get found', title: 'Marketing that works in 2027' },
