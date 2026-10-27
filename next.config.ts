@@ -67,6 +67,12 @@ const nextConfig: NextConfig = {
       { source: '/expo/apply', destination: '/events/entrepreneurship-for-everyone', permanent: true },
       { source: '/contact', destination: '/about#contact', permanent: true },
       { source: '/sessions', destination: '/events', permanent: true },
+      // Partner pages (Oct 2026): the co-branded /with/{slug} micro-sites and
+      // the legacy /partners/{slug} profiles are retired in favour of the one
+      // /partners page. The lookahead stops /partners' own generated share
+      // image (/partners/opengraph-image-…) being redirected with them.
+      { source: '/with/:slug', destination: '/partners', permanent: true },
+      { source: '/partners/:slug((?!opengraph-image|twitter-image).+)', destination: '/partners', permanent: true },
       // Hidden until there are real stories and articles to show — temporary
       // (307) so the URLs can come back without fighting browser caches.
       { source: '/case-studies', destination: '/', permanent: false },

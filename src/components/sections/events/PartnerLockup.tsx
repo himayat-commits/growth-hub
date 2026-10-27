@@ -47,7 +47,7 @@ export function PartnerLockup({
     return (
       <Link
         key={String(p.id ?? p.slug)}
-        href={`/partners/${p.slug}`}
+        href="/partners"
         className="event-partner-chip"
         style={{
           display: 'inline-flex',

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
-import { getPublicEvents, getPartners, getProductSlugs } from '@/lib/cms';
+import { getPublicEvents } from '@/lib/cms';
+import { canberraDateKey } from '@/lib/events-time';
 
 // Canonical production host. The Vercel deployment URL and any preview
 // hosts fall back to this so search engines don't index split content.
@@ -11,7 +12,7 @@ type Doc = { slug?: string | null; updatedAt?: string | null; date?: string | nu
 // titles 301 there (next.config.ts redirects) and the canonical slug is
 // already in staticPages — listing them from the CMS would put redirecting
 // and duplicate URLs in the sitemap. Mirrors SUMMIT_SLUGS in
-// src/app/(main)/events/page.tsx.
+// src/lib/sessions.ts.
 const SUMMIT_SLUGS = new Set([
   'small-business-journey',
   'ai-for-small-business-9-july',
@@ -32,12 +33,11 @@ function entry(
   };
 }
 
+// Only the public marketing pages and upcoming events. Partner profiles and
+// /with/{slug} micro-sites are retired (they 308 to /partners), and /shop and
+// its products are left out while the shop is hidden (still reachable by URL).
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [events, partners, productSlugs] = await Promise.all([
-    getPublicEvents(100).catch(() => [] as Doc[]),
-    getPartners().catch(() => null),
-    getProductSlugs().catch(() => [] as Array<{ slug: string; updatedAt: string }>),
-  ]);
+  const events = await getPublicEvents(100).catch(() => [] as Doc[]);
 
   const staticPages: MetadataRoute.Sitemap = [
     entry('/', null, 'weekly', 1),
@@ -46,38 +46,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/sites', null, 'monthly', 0.9),
     entry('/partners', null, 'monthly', 0.7),
     entry('/about', null, 'monthly', 0.7),
-    entry('/shop', null, 'weekly', 0.5),
     entry('/privacy', null, 'yearly', 0.3),
     entry('/community-guidelines', null, 'yearly', 0.4),
   ];
 
+  // Upcoming = on or after today's date in Canberra (not server/UTC
+  // midnight), so an event stays listed for the whole of its day.
+  const today = canberraDateKey(new Date());
   const eventEntries: MetadataRoute.Sitemap = (events as Doc[])
-    .filter((e): e is Doc & { slug: string } => Boolean(e.slug) && !SUMMIT_SLUGS.has(e.slug as string))
+    .filter(
+      (e): e is Doc & { slug: string; date: string } =>
+        Boolean(e.slug) &&
+        !SUMMIT_SLUGS.has(e.slug as string) &&
+        Boolean(e.date) &&
+        canberraDateKey(new Date(e.date as string)) >= today,
+    )
     .map((e) => entry(`/events/${e.slug}`, e.updatedAt ?? e.date, 'weekly', 0.7));
 
-  const partnerDocs = (partners?.docs ?? []) as Doc[];
-  const partnerSlugDocs = partnerDocs.filter(
-    (p): p is Doc & { slug: string } => Boolean(p.slug),
-  );
-  // Each partner gets two indexed URLs: the directory profile
-  // (/partners/{slug}) and the co-branded campaign micro-site
-  // (/with/{slug}). Both pre-render at build time and are linked from
-  // each other, so it's worth exposing both to crawlers — the micro-
-  // site is what partners hand to their audience and ranks for the
-  // "Growth Hub × {Partner}" query.
-  const partnerEntries: MetadataRoute.Sitemap = partnerSlugDocs.flatMap((p) => [
-    entry(`/partners/${p.slug}`, p.updatedAt, 'monthly', 0.6),
-    entry(`/with/${p.slug}`, p.updatedAt, 'monthly', 0.6),
-  ]);
-
-  const productEntries: MetadataRoute.Sitemap = productSlugs.map((p) =>
-    entry(`/shop/${p.slug}`, p.updatedAt, 'weekly', 0.7),
-  );
-
-  return [
-    ...staticPages,
-    ...eventEntries,
-    ...partnerEntries,
-    ...productEntries,
-  ];
+  return [...staticPages, ...eventEntries];
 }

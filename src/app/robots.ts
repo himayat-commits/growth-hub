@@ -9,10 +9,15 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       // Member app, staff console, CMS admin, API and transactional shop pages
       // are auth-gated or per-session; keep their sign-in redirects out of
-      // the index.
+      // the index. Same for the sign-in / sign-up / auth callback routes and
+      // the parked /portal.
       disallow: [
         "/api/",
         "/admin",
+        "/sign-in",
+        "/sign-up",
+        "/auth",
+        "/portal",
         "/dashboard",
         "/ops",
         "/orders",
