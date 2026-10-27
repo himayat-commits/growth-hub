@@ -1571,6 +1571,9 @@ a.cal-title:hover { text-decoration: underline; text-underline-offset: 4px; }
 .template-thumb i:nth-child(2) { height: 46%; background: rgba(255, 255, 255, 0.45); }
 .template-thumb i:nth-child(3) { height: 12px; width: 80%; }
 .template-thumb i:nth-child(4) { height: 12px; width: 60%; }
+/* Real template screenshots (4:3 desktop captures) instead of the drawn bars. */
+.template-thumb--shot { position: relative; aspect-ratio: 4 / 3; padding: 0; overflow: hidden; border-radius: 16px; border: 1px solid var(--eggshell-line); background: var(--eggshell-warm); }
+.template-thumb--shot img { object-fit: cover; object-position: top center; }
 .template-card h3 { font-size: 20px; font-weight: 600; margin: 0; }
 .template-card p { margin: 0; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 14px; color: var(--fg-muted); }
 
