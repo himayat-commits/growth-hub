@@ -50,7 +50,7 @@ export default function AboutPage() {
             </div>
             <ul className="lab-steps" style={{ gap: 10 }}>
               <li className="site-card" style={{ padding: 18 }}>
-                <p><b>Free monthly Sessions</b> on one practical topic, at CBRIN in Canberra.</p>
+                <p><b>Free monthly Sessions</b> on one practical topic, in Canberra.</p>
               </li>
               <li className="site-card" style={{ padding: 18 }}>
                 <p><b>Build Labs</b>, where owners build and publish their website in a morning.</p>

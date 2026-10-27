@@ -42,7 +42,7 @@ export default async function SessionsPage() {
               <span className="site-tag site-tag--free">Session · {SESSION_FORMAT.session.price}</span>
               <h3>Second Wednesday, {SESSION_FORMAT.session.time}</h3>
               <p>
-                At {SESSION_VENUE.short}, and streamed for anyone who can&apos;t be
+                In {SESSION_VENUE.short}, and streamed for anyone who can&apos;t be
                 there. Ninety minutes, one topic, one change to make this week.
               </p>
             </div>

@@ -140,7 +140,7 @@ export default async function HomePage() {
             </p>
             <div className="site-ctas" style={{ marginTop: 28 }}>
               <Link className="btn btn-lime" href="/sites">See plans and templates</Link>
-              <span className="site-fine">From A$39 a month · 14-day free trial</span>
+              <span className="site-fine">From A$39 a month</span>
             </div>
           </div>
           <BrowserMock />

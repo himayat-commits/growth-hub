@@ -22,14 +22,17 @@ export const SESSION_AREAS: Array<{ area: SessionArea; blurb: string }> = [
   { area: 'Stay safe', blurb: 'MFA, backups and your privacy duties, in plain English.' },
 ];
 
-export const SESSION_VENUE = {
-  short: 'CBRIN, 1 Moore St',
-  full: 'CBR Innovation Network, Level 4, 1 Moore St, Canberra',
-};
+// The room at CBRIN (1 Moore St) is requested but not yet confirmed. Flip this
+// to true once CBRIN agrees and every venue line on the site updates together.
+const VENUE_CONFIRMED = false;
+
+export const SESSION_VENUE = VENUE_CONFIRMED
+  ? { short: 'CBRIN, 1 Moore St', row: 'CBRIN' }
+  : { short: 'Canberra city, venue to be confirmed', row: 'Canberra city · venue TBC' };
 
 export const SESSION_FORMAT: Record<'session' | 'lab', { label: string; price: string; time: string; where: string }> = {
-  session: { label: 'Session', price: 'Free', time: '12:00–1:30pm', where: 'CBRIN · and streamed' },
-  lab: { label: 'Build Lab', price: 'A$179', time: '9:30am–12:30pm', where: 'CBRIN · in person' },
+  session: { label: 'Session', price: 'Free', time: '12:00–1:30pm', where: VENUE_CONFIRMED ? 'CBRIN · and streamed' : SESSION_VENUE.row },
+  lab: { label: 'Build Lab', price: 'A$179', time: '9:30am–12:30pm', where: VENUE_CONFIRMED ? 'CBRIN · in person' : SESSION_VENUE.row },
 };
 
 interface SeasonItem {

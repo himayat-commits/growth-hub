@@ -2,13 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import BrowserMock from '@/components/sections/site/BrowserMock';
 import Questions from '@/components/sections/site/Questions';
-import { CONTACT, SITES } from '@/lib/site';
+import { CONTACT, SITES, SITES_TRIALS_OPEN } from '@/lib/site';
 import { SESSION_FORMAT } from '@/lib/sessions';
 
 export const metadata: Metadata = {
   title: 'Growth Hub Sites — a website you can run yourself',
   description:
-    'Templates made for local businesses, an AI builder that drafts from your answers, and real people to check it with you. From A$39 a month, with a 14-day free trial.',
+    'Templates made for local businesses, an AI builder that drafts from your answers, and real people to check it with you. From A$39 a month.',
   alternates: { canonical: '/sites' },
 };
 
@@ -41,10 +41,18 @@ export default function SitesPage() {
               your answers, and real people to check it with you before it goes live.
             </p>
             <div className="site-ctas" style={{ marginBottom: 20 }}>
-              <a className="btn btn-primary" href={SITES.trialMonthly}>Start a 14-day free trial</a>
+              {SITES_TRIALS_OPEN ? (
+                <a className="btn btn-primary" href={SITES.trialMonthly}>Start a 14-day free trial</a>
+              ) : (
+                <Link className="btn btn-primary" href="/about#contact">Talk to us</Link>
+              )}
               <Link className="btn btn-secondary" href="/events#build-lab">Build it with us at a Lab</Link>
             </div>
-            <p className="site-fine">No card for the trial · Prices in AUD, including GST · Cancel any time</p>
+            <p className="site-fine">
+              {SITES_TRIALS_OPEN
+                ? 'No card for the trial · Prices in AUD, including GST · Cancel any time'
+                : 'Self-serve sign-up opens soon · Prices in AUD, including GST'}
+            </p>
           </div>
           <BrowserMock address="yourtrade.com.au" name="Your trade" headline="Licensed, local and on time" action="Get a quote" />
         </div>
@@ -121,7 +129,7 @@ export default function SitesPage() {
               <div className="plan-price">
                 <b>A$39<small> a month</small></b>
                 <span className="site-fine" style={{ textAlign: 'left' }}>
-                  or <a href={SITES.trialAnnual} style={{ textDecoration: 'underline' }}>A$390 a year</a> (two months free)
+                  or {SITES_TRIALS_OPEN ? <a href={SITES.trialAnnual} style={{ textDecoration: 'underline' }}>A$390 a year</a> : 'A$390 a year'} (two months free)
                 </span>
               </div>
               <ul>
@@ -131,8 +139,14 @@ export default function SitesPage() {
                 <li>The app version of your site</li>
                 <li>Support from a person</li>
               </ul>
-              <a className="btn btn-primary" href={SITES.trialMonthly}>Start 14-day free trial</a>
-              <span className="site-fine">No card needed to start</span>
+              {SITES_TRIALS_OPEN ? (
+                <a className="btn btn-primary" href={SITES.trialMonthly}>Start 14-day free trial</a>
+              ) : (
+                <Link className="btn btn-primary" href="/about#contact">Talk to us</Link>
+              )}
+              <span className="site-fine">
+                {SITES_TRIALS_OPEN ? 'No card needed to start' : '14-day free trial when self-serve sign-up opens'}
+              </span>
             </div>
 
             <div className="plan">
@@ -180,13 +194,18 @@ export default function SitesPage() {
                 q: 'Where is my data kept?',
                 a: 'Sites are hosted in Sydney. Images you upload are stored in the United States. The Growth Hub Sites privacy policy, shown when you sign up, has the details.',
               },
-              {
-                q: 'What happens when the trial ends?',
-                a: 'Nothing is charged during the 14-day trial and no card is needed to start. To keep your site live on Storefront afterwards, choose monthly or yearly billing.',
-              },
+              SITES_TRIALS_OPEN
+                ? {
+                    q: 'What happens when the trial ends?',
+                    a: 'Nothing is charged during the 14-day trial and no card is needed to start. To keep your site live on Storefront afterwards, choose monthly or yearly billing.',
+                  }
+                : {
+                    q: 'Is there a free trial?',
+                    a: "Yes: 14 days, with no card needed. Self-serve sign-up opens soon. Until then, talk to us and we'll let you know as soon as it's ready.",
+                  },
               {
                 q: 'Do I need to come to a Build Lab?',
-                a: "No. You can start a trial and build it yourself; the help articles walk you through it. A Build Lab is for people who'd rather do it with someone beside them.",
+                a: "No. You can build it yourself; the help articles walk you through it. A Build Lab is for people who'd rather do it with someone beside them.",
               },
             ]}
           />

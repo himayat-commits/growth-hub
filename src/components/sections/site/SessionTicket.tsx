@@ -43,7 +43,7 @@ export default function SessionTicket({
                 <>
                   {when.long} · {session.time}
                   <br />
-                  {SESSION_VENUE.short}, Canberra · and streamed
+                  {SESSION_VENUE.short} · and streamed
                 </>
               ) : (
                 'Get the monthly email to hear about the next season first.'
