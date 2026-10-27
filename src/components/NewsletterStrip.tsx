@@ -10,17 +10,20 @@ export interface NewsletterStripProps {
   /** Override the default heading + sub if the page has a stronger angle. */
   heading?: string;
   sub?: string;
+  /** Button label. */
+  cta?: string;
 }
 
 export default function NewsletterStrip({
   source,
   heading = 'Get the Growth Hub digest.',
   sub = "One monthly email. Three things worth knowing — workshops, member wins, the occasional resource. No drip sequence.",
+  cta = 'Subscribe',
 }: NewsletterStripProps) {
   return (
     <section className="gh-newsletter-strip" aria-label="Newsletter signup">
       <div className="wrap">
-        <NewsletterForm source={source} heading={heading} sub={sub} />
+        <NewsletterForm source={source} heading={heading} sub={sub} cta={cta} />
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Source_Serif_4 } from "next/font/google";
+import { Inter, Source_Serif_4 } from "next/font/google";
 import localFont from "next/font/local";
 import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import "../globals.css";
@@ -26,6 +26,12 @@ const sourceSerif = Source_Serif_4({
   weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
   variable: "--font-serif",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -68,7 +74,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-AU" className={`${sourceSerif.variable} ${biroScript.variable}`}>
+    <html lang="en-AU" className={`${sourceSerif.variable} ${inter.variable} ${biroScript.variable}`}>
       <body>
         <AuthKitProvider>
           <PostHogProvider>

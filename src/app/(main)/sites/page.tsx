@@ -198,7 +198,7 @@ export default function SitesPage() {
           <div className="site-panel site-panel--lime">
             <h2 className="section-h2">Not sure where to start? Come to a free Session first.</h2>
             <div>
-              <Link className="btn btn-primary" href="/events">See what&apos;s on</Link>
+              <Link className="btn btn-primary" href="/events#whats-on">See Session dates</Link>
             </div>
           </div>
         </div>

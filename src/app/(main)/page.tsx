@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import NewsletterStrip from '@/components/NewsletterStrip';
 import BrowserMock from '@/components/sections/site/BrowserMock';
 import GrowWord from '@/components/sections/site/GrowWord';
-import SessionDate from '@/components/sections/site/SessionDate';
+import SessionTicket from '@/components/sections/site/SessionTicket';
 import { getUpcomingEvents } from '@/lib/cms';
 import { PROOF_NAMES } from '@/lib/partner-network';
 import { buildCalendar, dateParts, nextSession, SESSION_FORMAT } from '@/lib/sessions';
@@ -52,14 +51,17 @@ export default async function HomePage() {
   const docs = await getUpcomingEvents().catch(() => []);
   const rows = buildCalendar(docs as PayloadEvent[]);
   const next = nextSession(rows);
+  const nextLab = rows.find((r) => r.kind === 'lab') ?? null;
   const season = rows.filter((r) => r.kind === 'session').slice(0, 5);
+  // One label per state: "Book a seat" goes to a booking, "See dates" to the calendar.
+  const bookLabel = next?.href ? 'Book a seat' : 'See dates';
+  const bookHref = next?.href ?? '/events#whats-on';
 
   return (
     <main className="has-sticky-cta">
       <section className="site-hero">
         <div className="wrap site-split">
           <div>
-            <span className="section-label">Growth Hub by Himayat · Canberra and region</span>
             <h1 className="hero-h1">
               Your business deserves to <GrowWord />.
             </h1>
@@ -69,36 +71,12 @@ export default async function HomePage() {
               you&apos;re starting from.
             </p>
             <div className="site-ctas" style={{ marginBottom: 20 }}>
-              <Link className="btn btn-primary" href={next?.href ?? '/events'}>Book a free Session</Link>
+              <Link className="btn btn-primary" href={bookHref}>{bookLabel}</Link>
               <Link className="btn btn-secondary" href="/sites">See Growth Hub Sites</Link>
             </div>
             <p className="site-fine">Run by Himayat, a Social Traders Verified social enterprise.</p>
           </div>
-          <div className="site-hero-media">
-            <Image
-              src="/images/hero-workshop-2.jpg"
-              alt="A presenter talking small business owners through a workshop in Canberra"
-              width={1600}
-              height={1200}
-              priority
-              sizes="(max-width: 900px) 100vw, 46vw"
-            />
-            {next && (
-              <div className="site-next">
-                <SessionDate date={next.date} kind="session" />
-                <div className="site-next-body">
-                  <span className="site-tag site-tag--free">{next.area ?? 'Session'} · free</span>
-                  <span className="site-next-title">{next.title}</span>
-                  <span className="site-fine">
-                    {dateParts(next.date).weekday} {next.time} · {next.where}
-                  </span>
-                </div>
-                <Link className="site-link" href={next.href ?? '/events'}>
-                  {next.href ? 'Book' : 'Details'}
-                </Link>
-              </div>
-            )}
-          </div>
+          <SessionTicket session={next} lab={nextLab} />
         </div>
       </section>
 
@@ -226,11 +204,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <NewsletterStrip
-        source="home"
-        heading="Get the next Session in your inbox."
-        sub="One email a month with what's on next. Unsubscribe any time."
-      />
+      <div id="newsletter">
+        <NewsletterStrip
+          source="home"
+          heading="Get the next Session in your inbox."
+          sub="One email a month with what's on next."
+        />
+      </div>
 
       {next && (
         <div className="sticky-cta">
@@ -239,8 +219,8 @@ export default async function HomePage() {
             <br />
             <b>{next.title} · free</b>
           </span>
-          <Link className="btn btn-primary" href={next.href ?? '/events'}>
-            {next.href ? 'Book a seat' : 'See dates'}
+          <Link className="btn btn-primary" href={bookHref}>
+            {bookLabel}
           </Link>
         </div>
       )}

@@ -23,8 +23,8 @@ export default async function NextSessionBar() {
           </strong>
           <span className="top-bar-topic"> · {next.title}</span>
         </span>
-        <Link href={next.href ?? '/events'} className="top-bar-link">
-          {next.href ? 'Book a seat →' : "See what's on →"}
+        <Link href={next.href ?? '/events#whats-on'} className="top-bar-link">
+          {next.href ? 'Book a seat →' : 'See dates →'}
         </Link>
       </div>
     </div>

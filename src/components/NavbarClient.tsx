@@ -64,10 +64,11 @@ export default function NavbarClient({
   }, [menuOpen]);
 
   const resolvedItems = navItems && navItems.length > 0 ? navItems : DEFAULT_NAV_ITEMS;
-  // Signed-out visitors are pointed at the free Sessions, the front door to
-  // everything else now the member portal is parked.
-  const resolvedCtaLabel = ctaLabel ?? "Book a free Session";
-  const resolvedCtaHref = ctaHref ?? "/events";
+  // Signed-out visitors are pointed at the Sessions calendar, the front door
+  // to everything else now the member portal is parked. The label names where
+  // it goes, not a booking that may not be open yet.
+  const resolvedCtaLabel = ctaLabel ?? "See Session dates";
+  const resolvedCtaHref = ctaHref ?? "/events#whats-on";
 
   return (
     <header className="nav" style={{ position: "sticky", top: 0, zIndex: 50 }}>

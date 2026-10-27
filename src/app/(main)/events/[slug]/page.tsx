@@ -76,7 +76,6 @@ export default async function GenericEventPage({ params }: { params: Params }) {
   const label = season ? SESSION_FORMAT[season.kind].label : ev.tag;
   const registerUrl = (doc as { registerUrl?: string | null }).registerUrl ?? null;
   const seats = (doc as { seats?: string | null }).seats ?? null;
-  const isFree = /^free/i.test(ev.cost);
 
   const upcoming = await getUpcomingEvents().catch(() => []);
   const related = buildCalendar(upcoming as PayloadEvent[])
@@ -208,7 +207,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
                 {hasEnded ? (
                   <>
                     <span className="btn btn-secondary" aria-disabled="true">This event has run</span>
-                    <Link className="btn btn-primary" href="/events#whats-on">See what&apos;s on</Link>
+                    <Link className="btn btn-primary" href="/events#whats-on">See dates</Link>
                   </>
                 ) : (
                   <>
@@ -216,7 +215,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
                       slug={ev.slug}
                       title={ev.title}
                       registerUrl={registerUrl}
-                      label={registerUrl ? (kind === 'lab' ? 'Book a seat' : isFree ? 'Register free' : 'Register') : undefined}
+                      label={registerUrl ? 'Book a seat' : undefined}
                     />
                     <AddToCalendarLink slug={ev.slug} title={ev.title} />
                   </>
@@ -261,7 +260,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
       <NewsletterStrip
         source={`event-${ev.slug}`}
         heading={hasEnded ? 'Get new Session dates by email.' : `Can't make ${ev.title}?`}
-        sub="One email a month with what's on next. No drip sequence."
+        sub="One email a month with what's on next."
       />
     </main>
   );

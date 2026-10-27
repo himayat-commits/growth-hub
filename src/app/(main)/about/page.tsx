@@ -39,7 +39,7 @@ export default function AboutPage() {
               diverse businesses that big agencies overlook.
             </p>
             <div className="site-ctas">
-              <Link className="btn btn-primary" href="/events">Come to a free Session</Link>
+              <Link className="btn btn-primary" href="/events#whats-on">See Session dates</Link>
               <a className="btn btn-secondary" href="#contact">Write us a line</a>
             </div>
           </div>

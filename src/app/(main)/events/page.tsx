@@ -33,7 +33,7 @@ export default async function SessionsPage() {
               work on your own business at the table. No pitches, no jargon.
             </p>
             <div className="site-ctas">
-              <a className="btn btn-primary" href="#whats-on">See what&apos;s on</a>
+              <a className="btn btn-primary" href="#whats-on">See dates</a>
               <a className="btn btn-secondary" href="#build-lab">How a Build Lab works</a>
             </div>
           </div>
@@ -195,7 +195,7 @@ export default async function SessionsPage() {
         <NewsletterStrip
           source="events"
           heading="Get new Session dates by email."
-          sub="One email a month with what's on next. No drip sequence."
+          sub="One email a month with what's on next."
         />
       </div>
     </main>

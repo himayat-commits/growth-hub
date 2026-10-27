@@ -91,7 +91,7 @@ export default function SessionsCalendar({ rows }: { rows: CalendarRow[] }) {
                 {r.href ? (
                   <>
                     <Link className={`btn ${r.kind === 'lab' ? 'btn-secondary' : 'btn-primary'}`} href={r.href}>
-                      {r.kind === 'lab' ? 'Book a seat' : 'Register'}
+                      Book a seat
                     </Link>
                     {r.seats && <span className="cal-seats">{r.seats}</span>}
                   </>
