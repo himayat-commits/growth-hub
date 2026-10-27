@@ -5,6 +5,7 @@
 // modal) — the kind of thing a prospective attendee wants before deciding to
 // come. The "See the draft program" row opens by default so the most-wanted
 // content is visible without a click, and links down to the full program.
+// Once the day has run (`past`), the same panel reads as a record of it.
 
 import { useState, type ReactNode } from 'react';
 import { track } from '@/lib/analytics';
@@ -41,7 +42,13 @@ const SHORT_DATE = (() => {
   return m ? `${m[1]} ${m[2]}` : null;
 })();
 
-export default function PlanYourDayPanel({ blocks }: { blocks: ProgramBlock[] }) {
+export default function PlanYourDayPanel({
+  blocks,
+  past = false,
+}: {
+  blocks: ProgramBlock[];
+  past?: boolean;
+}) {
   const [open, setOpen] = useState<string | null>('program');
 
   const toggle = (id: string) => {
@@ -81,15 +88,18 @@ export default function PlanYourDayPanel({ blocks }: { blocks: ProgramBlock[] })
     <div className="plan-panel">
       <div className="plan-panel-head">
         <div className="plan-head-text">
-          <span className="plan-eyebrow">Planning to come?</span>
-          <p className="plan-lede">Free and open to all. Here&apos;s the day at a glance.</p>
+          <span className="plan-eyebrow">{past ? 'How the day ran' : 'Planning to come?'}</span>
+          <p className="plan-lede">
+            {past ? 'It was free and open to all. ' : 'Free and open to all. '}
+            Here&apos;s the day at a glance.
+          </p>
         </div>
         {SHORT_DATE && <span className="plan-chip">{SHORT_DATE}</span>}
       </div>
       <div className="plan-acc">
         {row(
           'program',
-          'See the draft program',
+          past ? 'See the program' : 'See the draft program',
           <>
             <ul className="plan-prog">
               {blocks.map((b, idx) => (
@@ -106,7 +116,7 @@ export default function PlanYourDayPanel({ blocks }: { blocks: ProgramBlock[] })
         )}
         {row(
           'who',
-          'Who should come',
+          past ? 'Who it was for' : 'Who should come',
           <ul className="plan-list">
             <li>First-time and early-stage founders</li>
             <li>Tradies and sole traders</li>
@@ -118,13 +128,17 @@ export default function PlanYourDayPanel({ blocks }: { blocks: ProgramBlock[] })
         )}
         {row(
           'included',
-          "What's included",
+          past ? 'What was included' : "What's included",
           <ul className="plan-list">
-            <li>Free entry — no ticket cost</li>
+            <li>{past ? 'Free entry' : 'Free entry — no ticket cost'}</li>
             <li>Talks, hands-on workshops &amp; one-to-one help desks</li>
             <li>Catered lunch</li>
             <li>Quiet catch-up area &amp; accessibility support</li>
-            <li>Lift-accessible venue — tell us any access needs when you register</li>
+            <li>
+              {past
+                ? 'Lift-accessible venue'
+                : 'Lift-accessible venue — tell us any access needs when you register'}
+            </li>
           </ul>,
         )}
       </div>
