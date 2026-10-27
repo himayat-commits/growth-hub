@@ -6,6 +6,7 @@ import NewsletterStrip from '@/components/NewsletterStrip';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 import { getSiteSettings } from '@/lib/cms';
+import { CONTACT } from '@/lib/site';
 import { SUMMIT, isSummitPast, isSummitRegistrationOpen } from '@/lib/summit';
 import CaptureAttribution from '../[slug]/CaptureAttribution';
 import SummitCtas, { SummitApplyLink } from './SummitCtas';
@@ -177,6 +178,9 @@ if (!isSummitPast()) {
 
 export default async function EntrepreneurshipForEveryonePage() {
   const siteSettings = await getSiteSettings();
+  // After 9 July the page is a record of the day: no recruiting sections, and
+  // the wrap-up points at the monthly Sessions and Build Labs instead.
+  const past = isSummitPast();
 
   // Condensed running order for the hero "see the draft program" disclosure.
   const programBlocks = PROGRAM.map((s) => ({
@@ -223,12 +227,12 @@ export default async function EntrepreneurshipForEveryonePage() {
                 <div className="event-keyfact"><span className="lbl">Date</span><span className="val">{SUMMIT.dateLong}</span></div>
                 <div className="event-keyfact"><span className="lbl">Location</span><span className="val">{SUMMIT.venue}</span></div>
                 <div className="event-keyfact"><span className="lbl">Hours</span><span className="val">{SUMMIT.time}</span></div>
-                <div className="event-keyfact"><span className="lbl">Cost</span><span className="val">{SUMMIT.cost}</span></div>
+                <div className="event-keyfact"><span className="lbl">Cost</span><span className="val">{past ? 'Free entry' : SUMMIT.cost}</span></div>
               </div>
             </div>
 
-            <aside className="event-hero-side" aria-label="Plan your day">
-              <PlanYourDayPanel blocks={programBlocks} />
+            <aside className="event-hero-side" aria-label={past ? 'The day at a glance' : 'Plan your day'}>
+              <PlanYourDayPanel blocks={programBlocks} past={past} />
             </aside>
           </div>
         </div>
@@ -241,7 +245,7 @@ export default async function EntrepreneurshipForEveryonePage() {
             <span className="section-label">Program</span>
             <h2 className="section-h2">A full day of practical help, start to finish.</h2>
             <p className="naming-lead">
-              Three things run side by side: hands-on workshops in the Seminar Rooms, drop-in
+              Three things {past ? 'ran' : 'run'} side by side: hands-on workshops in the Seminar Rooms, drop-in
               one-to-one advisors in the Glass Foyer Reception all day, and an afternoon of
               stalls, networking and a candid evening panel in the Conference Room.
             </p>
@@ -306,7 +310,8 @@ export default async function EntrepreneurshipForEveryonePage() {
               <p className="room-time">10:00am – 4:00pm</p>
               <p className="room-note">
                 One-to-one help desks with advisors and mentors — getting online, business
-                planning, or general advice. Drop in any time, no booking needed.
+                planning, or general advice.{' '}
+                {past ? 'Drop-in all day, no booking needed.' : 'Drop in any time, no booking needed.'}
               </p>
             </div>
             <div className="room-card">
@@ -316,7 +321,7 @@ export default async function EntrepreneurshipForEveryonePage() {
                 <li><span className="t">5:00 – 6:00pm</span> Panel discussion</li>
               </ul>
               <p className="room-note">
-                Hear four award-winning founders — Vanessa Brettell (Stepping Stone), Usman
+                {past ? 'Four' : 'Hear four'} award-winning founders — Vanessa Brettell (Stepping Stone), Usman
                 Iftikhar (Catalysr), Tendayi Ganga (Born to Shine) and Shooby Kandel (What
                 Works) — moderated by Waheed Jayhoon (Himayat), on what it really takes to
                 start, build and grow.
@@ -326,83 +331,87 @@ export default async function EntrepreneurshipForEveryonePage() {
         </div>
       </section>
 
-      {/* GET INVOLVED */}
-      <section className="involved" id="involved">
-        <div className="wrap">
-          <span className="section-label">Get involved</span>
-          <h2 className="section-h2">Eight ways to be part of the day.</h2>
-          <p className="involved-lead">
-            We&apos;re bringing partners in across the whole program. If any of the following
-            fits what your organisation does, apply to take part — we read every application
-            and reply within a few business days.
-          </p>
-          <div className="involved-grid">
-            {WAYS_TO_HELP.map((w, i) => (
-              <div className="inv-card" key={i}>
-                <span className="inv-tag">{w.tag}</span>
-                <h3>{w.t}</h3>
-                <p>{w.d}</p>
+      {/* GET INVOLVED + STAKEHOLDERS — recruiting copy, so only before the day */}
+      {!past && (
+        <>
+          <section className="involved" id="involved">
+            <div className="wrap">
+              <span className="section-label">Get involved</span>
+              <h2 className="section-h2">Eight ways to be part of the day.</h2>
+              <p className="involved-lead">
+                We&apos;re bringing partners in across the whole program. If any of the following
+                fits what your organisation does, apply to take part — we read every application
+                and reply within a few business days.
+              </p>
+              <div className="involved-grid">
+                {WAYS_TO_HELP.map((w, i) => (
+                  <div className="inv-card" key={i}>
+                    <span className="inv-tag">{w.tag}</span>
+                    <h3>{w.t}</h3>
+                    <p>{w.d}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="hero-ctas" style={{ marginTop: 32 }}>
-            <SummitApplyLink surface="involved" label="Apply to take part" />
-          </div>
-        </div>
-      </section>
-
-      {/* STAKEHOLDERS */}
-      <section className="stakes" id="stakeholders">
-        <div className="wrap">
-          <div className="stakes-head">
-            <div>
-              <span className="section-label">Stakeholders</span>
-              <h2 className="section-h2">Who&apos;s already at the table.</h2>
+              <div className="hero-ctas" style={{ marginTop: 32 }}>
+                <SummitApplyLink surface="involved" label="Apply to take part" />
+              </div>
             </div>
-            <p className="naming-lead">
-              Currently involved or invited — and growing. If you don&apos;t see your
-              organisation here, that&apos;s our cue to send the next invite.
-            </p>
-          </div>
-          <div className="stakes-groups">
-            {STAKEHOLDER_GROUPS.map((g) => (
-              <div className="stake-group" key={g.label}>
-                <h3 className="stake-group-label">{g.label}</h3>
-                <div className="stakes-grid">
-                  {g.members.map((s) => (
-                    <div className={'stake-cell' + (s.host ? ' is-host' : '')} key={s.name}>
-                      <span className="stake-name">{s.name}</span>
-                      <span className="stake-role">{s.role}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="stakes-foot">
-            <span>And not limited to the above.</span>
-            <span className="dot" />
-            <span>Want to be added? <Link href={SUMMIT.applyPath} style={{ color: 'var(--plum)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Apply to take part.</Link></span>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      {/* REGISTER / GET NOTIFIED */}
+          {/* STAKEHOLDERS */}
+          <section className="stakes" id="stakeholders">
+            <div className="wrap">
+              <div className="stakes-head">
+                <div>
+                  <span className="section-label">Stakeholders</span>
+                  <h2 className="section-h2">Who&apos;s already at the table.</h2>
+                </div>
+                <p className="naming-lead">
+                  Currently involved or invited — and growing. If you don&apos;t see your
+                  organisation here, that&apos;s our cue to send the next invite.
+                </p>
+              </div>
+              <div className="stakes-groups">
+                {STAKEHOLDER_GROUPS.map((g) => (
+                  <div className="stake-group" key={g.label}>
+                    <h3 className="stake-group-label">{g.label}</h3>
+                    <div className="stakes-grid">
+                      {g.members.map((s) => (
+                        <div className={'stake-cell' + (s.host ? ' is-host' : '')} key={s.name}>
+                          <span className="stake-name">{s.name}</span>
+                          <span className="stake-role">{s.role}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="stakes-foot">
+                <span>And not limited to the above.</span>
+                <span className="dot" />
+                <span>Want to be added? <Link href={SUMMIT.applyPath} style={{ color: 'var(--plum)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Apply to take part.</Link></span>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* REGISTER / GET NOTIFIED — the wrap-up once the day has run */}
       <section className="feedback-cta" id="get-notified">
         <div className="wrap">
           <div className="feedback-card">
             <div>
               <span className="section-label handscript" style={{ color: 'var(--lime)', textTransform: 'none', fontSize: 22, letterSpacing: 0 }}>
-                {isSummitPast() ? "That's a wrap →" : isSummitRegistrationOpen() ? 'Registration is open →' : 'Save the date →'}
+                {past ? "That's a wrap →" : isSummitRegistrationOpen() ? 'Registration is open →' : 'Save the date →'}
               </span>
               <h2 className="section-h2" style={{ marginTop: 12 }}>
-                {isSummitPast() ? 'Thanks for coming on 9 July.' : 'Be there on 9 July.'}
+                {past ? 'Thanks for coming on 9 July.' : 'Be there on 9 July.'}
               </h2>
-              {isSummitPast() ? (
+              {past ? (
                 <p>
-                  The first Entrepreneurship for Everyone has run. Recordings and slides from
-                  the day go out to the newsletter first, and the next Growth Hub events —
-                  workshops, webinars and clinics — are already on the calendar.
+                  The first Entrepreneurship for Everyone has run. What comes next is smaller
+                  and more regular: free monthly Growth Hub Sessions, and hands-on Build Labs
+                  where you walk out with a website that&apos;s live.
                 </p>
               ) : isSummitRegistrationOpen() ? (
                 <p>
@@ -418,7 +427,7 @@ export default async function EntrepreneurshipForEveryonePage() {
                   live.
                 </p>
               )}
-              <span className="hand">— no spam, no drip sequence. One email when it matters.</span>
+              {!past && <span className="hand">— no spam, no drip sequence. One email when it matters.</span>}
               <SummitCtas surface="register-section" />
             </div>
             <div className="feedback-side">
@@ -438,15 +447,15 @@ export default async function EntrepreneurshipForEveryonePage() {
       <NewsletterStrip
         source={`event-${SUMMIT.slug}`}
         heading={
-          isSummitPast()
-            ? 'Get the recordings and the next date first.'
+          past
+            ? 'Get new Session dates by email.'
             : isSummitRegistrationOpen()
               ? 'Get the final program first.'
               : 'Get the registration link first.'
         }
         sub={
-          isSummitPast()
-            ? 'One email with the session recordings, slides and the date of the next summit. No drip sequence.'
+          past
+            ? "One email a month with what's on next."
             : isSummitRegistrationOpen()
               ? 'One email with the full session lineup before the day — plus any late additions. No drip sequence.'
               : 'One email when attendee registration opens — plus the final program. No drip sequence.'
@@ -454,7 +463,7 @@ export default async function EntrepreneurshipForEveryonePage() {
       />
 
       <Contact
-        supportEmail={siteSettings?.supportEmail ?? null}
+        supportEmail={CONTACT.email}
         phone={siteSettings?.phone ?? null}
         address={siteSettings?.address ?? null}
       />

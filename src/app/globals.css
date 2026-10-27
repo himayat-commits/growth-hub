@@ -2174,3 +2174,24 @@ a.cal-title:hover { text-decoration: underline; text-underline-offset: 4px; }
 .site-person { display: flex; gap: 18px; align-items: center; }
 .site-avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--lavender); display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--plum); flex-shrink: 0; }
 .site-ack { max-width: 62ch; font-size: 19px; line-height: 1.6; color: var(--fg-muted); margin: 0; }
+
+/* ================================================================
+   LAUNCH FIXES (Oct 2026) — summit wrap-up, accessibility, 404
+   Share row on /events/[slug] (teal on the light eggshell page, AA
+   contrast), the date block's visually hidden full date, and the
+   not-found page (app/global-not-found.tsx + app/(main)/not-found.tsx).
+   ================================================================ */
+/* SessionDate: keep the .sr-only full date inside its block. */
+.site-date { position: relative; }
+
+/* Share row (ShareButtons) */
+.share-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.share-label { margin-right: 4px; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted); }
+.share-chip { padding: 6px 14px; border-radius: 999px; border: 1px solid #C9C2AE; background: #fff; color: var(--teal); font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 14px; font-weight: 500; cursor: pointer; transition: border-color .2s; }
+.share-chip:hover { border-color: var(--teal); }
+
+/* Not-found page */
+.nf .hero-h1 { margin-top: 0; max-width: 14ch; }
+.nf-grid { max-width: 880px; margin-bottom: 28px; }
+.nf-grid .site-card h2 { font-size: 23px; font-weight: 600; line-height: 1.25; margin: 0; color: var(--teal); }
+.nf .site-fine a { text-decoration: underline; text-underline-offset: 3px; }

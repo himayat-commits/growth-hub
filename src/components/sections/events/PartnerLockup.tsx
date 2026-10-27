@@ -54,8 +54,8 @@ export function PartnerLockup({
           alignItems: 'center',
           gap: 12,
           padding: '10px 16px 10px 12px',
-          background: 'rgba(243,240,231,0.06)',
-          border: '1px solid rgba(243,240,231,0.18)',
+          background: '#fff',
+          border: '1px solid #C9C2AE',
           borderRadius: 999,
           textDecoration: 'none',
           color: 'inherit',
@@ -69,13 +69,13 @@ export function PartnerLockup({
             borderRadius: 8,
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(243,240,231,0.08)',
+            background: 'var(--eggshell-warm)',
           }}
         >
           <PartnerMark shape={shape} />
         </span>
         <span style={{ display: 'inline-flex', flexDirection: 'column', lineHeight: 1.15 }}>
-          <span style={{ fontSize: 11, opacity: 0.7, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          <span style={{ fontSize: 11, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
             {label}
           </span>
           <span style={{ fontSize: 15, fontWeight: 500 }}>{p.name}</span>

@@ -10,7 +10,8 @@
 // The .ics uses explicit UTC instants for 9:30am–5:00pm AEST (UTC+10, no
 // winter DST in the ACT) so every calendar client lands on the right
 // wall-clock time. Once the summit is over (isSummitPast) the cluster
-// collapses to a single "see what's next" link.
+// collapses to a single "see what's next" link to the Sessions calendar
+// (/events#whats-on).
 
 import Link from 'next/link';
 import { track } from '@/lib/analytics';
@@ -74,7 +75,7 @@ export default function SummitCtas({ surface = 'hero' }: { surface?: string }) {
       <div className="hero-ctas">
         <Link
           className="btn btn-primary"
-          href="/events#upcoming"
+          href="/events#whats-on"
           onClick={() => track('summit_register_intent', { slug: SUMMIT.slug, channel: 'past', surface })}
         >
           See what&apos;s coming up <Arrow />

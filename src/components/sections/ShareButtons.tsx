@@ -10,6 +10,9 @@
 // Networks supported: LinkedIn, X (Twitter), WhatsApp, Email. No Facebook —
 // Meta's share endpoint drops query strings unless an ad-account is wired
 // in, defeating the attribution. Add later if needed.
+//
+// Styled by .share-row / .share-label / .share-chip in globals.css: teal on
+// the light eggshell event page (it used to assume a dark background).
 
 import { useCallback } from 'react';
 import { track } from '@/lib/analytics';
@@ -75,26 +78,8 @@ export default function ShareButtons({
   );
 
   return (
-    <div
-      className="share-row"
-      style={{
-        display: 'flex',
-        gap: 10,
-        alignItems: 'center',
-        flexWrap: 'wrap',
-      }}
-    >
-      <span
-        style={{
-          fontSize: 12,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          color: 'rgba(243,240,231,0.55)',
-          marginRight: 4,
-        }}
-      >
-        Share
-      </span>
+    <div className="share-row">
+      <span className="share-label">Share</span>
       {NETWORKS.map((n) => (
         <a
           key={n.network}
@@ -102,6 +87,7 @@ export default function ShareButtons({
           // without pushing a server-render dependency. Falls back to a
           // placeholder href so the link is keyboard-focusable before JS hydrates.
           href={`#share-${n.network}`}
+          className="share-chip"
           onClick={(e) => {
             e.preventDefault();
             const href = onShare(n.network);
@@ -111,16 +97,6 @@ export default function ShareButtons({
             } else {
               window.open(href, '_blank', 'noopener,noreferrer');
             }
-          }}
-          style={{
-            padding: '6px 14px',
-            borderRadius: 999,
-            border: '1px solid rgba(243,240,231,0.18)',
-            background: 'rgba(243,240,231,0.04)',
-            color: 'inherit',
-            fontSize: 13,
-            textDecoration: 'none',
-            cursor: 'pointer',
           }}
         >
           {n.label}
