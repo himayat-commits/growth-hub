@@ -1,9 +1,9 @@
-// Site-wide default OG card. Inherits down to every (main)/* page that
-// doesn't declare its own opengraph-image. Replaces the 404'ing
-// /og-image.png referenced by (main)/layout.tsx metadata.
-//
-// /events, /partners, /case-studies all have their own per-page
-// variants which take precedence.
+// Site-wide default OG card, used by the home page and inherited by every
+// (main)/* page that sets no `openGraph` of its own. A page that does set
+// `openGraph` loses the inherited image, so it needs an opengraph-image in its
+// own folder (see shared-metadata.ts): /events, /sites, /about, /partners and
+// the event pages have their own cards; /privacy and /community-guidelines
+// re-use this one.
 
 import { ImageResponse } from 'next/og';
 

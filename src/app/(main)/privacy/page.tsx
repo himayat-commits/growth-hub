@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
 
 // Privacy policy for the public marketing site. The cookie-consent banner
@@ -11,12 +12,17 @@ import Link from 'next/link';
 
 const LAST_UPDATED = '23 June 2026';
 
+const TITLE = 'Privacy policy — Growth Hub by Himayat';
+const DESCRIPTION =
+  'How Growth Hub by Himayat collects, uses, and protects your personal information, and the choices you have.';
+
 export const metadata: Metadata = {
-  title: 'Privacy policy — Growth Hub by Himayat',
-  description:
-    'How Growth Hub by Himayat collects, uses, and protects your personal information, and the choices you have.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/privacy' },
   robots: { index: true, follow: true },
+  openGraph: { ...ogBase, title: TITLE, description: DESCRIPTION, url: '/privacy' },
+  twitter: { ...twitterBase, title: TITLE, description: DESCRIPTION },
 };
 
 // Small presentational helpers so the prose stays readable without depending
