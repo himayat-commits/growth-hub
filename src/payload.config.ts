@@ -33,16 +33,15 @@ import { Media } from './collections/Media.ts';
 import { Logos } from './collections/Logos.ts';
 import { Partners } from './collections/Partners.ts';
 import { Events } from './collections/Events.ts';
-import { Resources } from './collections/Resources.ts';
-import { Services } from './collections/Services.ts';
-import { Strategists } from './collections/Strategists.ts';
-import { Products } from './collections/Products.ts';
+// Resources, Services, Strategists and Products (member portal / shop) were
+// removed in Oct 2026; their tables in the payload schema are left in place
+// (push is off, no migration) and the code is at tag
+// archive/member-portal-and-shop-2026-10. Same for the SignupPageContent global.
 
 // Globals
 import { SiteSettings } from './globals/SiteSettings.ts';
 import { Navigation } from './globals/Navigation.ts';
 import { AnnouncementBar } from './globals/AnnouncementBar.ts';
-import { SignupPageContent } from './globals/SignupPageContent.ts';
 import { PartnersPage } from './globals/PartnersPage.ts';
 
 export default buildConfig({
@@ -65,17 +64,12 @@ export default buildConfig({
     Logos,
     Partners,
     Events,
-    Resources,
-    Services,
-    Strategists,
-    Products,
   ],
 
   globals: [
     SiteSettings,
     Navigation,
     AnnouncementBar,
-    SignupPageContent,
     PartnersPage,
   ],
 

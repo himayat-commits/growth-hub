@@ -78,10 +78,6 @@ export interface Config {
     logos: Logo;
     partners: Partner;
     events: Event;
-    resources: Resource;
-    services: Service;
-    strategists: Strategist;
-    products: Product;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -100,10 +96,6 @@ export interface Config {
     logos: LogosSelect<false> | LogosSelect<true>;
     partners: PartnersSelect<false> | PartnersSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
-    resources: ResourcesSelect<false> | ResourcesSelect<true>;
-    services: ServicesSelect<false> | ServicesSelect<true>;
-    strategists: StrategistsSelect<false> | StrategistsSelect<true>;
-    products: ProductsSelect<false> | ProductsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -117,14 +109,12 @@ export interface Config {
     'site-settings': SiteSetting;
     navigation: Navigation;
     'announcement-bar': AnnouncementBar;
-    'signup-page-content': SignupPageContent;
     'partners-page': PartnersPage;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
     'announcement-bar': AnnouncementBarSelect<false> | AnnouncementBarSelect<true>;
-    'signup-page-content': SignupPageContentSelect<false> | SignupPageContentSelect<true>;
     'partners-page': PartnersPageSelect<false> | PartnersPageSelect<true>;
   };
   locale: null;
@@ -826,12 +816,12 @@ export interface Event {
    */
   date: string;
   /**
-   * Display time, e.g. "12:30 – 1:30 pm" or "10:00 – 11:30 am".
+   * Start and end time in Canberra, e.g. "12:00–1:30pm" or "9:30am–12:30pm".
    */
   time?: string | null;
   type?: ('webinar' | 'workshop' | 'community') | null;
   /**
-   * For in-person events. Leave blank for online.
+   * For in-person events. Leave blank for online. Sessions and Build Labs default to the venue on the site.
    */
   location?: string | null;
   /**
@@ -839,7 +829,7 @@ export interface Event {
    */
   seats?: string | null;
   /**
-   * External registration URL (e.g. Eventbrite, Zoom).
+   * Full https:// booking link (e.g. Eventbrite). "Book a seat" shows on the site only once this is set.
    */
   registerUrl?: string | null;
   /**
@@ -911,232 +901,6 @@ export interface Event {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "resources".
- */
-export interface Resource {
-  id: number;
-  title: string;
-  tag: 'Guide' | 'Template' | 'Course' | 'Video' | 'Webinar';
-  /**
-   * Card thumbnail colour. Try to spread tones across the grid for visual rhythm.
-   */
-  tone?: ('cream' | 'lime' | 'teal' | 'plum' | 'lav') | null;
-  /**
-   * Short meta line, e.g. "5-min read" or "PDF · Editable" or "Self-paced · 2 hrs".
-   */
-  meta?: string | null;
-  /**
-   * Optional cover image. Falls back to a solid-colour thumbnail using `tone`.
-   */
-  thumbnail?: (number | null) | Media;
-  /**
-   * Where the card links to — a hosted PDF, external course, YouTube, etc.
-   */
-  url?: string | null;
-  /**
-   * Uncheck to gate behind a paid plan.
-   */
-  free?: boolean | null;
-  /**
-   * Drafts never appear in the member library, search or dashboard.
-   */
-  status: 'draft' | 'published';
-  /**
-   * Leave blank to publish immediately. A future date hides the item until then.
-   */
-  publishedAt?: string | null;
-  /**
-   * Show in the dashboard "Suggested first reads" card. Aim for 3 featured at any time.
-   */
-  featured?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Consultancy + done-with-you services. Use sortOrder to control card order; lower numbers first.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
- */
-export interface Service {
-  id: number;
-  title: string;
-  /**
-   * Used for the /services/[slug] URL. Keep it kebab-case (e.g. "growth-call", "website-setup").
-   */
-  slug: string;
-  /**
-   * Two or three sentences. Renders below the title on the card.
-   */
-  description: string;
-  category?: ('strategy' | 'build' | 'marketing' | 'ops') | null;
-  /**
-   * Icon background colour on the card.
-   */
-  tone?: ('lime' | 'teal' | 'plum' | 'lav') | null;
-  icon?: ('cal' | 'globe' | 'megaphone' | 'type' | 'trend' | 'share' | 'briefcase') | null;
-  /**
-   * Display price, e.g. "A$390 / mo" or "From A$1,950" or "Complimentary". Leave blank if pricing is bespoke.
-   */
-  price?: string | null;
-  /**
-   * Tiny label under the price, e.g. "first call free", "fixed project fee", "month-to-month".
-   */
-  priceLabel?: string | null;
-  /**
-   * Card button text. "Book a time" for the Growth Call, "Request" otherwise.
-   */
-  ctaLabel?: string | null;
-  /**
-   * Uncheck to hide from /services without deleting the row.
-   */
-  active?: boolean | null;
-  /**
-   * Lower numbers appear first. Growth Call is usually 0.
-   */
-  sortOrder?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "strategists".
- */
-export interface Strategist {
-  id: number;
-  name: string;
-  /**
-   * Stable assignment key stored on user_profiles.assigned_strategist_id. Auto-generated from name on save if left blank.
-   */
-  slug?: string | null;
-  /**
-   * e.g. "Growth Strategist", "Senior Strategist"
-   */
-  role: string;
-  photo?: (number | null) | Media;
-  email: string;
-  bio?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Full URL including https://. Doubles as the booking link shown on /services ("Your strategist") and next to the request form.
-   */
-  calendlyUrl?: string | null;
-  /**
-   * Which member needs this strategist should be routed. Leave empty to only receive overflow / unmatched members.
-   */
-  specialties?:
-    | (
-        | 'starting_business'
-        | 'behind_on_digital'
-        | 'marketing_growth'
-        | 'website'
-        | 'funding_grants'
-        | 'other'
-      )[]
-    | null;
-  /**
-   * Only active strategists receive auto-assignment of new signups. Inactive strategists keep existing assignments.
-   */
-  active?: boolean | null;
-  /**
-   * Lower numbers appear first in admin lists
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Merch sold on /shop. Stock is managed in the Ops console (/ops/inventory), not here. Prices are in cents, GST-inclusive.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "products".
- */
-export interface Product {
-  id: number;
-  name: string;
-  /**
-   * URL: /shop/[slug]. Auto-generated from the name if left blank.
-   */
-  slug?: string | null;
-  /**
-   * Only Published products appear on /shop and can be bought.
-   */
-  status: 'draft' | 'published' | 'archived';
-  category?: ('apparel' | 'accessories' | 'stationery' | 'other') | null;
-  /**
-   * One or two lines. Renders on the product card and as the meta description.
-   */
-  shortDescription?: string | null;
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * First image is the card / hero image.
-   */
-  images: (number | Media)[];
-  /**
-   * AUD, GST-inclusive, in cents. 3500 = A$35.00. Variants may override.
-   */
-  priceCents: number;
-  /**
-   * Discount for members with an active paid plan. 0 = no member price.
-   */
-  memberDiscountPct?: number | null;
-  /**
-   * One row per sellable SKU. A product with no size/colour still needs exactly one variant. Do NOT rename a SKU after it has sold.
-   */
-  variants: {
-    /**
-     * Stable key for stock + orders, e.g. GH-TEE-M-TEAL.
-     */
-    sku: string;
-    size?: string | null;
-    colour?: string | null;
-    /**
-     * Leave blank to use the product price.
-     */
-    priceCentsOverride?: number | null;
-    /**
-     * Optional — for future carrier integration.
-     */
-    weightGrams?: number | null;
-    id?: string | null;
-  }[];
-  featured?: boolean | null;
-  /**
-   * Lower numbers appear first on /shop.
-   */
-  sortOrder?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1202,22 +966,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'events';
         value: number | Event;
-      } | null)
-    | ({
-        relationTo: 'resources';
-        value: number | Resource;
-      } | null)
-    | ({
-        relationTo: 'services';
-        value: number | Service;
-      } | null)
-    | ({
-        relationTo: 'strategists';
-        value: number | Strategist;
-      } | null)
-    | ({
-        relationTo: 'products';
-        value: number | Product;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1748,90 +1496,6 @@ export interface EventsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "resources_select".
- */
-export interface ResourcesSelect<T extends boolean = true> {
-  title?: T;
-  tag?: T;
-  tone?: T;
-  meta?: T;
-  thumbnail?: T;
-  url?: T;
-  free?: T;
-  status?: T;
-  publishedAt?: T;
-  featured?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services_select".
- */
-export interface ServicesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  description?: T;
-  category?: T;
-  tone?: T;
-  icon?: T;
-  price?: T;
-  priceLabel?: T;
-  ctaLabel?: T;
-  active?: T;
-  sortOrder?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "strategists_select".
- */
-export interface StrategistsSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  role?: T;
-  photo?: T;
-  email?: T;
-  bio?: T;
-  calendlyUrl?: T;
-  specialties?: T;
-  active?: T;
-  order?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "products_select".
- */
-export interface ProductsSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  status?: T;
-  category?: T;
-  shortDescription?: T;
-  description?: T;
-  images?: T;
-  priceCents?: T;
-  memberDiscountPct?: T;
-  variants?:
-    | T
-    | {
-        sku?: T;
-        size?: T;
-        colour?: T;
-        priceCentsOverride?: T;
-        weightGrams?: T;
-        id?: T;
-      };
-  featured?: T;
-  sortOrder?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1950,111 +1614,6 @@ export interface AnnouncementBar {
    * Hex colour code, e.g. #0D3F48.
    */
   bgColor?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "signup-page-content".
- */
-export interface SignupPageContent {
-  id: number;
-  foundations?: {
-    /**
-     * Main heading for the Foundations signup page
-     */
-    title?: string | null;
-    /**
-     * Subheading below the title
-     */
-    tagline?: string | null;
-    /**
-     * Feature list shown on the signup page
-     */
-    features?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Optional add-on upsell line (e.g. "Add Search AI from $99/mo")
-     */
-    addon?: string | null;
-    /**
-     * Trust badges / guarantees shown below the feature list
-     */
-    trustItems?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  growth?: {
-    /**
-     * Main heading for the Growth signup page
-     */
-    title?: string | null;
-    /**
-     * Subheading below the title
-     */
-    tagline?: string | null;
-    /**
-     * Feature list shown on the signup page
-     */
-    features?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Optional add-on upsell line (e.g. "Add Search AI from $99/mo")
-     */
-    addon?: string | null;
-    /**
-     * Trust badges / guarantees shown below the feature list
-     */
-    trustItems?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  accelerate?: {
-    /**
-     * Main heading for the Accelerate signup page
-     */
-    title?: string | null;
-    /**
-     * Subheading below the title
-     */
-    tagline?: string | null;
-    /**
-     * Feature list shown on the signup page
-     */
-    features?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Optional add-on upsell line (e.g. "Add Search AI from $99/mo")
-     */
-    addon?: string | null;
-    /**
-     * Trust badges / guarantees shown below the feature list
-     */
-    trustItems?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2265,72 +1824,6 @@ export interface AnnouncementBarSelect<T extends boolean = true> {
   linkText?: T;
   linkHref?: T;
   bgColor?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "signup-page-content_select".
- */
-export interface SignupPageContentSelect<T extends boolean = true> {
-  foundations?:
-    | T
-    | {
-        title?: T;
-        tagline?: T;
-        features?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        addon?: T;
-        trustItems?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-      };
-  growth?:
-    | T
-    | {
-        title?: T;
-        tagline?: T;
-        features?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        addon?: T;
-        trustItems?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-      };
-  accelerate?:
-    | T
-    | {
-        title?: T;
-        tagline?: T;
-        features?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        addon?: T;
-        trustItems?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

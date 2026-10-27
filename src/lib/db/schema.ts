@@ -1,3 +1,10 @@
+// Member portal and shop tables (Oct 2026): the portal, ops console, shop,
+// WorkOS sign-in and Stripe billing code was removed and archived at tag
+// archive/member-portal-and-shop-2026-10. These table definitions and the
+// migrations in drizzle/ are kept as they are, and the production tables and
+// their data are retained. Nothing in the app reads or writes them now. Don't
+// generate a migration that drops or alters them without an owner decision.
+
 import { pgTable, text, timestamp, varchar, boolean, jsonb, serial, integer, index, uniqueIndex, primaryKey, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
