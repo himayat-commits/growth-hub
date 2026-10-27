@@ -1,19 +1,21 @@
 import type { Metadata } from 'next';
 import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
+import { CONTACT } from '@/lib/site';
 
-// Community guidelines + member-to-member services disclaimer for the public
+// Community guidelines + "what we don't vouch for" disclaimer for the public
 // site. Linked from the footer.
 //
-// NOTE: Plain-English baseline written for launch (GTM review F6.11). Have the
-// disclaimer wording checked by someone qualified before relying on it — it is
-// not legal advice. Update LAST_UPDATED whenever the content changes.
+// DRAFT (27 Oct 2026) for counsel review: rewritten for Growth Hub Sessions,
+// Build Labs and Growth Hub Sites after the member portal (groups, webinars,
+// referral credits) was removed. It is not legal advice. Update LAST_UPDATED to
+// the date it takes effect.
 
-const LAST_UPDATED = '9 September 2026';
+const LAST_UPDATED = '27 October 2026';
 
 const TITLE = 'Community guidelines — Growth Hub by Himayat';
 const DESCRIPTION =
-  'How the Growth Hub community works: what we expect of members, how referrals work, and what we do and don’t vouch for.';
+  'What we ask of everyone at Growth Hub Sessions and Build Labs, how we keep them pitch-free, and what Growth Hub does and doesn’t vouch for.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -56,8 +58,8 @@ export default function CommunityGuidelinesPage() {
           </div>
           <h1 className="hero-h1">How we look after each other.</h1>
           <p className="hero-sub">
-            Plain English: what the community is for, what we ask of you, how referrals work, and
-            what Growth Hub does and doesn&rsquo;t vouch for.
+            Plain English: what we ask of everyone in the room, how we keep Sessions pitch-free,
+            and what Growth Hub does and doesn&rsquo;t vouch for.
           </p>
         </div>
       </section>
@@ -68,84 +70,97 @@ export default function CommunityGuidelinesPage() {
             <strong>Last updated:</strong> {LAST_UPDATED}
           </P>
 
-          <H2>What the community is for</H2>
+          <H2>What Growth Hub is</H2>
           <P>
-            Growth Hub is a network of Canberra freelancers, tradies, consultants and small service
-            providers who back each other. People join to learn, to get unstuck, and to be referred
-            to the kind of customers they want. It works because members give first and sell second.
-            The Slack, Facebook and WhatsApp groups, the weekly webinar and our in-person events are
-            all part of the same community, and the same rules apply in every one of them.
+            Growth Hub brings Canberra small business owners and sole traders together: free
+            monthly Growth Hub Sessions on one practical topic, hands-on Build Labs where owners
+            build and publish their website, and Growth Hub Sites, the website builder people
+            keep using afterwards. The same guidelines apply at every Session and Build Lab, and
+            to presenters, co-hosts, helpers and attendees alike.
           </P>
 
-          <H2>The rules</H2>
+          <H2>In the room</H2>
           <ul style={{ margin: '0 0 14px', paddingLeft: 22 }}>
             <Rule title="Add value">
-              answer questions, share what actually worked for you, welcome new members. If you
-              only ever post when you have something to sell, you&rsquo;ll be asked to stop.
+              share what actually worked for you, help the person next to you, and ask the
+              question everyone else is thinking.
             </Rule>
-            <Rule title="No pitching, no cold DMs">
-              don&rsquo;t drop offers into the groups or message members to sell to them. If
-              someone asks for a recommendation, answer the question; if they want to talk business,
-              they&rsquo;ll ask.
+            <Rule title="No pitching">
+              Sessions are for learning, not selling. Presenters teach one practical move with no
+              product pitch, and attendees don&rsquo;t sell to each other at the table. If someone
+              wants to talk business, they&rsquo;ll ask you afterwards.
             </Rule>
             <Rule title="Say so when it&rsquo;s you">
-              recommending your own service, or a mate&rsquo;s, is fine as long as you say so.
-              Undisclosed self-promotion isn&rsquo;t.
+              recommending your own service, or a friend&rsquo;s, is fine as long as you say so.
             </Rule>
             <Rule title="Keep it respectful">
               disagree with the idea, not the person. No harassment, discrimination or public
-              call-outs of other members or their businesses.
+              call-outs of other people or their businesses.
             </Rule>
             <Rule title="Keep it confidential">
-              what members share about their numbers, clients and struggles stays in the room. Ask
-              before you screenshot, quote or repost.
+              what owners share at the table about their numbers, customers and struggles stays at
+              the table. Ask before you take a photo of anyone, or share what they said.
             </Rule>
           </ul>
 
-          <H2>Webinars are where trust is built</H2>
+          <H2>Our own interests, plainly</H2>
           <P>
-            The weekly live webinar is open to every member, including the Free tier, and so are the
-            recordings. Turn up, ask your questions, share a win. The people who get referred most
-            are the ones the rest of the room has actually heard from.
+            Sessions are free. Growth Hub charges for Build Lab seats, Growth Hub Sites
+            subscriptions and done-with-you website builds, and we&rsquo;ll always tell you
+            plainly when something costs money. We won&rsquo;t pitch them during the teaching
+            part of a Session.
+          </P>
+          <P>
+            CBR Innovation Network&rsquo;s Digital Solutions program is separate from Growth Hub.
+            At each Session we explain how to get free one-on-one advice through it. If you&rsquo;d
+            like a referral, we pass your details to CBRIN only with your consent, and CBRIN
+            chooses your advisor.
           </P>
 
-          <H2>How referrals work</H2>
-          <P>
-            Every member has a referral link. When someone you invite joins Growth Hub and completes
-            their first Growth Call, you both receive an A$50 credit on your Growth Hub account. The
-            credit is applied automatically, once per referral, and can&rsquo;t be exchanged for
-            cash. We may pause credits where we see referrals being gamed.
-          </P>
+          <H2>At a Build Lab</H2>
+          <ul style={{ margin: '0 0 14px', paddingLeft: 22 }}>
+            <Rule title="Your site is yours">
+              you own your business information and the content you put on your site.
+            </Rule>
+            <Rule title="Check every claim">
+              the AI builder drafts from your answers and can get things wrong. Before you publish,
+              make sure your details, prices and claims are true. We check them with you, but
+              you&rsquo;re responsible for what your site says.
+            </Rule>
+            <Rule title="Use photos you have the right to use">
+              your own photos, or ones you have permission for.
+            </Rule>
+          </ul>
 
           <H2>What Growth Hub doesn&rsquo;t vouch for</H2>
           <P>
             <strong>
-              Growth Hub introduces members and partners to each other but doesn&rsquo;t vet,
-              supervise or endorse the services they provide to one another.
+              Growth Hub introduces people to presenters, co-hosts and partner organisations, but
+              doesn&rsquo;t vet, supervise or endorse the services they provide.
             </strong>{' '}
-            A member being in the community, or a partner being listed on our site, is not a
-            recommendation from us. Before you hire or work with anyone you meet here, check their
-            credentials, licences, insurance and references yourself, agree the scope and price up
-            front, and put it in writing. Any agreement is between you and them, not with Growth Hub
-            or Himayat.
+            An organisation presenting at a Session or being listed on our site is not a
+            recommendation from us. Before you hire or work with anyone you meet through Growth
+            Hub, check their credentials, licences, insurance and references yourself, agree the
+            scope and price up front, and put it in writing. Any agreement is between you and
+            them, not with Growth Hub or Himayat.
           </P>
 
           <H2>Reporting a problem</H2>
           <P>
-            If something in the community doesn&rsquo;t feel right — a pushy pitch, a dispute over
-            work, a post that crosses a line — email{' '}
-            <a href="mailto:hello@himayat.com.au" style={LINK}>
-              hello@himayat.com.au
-            </a>{' '}
-            and a person on the Himayat team will read it. We&rsquo;ll keep your report confidential
-            wherever we can.
+            If something doesn&rsquo;t feel right (a pushy pitch, a dispute, behaviour that crosses
+            a line), tell a host on the day or email{' '}
+            <a href={`mailto:${CONTACT.email}`} style={LINK}>
+              {CONTACT.email}
+            </a>
+            , and a person on the Growth Hub team will read it. We&rsquo;ll keep your report
+            confidential wherever we can.
           </P>
 
-          <H2>If the rules are broken</H2>
+          <H2>If the guidelines are broken</H2>
           <P>
-            We&rsquo;ll usually start with a quiet word. Where a member keeps breaching these
-            guidelines, or does something serious, we may remove them from the groups, the events
-            and the platform.
+            We&rsquo;ll usually start with a quiet word. If someone keeps breaching these
+            guidelines, or does something serious, we may ask them to leave a Session or Build Lab
+            and not to come back.
           </P>
 
           <H2>Changes to these guidelines</H2>

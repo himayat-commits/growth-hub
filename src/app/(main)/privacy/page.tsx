@@ -1,20 +1,23 @@
 import type { Metadata } from 'next';
 import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
+import { CONTACT, SITES } from '@/lib/site';
 
-// Privacy policy for the public marketing site. The cookie-consent banner
-// (components/analytics/ConsentBanner) links here.
+// Privacy policy for the public site. The cookie-consent banner
+// (components/analytics/ConsentBanner) and the contact form link here.
 //
-// NOTE: This is a plain-English baseline drafted to cover what the site
-// actually does (the processors below are the ones wired into this codebase).
-// Have it reviewed by someone qualified before relying on it — it is not legal
-// advice. Update LAST_UPDATED whenever the content changes.
+// DRAFT (27 Oct 2026) for counsel / Amplify 11 review: rewritten for the site as it
+// is after the member portal, shop and Stripe billing were removed. Every processor
+// named below is one the code or the business actually uses. It is not legal advice.
+// Update LAST_UPDATED to the date it takes effect.
 
-const LAST_UPDATED = '23 June 2026';
+const LAST_UPDATED = '27 October 2026';
+const PRIVACY_EMAIL = 'privacy@thegrowthhub.com.au';
+const SITES_PRIVACY_URL = `${SITES.signIn}/site/legal?what=privacy`;
 
 const TITLE = 'Privacy policy — Growth Hub by Himayat';
 const DESCRIPTION =
-  'How Growth Hub by Himayat collects, uses, and protects your personal information, and the choices you have.';
+  'How Growth Hub handles your personal information when you use this website, register for a Session or Build Lab, or contact us.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -38,6 +41,8 @@ function P({ children }: { children: React.ReactNode }) {
   return <p style={{ margin: '0 0 14px', lineHeight: 1.7 }}>{children}</p>;
 }
 
+const LINK = { color: 'var(--plum, #5f304b)' } as const;
+
 export default function PrivacyPage() {
   return (
     <main>
@@ -60,87 +65,111 @@ export default function PrivacyPage() {
             <strong>Last updated:</strong> {LAST_UPDATED}
           </P>
           <P>
-            Growth Hub is operated by Himayat (&ldquo;Growth Hub&rdquo;, &ldquo;we&rdquo;,
-            &ldquo;us&rdquo;), a Canberra-based social enterprise (ABN 40 169 711 734; NDIS
-            provider 4050130469). This policy explains how we handle personal information in line
-            with the Australian Privacy Principles under the Privacy Act 1988 (Cth).
+            Growth Hub is operated by The Trustee for Himayat Trust (ABN 40 169 711 734), a
+            Canberra-based social enterprise (&ldquo;Growth Hub&rdquo;, &ldquo;we&rdquo;,
+            &ldquo;us&rdquo;). This policy explains how we handle personal information on this
+            website and at our events, in line with the Australian Privacy Principles under the
+            Privacy Act 1988 (Cth).
+          </P>
+          <P>
+            <strong>Growth Hub Sites</strong>, our website builder at{' '}
+            <a href={SITES.signIn} style={LINK}>
+              app.thegrowthhub.com.au
+            </a>
+            , has its own{' '}
+            <a href={SITES_PRIVACY_URL} style={LINK}>
+              privacy policy
+            </a>
+            , which covers your account, your sites and billing on that platform.
           </P>
 
           <H2>Information we collect</H2>
           <P>
-            <strong>Information you give us</strong> — your name, email, phone, business details,
-            and anything you write when you contact us, subscribe to our newsletter, apply to take
-            part in an event, sign up, or message our team.
+            <strong>When you contact us</strong>: your name, email, business name (optional), the
+            topics you tick and your message.
           </P>
           <P>
-            <strong>Account &amp; subscription information</strong> — when you create an account we
-            use WorkOS to authenticate you, and Stripe to process payments. We never see or store
-            your full card number; Stripe handles card data directly.
+            <strong>When you subscribe to our newsletter</strong>: your email address.
           </P>
           <P>
-            <strong>Information collected automatically</strong> — basic usage and device data
-            (pages viewed, approximate location from IP, browser type) via analytics tools. On the
-            public site, analytics and advertising cookies only load after you accept them in our
-            cookie banner (see &ldquo;Cookies and analytics&rdquo; below).
+            <strong>When you register for a Session or Build Lab</strong>: tickets are booked
+            through Eventbrite, which collects your details under its own privacy policy and shares
+            your registration with us. That includes your name, email and, for a Build Lab, the
+            answers you give about your business so we can prepare your brief.
+          </P>
+          <P>
+            <strong>At a Session</strong>: if you ask to be referred to CBR Innovation
+            Network&rsquo;s Digital Solutions program, we pass your name and contact details to
+            CBRIN only with your consent. CBRIN then contacts you and chooses your advisor. We
+            don&rsquo;t record or live-stream the December 2026 pilot Sessions.
+          </P>
+          <P>
+            <strong>Information collected automatically</strong>: if you accept analytics cookies,
+            basic usage data such as pages viewed, approximate location from your IP address and
+            browser type (see &ldquo;Cookies and analytics&rdquo;).
           </P>
 
           <H2>How we use your information</H2>
           <P>
-            To provide and run the platform and your subscription; to respond to enquiries and
-            provide support; to send you service and (with your consent) marketing communications;
-            to run our events and community; to understand and improve how the site and product are
-            used; to keep the service secure; and to meet our legal and reporting obligations as a
-            social enterprise.
+            To reply to your enquiries; to run Sessions and Build Labs and follow up afterwards
+            with the slides and next steps; to send our newsletter if you subscribe; to make
+            consented referrals to CBRIN; to understand and improve how the site is used; to keep
+            the site secure; and to meet our legal and reporting obligations as a social enterprise.
           </P>
 
           <H2>Cookies and analytics</H2>
           <P>
-            We use essential cookies needed for the site and your account to work. We also use
-            optional analytics and advertising cookies (Google Analytics, the Meta Pixel, and the
-            LinkedIn Insight Tag) to measure and improve our marketing. On the public site these
-            optional cookies do not load until you select &ldquo;Accept&rdquo; in the cookie
-            banner, and you can change your mind at any time by clearing the{' '}
-            <code>gh_consent</code> cookie in your browser. We also use PostHog for privacy-conscious
-            product analytics and Sentry for error monitoring.
+            The site uses essential cookies so it works and remembers your cookie choice. Optional
+            analytics (PostHog) and any advertising tags only load after you select
+            &ldquo;Accept&rdquo; in the cookie banner. You can change your mind at any time by
+            clearing the <code>gh_consent</code> cookie in your browser. We use Sentry to catch
+            errors on the site; it doesn&rsquo;t record your session, and we strip your IP address
+            and email from error reports.
           </P>
 
           <H2>Who we share it with</H2>
           <P>
             We do not sell your personal information. We share it only with service providers who
-            help us run Growth Hub, and only as needed to provide the service — including WorkOS
-            (authentication), Stripe (payments), Neon and Vercel (hosting and infrastructure),
-            Resend (email delivery), HubSpot (newsletter and forms), Birdeye (the marketing platform
-            we provision for subscribers), and our analytics/monitoring providers above. We may also
-            disclose information where required by law.
+            help us run Growth Hub, and only as needed: HubSpot (our contact and newsletter
+            records, and email), Eventbrite (event registration), Google Workspace (our email
+            inboxes), Vercel and Neon (website hosting and database), PostHog (analytics, with
+            your consent) and Sentry (error monitoring). With your consent, we also share referral
+            details with CBR Innovation Network, as described above. We may disclose information
+            where the law requires it.
           </P>
 
           <H2>Overseas storage</H2>
           <P>
-            Some of these providers store or process data outside Australia (for example in the
-            United States or the European Union). Where that happens, we take reasonable steps to
+            Some of these providers store or process data outside Australia, for example in the
+            United States or the European Union. Where that happens, we take reasonable steps to
             ensure your information is handled consistently with the Australian Privacy Principles.
           </P>
 
           <H2>How we protect it</H2>
           <P>
-            We use reputable providers, encryption in transit, access controls, and least-privilege
+            We use reputable providers, encryption in transit, access controls and least-privilege
             practices. No system is perfectly secure, but we take reasonable steps to protect your
-            information from misuse, loss, and unauthorised access.
+            information from misuse, loss and unauthorised access.
           </P>
 
           <H2>How long we keep it</H2>
           <P>
             We keep personal information only as long as we need it for the purposes above or as
-            required by law, then delete or de-identify it.
+            the law requires, then delete or de-identify it.
+          </P>
+          <P>
+            <strong>Our former member portal</strong> closed in October 2026. If you had an account
+            on it, we still hold the details you gave us then. You can ask us to give you a copy or
+            to delete them at any time.
           </P>
 
           <H2>Your choices and rights</H2>
           <P>
-            You can ask to access or correct the personal information we hold about you, unsubscribe
-            from marketing at any time, and decline optional cookies. To make a request or raise a
-            privacy concern, email{' '}
-            <a href="mailto:hello@himayat.com.au" style={{ color: 'var(--plum, #5f304b)' }}>
-              hello@himayat.com.au
+            You can ask to access or correct the personal information we hold about you,
+            unsubscribe from our newsletter at any time, and decline optional cookies. To make a
+            request or raise a privacy concern, email{' '}
+            <a href={`mailto:${PRIVACY_EMAIL}`} style={LINK}>
+              {PRIVACY_EMAIL}
             </a>
             . If you&rsquo;re not satisfied with our response, you can contact the Office of the
             Australian Information Commissioner (OAIC).
@@ -148,7 +177,7 @@ export default function PrivacyPage() {
 
           <H2>Children</H2>
           <P>
-            Growth Hub is intended for business owners and is not directed at children under 18.
+            Growth Hub is for business owners and isn&rsquo;t directed at children under 18.
           </P>
 
           <H2>Changes to this policy</H2>
@@ -159,18 +188,18 @@ export default function PrivacyPage() {
 
           <H2>Contact us</H2>
           <P>
-            Himayat — Growth Hub
+            Growth Hub, operated by The Trustee for Himayat Trust
             <br />
-            Level 4, 1 Moore St, Canberra ACT 2601
+            {CONTACT.address}
             <br />
-            <a href="mailto:hello@himayat.com.au" style={{ color: 'var(--plum, #5f304b)' }}>
-              hello@himayat.com.au
+            <a href={`mailto:${PRIVACY_EMAIL}`} style={LINK}>
+              {PRIVACY_EMAIL}
             </a>{' '}
-            · 02 5119 0005
+            · {CONTACT.phone}
           </P>
 
           <p style={{ margin: '32px 0 0', lineHeight: 1.7 }}>
-            <Link href="/" style={{ color: 'var(--plum, #5f304b)' }}>
+            <Link href="/" style={LINK}>
               ← Back to home
             </Link>
           </p>
