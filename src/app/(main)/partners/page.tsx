@@ -30,6 +30,11 @@ const WAYS = [
     title: 'Send owners our way',
     body: 'Sessions are free for everyone. Owners you refer can have a free Build Lab seat.',
   },
+  {
+    kicker: 'Bring a group',
+    title: 'A Session or Build Lab for your clients',
+    body: 'A private Session or Build Lab for your clients, members or staff, with a Starter site for each owner. Talk to us about dates.',
+  },
 ];
 
 export default function PartnersPage() {

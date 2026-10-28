@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getPublicEvents } from '@/lib/cms';
 import { canberraDateKey } from '@/lib/events-time';
+import { GUIDES } from '@/lib/guides';
 
 // Canonical production host. The Vercel deployment URL and any preview
 // hosts fall back to this so search engines don't index split content.
@@ -44,6 +45,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/events', null, 'daily', 0.9),
     entry('/events/entrepreneurship-for-everyone', null, 'monthly', 0.6),
     entry('/sites', null, 'monthly', 0.9),
+    entry('/guides', null, 'monthly', 0.8),
+    ...GUIDES.map((g) => entry(`/guides/${g.slug}`, g.updated, 'monthly', 0.7)),
     entry('/partners', null, 'monthly', 0.7),
     entry('/about', null, 'monthly', 0.7),
     entry('/privacy', null, 'yearly', 0.3),

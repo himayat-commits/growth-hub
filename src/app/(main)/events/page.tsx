@@ -5,6 +5,7 @@ import NewsletterStrip from '@/components/NewsletterStrip';
 import SessionsCalendar from '@/components/sections/site/SessionsCalendar';
 import Questions from '@/components/sections/site/Questions';
 import { getUpcomingEvents } from '@/lib/cms';
+import { guideForArea } from '@/lib/guides';
 import { buildCalendar, dateParts, LAB_STEPS, RUN_SHEET, SESSION_AREAS, SESSION_FORMAT, SESSION_VENUE } from '@/lib/sessions';
 import type { Event as PayloadEvent } from '@/payload-types';
 
@@ -137,14 +138,19 @@ export default async function SessionsPage() {
           <div className="site-head">
             <span className="section-label">The five topics</span>
             <h2 className="section-h2">Each one comes round once a season</h2>
+            <p className="section-lead">Each has a free guide, so you can start before the Session comes round.</p>
           </div>
           <div className="site-grid site-grid--small">
-            {SESSION_AREAS.map((a) => (
-              <div className="site-card" key={a.area}>
-                <h3>{a.area}</h3>
-                <p>{a.blurb}</p>
-              </div>
-            ))}
+            {SESSION_AREAS.map((a) => {
+              const guide = guideForArea(a.area);
+              return (
+                <div className="site-card" key={a.area}>
+                  <h3>{a.area}</h3>
+                  <p>{a.blurb}</p>
+                  {guide && <Link className="site-link" href={`/guides/${guide.slug}`}>Read the guide</Link>}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

@@ -32,6 +32,7 @@ export default function Footer() {
             <ul>
               <li><Link href="/events">What&apos;s on</Link></li>
               <li><Link href="/events#build-lab">Build Labs</Link></li>
+              <li><Link href="/guides">Free guides</Link></li>
               <li><Link href="/events/entrepreneurship-for-everyone">Entrepreneurship for Everyone</Link></li>
             </ul>
           </div>

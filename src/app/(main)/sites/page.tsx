@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
 import Image from 'next/image';
+import NewsletterStrip from '@/components/NewsletterStrip';
 import BrowserMock from '@/components/sections/site/BrowserMock';
 import Questions from '@/components/sections/site/Questions';
 import { CONTACT, SITES, SITES_TRIALS_OPEN } from '@/lib/site';
@@ -25,7 +26,7 @@ const FEATURES = [
   { h: 'A simple shop', p: 'Sell a few products or gift vouchers without a separate store.' },
   { h: 'Made for phones', p: 'Every template reads and books easily on a phone, where most of your customers are.' },
   { h: 'A chat assistant', p: "Answers common questions on your site, using what you've told it." },
-  { h: 'Help from a person', p: "Step-by-step guides, and a real person when you're stuck." },
+  { h: 'Help from a person', p: "Step-by-step help articles, and a person to ask when you're stuck." },
 ];
 
 // Screenshots of the four Growth Hub Sites templates (platform template sites
@@ -139,7 +140,7 @@ export default function SitesPage() {
             </div>
 
             <div className="plan plan--featured">
-              <span className="site-tag site-tag--free">Most owners choose this</span>
+              <span className="site-tag site-tag--free">Our pick for most owners</span>
               <h3>Storefront</h3>
               <div className="plan-price">
                 <b>A$39<small> a month</small></b>
@@ -227,7 +228,18 @@ export default function SitesPage() {
         </div>
       </section>
 
-      <section className="site-sec site-sec--tight">
+      {!SITES_TRIALS_OPEN && (
+        <div id="notify">
+          <NewsletterStrip
+            source="sites-waitlist"
+            heading="Want to know when self-serve sign-up opens?"
+            sub="We'll email you when it does, then one email a month with what's on. Unsubscribe any time."
+            cta="Tell me"
+          />
+        </div>
+      )}
+
+      <section className="site-sec site-sec--tight" style={SITES_TRIALS_OPEN ? undefined : { paddingTop: 'clamp(64px, 8vw, 112px)' }}>
         <div className="wrap">
           <div className="site-panel site-panel--lime">
             <h2 className="section-h2">Not sure where to start? Come to a free Session first.</h2>

@@ -51,6 +51,15 @@ const WAYS_IN = [
   },
 ];
 
+// What "for everyone" means in practice. Each is a promise the event pages,
+// the Build Lab and the About page already make; keep them in step.
+const COMMITMENTS = [
+  'An interpreter, Auslan or access support on request',
+  'Free Build Lab seats for hardship and partner referrals',
+  'No sales pitch in a free Session',
+  'A person answers, by email or phone',
+];
+
 export default async function HomePage() {
   const docs = await getUpcomingEvents().catch(() => []);
   const rows = buildCalendar(docs as PayloadEvent[]);
@@ -111,7 +120,10 @@ export default async function HomePage() {
                 <span className="section-label">Growth Hub Sessions · Wednesday lunchtime</span>
                 <h2 className="section-h2">One practical topic a month</h2>
               </div>
-              <Link className="site-link" href="/events">All Sessions and Build Labs</Link>
+              <div className="site-links">
+                <Link className="site-link" href="/guides">Free guide for every topic</Link>
+                <Link className="site-link" href="/events">All Sessions and Build Labs</Link>
+              </div>
             </div>
             <div className="site-grid site-grid--small">
               {season.map((r) => {
@@ -182,7 +194,13 @@ export default async function HomePage() {
               Himayat started by helping people find their way through systems that
               weren&apos;t built for them. Growth Hub brings the same patience to running a
               small business: plain answers, in a room, with people who&apos;ve done it.
+              It&apos;s built for the owners growth support usually misses.
             </p>
+            <ul className="commitments">
+              {COMMITMENTS.map((c) => (
+                <li key={c}>{c}</li>
+              ))}
+            </ul>
             <Link className="site-link" href="/about">Who we are</Link>
           </div>
         </div>

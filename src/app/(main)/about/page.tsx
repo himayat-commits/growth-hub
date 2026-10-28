@@ -22,7 +22,7 @@ const VALUES = [
   },
   {
     w: 'Honest.',
-    p: "Plain prices, real results and no sales pitch in a free Session. If something isn't right for you, we'll say so.",
+    p: "Plain prices, straight answers and no sales pitch in a free Session. If something isn't right for you, we'll say so.",
   },
   {
     w: 'Here.',

@@ -22,6 +22,7 @@ export default function ThreeDoors() {
       <div className="site-card">
         <h3>Stay connected</h3>
         <p>The slides and three next steps, next month&apos;s Session and one email a month.</p>
+        <Link className="site-link" href="/guides">Free guides for every topic</Link>
       </div>
     </div>
   );
