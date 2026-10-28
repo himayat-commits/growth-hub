@@ -69,7 +69,7 @@ export const SEASON: SeasonItem[] = [
 /** How a 90-minute Session runs; the last two steps are about your business. */
 export const RUN_SHEET = [
   { t: '0:00', h: 'Coffee and a seat', p: 'Tables by stage: starting out, trading, growing.', yours: false },
-  { t: '0:10', h: 'Why it matters now', p: "A welcome and the co-host's view.", yours: false },
+  { t: '0:10', h: 'Why it matters now', p: "A short welcome, and why this month's topic matters.", yours: false },
   { t: '0:15', h: 'Three practical moves', p: 'With Canberra examples, and no product pitch.', yours: false },
   { t: '0:45', h: 'Done live', p: 'One move, done in the room so you see it work.', yours: false },
   { t: '1:00', h: 'Table clinic', p: 'Your table works on one real problem, with helpers.', yours: true },

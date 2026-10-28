@@ -25,9 +25,6 @@ export default function Footer() {
               Free monthly Sessions, hands-on Build Labs and websites you can run
               yourself, for Canberra small businesses and sole traders.
             </p>
-            <div className="foot-badges">
-              <span className="mini">Social Traders Verified</span>
-            </div>
           </div>
 
           <div className="foot-col">
