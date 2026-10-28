@@ -6,10 +6,8 @@ import BrowserMock from '@/components/sections/site/BrowserMock';
 import GrowWord from '@/components/sections/site/GrowWord';
 import SessionTicket from '@/components/sections/site/SessionTicket';
 import { getUpcomingEvents } from '@/lib/cms';
-import { PROOF_NAMES } from '@/lib/partner-network';
 import { buildCalendar, dateParts, nextSession, rowCta, SESSION_FORMAT } from '@/lib/sessions';
 import { CBRIN_DIGITAL_SOLUTIONS_URL } from '@/lib/site';
-import { SUMMIT } from '@/lib/summit';
 import type { Event as PayloadEvent } from '@/payload-types';
 
 // The home page is built in code (it no longer renders the CMS "home" page
@@ -17,7 +15,7 @@ import type { Event as PayloadEvent } from '@/payload-types';
 
 const TITLE = 'Growth Hub by Himayat — Your business deserves to grow.';
 const DESCRIPTION =
-  'Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses and sole traders. A Social Traders Verified social enterprise.';
+  'Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses and sole traders. Run by Himayat, a Canberra social enterprise.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -80,7 +78,7 @@ export default async function HomePage() {
               <Link className="btn btn-primary" href={bookHref}>{bookLabel}</Link>
               <Link className="btn btn-secondary" href="/sites">See Growth Hub Sites</Link>
             </div>
-            <p className="site-fine">Run by Himayat, a Social Traders Verified social enterprise.</p>
+            <p className="site-fine">Run by Himayat, a Canberra social enterprise.</p>
           </div>
           <SessionTicket session={next} lab={nextLab} />
         </div>
@@ -172,26 +170,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="site-sec site-sec--tight">
-        <div className="wrap" style={{ maxWidth: 900 }}>
-          <span className="section-label">Where we&apos;ve shown up</span>
-          <h2 className="section-h2">{SUMMIT.name}</h2>
-          <p className="section-lead" style={{ marginBottom: 20 }}>
-            A free, all-day expo for Canberra small business on {SUMMIT.dateLong},
-            co-hosted with CBR Innovation Network: workshops, one-on-one help and more
-            than 30 organisations under one roof.
-          </p>
-          <p style={{ margin: '0 0 24px' }}>
-            <Link className="site-link" href={SUMMIT.path}>See the day</Link>
-          </p>
-          <div className="site-names">
-            {PROOF_NAMES.map((n) => (
-              <span key={n}>{n}</span>
-            ))}
-            <Link href="/partners" style={{ color: 'var(--plum)' }}>and more →</Link>
-          </div>
-        </div>
-      </section>
 
       <section className="site-sec site-sec--plum">
         <div className="wrap site-split">

@@ -99,7 +99,6 @@ export default function AboutPage() {
               </div>
             </div>
             <p className="site-fine" style={{ marginTop: 8 }}>
-              <span className="site-tag site-tag--free" style={{ marginRight: 8 }}>Social Traders Verified</span>
               Growth Hub is run by Himayat, a Canberra social enterprise.
             </p>
           </div>

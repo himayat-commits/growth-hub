@@ -207,7 +207,7 @@ export default function SitesPage() {
               },
               {
                 q: 'Where is my data kept?',
-                a: 'Sites are hosted in Sydney. Images you upload are stored in the United States. The Growth Hub Sites privacy policy, shown when you sign up, has the details.',
+                a: 'The Growth Hub Sites privacy policy, shown when you sign up, sets out where your site and the images you upload are stored.',
               },
               SITES_TRIALS_OPEN
                 ? {

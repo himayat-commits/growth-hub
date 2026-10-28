@@ -41,7 +41,7 @@ export default function SiteOgImage() {
               letterSpacing: '0.04em',
             }}
           >
-            A Social Traders Verified Enterprise
+            A Canberra social enterprise
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 26 }}>
             <span style={{ color: '#F3F0E7' }}>Growth Hub</span>

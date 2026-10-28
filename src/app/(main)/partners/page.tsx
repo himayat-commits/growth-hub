@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
-import { PARTNER_NETWORK } from '@/lib/partner-network';
 
 const TITLE = 'Partners — Growth Hub by Himayat';
 const DESCRIPTION =
-  'Growth Hub works alongside the organisations Canberra small businesses already trust. Co-host a Session, present, or refer owners our way.';
+  'Support Canberra small businesses? Co-host a Growth Hub Session, present at one, or refer owners our way.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -42,9 +41,9 @@ export default function PartnersPage() {
             <span className="section-label">Partners</span>
             <h1 className="hero-h1">We don&apos;t grow alone.</h1>
             <p className="site-lede" style={{ marginBottom: 0 }}>
-              Growth Hub works alongside the organisations Canberra owners already
-              trust: advisers, employment and settlement services, industry bodies and
-              local specialists.
+              If you support Canberra small businesses, as an adviser, an employment
+              or settlement service, an industry body or a local specialist, there&apos;s
+              a way to work with us.
             </p>
           </div>
           <div className="site-ctas" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
@@ -75,33 +74,6 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      <section className="site-sec">
-        <div className="wrap">
-          <div className="site-head site-head--row">
-            <div>
-              <span className="section-label">Who we&apos;ve worked with</span>
-              <h2 className="section-h2">The people who showed up</h2>
-            </div>
-            <p className="site-fine" style={{ maxWidth: '46ch' }}>
-              Organisations that took part in Entrepreneurship for Everyone in July
-              2026, or work with us now.
-            </p>
-          </div>
-          {PARTNER_NETWORK.map((g) => (
-            <div className="network-group" key={g.heading}>
-              <h3>{g.heading}</h3>
-              <div className="network-orgs">
-                {g.orgs.map((o) => (
-                  <span className="network-org" key={o.name}>
-                    <b>{o.name}</b>
-                    <span>{o.role}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       <section className="site-sec site-sec--tight">
         <div className="wrap">

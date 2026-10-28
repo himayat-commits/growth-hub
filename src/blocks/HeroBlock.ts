@@ -20,7 +20,7 @@ export const HeroBlock: Block = {
     {
       name: 'eyebrow',
       type: 'text',
-      admin: { description: 'Badge text above the heading, e.g. "A Social Traders Verified Enterprise"' },
+      admin: { description: 'Badge text above the heading, e.g. "A Canberra social enterprise"' },
     },
     {
       name: 'handnote',

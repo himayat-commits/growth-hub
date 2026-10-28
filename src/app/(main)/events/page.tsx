@@ -6,7 +6,6 @@ import SessionsCalendar from '@/components/sections/site/SessionsCalendar';
 import Questions from '@/components/sections/site/Questions';
 import { getUpcomingEvents } from '@/lib/cms';
 import { buildCalendar, dateParts, LAB_STEPS, RUN_SHEET, SESSION_AREAS, SESSION_FORMAT, SESSION_VENUE } from '@/lib/sessions';
-import { SUMMIT } from '@/lib/summit';
 import type { Event as PayloadEvent } from '@/payload-types';
 
 const TITLE = 'Sessions and Build Labs — Growth Hub by Himayat';
@@ -151,8 +150,8 @@ export default async function SessionsPage() {
       </section>
 
       <section className="site-sec site-sec--tight">
-        <div className="wrap site-grid">
-          <div className="site-panel site-panel--lavender" style={{ gridTemplateColumns: '1fr' }}>
+        <div className="wrap">
+          <div className="site-panel site-panel--lavender">
             <div>
               <span className="section-label">For organisations</span>
               <h2 className="section-h2">Co-host a Session with us</h2>
@@ -165,17 +164,6 @@ export default async function SessionsPage() {
               </p>
               <Link className="site-link" href="/partners#work-with-us">Ways to work with us</Link>
             </div>
-          </div>
-          <div className="site-card" style={{ padding: 'clamp(28px, 4vw, 44px)', borderRadius: 28 }}>
-            <span className="section-label">Past event · {SUMMIT.dateLong}</span>
-            <h2 className="section-h2" style={{ fontSize: 'clamp(26px, 2.6vw, 36px)', margin: 0 }}>
-              {SUMMIT.name}
-            </h2>
-            <p>
-              Our free all-day expo with CBR Innovation Network at the University of
-              Canberra: workshops, help desks and more than 30 organisations.
-            </p>
-            <Link className="site-link" href={SUMMIT.path}>See the day</Link>
           </div>
         </div>
       </section>
