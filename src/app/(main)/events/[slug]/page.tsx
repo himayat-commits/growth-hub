@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getEventBySlug, getGenericEventSlugs, getUpcomingEvents } from '@/lib/cms';
+import { guideForArea } from '@/lib/guides';
 import { toPublicEvent } from '@/lib/events-data';
 import { isBeforeCanberraToday } from '@/lib/events-time';
 import {
@@ -79,6 +80,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
   const label = season ? SESSION_FORMAT[season.kind].label : ev.tag;
   const registerUrl = registerUrlOf(doc as PayloadEvent);
   const seats = (doc as { seats?: string | null }).seats ?? null;
+  const guide = kind === 'lab' ? guideForArea('Build Lab') : guideForArea(season?.area);
 
   const upcoming = await getUpcomingEvents().catch(() => []);
   const related = buildCalendar(upcoming as PayloadEvent[])
@@ -167,6 +169,11 @@ export default async function GenericEventPage({ params }: { params: Params }) {
                       ? 'A laptop, your logo and a few photos if you have them, and the basics: what you sell, who to, and where.'
                       : 'Your phone (a laptop helps but isn’t needed), a question about your own business, and a business friend if you like.'}
                   </p>
+                  {guide && (
+                    <Link className="site-link" href={`/guides/${guide.slug}`}>
+                      {kind === 'lab' ? 'How to get ready' : 'Read the free guide first'}
+                    </Link>
+                  )}
                 </div>
               </div>
 

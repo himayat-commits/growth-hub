@@ -24,5 +24,19 @@ export const SITES = {
  *  true and the trial buttons on /sites come back. */
 export const SITES_TRIALS_OPEN = false;
 
+/** Eventbrite booking links get a tracking code (`aff`), so Eventbrite's order
+ *  reports show which bookings came from this site rather than from its own
+ *  listings. Other links pass through unchanged. */
+export function bookingHref(url: string): string {
+  try {
+    const u = new URL(url);
+    if (!/(^|\.)eventbrite\.com(\.au)?$/.test(u.hostname) || u.searchParams.has('aff')) return url;
+    u.searchParams.set('aff', 'thegrowthhub');
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 /** CBR Innovation Network's Digital Solutions program (free one-on-one advice). */
 export const CBRIN_DIGITAL_SOLUTIONS_URL = 'https://cbrin.com.au';

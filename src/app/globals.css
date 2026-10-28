@@ -1618,3 +1618,40 @@ a.cal-title:hover { text-decoration: underline; text-underline-offset: 4px; }
 .nf-grid { max-width: 880px; margin-bottom: 28px; }
 .nf-grid .site-card h2 { font-size: 23px; font-weight: 600; line-height: 1.25; margin: 0; color: var(--teal); }
 .nf .site-fine a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---- Guides (/guides, /guides/[slug]) ---- */
+.guide-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.guide-step { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 16px; align-items: start; background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 20px 22px; }
+.guide-box { width: 36px; height: 36px; border-radius: 10px; border: 2px solid var(--teal); display: flex; align-items: center; justify-content: center; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 15px; font-weight: 600; color: var(--teal); }
+.guide-step h3 { font-size: 20px; font-weight: 600; line-height: 1.3; margin: 4px 0 6px; color: var(--teal); }
+.guide-step p { margin: 0; font-size: 17px; line-height: 1.6; }
+.guide-next ol { margin: 0; padding-left: 24px; list-style: decimal; display: grid; gap: 10px; font-size: 19px; line-height: 1.5; }
+.guide-next li::marker { font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-weight: 600; }
+.guide-sources { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.site-panel--plum .section-label { color: var(--lime); }
+.site-panel--plum .section-label::before { background: var(--lime); }
+
+/* A guide prints as a checklist: content only, empty boxes to tick, and the
+   source links written out. */
+@media print {
+  .top-bar, .foot, .session-aside, .gh-newsletter-strip, .guide-doors, .guide > .site-sec--white, [aria-label="Cookie consent"] { display: none !important; }
+  body { background: #fff; }
+  .guide .site-sec { padding: 0 !important; }
+  .guide .session-layout { display: block; }
+  .guide .session-main { gap: 20px; }
+  .guide .session-main h1 { font-size: 30px; margin: 8px 0; }
+  .guide .session-main h2 { font-size: 21px; margin: 0 0 6px; break-after: avoid; }
+  .guide .site-lede { font-size: 15px; }
+  .guide-step { border: 0; border-bottom: 1px solid #ccc; border-radius: 0; padding: 8px 0; break-inside: avoid; }
+  .guide-box { color: transparent; border-radius: 4px; width: 22px; height: 22px; }
+  .guide-step h3 { font-size: 15px; margin: 0 0 2px; }
+  .guide-step p { font-size: 13px; line-height: 1.45; }
+  .guide-next { background: none; border: 2px solid #000; break-inside: avoid; }
+  .guide-sources a::after { content: " — " attr(href); font-weight: 400; word-break: break-all; }
+}
+
+/* Home: two links in a section head, and the "for everyone" commitments */
+.site-links { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.commitments { list-style: none; margin: 20px 0 24px; padding: 0; display: grid; gap: 10px; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 16px; line-height: 1.45; color: rgba(243, 240, 231, 0.9); }
+.commitments li { display: grid; grid-template-columns: 22px minmax(0, 1fr); }
+.commitments li::before { content: '✓'; color: var(--lime); font-weight: 600; }

@@ -7,7 +7,7 @@
 // itself a clean server component.
 
 import { track } from '@/lib/analytics';
-import { CONTACT } from '@/lib/site';
+import { bookingHref, CONTACT } from '@/lib/site';
 import { readAttribution } from './useAttribution';
 
 export default function RsvpMailtoLink({
@@ -21,7 +21,7 @@ export default function RsvpMailtoLink({
   registerUrl?: string | null;
   label?: string;
 }) {
-  const href = registerUrl || `mailto:${CONTACT.email}?subject=${encodeURIComponent(`RSVP — ${title}`)}`;
+  const href = registerUrl ? bookingHref(registerUrl) : `mailto:${CONTACT.email}?subject=${encodeURIComponent(`RSVP — ${title}`)}`;
   return (
     <a
       className="btn btn-primary"
