@@ -27,8 +27,12 @@ const HONEYPOT_STYLE = {
 
 type FormValues = z.infer<typeof schema>;
 
+// /free-seats links here with ?ask=free-seat, so this chip starts ticked.
+const FREE_SEAT_INTEREST = "A free Build Lab seat";
+
 const INTERESTS = [
   "A Session or Build Lab",
+  FREE_SEAT_INTEREST,
   "Growth Hub Sites",
   "Launch — build it with us",
   "Partnering with us",
@@ -53,6 +57,9 @@ export default function Contact({ supportEmail, phone, address }: ContactProps =
     const num = Math.floor(Math.random() * 900) + 100;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRef(`GH-${new Date().getFullYear()}-${num}`);
+    if (new URLSearchParams(window.location.search).get("ask") === "free-seat") {
+      setInterests(new Set([FREE_SEAT_INTEREST]));
+    }
   }, []);
 
   const {

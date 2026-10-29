@@ -46,6 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/sites', null, 'monthly', 0.9),
     entry('/guides', null, 'monthly', 0.8),
     ...GUIDES.map((g) => entry(`/guides/${g.slug}`, g.updated, 'monthly', 0.7)),
+    entry('/free-seats', null, 'monthly', 0.6),
     entry('/partners', null, 'monthly', 0.7),
     entry('/about', null, 'monthly', 0.7),
     entry('/privacy', null, 'yearly', 0.3),

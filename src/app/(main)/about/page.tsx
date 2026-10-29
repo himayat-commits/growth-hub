@@ -30,6 +30,17 @@ const VALUES = [
   },
 ];
 
+const PEOPLE_TO_COME = [
+  {
+    h: 'Table helpers',
+    p: "Helpers at every Session table and two at every Build Lab. We'll introduce them here as the team grows.",
+  },
+  {
+    h: 'Partner presenters',
+    p: "People from partner organisations who teach one practical move. We'll name each one on the event page.",
+  },
+];
+
 export default function AboutPage() {
   return (
     <main>
@@ -83,6 +94,20 @@ export default function AboutPage() {
       <section className="site-sec">
         <div className="wrap site-split">
           <div>
+            <span className="section-label">Why a social enterprise</span>
+            <h2 className="section-h2">The paid work pays for the free work.</h2>
+          </div>
+          <p className="section-lead" style={{ margin: 0 }}>
+            Growth Hub is a social enterprise, not a charity. Build Labs and Growth Hub
+            Sites are how we earn. That income pays for the free monthly Sessions and the
+            free Build Lab seats, and any surplus goes back into the community work.
+          </p>
+        </div>
+      </section>
+
+      <section className="site-sec site-sec--white">
+        <div className="wrap">
+          <div className="site-head">
             <span className="section-label">The people</span>
             <h2 className="section-h2">Who you&apos;ll meet</h2>
             <p className="section-lead">
@@ -90,17 +115,29 @@ export default function AboutPage() {
               partner organisations and helpers at every table.
             </p>
           </div>
-          <div className="site-card">
-            <div className="site-person">
-              <span className="site-avatar" aria-hidden="true">WJ</span>
-              <div>
-                <h3>Waheed Jayhoon</h3>
-                <p className="site-fine">Founder, Himayat. Hosts Growth Hub Sessions.</p>
+          <div className="site-grid">
+            <div className="site-card site-card--egg">
+              <div className="site-person">
+                <span className="site-avatar" aria-hidden="true">WJ</span>
+                <div>
+                  <h3>Waheed Jayhoon</h3>
+                  <p className="site-fine">Founder, Himayat. Hosts Growth Hub Sessions.</p>
+                </div>
               </div>
+              <p className="site-fine" style={{ marginTop: 8 }}>
+                Growth Hub is run by Himayat, a Canberra social enterprise.
+              </p>
             </div>
-            <p className="site-fine" style={{ marginTop: 8 }}>
-              Growth Hub is run by Himayat, a Canberra social enterprise.
-            </p>
+            {/* Placeholders until helpers and presenters are named, with their OK. */}
+            {PEOPLE_TO_COME.map((p) => (
+              <div className="site-card site-card--egg" key={p.h}>
+                <div className="site-person">
+                  <span className="site-avatar site-avatar--open" aria-hidden="true" />
+                  <h3>{p.h}</h3>
+                </div>
+                <p className="site-fine" style={{ marginTop: 8 }}>{p.p}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

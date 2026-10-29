@@ -9,6 +9,7 @@ import {
   buildCalendar,
   eventFacts,
   LAB_STEPS,
+  PILOT_NOTE,
   registerUrlOf,
   RUN_SHEET,
   SESSION_FORMAT,
@@ -22,6 +23,7 @@ import { EventJsonLd } from '@/components/seo/EventJsonLd';
 import { BreadcrumbListJsonLd } from '@/components/seo/BreadcrumbListJsonLd';
 import { PartnerLockup } from '@/components/sections/events/PartnerLockup';
 import ShareButtons from '@/components/sections/ShareButtons';
+import FreeSeatNote from '@/components/sections/site/FreeSeatNote';
 import SessionDate from '@/components/sections/site/SessionDate';
 import ThreeDoors from '@/components/sections/site/ThreeDoors';
 
@@ -120,6 +122,9 @@ export default async function GenericEventPage({ params }: { params: Params }) {
                 <h1>{ev.title}</h1>
                 {ev.desc && (
                   <p className="site-lede" style={{ margin: 0, maxWidth: '60ch' }}>{ev.desc}</p>
+                )}
+                {season?.pilot && (
+                  <p className="site-fine" style={{ marginTop: 14, maxWidth: '60ch' }}>{PILOT_NOTE}</p>
                 )}
               </div>
 
@@ -225,13 +230,16 @@ export default async function GenericEventPage({ params }: { params: Params }) {
                       <span className="cal-soon">Registration opens soon</span>
                     )}
                     <AddToCalendarLink slug={ev.slug} title={ev.title} />
+                    {kind === 'lab' && <FreeSeatNote>Free seats for hardship and partner referrals.</FreeSeatNote>}
                   </>
                 )}
               </div>
               <div className="session-note">
-                <b>Access and support</b>
-                Tell us when you register if you need an interpreter, Auslan or access
-                support, and we&apos;ll arrange it.
+                <b>Language and access</b>
+                {season && 'Plain English, and helpers at every table. '}
+                Need an interpreter, Auslan or access support, or want to bring someone
+                with you? Tell us when you book, or any time before, and we&apos;ll arrange
+                it. <Link href="/about#contact">Ask us&nbsp;→</Link>
               </div>
             </aside>
           </div>

@@ -8,6 +8,13 @@ export const CONTACT = {
   address: 'Level 4, 1 Moore St, Canberra ACT 2601',
 };
 
+/** Free Build Lab seats for hardship and partner referrals: the explainer page,
+ *  and the contact form with "A free Build Lab seat" already ticked. */
+export const FREE_SEATS = {
+  path: '/free-seats',
+  ask: '/about?ask=free-seat#contact',
+};
+
 /** Growth Hub Sites runs on the white-label platform at app.thegrowthhub.com.au.
  *  Plan ids come from the platform's plan list (Storefront monthly / annual). */
 const SITES_APP = 'https://app.thegrowthhub.com.au';

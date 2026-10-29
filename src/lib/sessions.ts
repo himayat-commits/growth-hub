@@ -26,11 +26,17 @@ export const SESSION_AREAS: Array<{ area: SessionArea; blurb: string }> = [
 
 // The room at CBRIN (1 Moore St) is requested but not yet confirmed. Flip this
 // to true once CBRIN agrees and every venue line on the site updates together.
+// Until then the venue is emailed to everyone booked ("sent with your booking"
+// wouldn't be true for people who booked before it was set).
 const VENUE_CONFIRMED = false;
 
 export const SESSION_VENUE = VENUE_CONFIRMED
   ? { short: 'CBRIN, 1 Moore St', row: 'CBRIN' }
-  : { short: 'Canberra city, venue to be confirmed', row: 'Canberra city · venue TBC' };
+  : { short: 'Canberra city, venue emailed before the day', row: 'Canberra city · venue by email' };
+
+/** One line explaining the "pilot" tag on the Nov–Dec 2026 dates. */
+export const PILOT_NOTE =
+  "Pilot means one of our first runs, in November and December 2026. Same format, and we'll ask you what to change for the 2027 season.";
 
 export const SESSION_FORMAT: Record<'session' | 'lab', { label: string; price: string; time: string; where: string }> = {
   session: { label: 'Session', price: 'Free', time: '12:00–1:30pm', where: VENUE_CONFIRMED ? 'CBRIN · in person' : SESSION_VENUE.row },

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import NewsletterStrip from '@/components/NewsletterStrip';
 import BrowserMock from '@/components/sections/site/BrowserMock';
+import FreeSeatNote from '@/components/sections/site/FreeSeatNote';
 import Questions from '@/components/sections/site/Questions';
 import { CONTACT, SITES, SITES_TRIALS_OPEN } from '@/lib/site';
 import { SESSION_FORMAT } from '@/lib/sessions';
@@ -137,6 +138,7 @@ export default function SitesPage() {
                 <li>Help articles</li>
               </ul>
               <Link className="btn btn-secondary" href="/events#build-lab">Book a Build Lab ({SESSION_FORMAT.lab.price})</Link>
+              <FreeSeatNote>Free seats for hardship and partner referrals.</FreeSeatNote>
             </div>
 
             <div className="plan plan--featured">
@@ -181,9 +183,9 @@ export default function SitesPage() {
               <Link className="btn btn-secondary" href="/about#contact">Talk to us about Launch</Link>
             </div>
           </div>
-          <p className="site-fine" style={{ marginTop: 20 }}>
+          <FreeSeatNote style={{ marginTop: 20 }}>
             Prices in AUD, including GST. Free Build Lab seats for hardship and partner referrals.
-          </p>
+          </FreeSeatNote>
         </div>
       </section>
 
