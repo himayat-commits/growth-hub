@@ -78,20 +78,20 @@ const nextConfig: NextConfig = {
       { source: '/account', destination: '/sites', permanent: true },
       { source: '/shop', destination: '/', permanent: true },
       { source: '/shop/:path*', destination: '/', permanent: true },
-      // Summit consolidation → the canonical "Entrepreneurship for Everyone"
-      // landing page. The old working titles ("Small Business Journey",
-      // "AI for Small Business") and the bare /expo path all funnel here.
-      // NB: '/expo' matches exactly (no nested paths), so /expo/apply — the
-      // contributor application form — is intentionally left untouched.
-      { source: '/events/small-business-journey', destination: '/events/entrepreneurship-for-everyone', permanent: true },
-      { source: '/events/ai-for-small-business-9-july', destination: '/events/entrepreneurship-for-everyone', permanent: true },
-      { source: '/expo', destination: '/events/entrepreneurship-for-everyone', permanent: true },
+      // The July 2026 summit page is retired (Oct 2026). Its URL, the old
+      // working titles ("Small Business Journey", "AI for Small Business") and
+      // the bare /expo path all go to the Sessions calendar.
+      { source: '/events/entrepreneurship-for-everyone', destination: '/events', permanent: true },
+      { source: '/events/entrepreneurship-for-everyone/:path*', destination: '/events', permanent: true },
+      { source: '/events/small-business-journey', destination: '/events', permanent: true },
+      { source: '/events/ai-for-small-business-9-july', destination: '/events', permanent: true },
+      { source: '/expo', destination: '/events', permanent: true },
       // Site refresh (Oct 2026): the portal-era pricing and sign-up pages are
       // retired in favour of Growth Hub Sites, and the closed summit form goes
-      // to the summit page.
+      // to the Sessions calendar.
       { source: '/pricing', destination: '/sites', permanent: true },
       { source: '/signup/:path*', destination: '/sites', permanent: true },
-      { source: '/expo/apply', destination: '/events/entrepreneurship-for-everyone', permanent: true },
+      { source: '/expo/apply', destination: '/events', permanent: true },
       { source: '/contact', destination: '/about#contact', permanent: true },
       { source: '/sessions', destination: '/events', permanent: true },
       // Partner pages (Oct 2026): the co-branded /with/{slug} micro-sites and
