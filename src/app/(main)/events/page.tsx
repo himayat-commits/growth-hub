@@ -2,11 +2,22 @@ import type { Metadata } from 'next';
 import { ogBase, twitterBase } from '../shared-metadata';
 import Link from 'next/link';
 import NewsletterStrip from '@/components/NewsletterStrip';
+import FreeSeatNote, { FREE_SEAT_LINE } from '@/components/sections/site/FreeSeatNote';
 import SessionsCalendar from '@/components/sections/site/SessionsCalendar';
 import Questions from '@/components/sections/site/Questions';
 import { getUpcomingEvents } from '@/lib/cms';
 import { guideForArea } from '@/lib/guides';
-import { buildCalendar, dateParts, LAB_STEPS, RUN_SHEET, SESSION_AREAS, SESSION_FORMAT, SESSION_VENUE } from '@/lib/sessions';
+import {
+  buildCalendar,
+  dateParts,
+  LAB_STEPS,
+  PILOT_NOTE,
+  RUN_SHEET,
+  SESSION_AREAS,
+  SESSION_FORMAT,
+  SESSION_VENUE,
+} from '@/lib/sessions';
+import { FREE_SEATS } from '@/lib/site';
 import type { Event as PayloadEvent } from '@/payload-types';
 
 const TITLE = 'Sessions and Build Labs — Growth Hub by Himayat';
@@ -81,10 +92,39 @@ export default async function SessionsPage() {
             <a className="site-link" href="#newsletter">Get new dates by email</a>
           </div>
           <SessionsCalendar rows={rows} />
+          {rows.some((r) => r.pilot && r.area) && (
+            <p className="site-fine" style={{ marginTop: 20 }}>{PILOT_NOTE}</p>
+          )}
         </div>
       </section>
 
-      <section className="site-sec">
+      <section className="site-sec" id="access">
+        <div className="wrap">
+          <div className="site-head">
+            <span className="section-label">Everyone&apos;s welcome</span>
+            <h2 className="section-h2">Come as you are. Ask for what you need.</h2>
+          </div>
+          <div className="site-grid">
+            <div className="site-card">
+              <h3>Language and access</h3>
+              <p>
+                Every Session is in plain English, with helpers at every table, and the
+                slides and three next steps come by email afterwards. If you&apos;d like an
+                interpreter, Auslan or access support, or want to bring a friend or support
+                worker, tell us when you book and we&apos;ll arrange it.
+              </p>
+              <Link className="site-link" href="/about#contact">Ask us</Link>
+            </div>
+            <div className="site-card site-card--lime">
+              <h3>Free Build Lab seats</h3>
+              <p>{FREE_SEAT_LINE}</p>
+              <Link className="site-link" href={FREE_SEATS.path}>How to ask</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="site-sec site-sec--tight">
         <div className="wrap">
           <div className="site-head">
             <span className="section-label">Inside a Session</span>
@@ -111,10 +151,10 @@ export default async function SessionsPage() {
               Ten to twelve owners, two helpers and three hours. We check every site with
               you before it goes live, so nothing goes out with placeholder details.
             </p>
-            <p className="site-fine" style={{ margin: '20px 0 28px' }}>
+            <FreeSeatNote style={{ margin: '20px 0 28px' }}>
               Price includes GST and your first site on the Starter plan. Free seats for
-              hardship and partner referrals: just ask.
-            </p>
+              hardship and partner referrals.
+            </FreeSeatNote>
             <div className="site-ctas">
               <a className="btn btn-lime" href="#whats-on">See Build Lab dates</a>
               <Link className="site-link" href="/sites">About Growth Hub Sites</Link>
@@ -196,8 +236,13 @@ export default async function SessionsPage() {
                 a: 'Not for the 2026 pilot Sessions: they are in person. Everyone who registers gets the slides and three next steps by email afterwards.',
               },
               {
-                q: 'Can I bring an interpreter, or ask for other support?',
-                a: "Yes. Tell us what you need when you register, whether that's an interpreter, Auslan or access support, and we'll arrange it.",
+                q: "Can I come if money's tight?",
+                a: (
+                  <>
+                    Yes. Sessions are free, and you can ask for a free Build Lab seat with a
+                    message. <Link href={FREE_SEATS.path}>How to ask</Link>.
+                  </>
+                ),
               },
             ]}
           />

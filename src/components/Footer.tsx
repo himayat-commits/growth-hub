@@ -25,6 +25,7 @@ export default function Footer() {
               Free monthly Sessions, hands-on Build Labs and websites you can run
               yourself, for Canberra small businesses and sole traders.
             </p>
+            <p className="foot-run">Run by Himayat, a Canberra social enterprise.</p>
           </div>
 
           <div className="foot-col">
