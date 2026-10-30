@@ -171,16 +171,35 @@ export default function SitesPage() {
               <span className="site-kicker" style={{ color: 'var(--lime)' }}>Done with you</span>
               <h3>Launch</h3>
               <div className="plan-price">
-                <b>A$450–750</b>
-                <span className="site-fine">one-off, includes 3 months of Storefront</span>
+                <b>A$690</b>
+                <span className="site-fine">one-off, includes 3 months of Storefront Plus</span>
               </div>
               <ul>
                 <li>A 30-minute interview about your business</li>
                 <li>We build it and check it</li>
                 <li>One round of changes</li>
                 <li>Your domain connected</li>
+                <li>Your Build Lab fee comes off if you book within 30 days of your Lab</li>
               </ul>
               <Link className="btn btn-secondary" href="/about#contact">Talk to us about Launch</Link>
+            </div>
+          </div>
+          <div className="plan plan-addon">
+            <div className="plan-addon-text">
+              <span className="site-kicker" style={{ color: 'var(--lime)' }}>Help every month</span>
+              <h3>Storefront Plus</h3>
+              <p>
+                Everything in Storefront, plus one update made for you each month (new photos, prices,
+                hours or a page) and a check-in call every three months. For owners who&rsquo;d rather
+                hand the updates over.
+              </p>
+            </div>
+            <div className="plan-addon-side">
+              <div className="plan-price">
+                <b>A$89<small> a month</small></b>
+                <span className="site-fine">or A$890 a year (two months free)</span>
+              </div>
+              <Link className="btn btn-secondary" href="/about#contact">Talk to us about Plus</Link>
             </div>
           </div>
           <FreeSeatNote style={{ marginTop: 20 }}>

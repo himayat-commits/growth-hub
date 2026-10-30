@@ -1587,6 +1587,14 @@ a.cal-title:hover { text-decoration: underline; text-underline-offset: 4px; }
 .plan--featured ul { color: var(--teal); }
 .plan--featured ul li::before { color: var(--plum); }
 .plan--featured .site-fine { color: var(--fg-muted); text-align: center; }
+.plan-addon { margin-top: 20px; flex-direction: row; align-items: center; justify-content: space-between; gap: 28px; }
+.plan-addon-text { display: grid; gap: 8px; max-width: 640px; }
+.plan-addon-text p { margin: 0; font-size: 16px; line-height: 1.5; color: rgba(243, 240, 231, 0.85); }
+.plan-addon-side { display: flex; align-items: center; gap: 24px; flex: none; }
+.plan-addon .btn { margin-top: 0; }
+@media (max-width: 860px) {
+  .plan-addon, .plan-addon-side { flex-direction: column; align-items: stretch; }
+}
 
 /* ---- Partners ---- */
 
