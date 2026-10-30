@@ -7,11 +7,14 @@ import { toPublicEvent } from '@/lib/events-data';
 import { isBeforeCanberraToday } from '@/lib/events-time';
 import {
   buildCalendar,
+  dateParts,
   eventFacts,
+  LAB_REFUND,
   LAB_STEPS,
   PILOT_NOTE,
   registerUrlOf,
   RUN_SHEET,
+  seasonItemFor,
   SESSION_FORMAT,
 } from '@/lib/sessions';
 import type { Event as PayloadEvent } from '@/payload-types';
@@ -42,14 +45,21 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!doc) return { title: 'Event — Growth Hub by Himayat' };
   const ev = toPublicEvent(doc as PayloadEvent);
   const path = `/events/${ev.slug}`;
-  const title = `${ev.title} — Growth Hub by Himayat`;
+  // Season dates repeat titles ("Build and publish your website"), so the date
+  // goes in the title and description to keep each page distinct.
+  const season = seasonItemFor(doc as PayloadEvent);
+  const d = season ? dateParts(season.date) : null;
+  const title = d
+    ? `${ev.title}, ${d.weekday} ${d.day} ${d.month} — Growth Hub by Himayat`
+    : `${ev.title} — Growth Hub by Himayat`;
+  const description = d ? `${d.long}${ev.time ? `, ${ev.time}` : ''}. ${ev.desc}` : ev.desc;
   return {
     title,
-    description: ev.desc,
+    description,
     alternates: { canonical: path },
     openGraph: {
       title,
-      description: ev.desc,
+      description,
       url: path,
       type: 'website',
       siteName: 'Growth Hub by Himayat',
@@ -58,7 +68,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     twitter: {
       card: 'summary_large_image',
       title,
-      description: ev.desc,
+      description,
     },
   };
 }
@@ -216,6 +226,12 @@ export default async function GenericEventPage({ params }: { params: Params }) {
                   </dd>
                   <dt>Where</dt>
                   <dd>{location || 'Online'}</dd>
+                  {kind === 'lab' && (
+                    <>
+                      <dt>Refunds</dt>
+                      <dd style={{ fontWeight: 400 }}>{LAB_REFUND}</dd>
+                    </>
+                  )}
                 </dl>
                 {hasEnded ? (
                   <>

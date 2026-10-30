@@ -10,6 +10,7 @@ import { guideForArea } from '@/lib/guides';
 import {
   buildCalendar,
   dateParts,
+  LAB_REFUND,
   LAB_STEPS,
   PILOT_NOTE,
   RUN_SHEET,
@@ -224,6 +225,10 @@ export default async function SessionsPage() {
                 a: 'Yes. Sessions are free and there is no pitch. Build Labs cost A$179 because you leave with a working website and two people helping you get there.',
               },
               {
+                q: "What if I can't make my Build Lab?",
+                a: `${LAB_REFUND} Cancel through your Eventbrite ticket, or email hello@thegrowthhub.com.au.`,
+              },
+              {
                 q: "I'm only just starting out. Is it for me?",
                 a: "Yes. Tables are grouped by stage (starting out, trading or growing), so you'll be working with people at the same point as you.",
               },
@@ -233,7 +238,7 @@ export default async function SessionsPage() {
               },
               {
                 q: 'Can I watch online, or later?',
-                a: 'Not for the 2026 pilot Sessions: they are in person. Everyone who registers gets the slides and three next steps by email afterwards.',
+                a: "No. Sessions are in person and aren't recorded or streamed. Everyone who registers gets the slides and three next steps by email afterwards.",
               },
               {
                 q: "Can I come if money's tight?",
