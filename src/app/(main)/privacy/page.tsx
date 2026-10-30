@@ -101,7 +101,7 @@ export default function PrivacyPage() {
             <strong>At a Session</strong>: if you ask to be referred to CBR Innovation
             Network&rsquo;s Digital Solutions program, we pass your name and contact details to
             CBRIN only with your consent. CBRIN then contacts you and chooses your advisor. We
-            don&rsquo;t record or live-stream the 2026 pilot Sessions (November and December).
+            don&rsquo;t record or live-stream Sessions.
           </P>
           <P>
             <strong>Information collected automatically</strong>: if you accept analytics cookies,

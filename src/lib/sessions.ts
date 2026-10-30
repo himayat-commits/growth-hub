@@ -35,6 +35,10 @@ export const SESSION_VENUE = VENUE_CONFIRMED
   : { short: 'Canberra city, venue emailed before the day', row: 'Canberra city · venue by email' };
 
 /** One line explaining the "pilot" tag on the Nov–Dec 2026 dates. */
+/** Build Lab refunds, matching the Eventbrite refund policy. */
+export const LAB_REFUND =
+  "Full refund up to 7 days before. After that, we'll move your seat to a later Build Lab at no cost.";
+
 export const PILOT_NOTE =
   "Pilot means one of our first runs, in November and December 2026. Same format, and we'll ask you what to change for the 2027 season.";
 

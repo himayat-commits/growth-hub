@@ -29,7 +29,7 @@ export default async function EventOgImage({ params }: { params: Params }) {
   const seasonTag = facts?.season ? (facts.season.kind === 'lab' ? 'Build Lab' : 'Growth Hub Session') : '';
 
   const title = ev?.title ?? 'Growth Hub event';
-  const dateLine = ev?.dateLong ?? '';
+  const dateLine = [ev?.dateLong, ev?.time].filter(Boolean).join(' · ');
   const tag = cmsTag || seasonTag || ev?.tag || 'Event';
   const location = facts?.location || 'Canberra';
 
@@ -102,19 +102,20 @@ export default async function EventOgImage({ params }: { params: Params }) {
           </div>
         </div>
 
-        {/* Bottom row — date + location */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <span style={{ fontSize: 18, color: 'rgba(243,240,231,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+        {/* Bottom rows — date and time, then location. Stacked so a long venue
+            line ("venue emailed before the day") never runs off the card. */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 20 }}>
+            <span style={{ width: 96, fontSize: 18, color: 'rgba(243,240,231,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               When
             </span>
-            <span style={{ fontSize: 36, color: '#F3F0E7' }}>{dateLine}</span>
+            <span style={{ fontSize: 34, color: '#F3F0E7' }}>{dateLine}</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
-            <span style={{ fontSize: 18, color: 'rgba(243,240,231,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 20 }}>
+            <span style={{ width: 96, fontSize: 18, color: 'rgba(243,240,231,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               Where
             </span>
-            <span style={{ fontSize: 32, color: '#F3F0E7' }}>{location}</span>
+            <span style={{ fontSize: 28, color: 'rgba(243,240,231,0.85)', maxWidth: 900 }}>{location}</span>
           </div>
         </div>
       </div>
