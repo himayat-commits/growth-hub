@@ -9,6 +9,7 @@ import {
   buildCalendar,
   dateParts,
   eventFacts,
+  labEarlyBird,
   LAB_REFUND,
   LAB_STEPS,
   PILOT_NOTE,
@@ -93,6 +94,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
   const registerUrl = registerUrlOf(doc as PayloadEvent);
   const seats = (doc as { seats?: string | null }).seats ?? null;
   const guide = kind === 'lab' ? guideForArea('Growth Lab') : guideForArea(season?.area);
+  const earlyBird = season?.kind === 'lab' ? labEarlyBird(season.date) : null;
 
   const upcoming = await getUpcomingEvents().catch(() => []);
   const related = buildCalendar(upcoming as PayloadEvent[])
@@ -213,6 +215,9 @@ export default async function GenericEventPage({ params }: { params: Params }) {
                   <span className="price">{price}</span>
                   {seats && !hasEnded && <span className="cal-seats">{seats}</span>}
                 </div>
+                {earlyBird && !hasEnded && (
+                  <p className="site-fine" style={{ margin: '-4px 0 0' }}>or {earlyBird}</p>
+                )}
                 <dl>
                   <dt>When</dt>
                   <dd>
