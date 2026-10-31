@@ -1,7 +1,7 @@
 # Growth Hub brand and voice guide
 
 For anyone writing for Growth Hub: the website, Eventbrite listings, emails,
-slides, social posts and the Growth Hub Sites platform. Last updated 29 Oct 2026.
+slides, social posts and the Growth Hub Sites platform. Last updated 30 Oct 2026.
 
 ## What Growth Hub is
 
@@ -39,7 +39,8 @@ arranged on request. Don't promise translated materials.
 | Build Lab | 3 hours, 4th Wednesday, 9:30am–12:30pm; leave with a site that's live | A$179 |
 | Growth Hub Sites: Starter | One site, five pages, on a Growth Hub web address | Free with a Build Lab or program code |
 | Growth Hub Sites: Storefront | Own domain, bookings, shop, chat assistant, support | A$39 a month or A$390 a year |
-| Growth Hub Sites: Launch | We build it with you | A$450–750 one-off, with 3 months of Storefront |
+| Growth Hub Sites: Storefront Plus | Storefront, one update made for you each month and a check-in call every three months | A$89 a month or A$890 a year |
+| Growth Hub Sites: Launch | We build it with you | A$690 one-off, with 3 months of Storefront Plus; the Build Lab fee comes off if booked within 30 days of a Lab |
 
 The source of truth for dates and prices is code: `src/lib/sessions.ts`
 (`SEASON`, `SESSION_FORMAT`) and the plans on `/sites`. Change them there,
@@ -53,7 +54,7 @@ not in copy.
 | Growth Hub Session, a Session (capital S) | webinar, workshop, talk, masterclass |
 | Build Lab (two words, both capitals) | Site in a Session, bootcamp |
 | Growth Hub Sites | the platform, Maven, the builder |
-| Starter, Storefront, Launch (plan names, capitalised) | tiers, packages |
+| Starter, Storefront, Storefront Plus, Launch (plan names, capitalised) | tiers, packages |
 | The five topics: Get started, Get found, Run smarter, Practical AI, Stay safe | |
 | CBR Innovation Network's Digital Solutions program | "our CBRIN program", "CBRIN sessions" |
 
