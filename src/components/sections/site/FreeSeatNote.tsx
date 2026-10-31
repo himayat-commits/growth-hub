@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { FREE_SEATS } from '@/lib/site';
 
-/** The free Build Lab seat line, repeated on home, /events, /sites and Build
+/** The free Growth Lab seat line, repeated on home, /events, /sites and Build
  *  Lab pages so it is never more than a scroll away. Pass children to fold it
  *  into small print that already sits next to a price. */
 export const FREE_SEAT_LINE =
-  'Doing it tough, or referred by a partner? Free Build Lab seats are available. Just send a message, no proof needed.';
+  'Doing it tough, or referred by a partner? Free Growth Lab seats are available. Just send a message, no proof needed.';
 
 export default function FreeSeatNote({
   children = FREE_SEAT_LINE,

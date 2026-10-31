@@ -821,7 +821,7 @@ export interface Event {
   time?: string | null;
   type?: ('webinar' | 'workshop' | 'community') | null;
   /**
-   * For in-person events. Leave blank for online. Sessions and Build Labs default to the venue on the site.
+   * For in-person events. Leave blank for online. Sessions and Growth Labs default to the venue on the site.
    */
   location?: string | null;
   /**

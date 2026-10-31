@@ -19,7 +19,7 @@ export function OrganizationJsonLd(props?: {
     url: SITE_URL,
     logo: `${SITE_URL}/images/himayat-logo.png`,
     description:
-      'Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses. A Canberra social enterprise by Himayat.',
+      'Free monthly Sessions, hands-on Growth Labs and websites you can run yourself, for Canberra small businesses. A Canberra social enterprise by Himayat.',
     sameAs: [
       'https://www.linkedin.com/company/himayat-australia',
     ],

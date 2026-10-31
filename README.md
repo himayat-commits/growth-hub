@@ -2,7 +2,7 @@
 
 Next.js 16 (App Router) + Payload CMS 3 on Neon Postgres. This is the public website for
 [The Growth Hub](https://thegrowthhub.com.au), a Canberra social enterprise by Himayat:
-free monthly Growth Hub Sessions, paid Build Labs, and Growth Hub Sites.
+free monthly Growth Hub Sessions, paid Growth Labs, and Growth Hub Sites.
 
 Growth Hub Sites itself (accounts, site building, billing) runs on a separate white-label
 platform at [app.thegrowthhub.com.au](https://app.thegrowthhub.com.au), not in this repo.
@@ -62,14 +62,14 @@ Vercel builds `master` to production (region `syd1`, see `vercel.json`).
 ```
 src/
   app/
-    (main)/                  Public site: home, events (Sessions + Build Labs), sites,
+    (main)/                  Public site: home, events (Sessions + Growth Labs), sites,
                              partners, about, privacy, community-guidelines, not-found
     (payload)/               Payload admin (/admin) and its REST API
     api/contact, api/newsletter, api/events/ics/[slug], api/revalidate
     sitemap.ts, robots.ts, global-not-found.tsx
   collections/, globals/     Payload CMS schema (Events, Partners, Media, Site Settings, …)
   lib/
-    sessions.ts              The Sessions / Build Lab season plan (code), venue switch
+    sessions.ts              The Sessions / Growth Lab season plan (code), venue switch
     site.ts                  Contact details and Growth Hub Sites links
     cms/                     Cached Payload reads
     email/                   sendEmail() provider layer (used by the contact form)

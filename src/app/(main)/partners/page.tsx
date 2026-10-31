@@ -23,7 +23,7 @@ const PARTNER_TYPES = [
   },
   {
     title: 'Employment providers',
-    body: 'For people moving into self-employment, a free Session and a Build Lab seat are a practical first step.',
+    body: 'For people moving into self-employment, a free Session and a Growth Lab seat are a practical first step.',
   },
   {
     title: 'Multicultural and community organisations',
@@ -49,19 +49,19 @@ const WAYS = [
   {
     kicker: 'Refer',
     title: 'Send owners our way',
-    body: 'Sessions are free for everyone. Owners you refer can have a free Build Lab seat.',
+    body: 'Sessions are free for everyone. Owners you refer can have a free Growth Lab seat.',
   },
   {
     kicker: 'Bring a group',
-    title: 'A Session or Build Lab for your clients',
-    body: 'A private Session or Build Lab for your clients, members or staff, with a Starter site for each owner. Talk to us about dates.',
+    title: 'A Session or Growth Lab for your clients',
+    body: 'A private Session or Growth Lab for your clients, members or staff, with a Starter site for each owner. Talk to us about dates.',
   },
 ];
 
 const REFERRAL_STEPS = [
   'Tell an owner about Growth Hub, or send us their details with their OK.',
-  'They come to a free Session, or straight to a Build Lab.',
-  'Owners you refer get a free Build Lab seat: the morning, the helpers and a Starter site.',
+  'They come to a free Session, or straight to a Growth Lab.',
+  'Owners you refer get a free Growth Lab seat: the morning, the helpers and a Starter site.',
 ];
 
 // Partner logos, shown only with each organisation's written OK (see the
@@ -132,7 +132,7 @@ export default function PartnersPage() {
             <span className="section-label">Referrals</span>
             <h2 className="section-h2">How referrals work</h2>
             <p className="section-lead">
-              Owners you refer get a free Build Lab seat. Asking is easy and private: a
+              Owners you refer get a free Growth Lab seat. Asking is easy and private: a
               message is enough, with no proof needed.
             </p>
             <Link className="site-link" href={FREE_SEATS.path}>What owners see when they ask</Link>

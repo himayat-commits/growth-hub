@@ -33,7 +33,7 @@ const VALUES = [
 const PEOPLE_TO_COME = [
   {
     h: 'Table helpers',
-    p: "Helpers at every Session table and two at every Build Lab. We'll introduce them here as the team grows.",
+    p: "Helpers at every Session table and two at every Growth Lab. We'll introduce them here as the team grows.",
   },
   {
     h: 'Partner presenters',
@@ -70,7 +70,7 @@ export default function AboutPage() {
                 <p><b>Free monthly Sessions</b> on one practical topic, in Canberra.</p>
               </li>
               <li className="site-card" style={{ padding: 18 }}>
-                <p><b>Build Labs</b>, where owners build and publish their website in a morning.</p>
+                <p><b>Growth Labs</b>, where owners build and publish their website in a morning.</p>
               </li>
               <li className="site-card" style={{ padding: 18 }}>
                 <p><b>Growth Hub Sites</b>: websites small businesses can run themselves.</p>
@@ -98,9 +98,9 @@ export default function AboutPage() {
             <h2 className="section-h2">The paid work pays for the free work.</h2>
           </div>
           <p className="section-lead" style={{ margin: 0 }}>
-            Growth Hub is a social enterprise, not a charity. Build Labs and Growth Hub
+            Growth Hub is a social enterprise, not a charity. Growth Labs and Growth Hub
             Sites are how we earn. That income pays for the free monthly Sessions and the
-            free Build Lab seats, and any surplus goes back into the community work.
+            free Growth Lab seats, and any surplus goes back into the community work.
           </p>
         </div>
       </section>

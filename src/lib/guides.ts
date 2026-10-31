@@ -1,5 +1,5 @@
 // Growth Hub guides: one free, practical checklist per Session topic, plus a
-// Build Lab prep guide. They're the "three next steps" people take home from a
+// Growth Lab prep guide. They're the "three next steps" people take home from a
 // Session, and the first thing someone who can't come yet can use.
 //
 // Content lives here in code, like the season plan in sessions.ts. Facts that
@@ -9,7 +9,7 @@
 
 import type { SessionArea } from '@/lib/sessions';
 
-export type GuideArea = SessionArea | 'Build Lab';
+export type GuideArea = SessionArea | 'Growth Lab';
 
 export interface GuideStep {
   h: string;
@@ -421,13 +421,13 @@ export const GUIDES: Guide[] = [
     updated: '2026-10-29',
   },
   {
-    slug: 'build-lab-prep',
-    area: 'Build Lab',
-    title: 'Get ready for your Build Lab',
+    slug: 'growth-lab-prep',
+    area: 'Growth Lab',
+    title: 'Get ready for your Growth Lab',
     summary: 'What to bring, and the ten minutes of thinking that make your morning count.',
     time: 'Ten minutes, before the day',
     intro:
-      'A Build Lab is three hours, and you leave with a website that’s live. The owners who get the most from it arrive with their photos on the laptop and a few answers ready.',
+      'A Growth Lab is three hours, and you leave with a website that’s live. The owners who get the most from it arrive with their photos on the laptop and a few answers ready.',
     sections: [
       {
         h: 'Bring',
@@ -502,7 +502,7 @@ export function getGuide(slug: string): Guide | undefined {
   return GUIDES.find((g) => g.slug === slug);
 }
 
-/** The guide for a Session topic, or the Build Lab prep guide. */
+/** The guide for a Session topic, or the Growth Lab prep guide. */
 export function guideForArea(area: GuideArea | undefined): Guide | undefined {
   return area ? GUIDES.find((g) => g.area === area) : undefined;
 }

@@ -5,7 +5,7 @@ slides, social posts and the Growth Hub Sites platform. Last updated 30 Oct 2026
 
 ## What Growth Hub is
 
-**One line:** Free monthly Sessions, hands-on Build Labs and websites you can
+**One line:** Free monthly Sessions, hands-on Growth Labs and websites you can
 run yourself, for Canberra small businesses and sole traders.
 
 **Who it's for:** built for the Canberra owners big agencies overlook: new and
@@ -15,7 +15,7 @@ tough. Open to every small business in Canberra and the region, at any stage
 themselves, and always say everyone's welcome. Warm and plain, never
 charity-speak ("disadvantaged", "vulnerable", "the needy").
 
-**Free Build Lab seats:** for hardship and partner referrals. Asking is a
+**Free Growth Lab seats:** for hardship and partner referrals. Asking is a
 message, with no proof and no reasons asked for. Every mention links "How to
 ask" to `/free-seats` (use `FreeSeatNote`, so the wording stays in one place).
 
@@ -36,11 +36,11 @@ arranged on request. Don't promise translated materials.
 |---|---|---|
 | Free guides | One checklist per Session topic (`/guides`) | Free |
 | Growth Hub Session | 90 minutes, 2nd Wednesday, 12:00–1:30pm | Free |
-| Build Lab | 3 hours, 4th Wednesday, 9:30am–12:30pm; leave with a site that's live | A$179 |
-| Growth Hub Sites: Starter | One site, five pages, on a Growth Hub web address | Free with a Build Lab or program code |
+| Growth Lab | 3 hours, 4th Wednesday, 9:30am–12:30pm; leave with a site that's live | A$179 |
+| Growth Hub Sites: Starter | One site, five pages, on a Growth Hub web address | Free with a Growth Lab or program code |
 | Growth Hub Sites: Storefront | Own domain, bookings, shop, chat assistant, support | A$39 a month or A$390 a year |
 | Growth Hub Sites: Storefront Plus | Storefront, one update made for you each month and a check-in call every three months | A$89 a month or A$890 a year |
-| Growth Hub Sites: Launch | We build it with you | A$690 one-off, with 3 months of Storefront Plus; the Build Lab fee comes off if booked within 30 days of a Lab |
+| Growth Hub Sites: Launch | We build it with you | A$690 one-off, with 3 months of Storefront Plus; the Growth Lab fee comes off if booked within 30 days of a Lab |
 
 The source of truth for dates and prices is code: `src/lib/sessions.ts`
 (`SEASON`, `SESSION_FORMAT`) and the plans on `/sites`. Change them there,
@@ -52,7 +52,7 @@ not in copy.
 |---|---|
 | Growth Hub; Growth Hub by Himayat (first mention, footers, cards) | The Growth Hub, GrowthHub, GH |
 | Growth Hub Session, a Session (capital S) | webinar, workshop, talk, masterclass |
-| Build Lab (two words, both capitals) | Site in a Session, bootcamp |
+| Growth Lab (two words, both capitals) | Site in a Session, bootcamp |
 | Growth Hub Sites | the platform, Maven, the builder |
 | Starter, Storefront, Storefront Plus, Launch (plan names, capitalised) | tiers, packages |
 | The five topics: Get started, Get found, Run smarter, Practical AI, Stay safe | |
@@ -93,7 +93,7 @@ Decided 28 Oct 2026. Add a line here when a claim is confirmed or withdrawn.
 | NDIS registration, care services | Not Growth Hub; don't mention |
 | Charity, PBI, DGR, tax-deductible, "not-for-profit" (for Growth Hub) | Don't use; none is in place. Say "a social enterprise, not a charity" |
 | "Any surplus goes back into the community work" | OK as worded on /about; check it still holds once Growth Hub Pty Ltd is set up |
-| Free Build Lab seats, "no proof needed" | OK |
+| Free Growth Lab seats, "no proof needed" | OK |
 | Venue: "Canberra city, venue emailed before the day" | OK until the venue is confirmed (`VENUE_CONFIRMED` in `src/lib/sessions.ts`) |
 | Partner logos on /partners | Only with written OK; add to `PARTNER_LOGOS` in the partners page |
 
@@ -110,7 +110,7 @@ changes (laws, prices, phone numbers), and carry a "last checked" date.
   ("beside you, not above you").
 - **Signature:** the lime highlighter under "grow." in "Your business deserves
   to grow." Keep the headline.
-- **Free = lime tag, Build Lab = plum tag**, everywhere (site, Eventbrite
+- **Free = lime tag, Growth Lab = plum tag**, everywhere (site, Eventbrite
   cards, slides).
 - **Buttons:** 12px radius; one primary action per section.
 - **Photos:** real Growth Hub Sessions and owners, with permission. No stock

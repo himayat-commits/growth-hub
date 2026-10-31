@@ -94,6 +94,7 @@ const nextConfig: NextConfig = {
       { source: '/expo/apply', destination: '/events', permanent: true },
       { source: '/contact', destination: '/about#contact', permanent: true },
       { source: '/sessions', destination: '/events', permanent: true },
+      { source: '/guides/build-lab-prep', destination: '/guides/growth-lab-prep', permanent: true },
       // Partner pages (Oct 2026): the co-branded /with/{slug} micro-sites and
       // the legacy /partners/{slug} profiles are retired in favour of the one
       // /partners page. The lookahead stops /partners' own generated share

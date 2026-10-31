@@ -28,10 +28,10 @@ const HONEYPOT_STYLE = {
 type FormValues = z.infer<typeof schema>;
 
 // /free-seats links here with ?ask=free-seat, so this chip starts ticked.
-const FREE_SEAT_INTEREST = "A free Build Lab seat";
+const FREE_SEAT_INTEREST = "A free Growth Lab seat";
 
 const INTERESTS = [
-  "A Session or Build Lab",
+  "A Session or Growth Lab",
   FREE_SEAT_INTEREST,
   "Growth Hub Sites",
   "Launch — build it with us",

@@ -22,7 +22,7 @@ export default function Footer() {
               </div>
             </div>
             <p>
-              Free monthly Sessions, hands-on Build Labs and websites you can run
+              Free monthly Sessions, hands-on Growth Labs and websites you can run
               yourself, for Canberra small businesses and sole traders.
             </p>
             <p className="foot-run">Run by Himayat, a Canberra social enterprise.</p>
@@ -32,7 +32,7 @@ export default function Footer() {
             <h5>Sessions</h5>
             <ul>
               <li><Link href="/events">What&apos;s on</Link></li>
-              <li><Link href="/events#build-lab">Build Labs</Link></li>
+              <li><Link href="/events#growth-lab">Growth Labs</Link></li>
               <li><Link href="/guides">Free guides</Link></li>
             </ul>
           </div>

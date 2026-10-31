@@ -7,7 +7,7 @@ import { CONTACT } from '@/lib/site';
 // site. Linked from the footer.
 //
 // DRAFT (27 Oct 2026) for counsel review: rewritten for Growth Hub Sessions,
-// Build Labs and Growth Hub Sites after the member portal (groups, webinars,
+// Growth Labs and Growth Hub Sites after the member portal (groups, webinars,
 // referral credits) was removed. It is not legal advice. Update LAST_UPDATED to
 // the date it takes effect.
 
@@ -15,7 +15,7 @@ const LAST_UPDATED = '27 October 2026';
 
 const TITLE = 'Community guidelines — Growth Hub by Himayat';
 const DESCRIPTION =
-  'What we ask of everyone at Growth Hub Sessions and Build Labs, how we keep them pitch-free, and what Growth Hub does and doesn’t vouch for.';
+  'What we ask of everyone at Growth Hub Sessions and Growth Labs, how we keep them pitch-free, and what Growth Hub does and doesn’t vouch for.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -73,9 +73,9 @@ export default function CommunityGuidelinesPage() {
           <H2>What Growth Hub is</H2>
           <P>
             Growth Hub brings Canberra small business owners and sole traders together: free
-            monthly Growth Hub Sessions on one practical topic, hands-on Build Labs where owners
+            monthly Growth Hub Sessions on one practical topic, hands-on Growth Labs where owners
             build and publish their website, and Growth Hub Sites, the website builder people
-            keep using afterwards. The same guidelines apply at every Session and Build Lab, and
+            keep using afterwards. The same guidelines apply at every Session and Growth Lab, and
             to presenters, co-hosts, helpers and attendees alike.
           </P>
 
@@ -105,7 +105,7 @@ export default function CommunityGuidelinesPage() {
 
           <H2>Our own interests, plainly</H2>
           <P>
-            Sessions are free. Growth Hub charges for Build Lab seats, Growth Hub Sites
+            Sessions are free. Growth Hub charges for Growth Lab seats, Growth Hub Sites
             subscriptions and done-with-you website builds, and we&rsquo;ll always tell you
             plainly when something costs money. We won&rsquo;t pitch them during the teaching
             part of a Session.
@@ -117,7 +117,7 @@ export default function CommunityGuidelinesPage() {
             chooses your advisor.
           </P>
 
-          <H2>At a Build Lab</H2>
+          <H2>At a Growth Lab</H2>
           <ul style={{ margin: '0 0 14px', paddingLeft: 22 }}>
             <Rule title="Your site is yours">
               you own your business information and the content you put on your site.
@@ -159,7 +159,7 @@ export default function CommunityGuidelinesPage() {
           <H2>If the guidelines are broken</H2>
           <P>
             We&rsquo;ll usually start with a quiet word. If someone keeps breaching these
-            guidelines, or does something serious, we may ask them to leave a Session or Build Lab
+            guidelines, or does something serious, we may ask them to leave a Session or Growth Lab
             and not to come back.
           </P>
 

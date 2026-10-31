@@ -17,7 +17,7 @@ const SITES_PRIVACY_URL = `${SITES.signIn}/site/legal?what=privacy`;
 
 const TITLE = 'Privacy policy — Growth Hub by Himayat';
 const DESCRIPTION =
-  'How Growth Hub handles your personal information when you use this website, register for a Session or Build Lab, or contact us.';
+  'How Growth Hub handles your personal information when you use this website, register for a Session or Growth Lab, or contact us.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -92,9 +92,9 @@ export default function PrivacyPage() {
             <strong>When you subscribe to our newsletter</strong>: your email address.
           </P>
           <P>
-            <strong>When you register for a Session or Build Lab</strong>: tickets are booked
+            <strong>When you register for a Session or Growth Lab</strong>: tickets are booked
             through Eventbrite, which collects your details under its own privacy policy and shares
-            your registration with us. That includes your name, email and, for a Build Lab, the
+            your registration with us. That includes your name, email and, for a Growth Lab, the
             answers you give about your business so we can prepare your brief.
           </P>
           <P>
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
 
           <H2>How we use your information</H2>
           <P>
-            To reply to your enquiries; to run Sessions and Build Labs and follow up afterwards
+            To reply to your enquiries; to run Sessions and Growth Labs and follow up afterwards
             with the slides and next steps; to send our newsletter if you subscribe; to make
             consented referrals to CBRIN; to understand and improve how the site is used; to keep
             the site secure; and to meet our legal and reporting obligations as a social enterprise.

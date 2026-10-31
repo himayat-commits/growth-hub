@@ -44,7 +44,7 @@ const biroScript = localFont({
 export const metadata: Metadata = {
   title: "Growth Hub by Himayat — Your business deserves to grow.",
   description:
-    "Free monthly Sessions, hands-on Build Labs and websites you can run yourself, for Canberra small businesses and sole traders. Run by Himayat, a Canberra social enterprise.",
+    "Free monthly Sessions, hands-on Growth Labs and websites you can run yourself, for Canberra small businesses and sole traders. Run by Himayat, a Canberra social enterprise.",
   metadataBase: new URL(SITE_URL),
   // No `alternates.canonical` here: a layout-level canonical is inherited by
   // every child page that doesn't set its own, which pointed /pricing,

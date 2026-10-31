@@ -42,7 +42,7 @@ export function EventJsonLd({ ev }: { ev: PayloadEvent }) {
   const time = (ev as { time?: string | null }).time ?? null;
   const startEnd = buildStartEnd(dateIso, time);
 
-  // Sessions and Build Labs are in person whatever the CMS `type` says, at the
+  // Sessions and Growth Labs are in person whatever the CMS `type` says, at the
   // venue unless `location` is set.
   const { season, price: cost, location } = eventFacts(ev);
   const isOnline = !season && ((ev as { type?: string }).type ?? 'webinar') === 'webinar';

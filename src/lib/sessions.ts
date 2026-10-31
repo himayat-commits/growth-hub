@@ -1,6 +1,6 @@
 // Growth Hub Sessions: the published season plan, merged with the CMS.
 //
-// Free Sessions run on the 2nd Wednesday (12:00–1:30) and paid Build Labs on
+// Free Sessions run on the 2nd Wednesday (12:00–1:30) and paid Growth Labs on
 // the 4th Wednesday (9:30–12:30). The 2026 pilot runs in November (11 and
 // 25 Nov, on that rhythm) and December (2 and 9 Dec, off it); the season
 // proper starts in February. SEASON is the plan we publish; bookings live on the matching Payload
@@ -35,16 +35,16 @@ export const SESSION_VENUE = VENUE_CONFIRMED
   : { short: 'Canberra city, venue emailed before the day', row: 'Canberra city · venue by email' };
 
 /** One line explaining the "pilot" tag on the Nov–Dec 2026 dates. */
-/** Build Lab refunds, matching the Eventbrite refund policy. */
+/** Growth Lab refunds, matching the Eventbrite refund policy. */
 export const LAB_REFUND =
-  "Full refund up to 7 days before. After that, we'll move your seat to a later Build Lab at no cost.";
+  "Full refund up to 7 days before. After that, we'll move your seat to a later Growth Lab at no cost.";
 
 export const PILOT_NOTE =
   "Pilot means one of our first runs, in November and December 2026. Same format, and we'll ask you what to change for the 2027 season.";
 
 export const SESSION_FORMAT: Record<'session' | 'lab', { label: string; price: string; time: string; where: string }> = {
   session: { label: 'Session', price: 'Free', time: '12:00–1:30pm', where: VENUE_CONFIRMED ? 'CBRIN · in person' : SESSION_VENUE.row },
-  lab: { label: 'Build Lab', price: 'A$179', time: '9:30am–12:30pm', where: VENUE_CONFIRMED ? 'CBRIN · in person' : SESSION_VENUE.row },
+  lab: { label: 'Growth Lab', price: 'A$179', time: '9:30am–12:30pm', where: VENUE_CONFIRMED ? 'CBRIN · in person' : SESSION_VENUE.row },
 };
 
 interface SeasonItem {
@@ -52,7 +52,7 @@ interface SeasonItem {
   date: string;
   kind: 'session' | 'lab';
   title: string;
-  /** Sessions rotate through the five areas; Build Labs are always a website build. */
+  /** Sessions rotate through the five areas; Growth Labs are always a website build. */
   area?: SessionArea;
   pilot?: boolean;
 }
@@ -83,10 +83,10 @@ export const RUN_SHEET = [
   { t: '0:15', h: 'Three practical moves', p: 'With Canberra examples, and no product pitch.', yours: false },
   { t: '0:45', h: 'Done live', p: 'One move, done in the room so you see it work.', yours: false },
   { t: '1:00', h: 'Table clinic', p: 'Your table works on one real problem, with helpers.', yours: true },
-  { t: '1:20', h: 'Your next step', p: 'Free advice, a Build Lab, or next month.', yours: true },
+  { t: '1:20', h: 'Your next step', p: 'Free advice, a Growth Lab, or next month.', yours: true },
 ];
 
-/** How a three-hour Build Lab runs. */
+/** How a three-hour Growth Lab runs. */
 export const LAB_STEPS = [
   { t: '20 min', h: 'Brief.', p: 'Your answers from booking, printed on a card.' },
   { t: '40 min', h: 'Build.', p: 'Pick a template, or let the AI builder draft it from your brief.' },
@@ -107,7 +107,7 @@ export function registerUrlOf(doc: Pick<PayloadEvent, 'registerUrl'>): string | 
   return String(doc.registerUrl ?? '').trim() || null;
 }
 
-/** Price and venue as the public pages show them. Sessions and Build Labs fill
+/** Price and venue as the public pages show them. Sessions and Growth Labs fill
  *  blanks from the season plan, so a Lab saved without `cost` still reads
  *  A$179 and a blank `location` reads as the venue, never "Online". */
 export function eventFacts(doc: Pick<PayloadEvent, 'date' | 'cost' | 'location'>) {
@@ -127,7 +127,7 @@ export interface CalendarRow {
   /** Canberra calendar date, YYYY-MM-DD. */
   date: string;
   kind: SessionKind;
-  /** Kind label shown on the tag: "Session", "Build Lab", or the CMS tag. */
+  /** Kind label shown on the tag: "Session", "Growth Lab", or the CMS tag. */
   label: string;
   price: string;
   area?: SessionArea;

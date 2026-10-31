@@ -15,9 +15,9 @@ export default function ThreeDoors() {
         <a className="site-link" href={CBRIN_DIGITAL_SOLUTIONS_URL}>About the program</a>
       </div>
       <div className="site-card">
-        <h3>Build Lab</h3>
+        <h3>Growth Lab</h3>
         <p>Build and publish your website with us in one morning, a week or two later.</p>
-        <Link className="site-link" href="/events#build-lab">How a Build Lab works</Link>
+        <Link className="site-link" href="/events#growth-lab">How a Growth Lab works</Link>
       </div>
       <div className="site-card">
         <h3>Stay connected</h3>
