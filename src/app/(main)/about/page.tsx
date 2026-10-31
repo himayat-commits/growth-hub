@@ -5,7 +5,7 @@ import Contact from '@/components/sections/Contact';
 
 const TITLE = 'About and contact — Growth Hub by Himayat';
 const DESCRIPTION =
-  'Growth Hub is a Canberra social enterprise by Himayat: support that starts where systems stop, with people. Write us a line.';
+  'Growth Hub is a Canberra social enterprise by Himayat: growth support for the owners it usually misses, with people beside you. Write us a line.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -33,7 +33,7 @@ const VALUES = [
 const PEOPLE_TO_COME = [
   {
     h: 'Table helpers',
-    p: "Helpers at every Session table and two at every Build Lab. We'll introduce them here as the team grows.",
+    p: "Helpers at every Session table and two at every Growth Lab. We'll introduce them here as the team grows.",
   },
   {
     h: 'Partner presenters',
@@ -48,7 +48,7 @@ export default function AboutPage() {
         <div className="wrap site-split">
           <div>
             <span className="section-label">About Growth Hub</span>
-            <h1 className="hero-h1">Support that starts where systems stop. With people.</h1>
+            <h1 className="hero-h1">Growth support for the owners it usually misses.</h1>
             <p className="site-lede" style={{ maxWidth: '46ch' }}>
               We&apos;re a grassroots social enterprise. Himayat started by helping people
               find their way through systems that weren&apos;t built for them. Growth Hub
@@ -60,7 +60,7 @@ export default function AboutPage() {
               <a className="btn btn-secondary" href="#contact">Write us a line</a>
             </div>
           </div>
-          <div className="site-panel site-panel--lavender" style={{ gridTemplateColumns: '1fr' }}>
+          <div className="site-panel site-panel--lime" style={{ gridTemplateColumns: '1fr' }}>
             <div>
               <span className="section-label">Growth Hub by Himayat</span>
               <h2 className="section-h2">What we do</h2>
@@ -70,7 +70,7 @@ export default function AboutPage() {
                 <p><b>Free monthly Sessions</b> on one practical topic, in Canberra.</p>
               </li>
               <li className="site-card" style={{ padding: 18 }}>
-                <p><b>Build Labs</b>, where owners build and publish their website in a morning.</p>
+                <p><b>Growth Labs</b>, where owners build and publish their website in a morning.</p>
               </li>
               <li className="site-card" style={{ padding: 18 }}>
                 <p><b>Growth Hub Sites</b>: websites small businesses can run themselves.</p>
@@ -98,9 +98,9 @@ export default function AboutPage() {
             <h2 className="section-h2">The paid work pays for the free work.</h2>
           </div>
           <p className="section-lead" style={{ margin: 0 }}>
-            Growth Hub is a social enterprise, not a charity. Build Labs and Growth Hub
+            Growth Hub is a social enterprise, not a charity. Growth Labs and Growth Hub
             Sites are how we earn. That income pays for the free monthly Sessions and the
-            free Build Lab seats, and any surplus goes back into the community work.
+            free Growth Lab seats, and any surplus goes back into the community work.
           </p>
         </div>
       </section>

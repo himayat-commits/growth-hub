@@ -1,4 +1,4 @@
-// Free Build Lab seats OG card. Static at deploy time. Partners share this
+// Free Growth Lab seats OG card. Static at deploy time. Partners share this
 // page, so it gets its own card in the same teal-and-lime style.
 
 import { ImageResponse } from 'next/og';
@@ -6,7 +6,7 @@ import { ImageResponse } from 'next/og';
 export const runtime = 'nodejs';
 export const contentType = 'image/png';
 export const size = { width: 1200, height: 630 };
-export const alt = 'Free Build Lab seats from Growth Hub — ask with a message, no proof needed.';
+export const alt = 'Free Growth Lab seats from Growth Hub — ask with a message, no proof needed.';
 
 export default function FreeSeatsOgImage() {
   return new ImageResponse(
@@ -37,7 +37,7 @@ export default function FreeSeatsOgImage() {
               letterSpacing: '0.04em',
             }}
           >
-            Free Build Lab seats
+            Free Growth Lab seats
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 26 }}>
             <span style={{ color: '#F3F0E7' }}>Growth Hub</span>

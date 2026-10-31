@@ -84,7 +84,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
   // route never out-competes the hand-built layout.
   if (ev.bespoke) redirect(`/events/${ev.slug}`);
 
-  // Season Sessions and Build Labs get their format (tag, run sheet, three
+  // Season Sessions and Growth Labs get their format (tag, run sheet, three
   // doors, and price and venue from code when the CMS leaves them blank);
   // anything else (a webinar, a one-off) renders as a plain event.
   const { season, price, location } = eventFacts(doc as PayloadEvent);
@@ -92,7 +92,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
   const label = season ? SESSION_FORMAT[season.kind].label : ev.tag;
   const registerUrl = registerUrlOf(doc as PayloadEvent);
   const seats = (doc as { seats?: string | null }).seats ?? null;
-  const guide = kind === 'lab' ? guideForArea('Build Lab') : guideForArea(season?.area);
+  const guide = kind === 'lab' ? guideForArea('Growth Lab') : guideForArea(season?.area);
 
   const upcoming = await getUpcomingEvents().catch(() => []);
   const related = buildCalendar(upcoming as PayloadEvent[])
@@ -125,7 +125,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
               <div>
                 <span className="cal-tags">
                   <span className={`site-tag${kind === 'lab' ? ' site-tag--lab' : kind === 'session' ? ' site-tag--free' : ''}`}>
-                    {season ? `Growth Hub ${label}` : label} · {price}
+                    {season?.kind === 'session' ? `Growth Hub ${label}` : label} · {price}
                   </span>
                   {season?.area && <span>{season.area}{season.pilot ? ' · pilot' : ''}</span>}
                 </span>

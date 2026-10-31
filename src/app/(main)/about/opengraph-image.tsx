@@ -5,7 +5,7 @@ import { ImageResponse } from 'next/og';
 export const runtime = 'nodejs';
 export const contentType = 'image/png';
 export const size = { width: 1200, height: 630 };
-export const alt = 'About Growth Hub — Support that starts where systems stop. With people.';
+export const alt = 'About Growth Hub — Growth support for the owners it usually misses.';
 
 export default function AboutOgImage() {
   return new ImageResponse(
@@ -48,13 +48,13 @@ export default function AboutOgImage() {
             whole headline fits at 1200px. */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <span style={{ fontSize: 92, lineHeight: 1, letterSpacing: '-0.03em' }}>
-            Support that starts
+            Growth support for
           </span>
           <span style={{ fontSize: 92, lineHeight: 1, letterSpacing: '-0.03em' }}>
-            where systems stop.
+            the owners it
           </span>
           <span style={{ fontSize: 92, lineHeight: 1, letterSpacing: '-0.03em', color: '#E3F29C' }}>
-            With people.
+            usually misses.
           </span>
         </div>
 

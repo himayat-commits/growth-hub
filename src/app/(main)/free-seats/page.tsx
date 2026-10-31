@@ -7,9 +7,9 @@ import { SESSION_FORMAT } from '@/lib/sessions';
 // The explainer behind every "How to ask" link. Asking has to stay easy and
 // private: a message is enough, with no proof and no reasons asked for.
 
-const TITLE = 'Free Build Lab seats — Growth Hub by Himayat';
+const TITLE = 'Free Growth Lab seats — Growth Hub by Himayat';
 const DESCRIPTION =
-  'Doing it tough, or referred by a partner? Ask for a free Build Lab seat with a message. No proof needed.';
+  'Doing it tough, or referred by a partner? Ask for a free Growth Lab seat with a message. No proof needed.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -25,8 +25,8 @@ const STEPS = [
     p: (
       <>
         Use <Link href={FREE_SEATS.ask}>the form</Link>{' '}
-        and tick &ldquo;A free Build Lab seat&rdquo;, email{' '}
-        <a href={`mailto:${CONTACT.email}?subject=Free%20Build%20Lab%20seat`}>{CONTACT.email}</a>, or
+        and tick &ldquo;A free Growth Lab seat&rdquo;, email{' '}
+        <a href={`mailto:${CONTACT.email}?subject=Free%20Growth%20Lab%20seat`}>{CONTACT.email}</a>, or
         call <a href={CONTACT.phoneHref}>{CONTACT.phone}</a>. Tell us which date suits you.
       </>
     ),
@@ -41,16 +41,16 @@ export default function FreeSeatsPage() {
       <section className="site-hero">
         <div className="wrap site-split">
           <div>
-            <span className="section-label">Free Build Lab seats</span>
-            <h1 className="hero-h1">Ask for a free Build Lab seat.</h1>
+            <span className="section-label">Free Growth Lab seats</span>
+            <h1 className="hero-h1">Ask for a free Growth Lab seat.</h1>
             <p className="site-lede">
-              A Build Lab costs {SESSION_FORMAT.lab.price}. If that&apos;s hard right now, or a
+              A Growth Lab costs {SESSION_FORMAT.lab.price}. If that&apos;s hard right now, or a
               service has referred you, ask for a free seat. You don&apos;t need to explain why
               or show us anything.
             </p>
             <div className="site-ctas">
               <Link className="btn btn-primary" href={FREE_SEATS.ask}>Ask for a free seat</Link>
-              <Link className="btn btn-secondary" href="/events#whats-on">See Build Lab dates</Link>
+              <Link className="btn btn-secondary" href="/events#whats-on">See Growth Lab dates</Link>
             </div>
           </div>
           <div className="site-panel site-panel--lime" style={{ gridTemplateColumns: '1fr' }}>

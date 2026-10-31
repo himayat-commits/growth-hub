@@ -42,19 +42,19 @@ export default async function GuidePage({ params }: { params: Params }) {
   const guide = getGuide(slug);
   if (!guide) notFound();
 
-  // The next date on this guide's topic: the next Build Lab for the prep
+  // The next date on this guide's topic: the next Growth Lab for the prep
   // guide, else the next Session in the same area. Topics come round once a
   // season, so fall back to the next Session of any kind.
   const docs = await getUpcomingEvents().catch(() => []);
   const rows = buildCalendar(docs as PayloadEvent[]);
-  const isLab = guide.area === 'Build Lab';
+  const isLab = guide.area === 'Growth Lab';
   const onTopic = rows.find((r) => (isLab ? r.kind === 'lab' : r.kind === 'session' && r.area === guide.area)) ?? null;
   const next = onTopic ?? rows.find((r) => r.kind === 'session') ?? null;
   const cta = rowCta(next);
   // A topic can be months away, so also point to any free Session before it.
   const sooner = !isLab && onTopic ? rows.find((r) => r.kind === 'session' && r.date < onTopic.date) ?? null : null;
   const thisYear = dateParts(canberraDateKey(new Date())).year;
-  const others = GUIDES.filter((g) => g.slug !== guide.slug && g.area !== 'Build Lab').slice(0, 3);
+  const others = GUIDES.filter((g) => g.slug !== guide.slug && g.area !== 'Growth Lab').slice(0, 3);
   // Steps are numbered straight through the guide, across its sections.
   const firstStep = guide.sections.map((_, i) =>
     guide.sections.slice(0, i).reduce((total, s) => total + s.steps.length, 1),
@@ -144,7 +144,7 @@ export default async function GuidePage({ params }: { params: Params }) {
               {next && (
                 <div className="session-book">
                   <span className="site-kicker">
-                    {onTopic ? (isLab ? 'Next Build Lab' : 'Next Session on this topic') : 'Next free Session'}
+                    {onTopic ? (isLab ? 'Next Growth Lab' : 'Next Session on this topic') : 'Next free Session'}
                   </span>
                   <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                     <SessionDate date={next.date} kind={next.kind} muted={!next.href} />

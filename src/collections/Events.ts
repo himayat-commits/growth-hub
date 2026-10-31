@@ -100,7 +100,7 @@ export const Events: CollectionConfig = {
       type: 'text',
       admin: {
         description:
-          'For in-person events. Leave blank for online. Sessions and Build Labs default to the venue on the site.',
+          'For in-person events. Leave blank for online. Sessions and Growth Labs default to the venue on the site.',
       },
     },
     {

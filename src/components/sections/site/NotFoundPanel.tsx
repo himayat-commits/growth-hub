@@ -19,7 +19,7 @@ export default function NotFoundPanel() {
             <h2>Growth Hub Sessions</h2>
             <p>
               Free monthly Sessions: ninety minutes, one topic, one change to make this
-              week. Plus hands-on Build Labs.
+              week. Plus hands-on Growth Labs.
             </p>
             <Link className="site-link" href="/events">See Session dates</Link>
           </div>
