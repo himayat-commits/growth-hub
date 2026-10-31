@@ -36,7 +36,7 @@ export default function EventsHubOgImage() {
               letterSpacing: '0.04em',
             }}
           >
-            Free Sessions · Build Labs
+            Free Sessions · Growth Labs
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 26 }}>
             <span style={{ color: '#F3F0E7' }}>Growth Hub</span>

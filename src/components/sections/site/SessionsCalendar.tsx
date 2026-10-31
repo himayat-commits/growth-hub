@@ -53,7 +53,7 @@ export default function SessionsCalendar({ rows }: { rows: CalendarRow[] }) {
       <div className="cal-filters" role="group" aria-label="Filter what's on">
         {chip('all', 'All')}
         {chip('session', 'Free Sessions')}
-        {chip('lab', 'Build Labs')}
+        {chip('lab', 'Growth Labs')}
         {areas.length > 1 && <span className="cal-chip-sep" aria-hidden="true" />}
         {areas.length > 1 && areas.map((a) => chip(a, a))}
       </div>

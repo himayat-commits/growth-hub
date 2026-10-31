@@ -1,7 +1,7 @@
-# Events: Sessions, Build Labs and the calendar
+# Events: Sessions, Growth Labs and the calendar
 
 The Sessions season is **code**: `SEASON` in `src/lib/sessions.ts` lists every Growth Hub
-Session and Build Lab date, title and topic. The site renders the calendar, the home-page
+Session and Growth Lab date, title and topic. The site renders the calendar, the home-page
 ticket and the top bar from it.
 
 A **Payload event** (`/admin` → Events) on the same **Australia/Canberra calendar date** as a
@@ -20,9 +20,9 @@ Events have **no drafts**: saving publishes. Enter everything, including `regist
 save. Changes appear immediately if the revalidate hook can reach `/api/revalidate` with
 `REVALIDATION_SECRET`, otherwise within an hour.
 
-## Fields for a Session or Build Lab
+## Fields for a Session or Growth Lab
 
-| Field | Session | Build Lab | Notes |
+| Field | Session | Growth Lab | Notes |
 |---|---|---|---|
 | `title` | e.g. Be found and chosen online | Build and publish your website | Replaces the season title |
 | `slug` | e.g. `be-found-and-chosen-online` | e.g. `build-lab-9-dec-2026` | Unique; not a summit slug |
@@ -32,7 +32,7 @@ save. Changes appear immediately if the revalidate hook can reach `/api/revalida
 | `location` | leave blank | leave blank | Blank follows `SESSION_VENUE` / `VENUE_CONFIRMED` in `sessions.ts` |
 | `registerUrl` | Eventbrite link | Eventbrite link | Validated: empty or a full `http(s)://` URL |
 | `cost` | Free | `A$179` | A Lab with blank or "Free" cost shows the season price anyway |
-| `tag` | Growth Hub Session | Build Lab | Label on the share card |
+| `tag` | Growth Hub Session | Growth Lab | Label on the share card |
 | `description` | 1–2 sentences | 1–2 sentences | Meta description, share card, `.ics` |
 | `bespoke`, `dateDisplay` | leave unticked / blank | same | `bespoke` redirects to a hand-built page |
 

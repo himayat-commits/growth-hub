@@ -1,6 +1,6 @@
 // The next Session as a paper admission ticket — the home page hero. The stub
 // is the button: "Book a seat" once the CMS event has a booking link, "See
-// details" while it has only a page, "See dates" before that. A Build Lab
+// details" while it has only a page, "See dates" before that. A Growth Lab
 // ticket sits tucked behind it when one is on the calendar, so the ladder
 // (free Session → paid Lab) is visible at a glance.
 
@@ -24,7 +24,7 @@ export default function SessionTicket({
           <div className="ticket ticket--lab">
             <div className="ticket-main">
               <span className="ticket-kicker">
-                Build Lab · {lab.price} · {dateParts(lab.date).day} {dateParts(lab.date).month}
+                Growth Lab · {lab.price} · {dateParts(lab.date).day} {dateParts(lab.date).month}
               </span>
               <span className="ticket-title">{lab.title}</span>
             </div>

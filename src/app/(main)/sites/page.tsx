@@ -129,7 +129,7 @@ export default function SitesPage() {
               <h3>Starter</h3>
               <div className="plan-price">
                 <b>Free</b>
-                <span className="site-fine">with a Build Lab or program code</span>
+                <span className="site-fine">with a Growth Lab or program code</span>
               </div>
               <ul>
                 <li>One site, up to five pages</li>
@@ -137,7 +137,7 @@ export default function SitesPage() {
                 <li>Templates and the AI builder</li>
                 <li>Help articles</li>
               </ul>
-              <Link className="btn btn-secondary" href="/events#build-lab">Book a Build Lab ({SESSION_FORMAT.lab.price})</Link>
+              <Link className="btn btn-secondary" href="/events#build-lab">Book a Growth Lab ({SESSION_FORMAT.lab.price})</Link>
               <FreeSeatNote>Free seats for hardship and partner referrals.</FreeSeatNote>
             </div>
 
@@ -179,7 +179,7 @@ export default function SitesPage() {
                 <li>We build it and check it</li>
                 <li>One round of changes</li>
                 <li>Your domain connected</li>
-                <li>Your Build Lab fee comes off if you book within 30 days of your Lab</li>
+                <li>Your Growth Lab fee comes off if you book within 30 days of your Lab</li>
               </ul>
               <Link className="btn btn-secondary" href="/about#contact">Talk to us about Launch</Link>
             </div>
@@ -203,7 +203,7 @@ export default function SitesPage() {
             </div>
           </div>
           <FreeSeatNote style={{ marginTop: 20 }}>
-            Prices in AUD, including GST. Free Build Lab seats for hardship and partner referrals.
+            Prices in AUD, including GST. Free Growth Lab seats for hardship and partner referrals.
           </FreeSeatNote>
         </div>
       </section>
@@ -225,7 +225,7 @@ export default function SitesPage() {
               },
               {
                 q: 'The AI writes my content. Is it accurate?',
-                a: 'It drafts from your answers, and it can get things wrong. You check every page before it goes live, and in a Build Lab or Launch we check it with you.',
+                a: 'It drafts from your answers, and it can get things wrong. You check every page before it goes live, and in a Growth Lab or Launch we check it with you.',
               },
               {
                 q: 'Where is my data kept?',
@@ -241,8 +241,8 @@ export default function SitesPage() {
                     a: "Yes: 14 days, with no card needed. Self-serve sign-up opens soon. Until then, talk to us and we'll let you know as soon as it's ready.",
                   },
               {
-                q: 'Do I need to come to a Build Lab?',
-                a: "No. You can build it yourself; the help articles walk you through it. A Build Lab is for people who'd rather do it with someone beside them.",
+                q: 'Do I need to come to a Growth Lab?',
+                a: "No. You can build it yourself; the help articles walk you through it. A Growth Lab is for people who'd rather do it with someone beside them.",
               },
             ]}
           />

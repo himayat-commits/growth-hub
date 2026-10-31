@@ -16,7 +16,7 @@ import type { Event as PayloadEvent } from '@/payload-types';
 
 const TITLE = 'Growth Hub by Himayat — Your business deserves to grow.';
 const DESCRIPTION =
-  'Free monthly Sessions, hands-on Build Labs and websites you can run yourself. Built for the Canberra owners big agencies overlook, and open to every small business. Run by Himayat, a Canberra social enterprise.';
+  'Free monthly Sessions, hands-on Growth Labs and websites you can run yourself. Built for the Canberra owners big agencies overlook, and open to every small business. Run by Himayat, a Canberra social enterprise.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -38,10 +38,10 @@ const WAYS_IN = [
   },
   {
     kicker: `2 · One morning, ${SESSION_FORMAT.lab.price}`,
-    title: 'Build your site at a Build Lab',
+    title: 'Build your site at a Growth Lab',
     body: "Bring a laptop and what you know about your business. With us beside you, you leave with a website that's live.",
     href: '/events#build-lab',
-    cta: 'How a Build Lab works',
+    cta: 'How a Growth Lab works',
   },
   {
     kicker: '3 · From A$39 a month',
@@ -69,16 +69,16 @@ const FOR_WHO = [
   },
   {
     title: 'Owners doing it tough',
-    body: "Money's tight or life's got hard. Sessions are free, and you can ask for a free Build Lab seat with a message. No proof needed.",
+    body: "Money's tight or life's got hard. Sessions are free, and you can ask for a free Growth Lab seat with a message. No proof needed.",
     seats: true,
   },
 ];
 
 // What "for everyone" means in practice. Each is a promise the event pages,
-// the Build Lab and the About page already make; keep them in step.
+// the Growth Lab and the About page already make; keep them in step.
 const COMMITMENTS: Array<{ text: string; href?: string }> = [
   { text: 'An interpreter, Auslan or access support on request' },
-  { text: 'Free Build Lab seats for hardship and partner referrals', href: FREE_SEATS.path },
+  { text: 'Free Growth Lab seats for hardship and partner referrals', href: FREE_SEATS.path },
   { text: 'No sales pitch in a free Session' },
   { text: 'A person answers, by email or phone' },
 ];
@@ -102,7 +102,7 @@ export default async function HomePage() {
               Your business deserves to <GrowWord />.
             </h1>
             <p className="site-lede site-lede--wide">
-              Free monthly Sessions, a hands-on Build Lab and a website you can run
+              Free monthly Sessions, a hands-on Growth Lab and a website you can run
               yourself. Built for the Canberra owners big agencies overlook: new
               founders, migrant and refugee founders, sole traders and anyone doing
               it tough. Everyone&apos;s welcome.
@@ -169,7 +169,7 @@ export default async function HomePage() {
               </div>
               <div className="site-links">
                 <Link className="site-link" href="/guides">Free guide for every topic</Link>
-                <Link className="site-link" href="/events">All Sessions and Build Labs</Link>
+                <Link className="site-link" href="/events">All Sessions and Growth Labs</Link>
               </div>
             </div>
             <div className="site-grid site-grid--small">
@@ -233,7 +233,7 @@ export default async function HomePage() {
       <section className="site-sec site-sec--plum">
         <div className="wrap site-split">
           <div>
-            <p className="site-statement">Support that starts where systems stop. With people.</p>
+            <p className="site-statement">Practical help, from people beside you.</p>
             <span className="site-script handscript">beside you, not above you</span>
           </div>
           <div>

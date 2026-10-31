@@ -22,11 +22,11 @@ export default async function EventOgImage({ params }: { params: Params }) {
   const doc = await getEventBySlug(slug);
   // Fall back to a generic placeholder card if the slug doesn't resolve.
   const ev = doc ? toPublicEvent(doc as PayloadEvent) : null;
-  // Sessions and Build Labs label themselves and default to the venue when
+  // Sessions and Growth Labs label themselves and default to the venue when
   // the CMS `tag` / `location` are blank.
   const facts = doc ? eventFacts(doc as PayloadEvent) : null;
   const cmsTag = String((doc as { tag?: string | null } | null)?.tag ?? '').trim();
-  const seasonTag = facts?.season ? (facts.season.kind === 'lab' ? 'Build Lab' : 'Growth Hub Session') : '';
+  const seasonTag = facts?.season ? (facts.season.kind === 'lab' ? 'Growth Lab' : 'Growth Hub Session') : '';
 
   const title = ev?.title ?? 'Growth Hub event';
   const dateLine = [ev?.dateLong, ev?.time].filter(Boolean).join(' · ');

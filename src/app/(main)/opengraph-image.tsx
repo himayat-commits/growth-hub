@@ -60,7 +60,7 @@ export default function SiteOgImage() {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: 22 }}>
           <span style={{ color: 'rgba(243,240,231,0.7)' }}>
-            Free Sessions · Build Labs · Websites you run yourself
+            Free Sessions · Growth Labs · Websites you run yourself
           </span>
           <span style={{ color: '#E3F29C', fontStyle: 'italic' }}>
             thegrowthhub.com.au

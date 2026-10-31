@@ -21,9 +21,9 @@ import {
 import { FREE_SEATS } from '@/lib/site';
 import type { Event as PayloadEvent } from '@/payload-types';
 
-const TITLE = 'Sessions and Build Labs — Growth Hub by Himayat';
+const TITLE = 'Sessions and Growth Labs — Growth Hub by Himayat';
 const DESCRIPTION =
-  'Free monthly Growth Hub Sessions and hands-on Build Labs in Canberra. One practical topic a month, with time to work on your own business at the table.';
+  'Free monthly Growth Hub Sessions and hands-on Growth Labs in Canberra. One practical topic a month, with time to work on your own business at the table.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -54,7 +54,7 @@ export default async function SessionsPage() {
       <section className="site-hero">
         <div className="wrap site-split">
           <div>
-            <span className="section-label">Growth Hub Sessions and Build Labs</span>
+            <span className="section-label">Growth Hub Sessions and Growth Labs</span>
             <h1 className="hero-h1">Learn it in a room. Use it the same week.</h1>
             <p className="site-lede">
               One practical topic a month, taught by people who do it, with time to
@@ -62,7 +62,7 @@ export default async function SessionsPage() {
             </p>
             <div className="site-ctas">
               <a className="btn btn-primary" href="#whats-on">See dates</a>
-              <a className="btn btn-secondary" href="#build-lab">How a Build Lab works</a>
+              <a className="btn btn-secondary" href="#build-lab">How a Growth Lab works</a>
             </div>
           </div>
           <div className="site-grid" style={{ gridTemplateColumns: '1fr' }}>
@@ -75,7 +75,7 @@ export default async function SessionsPage() {
               </p>
             </div>
             <div className="site-card">
-              <span className="site-tag site-tag--lab">Build Lab · {SESSION_FORMAT.lab.price}</span>
+              <span className="site-tag site-tag--lab">Growth Lab · {SESSION_FORMAT.lab.price}</span>
               <h3>Fourth Wednesday{offRhythm('lab')}</h3>
               <p>
                 {SESSION_FORMAT.lab.time}, same venue, in person. Bring a laptop and
@@ -117,7 +117,7 @@ export default async function SessionsPage() {
               <Link className="site-link" href="/about#contact">Ask us</Link>
             </div>
             <div className="site-card site-card--lime">
-              <h3>Free Build Lab seats</h3>
+              <h3>Free Growth Lab seats</h3>
               <p>{FREE_SEAT_LINE}</p>
               <Link className="site-link" href={FREE_SEATS.path}>How to ask</Link>
             </div>
@@ -146,7 +146,7 @@ export default async function SessionsPage() {
       <section className="site-sec site-sec--teal" id="build-lab">
         <div className="wrap site-split" style={{ alignItems: 'start' }}>
           <div>
-            <span className="section-label">Build Lab · one morning · {SESSION_FORMAT.lab.price}</span>
+            <span className="section-label">Growth Lab · one morning · {SESSION_FORMAT.lab.price}</span>
             <h2 className="section-h2">Walk in with a laptop. Walk out with a website that&apos;s live.</h2>
             <p className="section-lead">
               Ten to twelve owners, two helpers and three hours. We check every site with
@@ -157,7 +157,7 @@ export default async function SessionsPage() {
               hardship and partner referrals.
             </FreeSeatNote>
             <div className="site-ctas">
-              <a className="btn btn-lime" href="#whats-on">See Build Lab dates</a>
+              <a className="btn btn-lime" href="#whats-on">See Growth Lab dates</a>
               <Link className="site-link" href="/sites">About Growth Hub Sites</Link>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default async function SessionsPage() {
 
       <section className="site-sec site-sec--tight">
         <div className="wrap">
-          <div className="site-panel site-panel--lavender">
+          <div className="site-panel site-panel--lime">
             <div>
               <span className="section-label">For organisations</span>
               <h2 className="section-h2">Co-host a Session with us</h2>
@@ -222,10 +222,10 @@ export default async function SessionsPage() {
             items={[
               {
                 q: 'Is it really free?',
-                a: 'Yes. Sessions are free and there is no pitch. Build Labs cost A$179 because you leave with a working website and two people helping you get there.',
+                a: 'Yes. Sessions are free and there is no pitch. Growth Labs cost A$179 because you leave with a working website and two people helping you get there.',
               },
               {
-                q: "What if I can't make my Build Lab?",
+                q: "What if I can't make my Growth Lab?",
                 a: `${LAB_REFUND} Cancel through your Eventbrite ticket, or email hello@thegrowthhub.com.au.`,
               },
               {
@@ -244,7 +244,7 @@ export default async function SessionsPage() {
                 q: "Can I come if money's tight?",
                 a: (
                   <>
-                    Yes. Sessions are free, and you can ask for a free Build Lab seat with a
+                    Yes. Sessions are free, and you can ask for a free Growth Lab seat with a
                     message. <Link href={FREE_SEATS.path}>How to ask</Link>.
                   </>
                 ),

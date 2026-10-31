@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 };
 
 export default function GuidesPage() {
-  const topics = GUIDES.filter((g) => g.area !== 'Build Lab');
-  const labPrep = GUIDES.find((g) => g.area === 'Build Lab');
+  const topics = GUIDES.filter((g) => g.area !== 'Growth Lab');
+  const labPrep = GUIDES.find((g) => g.area === 'Growth Lab');
 
   return (
     <main>
@@ -58,7 +58,7 @@ export default function GuidesPage() {
           <div className="wrap">
             <div className="site-panel site-panel--plum">
               <div>
-                <span className="section-label">Booked a Build Lab?</span>
+                <span className="section-label">Booked a Growth Lab?</span>
                 <h2 className="section-h2">{labPrep.title}</h2>
               </div>
               <div>
