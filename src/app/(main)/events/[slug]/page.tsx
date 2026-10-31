@@ -125,7 +125,7 @@ export default async function GenericEventPage({ params }: { params: Params }) {
               <div>
                 <span className="cal-tags">
                   <span className={`site-tag${kind === 'lab' ? ' site-tag--lab' : kind === 'session' ? ' site-tag--free' : ''}`}>
-                    {season ? `Growth Hub ${label}` : label} · {price}
+                    {season?.kind === 'session' ? `Growth Hub ${label}` : label} · {price}
                   </span>
                   {season?.area && <span>{season.area}{season.pilot ? ' · pilot' : ''}</span>}
                 </span>
