@@ -10,7 +10,7 @@
 // still list, after the season rows.
 
 import type { Event as PayloadEvent } from '@/payload-types';
-import { canberraDateKey } from '@/lib/events-time';
+import { canberraDateKey, canberraDateKeyPlusDays, canberraStartOfDay } from '@/lib/events-time';
 import { toPublicEvent } from '@/lib/events-data';
 
 export type SessionKind = 'session' | 'lab' | 'other';
@@ -38,6 +38,13 @@ export const SESSION_VENUE = VENUE_CONFIRMED
 /** Growth Lab refunds, matching the Eventbrite refund policy. */
 export const LAB_REFUND =
   "Full refund up to 7 days before. After that, we'll move your seat to a later Growth Lab at no cost.";
+
+/** Growth Lab early-bird, matching the Eventbrite early-bird ticket: on sale until
+ *  11:59pm Canberra time, 14 days before each Lab. */
+export const LAB_EARLY_BIRD = { price: 'A$149', daysAhead: 14 } as const;
+
+/** For pages about Growth Labs in general: "A$149 if you book 14 days ahead". */
+export const LAB_EARLY_BIRD_LINE = `${LAB_EARLY_BIRD.price} if you book ${LAB_EARLY_BIRD.daysAhead} days ahead`;
 
 export const PILOT_NOTE =
   "Pilot means one of our first runs, in November and December 2026. Same format, and we'll ask you what to change for the 2027 season.";
@@ -233,4 +240,13 @@ export function dateParts(dateKey: string) {
     year: String(y),
     long: fmt({ weekday: 'long', day: 'numeric', month: 'long' }),
   };
+}
+
+/** "A$149 if you book by Wed 11 Nov" while a Lab's early-bird is on sale,
+ *  otherwise null. */
+export function labEarlyBird(labDate: string, now: Date = new Date()): string | null {
+  const lastDay = canberraDateKeyPlusDays(canberraStartOfDay(labDate), -LAB_EARLY_BIRD.daysAhead);
+  if (canberraDateKey(now) > lastDay) return null;
+  const p = dateParts(lastDay);
+  return `${LAB_EARLY_BIRD.price} if you book by ${p.weekday} ${p.day} ${p.month}`;
 }

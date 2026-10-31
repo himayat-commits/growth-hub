@@ -10,6 +10,7 @@ import { guideForArea } from '@/lib/guides';
 import {
   buildCalendar,
   dateParts,
+  LAB_EARLY_BIRD_LINE,
   LAB_REFUND,
   LAB_STEPS,
   PILOT_NOTE,
@@ -79,7 +80,7 @@ export default async function SessionsPage() {
               <h3>Fourth Wednesday{offRhythm('lab')}</h3>
               <p>
                 {SESSION_FORMAT.lab.time}, same venue, in person. Bring a laptop and
-                leave with a website that&apos;s live.
+                leave with a website that&apos;s live. {LAB_EARLY_BIRD_LINE}.
               </p>
             </div>
           </div>
@@ -153,8 +154,8 @@ export default async function SessionsPage() {
               you before it goes live, so nothing goes out with placeholder details.
             </p>
             <FreeSeatNote style={{ margin: '20px 0 28px' }}>
-              Price includes GST and your first site on the Starter plan. Free seats for
-              hardship and partner referrals.
+              Price includes GST and your first site on the Starter plan;{' '}
+              {LAB_EARLY_BIRD_LINE}. Free seats for hardship and partner referrals.
             </FreeSeatNote>
             <div className="site-ctas">
               <a className="btn btn-lime" href="#whats-on">See Growth Lab dates</a>
@@ -222,7 +223,7 @@ export default async function SessionsPage() {
             items={[
               {
                 q: 'Is it really free?',
-                a: 'Yes. Sessions are free and there is no pitch. Growth Labs cost A$179 because you leave with a working website and two people helping you get there.',
+                a: `Yes. Sessions are free and there is no pitch. Growth Labs cost ${SESSION_FORMAT.lab.price} (${LAB_EARLY_BIRD_LINE}) because you leave with a working website and two people helping you get there.`,
               },
               {
                 q: "What if I can't make my Growth Lab?",
