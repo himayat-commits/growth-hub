@@ -1,74 +1,57 @@
-import { cn } from "@/lib/cn";
+import Image from "next/image";
 
-// Real Himayat butterfly logomark. The PNG ships as a teal silhouette;
-// for non-teal needs we apply a CSS filter chain mapped to each tint
-// (matches the brand site's <Butterfly> component).
+// The one Growth Hub lock-up: mark + "Growth Hub" + "by Himayat". Used by the
+// navbar, footer and global 404, so a change of mark (see "Logo and the 'by
+// Himayat' endorsement" in docs/BRAND.md) is a change to this file only.
+// The mark is decorative: the wordmark beside it carries the name, so screen
+// readers hear "Growth Hub by Himayat" once.
 
-type Variant = "dark" | "light";
-type Size = "sm" | "md" | "lg";
+const MARK_SRC = "/images/himayat-logo.png";
 
-const SIZES: Record<Size, { dim: number; word: string; sub: string }> = {
-  sm: { dim: 24, word: "text-[17px]", sub: "text-[13px]" },
-  md: { dim: 30, word: "text-xl", sub: "text-[15px]" },
-  lg: { dim: 38, word: "text-2xl", sub: "text-[17px]" },
-};
+// The PNG ships as a teal silhouette; on dark surfaces this maps it to lime.
+const LIGHT_MARK_FILTER =
+  "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(10deg) brightness(1.08)";
 
-const FILTERS: Record<Variant, { mark: string; word: string; sub: string }> = {
-  dark: {
-    // Teal silhouette as-is, plum for the "by Himayat" sub.
-    mark: "none",
-    word: "text-teal",
-    sub: "text-plum",
-  },
-  light: {
-    // Filter chain that maps black→white→lime tint, matching brand site.
-    mark: "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(10deg) brightness(1.08)",
-    word: "text-eggshell",
-    sub: "text-lime",
-  },
-};
+type Placement = "nav" | "footer";
 
 export function Logo({
-  className,
-  variant = "dark",
-  showSub = true,
-  size = "md",
+  placement = "nav",
+  eager = false,
 }: {
-  className?: string;
-  variant?: Variant;
-  showSub?: boolean;
-  size?: Size;
+  placement?: Placement;
+  eager?: boolean;
 }) {
-  const { dim, word, sub } = SIZES[size];
-  const f = FILTERS[variant];
+  if (placement === "footer") {
+    return (
+      <div className="foot-brand">
+        <Image
+          src={MARK_SRC}
+          alt=""
+          width={36}
+          height={36}
+          style={{ objectFit: "contain", filter: LIGHT_MARK_FILTER }}
+        />
+        <div className="foot-brand-text">
+          <span className="name">Growth Hub</span>
+          <span className="sub">by Himayat</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/himayat-logo.png"
+    <>
+      <Image
+        src={MARK_SRC}
         alt=""
-        width={dim}
-        height={dim}
-        aria-hidden="true"
-        style={{
-          width: dim,
-          height: dim,
-          objectFit: "contain",
-          filter: f.mark,
-          flexShrink: 0,
-          display: "inline-block",
-        }}
+        width={30}
+        height={30}
+        loading={eager ? "eager" : undefined}
+        style={{ objectFit: "contain" }}
       />
-      <span className="flex flex-col leading-none">
-        <span className={cn("font-serif tracking-tight", word, f.word)}>
-          Growth Hub
-        </span>
-        {showSub ? (
-          <span className={cn("font-serif italic mt-1", sub, f.sub)}>
-            by Himayat
-          </span>
-        ) : null}
+      <span className="wordmark">
+        Growth Hub <span className="logo-sub">by Himayat</span>
       </span>
-    </span>
+    </>
   );
 }

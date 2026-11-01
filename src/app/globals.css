@@ -10,11 +10,11 @@
   --teal-deep: #082A30;
   --plum: #5F304B;
   --plum-deep: #3F1F32;
+  /* No lavender: it's Himayat's colour, not Growth Hub's (docs/BRAND.md). */
   --eggshell: #F3F0E7;
   --eggshell-warm: #ECE7D8;
   --eggshell-line: #E6E1D2;
   --lime: #E3F29C;
-  --lavender: #E8DDFF;
   --ink: #0D3F48;
   --fg: #0D3F48;
   --fg-muted: #4A6A70;
@@ -90,12 +90,13 @@ footer.foot :focus-visible {
   border-bottom: 1px solid rgba(13, 63, 72, 0.08);
 }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 24px; }
-.nav-logo { display: flex; align-items: center; gap: 10px; font-size: 20px; letter-spacing: -0.01em; color: var(--teal); font-weight: 500; }
+.nav-logo { display: flex; flex-shrink: 0; align-items: center; gap: 10px; font-size: 20px; letter-spacing: -0.01em; color: var(--teal); font-weight: 500; }
 .nav-logo .logo-sub { font-style: italic; font-size: 17px; color: var(--plum); font-weight: 500; margin-left: -2px; }
 .nav-links { display: flex; gap: 32px; font-size: 16px; color: var(--teal); }
 .nav-links a { position: relative; }
 .nav-links a:hover::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: var(--teal); }
-.btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 12px; font-size: 16px; font-weight: 500; transition: transform .2s, background .2s, color .2s; white-space: nowrap; }
+/* Buttons are Inter, 12px radius (docs/BRAND.md); Himayat's are serif. */
+.btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 12px; font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-size: 16px; font-weight: 500; transition: transform .2s, background .2s, color .2s; white-space: nowrap; }
 /* Long labels ("Become a stallholder, speaker or sponsor") exceed a phone's
    width as a single line and force page-level horizontal scroll. */
 @media (max-width: 480px) { .btn { white-space: normal; text-align: left; } }
@@ -125,6 +126,8 @@ footer.foot :focus-visible {
 .nav-links a, .nav-logo, .nav-contact { white-space: nowrap; }
 .nav-links a[aria-current="page"]::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 2px; background: var(--teal); }
 @media (max-width: 1180px) { .nav-links { gap: 22px; } .nav-contact { display: none; } }
+/* Logo + five links + the CTA don't fit below ~1080px; the top bar keeps a booking link. */
+@media (max-width: 1080px) { .nav-cta { display: none; } }
 @media (max-width: 900px) { .nav-links { display: none; } .nav-toggle { display: inline-flex; } .nav-cta { display: none; } .nav-contact { display: none; } }
 
 /* ---- HERO ---- */
@@ -403,7 +406,6 @@ a.logo-item--img:hover { opacity: 1; }
 .compare-table .check { color: var(--teal); font-weight: 600; font-size: 18px; }
 .compare-table .dash { color: rgba(13, 63, 72, 0.25); }
 .cmp-pill { display: inline-flex; align-items: center; justify-content: center; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
-.cmp-pill-managed { background: rgba(189, 174, 220, 0.32); color: #5b4a8a; border: 1px solid rgba(189, 174, 220, 0.6); }
 .cmp-pill-addon { background: rgba(13, 63, 72, 0.06); color: var(--teal); border: 1px solid rgba(13, 63, 72, 0.18); }
 .compare-table tbody td { height: 56px; vertical-align: middle; }
 .compare-table tbody td:first-child { font-weight: 500; color: var(--ink); border-right: 1px solid var(--line); }
@@ -456,7 +458,6 @@ a.logo-item--img:hover { opacity: 1; }
 .comm-event-status { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(243, 240, 231, 0.6); }
 .comm-event-pill { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
 .comm-event-pill-free { background: rgba(227, 242, 156, 0.16); color: var(--lime); border: 1px solid rgba(227, 242, 156, 0.4); }
-.comm-event-pill-sub { background: rgba(189, 174, 220, 0.18); color: var(--lavender); border: 1px solid rgba(189, 174, 220, 0.35); }
 .comm-event-title { font-weight: 600; font-size: 17px; color: var(--eggshell); line-height: 1.3; }
 .comm-event-loc { font-size: 13px; color: rgba(243, 240, 231, 0.55); }
 @media (max-width: 900px) { .comm-tabs { grid-template-columns: repeat(2, 1fr); } .comm-panel-inner { grid-template-columns: 1fr; gap: 28px; } }
@@ -908,7 +909,7 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .tag-summit { background: var(--lime); color: var(--teal); }
 .tag-workshop { background: rgba(13,63,72,0.08); color: var(--teal); }
 .tag-webinar { background: rgba(13,63,72,0.08); color: var(--teal); box-shadow: inset 0 0 0 1px rgba(13,63,72,0.25); }
-.tag-mixer { background: var(--lavender); color: var(--plum); }
+.tag-mixer { background: #F1E6EC; color: var(--plum); }
 .tag-clinic { background: var(--eggshell-warm); color: var(--teal); }
 .tag-community { background: rgba(95,48,75,0.1); color: var(--plum); }
 .ev-main h3 { font-size: clamp(22px, 2vw, 28px); color: var(--teal); letter-spacing: -0.015em; margin: 0 0 8px; font-weight: 400; }
@@ -1084,7 +1085,6 @@ footer.foot { background: var(--teal-deep); color: var(--eggshell); padding: 80p
 .slot-time .end { font-size: 12.5px; font-weight: 400; color: var(--muted); font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; }
 .slot-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--teal); margin-top: 6px; }
 .slot.is-pin .slot-dot { background: var(--lime); border: 1.5px solid var(--teal); }
-.slot.is-break .slot-dot { background: var(--lavender); }
 .slot-body h3 { font-size: 22px; color: var(--teal); letter-spacing: -0.01em; margin: 0 0 6px; font-weight: 400; }
 .slot.is-pin .slot-body h3 { color: var(--plum); }
 .slot-blurb { color: var(--muted); line-height: 1.55; font-size: 15px; }
@@ -1444,7 +1444,6 @@ a.ticket-stub:focus-visible { outline: 3px solid var(--lime); outline-offset: -6
 /* ---- Lime advice panel ---- */
 .site-panel { border-radius: 28px; padding: clamp(28px, 4vw, 44px); display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px 40px; align-items: center; }
 .site-panel--lime { background: var(--lime); }
-.site-panel--lavender { background: var(--lavender); }
 .site-panel--plum { background: var(--plum); color: var(--eggshell); }
 .site-panel--plum .section-h2 { color: var(--eggshell); }
 .site-panel .section-h2 { font-size: clamp(26px, 2.6vw, 36px); margin: 0; }

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
+import { Logo } from '@/components/brand/Logo';
 import { Inter, Source_Serif_4 } from 'next/font/google';
 import './globals.css';
 import NotFoundPanel from '@/components/sections/site/NotFoundPanel';
@@ -41,16 +41,7 @@ export default function GlobalNotFound() {
         <header className="nav">
           <div className="wrap nav-inner">
             <Link className="nav-logo" href="/">
-              <Image
-                src="/images/himayat-logo.png"
-                alt="Himayat logomark"
-                width={30}
-                height={30}
-                style={{ objectFit: 'contain' }}
-              />
-              <span className="wordmark">
-                Growth Hub <span className="logo-sub">by Himayat</span>
-              </span>
+              <Logo />
             </Link>
           </div>
         </header>

@@ -29,7 +29,6 @@ const config: Config = {
           DEFAULT: "#E3F29C",
           soft: "#EFF7C7",
         },
-        lavender: { DEFAULT: "#E8DDFF" },
         gold: { DEFAULT: "#E2B842" },
         fg: {
           DEFAULT: "#0D3F48",

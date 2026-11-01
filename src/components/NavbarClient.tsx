@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Logo } from "@/components/brand/Logo";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 
 export interface NavItem {
   label: string;
@@ -52,17 +52,7 @@ export default function NavbarClient({
     <header className="nav" style={{ position: "sticky", top: 0, zIndex: 50 }}>
       <div className="wrap nav-inner">
         <Link className="nav-logo" href="/">
-          <Image
-            src="/images/himayat-logo.png"
-            alt="Himayat logomark"
-            width={30}
-            height={30}
-            loading="eager"
-            style={{ objectFit: "contain" }}
-          />
-          <span className="wordmark">
-            Growth Hub <span className="logo-sub">by Himayat</span>
-          </span>
+          <Logo eager />
         </Link>
 
         <nav className="nav-links" aria-label="Primary navigation">
