@@ -3,11 +3,14 @@
 // Cookie-consent banner for the public marketing site. Opt-in: the marketing
 // pixels (gated by <ConsentGate>) only load after the visitor clicks Accept.
 // Uses inline styles so it renders correctly regardless of which stylesheet
-// the current (main) page loaded.
+// the current (main) page loaded. Brand palette and 12px Inter buttons, per
+// docs/BRAND.md.
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { readConsent, writeConsent } from '@/lib/consent';
+
+const SANS = 'var(--font-sans, ui-sans-serif, system-ui, sans-serif)';
 
 export default function ConsentBanner() {
   // Start "decided" so the banner never flashes during SSR / first paint;
@@ -50,12 +53,13 @@ export default function ConsentBanner() {
         gap: 14,
         alignItems: 'center',
         justifyContent: 'space-between',
+        fontFamily: SANS,
       }}
     >
       <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, flex: '1 1 280px' }}>
         We use analytics cookies to understand how the site is used and improve it.
         Nothing loads until you choose. See our{' '}
-        <Link href="/privacy" style={{ color: '#C5E84A', textDecoration: 'underline' }}>
+        <Link href="/privacy" style={{ color: '#E3F29C', textDecoration: 'underline' }}>
           privacy policy
         </Link>
         .
@@ -68,9 +72,10 @@ export default function ConsentBanner() {
             background: 'transparent',
             color: '#F3F0E7',
             border: '1px solid rgba(243,240,231,0.4)',
-            borderRadius: 999,
+            borderRadius: 12,
             padding: '8px 18px',
             fontSize: 14,
+            fontFamily: SANS,
             cursor: 'pointer',
           }}
         >
@@ -80,13 +85,14 @@ export default function ConsentBanner() {
           type="button"
           onClick={() => choose('granted')}
           style={{
-            background: '#C5E84A',
-            color: '#1a3530',
+            background: '#E3F29C',
+            color: '#0D3F48',
             border: 'none',
-            borderRadius: 999,
+            borderRadius: 12,
             padding: '8px 18px',
             fontSize: 14,
             fontWeight: 600,
+            fontFamily: SANS,
             cursor: 'pointer',
           }}
         >

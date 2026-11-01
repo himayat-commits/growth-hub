@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { CONTACT, SITES } from "@/lib/site";
+import { Logo } from "@/components/brand/Logo";
 
 export default function Footer() {
   return (
@@ -8,19 +8,7 @@ export default function Footer() {
       <div className="wrap">
         <div className="foot-grid">
           <div className="foot-col">
-            <div className="foot-brand">
-              <Image
-                src="/images/himayat-logo.png"
-                alt="Himayat logomark"
-                width={36}
-                height={36}
-                style={{ objectFit: "contain", filter: "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(10deg) brightness(1.08)" }}
-              />
-              <div className="foot-brand-text">
-                <span className="name">Growth Hub</span>
-                <span className="sub">by Himayat</span>
-              </div>
-            </div>
+            <Logo placement="footer" />
             <p>
               Free monthly Sessions, hands-on Growth Labs and websites you can run
               yourself, for Canberra small businesses and sole traders.

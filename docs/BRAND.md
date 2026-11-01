@@ -1,7 +1,7 @@
 # Growth Hub brand and voice guide
 
 For anyone writing for Growth Hub: the website, Eventbrite listings, emails,
-slides, social posts and the Growth Hub Sites platform. Last updated 30 Oct 2026.
+slides, social posts and the Growth Hub Sites platform. Last updated 2 Nov 2026.
 
 ## What Growth Hub is
 
@@ -27,7 +27,7 @@ arranged on request. Don't promise translated materials.
 - Practical: one topic, one change to make this week.
 - In a room, with people beside you. A person answers.
 - Honest: plain prices, no sales pitch in a free Session.
-- For everyone: interpreters, Auslan and access support on request; free Build
+- For everyone: interpreters, Auslan and access support on request; free Growth
   Lab seats for hardship and partner referrals.
 
 **The ladder** (keep this order everywhere):
@@ -103,9 +103,10 @@ changes (laws, prices, phone numbers), and carry a "last checked" date.
 
 ## Look
 
-- **Colours:** teal `#0D3F48` (text, primary), plum `#5F304B` (labels, Build
+- **Colours:** teal `#0D3F48` (text, primary), plum `#5F304B` (labels, Growth
   Lab), eggshell `#F3F0E7` (background), lime `#E3F29C` (highlights, free),
-  gold `#E2B842` (sparingly). Lavender is Himayat's colour; Growth Hub doesn't use it.
+  gold `#E2B842` (sparingly). Text and labels on lime use dark olive
+  `#3D4A0A` (the "Free" tag), since teal on lime reads as a button. Lavender is Himayat's colour; Growth Hub doesn't use it.
 - **Type:** Source Serif 4 for headings and body; Inter for labels, buttons and
   small print; Biro Script only for short handwritten asides
   ("beside you, not above you").
@@ -113,7 +114,8 @@ changes (laws, prices, phone numbers), and carry a "last checked" date.
   to grow." Keep the headline.
 - **Free = lime tag, Growth Lab = plum tag**, everywhere (site, Eventbrite
   cards, slides).
-- **Buttons:** 12px radius; one primary action per section.
+- **Buttons:** Inter, 12px radius; one primary action per section. The cookie
+  banner follows the same rules (lime Accept, outlined Decline).
 - **Photos:** real Growth Hub Sessions and owners, with permission. No stock
   people, no AI-generated people.
 - **Event images:** `eventbrite-images/card.html` in the project folder makes
@@ -139,7 +141,9 @@ Himayat's site links to Growth Hub as "Digital Services"; it should say
 ## Logo and the "by Himayat" endorsement
 
 Growth Hub currently uses the Himayat butterfly mark with the wordmark
-"Growth Hub by Himayat" (`public/images/himayat-logo.png`). Under the planned
+"Growth Hub by Himayat" (`public/images/himayat-logo.png`), drawn by the one
+`Logo` component (`src/components/brand/Logo.tsx`) used by the navbar, footer
+and 404 page; swap the mark there. Under the planned
 restructure, the Himayat brand sits with Himayat Ltd and Growth Hub becomes
 Growth Hub Pty Ltd. Before that happens, Growth Hub needs either a written
 licence to use the Himayat name and mark, or a mark of its own with "by
